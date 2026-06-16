@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -109,6 +110,7 @@ fun GameScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(currentBoard.width.toFloat() / currentBoard.height.toFloat())
+                .shadow(elevation = 20.dp, shape = RoundedCornerShape(0.dp))
         )
 
         // Hint container (visible when hint is active)
@@ -254,6 +256,7 @@ fun GameInfoCard(
             .background(cardBrush, shape)
             .border(BorderStroke(2.dp, Color(0xFF404040)), shape)
             .padding(horizontal = 16.dp, vertical = 4.dp)
+            .shadow(elevation = 8.dp, shape = shape)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

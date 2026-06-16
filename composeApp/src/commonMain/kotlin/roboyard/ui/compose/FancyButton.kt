@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -85,7 +86,8 @@ fun FancyButton(
             .background(brush, shape)
             .border(BorderStroke(1.dp, color.strokeColor), shape)
             .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = 8.dp),
+            .padding(horizontal = 8.dp)
+            .shadow(elevation = 6.dp, shape = shape),
         contentAlignment = Alignment.Center
     ) {
         Text(
