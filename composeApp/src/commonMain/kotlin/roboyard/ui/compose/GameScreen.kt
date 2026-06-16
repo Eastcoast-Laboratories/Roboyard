@@ -89,7 +89,7 @@ import roboyard.logic.core.Preferences
 import roboyard.logic.storage.PlatformStorage
 
 // Compose App Version - increment after each session
-const val COMPOSE_APP_VERSION = "v1.8"
+const val COMPOSE_APP_VERSION = "v1.9"
 
 // Helper function to format time as MM:SS
 fun formatTime(elapsedTimeMs: Long): String {
@@ -172,6 +172,10 @@ fun GameScreen(
                         // [GAME_WIN] Check if the goal robot reached its target
                         if (newBoard.goals.isNotEmpty() && isSolved(newBoard)) {
                             gameWon = true
+                            // Play win sound and show completion message
+                            // Note: Sound playback is platform-specific and will be implemented separately
+                            val completionMessage = "Game completed in $moveCount moves!"
+                            hintMessage = completionMessage
                         }
                     }
                 }
@@ -531,73 +535,9 @@ fun GameScreen(
                         moveCount = 0
                         squaresMoved = 0
                         hintMessage = null
+                        gameWon = false
                     },
-                    modifier = Modifier.weight(1f).padding(end = 3.dp)
-                )
-                FancyButton(
-                    text = "Load",
-                    color = FancyButtonColor.BLUE,
-                    onClick = {
-                        // Load board state from storage
-                        val storage = Preferences.storageProvider?.invoke()
-                        if (storage != null) {
-                            val saveData = storage.getString("saved_game", null)
-                            if (saveData != null) {
-                                try {
-                                    val lines = saveData.lines()
-                                    var width = 12
-                                    var height = 14
-                                    var savedMoveCount = 0
-                                    var savedSquaresMoved = 0
-                                    val robotPositions = mutableListOf<Int>()
-                                    val goals = mutableListOf<Pair<Int, Int>>()
-
-                                    for (line in lines) {
-                                        if (line.startsWith("width:")) {
-                                            width = line.substringAfter("width:").toInt()
-                                        } else if (line.startsWith("height:")) {
-                                            height = line.substringAfter("height:").toInt()
-                                        } else if (line.startsWith("moveCount:")) {
-                                            savedMoveCount = line.substringAfter("moveCount:").toInt()
-                                        } else if (line.startsWith("squaresMoved:")) {
-                                            savedSquaresMoved = line.substringAfter("squaresMoved:").toInt()
-                                        } else if (line.startsWith("robots:")) {
-                                            val positions = line.substringAfter("robots:").split(",")
-                                            robotPositions.addAll(positions.map { it.toInt() })
-                                        } else if (line.startsWith("goal:")) {
-                                            val parts = line.substringAfter("goal:").split(",")
-                                            if (parts.size == 2) {
-                                                goals.add(Pair(parts[0].toInt(), parts[1].toInt()))
-                                            }
-                                        }
-                                    }
-
-                                    // Create new board with loaded state
-                                    val loadedBoard = Board.createBoardFreestyle(null, width, height, 4)
-                                    if (loadedBoard != null) {
-                                        loadedBoard.setRobots(robotPositions.toIntArray())
-                                        for (goal in goals) {
-                                            loadedBoard.addGoal(goal.first, goal.second, 0)
-                                        }
-                                        loadedBoard.setGoalRandom()
-                                        currentBoard = loadedBoard
-                                        moveCount = savedMoveCount
-                                        squaresMoved = savedSquaresMoved
-                                        hintMessage = "Game loaded!"
-                                    } else {
-                                        hintMessage = "Load failed: board creation error"
-                                    }
-                                } catch (e: Exception) {
-                                    hintMessage = "Load failed: ${e.message}"
-                                }
-                            } else {
-                                hintMessage = "No saved game found"
-                            }
-                        } else {
-                            hintMessage = "Load failed: no storage"
-                        }
-                    },
-                    modifier = Modifier.weight(1f).padding(end = 3.dp)
+                    modifier = Modifier.weight(1f)
                 )
                 FancyButton(
                     text = "New Game",
