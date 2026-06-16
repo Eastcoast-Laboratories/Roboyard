@@ -10,6 +10,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.draw.shadow
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -78,14 +82,32 @@ fun FancyButton(
         end = Offset.Infinite
     )
     val shape = RoundedCornerShape(percent = 50)
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
 
     Box(
         modifier = modifier
             .height(48.dp)
             .clip(shape)
-            .background(brush, shape)
+            .background(
+                if (isPressed) {
+                    Brush.linearGradient(
+                        colors = listOf(color.startColor.copy(alpha = 0.8f), color.endColor.copy(alpha = 0.8f)),
+                        start = Offset(0f, 0f),
+                        end = Offset.Infinite
+                    )
+                } else {
+                    brush
+                },
+                shape
+            )
             .border(BorderStroke(1.dp, color.strokeColor), shape)
-            .clickable(enabled = enabled, onClick = onClick)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                enabled = enabled,
+                onClick = onClick
+            )
             .padding(horizontal = 8.dp)
             .shadow(elevation = 6.dp, shape = shape),
         contentAlignment = Alignment.Center
