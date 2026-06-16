@@ -901,3 +901,110 @@ fun CreditsScreen(
         )
     }
 }
+
+@Composable
+fun SaveLoadScreen(
+    onBack: () -> Unit = {},
+    onLoadGame: (Board) -> Unit = {}
+) {
+    var selectedTab by remember { mutableStateOf(0) }
+    val tabs = listOf("Save", "Load", "History")
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .padding(16.dp)
+    ) {
+        // Title and profile button
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = when (selectedTab) {
+                    0 -> "Select slot to save game"
+                    1 -> "Select slot to load game"
+                    else -> "Game History"
+                },
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
+            )
+            CircularButton(
+                text = null,
+                color = CircularButtonColor.TURQUOISE,
+                onClick = { },
+                modifier = Modifier.size(48.dp)
+            )
+        }
+
+        // Tab layout
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            tabs.forEachIndexed { index, tab ->
+                FancyButton(
+                    text = tab,
+                    color = if (selectedTab == index) FancyButtonColor.BLUE else FancyButtonColor.GRAY,
+                    onClick = { selectedTab = index },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+        // Save slots or history entries
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(top = 8.dp)
+        ) {
+            repeat(10) { slotIndex ->
+                SaveSlotItem(
+                    slotNumber = slotIndex + 1,
+                    isEmpty = true,
+                    onClick = { }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+
+        // Back button
+        FancyButton(
+            text = "Back",
+            color = FancyButtonColor.GRAY,
+            onClick = onBack,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+fun SaveSlotItem(
+    slotNumber: Int,
+    isEmpty: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(64.dp)
+            .background(Color(0xFF2C2C2C), RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Text(
+            text = if (isEmpty) "Slot $slotNumber (Empty)" else "Slot $slotNumber - Level 1, 5 moves",
+            color = Color.White,
+            fontSize = 16.sp
+        )
+    }
+}
