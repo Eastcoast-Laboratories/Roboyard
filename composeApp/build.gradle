@@ -1,11 +1,21 @@
 plugins {
     id 'org.jetbrains.kotlin.multiplatform'
-    id 'org.jetbrains.compose' version '1.8.2'
+    id 'org.jetbrains.compose' version '1.9.3'
     id 'org.jetbrains.kotlin.plugin.compose' version '2.2.10'
+    id 'com.android.kotlin.multiplatform.library'
 }
 
 kotlin {
     jvmToolchain(17)
+
+    androidLibrary {
+        namespace = 'roboyard.composeapp'
+        compileSdk = 36
+        minSdk = 21
+        androidResources {
+            enable = true
+        }
+    }
 
     jvm("desktop")
 
@@ -22,6 +32,7 @@ kotlin {
                 implementation compose.ui
                 implementation compose.components.resources
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0"
+                implementation project(':shared')
             }
         }
         commonTest {
@@ -29,9 +40,15 @@ kotlin {
                 implementation kotlin("test")
             }
         }
+        androidMain {
+            dependencies {
+                implementation compose.ui
+                implementation compose.material3
+                implementation compose.foundation
+            }
+        }
         desktopMain {
             dependencies {
-                implementation project(':shared')
                 implementation compose.desktop.currentOs
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.9.0"
             }
