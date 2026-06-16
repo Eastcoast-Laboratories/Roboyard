@@ -113,6 +113,8 @@ fun GameScreen(
     val boardHistory = remember(board) { mutableListOf<Board>() }
     var elapsedTime by remember(board) { mutableLongStateOf(0L) }
     var timerRunning by remember(board) { mutableStateOf(false) }
+    var selectedRobotIndex by remember(board) { mutableIntStateOf(0) }
+    var accessibilityControlsVisible by remember(board) { mutableStateOf(false) }
 
     // Timer effect - runs every second when timer is enabled
     LaunchedEffect(timerRunning) {
@@ -202,6 +204,109 @@ fun GameScreen(
                 color = Color.White,
                 fontSize = 14.sp
             )
+        }
+
+        // Accessibility controls container (visible when enabled)
+        if (accessibilityControlsVisible) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xDD000000))
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Select robot button
+                FancyButton(
+                    text = "Select Robot",
+                    color = FancyButtonColor.BLUE,
+                    onClick = {
+                        selectedRobotIndex = (selectedRobotIndex + 1) % currentBoard.robotPositions.size
+                    },
+                    modifier = Modifier.weight(1f).padding(end = 4.dp)
+                )
+                // Direction buttons
+                FancyButton(
+                    text = "N",
+                    color = FancyButtonColor.BLUE,
+                    onClick = {
+                        if (!gameWon) {
+                            val newBoard = moveRobot(currentBoard, selectedRobotIndex, Board.NORTH)
+                            if (newBoard != null) {
+                                boardHistory.add(Board.Companion.createClone(currentBoard))
+                                currentBoard = newBoard
+                                moveCount++
+                                squaresMoved++
+                                hintMessage = null
+                                if (isSolved(newBoard)) {
+                                    gameWon = true
+                                }
+                            }
+                        }
+                    },
+                    modifier = Modifier.weight(1f).padding(end = 4.dp)
+                )
+                FancyButton(
+                    text = "S",
+                    color = FancyButtonColor.BLUE,
+                    onClick = {
+                        if (!gameWon) {
+                            val newBoard = moveRobot(currentBoard, selectedRobotIndex, Board.SOUTH)
+                            if (newBoard != null) {
+                                boardHistory.add(Board.Companion.createClone(currentBoard))
+                                currentBoard = newBoard
+                                moveCount++
+                                squaresMoved++
+                                hintMessage = null
+                                if (isSolved(newBoard)) {
+                                    gameWon = true
+                                }
+                            }
+                        }
+                    },
+                    modifier = Modifier.weight(1f).padding(end = 4.dp)
+                )
+                FancyButton(
+                    text = "E",
+                    color = FancyButtonColor.BLUE,
+                    onClick = {
+                        if (!gameWon) {
+                            val newBoard = moveRobot(currentBoard, selectedRobotIndex, Board.EAST)
+                            if (newBoard != null) {
+                                boardHistory.add(Board.Companion.createClone(currentBoard))
+                                currentBoard = newBoard
+                                moveCount++
+                                squaresMoved++
+                                hintMessage = null
+                                if (isSolved(newBoard)) {
+                                    gameWon = true
+                                }
+                            }
+                        }
+                    },
+                    modifier = Modifier.weight(1f).padding(end = 4.dp)
+                )
+                FancyButton(
+                    text = "W",
+                    color = FancyButtonColor.BLUE,
+                    onClick = {
+                        if (!gameWon) {
+                            val newBoard = moveRobot(currentBoard, selectedRobotIndex, Board.WEST)
+                            if (newBoard != null) {
+                                boardHistory.add(Board.Companion.createClone(currentBoard))
+                                currentBoard = newBoard
+                                moveCount++
+                                squaresMoved++
+                                hintMessage = null
+                                if (isSolved(newBoard)) {
+                                    gameWon = true
+                                }
+                            }
+                        }
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
 
         // Hint container (visible when hint is active)
