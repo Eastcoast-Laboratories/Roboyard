@@ -471,8 +471,17 @@ fun BoardCanvas(
     modifier: Modifier = Modifier
 ) {
     val gameState = remember { ComposeGameState(board) }
+    var selectedRobot by remember { mutableStateOf<Int?>(null) }
     var dragStartRobot by remember { mutableStateOf<Int?>(null) }
     var dragStartPos by remember { mutableStateOf<Offset?>(null) }
+    var hasMovedRobotInCurrentGesture by remember { mutableStateOf(false) }
+    var robotActivatedBySwipe by remember { mutableStateOf(false) }
+    var pendingMoveDirection by remember { mutableStateOf<Pair<Int, Int>?>(null) }
+    var robotMoveInitiated by remember { mutableStateOf(false) }
+
+    // Constants matching fragment-app GameGridView
+    val MIN_SWIPE_DISTANCE = 30f
+    val ROBOT_MOVE_THRESHOLD = 50f
 
     // Load shared PNG assets (same drawables as the Android GameGridView)
     val gridTile = imageResource(Res.drawable.grid_tiles)
@@ -506,64 +515,154 @@ fun BoardCanvas(
                 contentDescription = "Game board with ${board.width}x${board.height} cells, ${board.robotPositions.size} robots, and ${board.goals.size} targets"
             }
             .pointerInput(Unit) {
-            detectDragGestures(
-                onDragStart = { offset ->
-                    val cellSize = min(size.width, size.height) / maxOf(board.width, board.height).toFloat()
-                    val offsetX = (size.width - board.width * cellSize) / 2
-                    val offsetY = (size.height - board.height * cellSize) / 2
+                var startTouch = Offset.Zero
+                var touchStartGridX = -1
+                var touchStartGridY = -1
 
-                    for (i in board.robotPositions.indices) {
-                        val position = board.robotPositions[i]
-                        val robotX = position % board.width
-                        val robotY = position / board.width
-                        val centerX = offsetX + robotX * cellSize + cellSize / 2
-                        val centerY = offsetY + robotY * cellSize + cellSize / 2
-                        val radius = cellSize * 0.35f
+                detectDragGestures(
+                    onDragStart = { offset ->
+                        val cellSize = min(size.width, size.height) / maxOf(board.width, board.height).toFloat()
+                        val offsetX = (size.width - board.width * cellSize) / 2
+                        val offsetY = (size.height - board.height * cellSize) / 2
 
-                        if (offset.x >= centerX - radius && offset.x <= centerX + radius &&
-                            offset.y >= centerY - radius && offset.y <= centerY + radius) {
-                            dragStartRobot = i
-                            dragStartPos = offset
-                            break
+                        // Reset tracking variables (ACTION_DOWN logic from fragment-app)
+                        hasMovedRobotInCurrentGesture = false
+                        pendingMoveDirection = null
+                        robotActivatedBySwipe = false
+                        robotMoveInitiated = false
+
+                        // Store initial touch position
+                        startTouch = offset
+                        val gridX = ((offset.x - offsetX) / cellSize).toInt()
+                        val gridY = ((offset.y - offsetY) / cellSize).toInt()
+                        touchStartGridX = gridX
+                        touchStartGridY = gridY
+
+                        // Check if a robot was touched at the start
+                        for (i in board.robotPositions.indices) {
+                            val position = board.robotPositions[i]
+                            val robotX = position % board.width
+                            val robotY = position / board.width
+                            val centerX = offsetX + robotX * cellSize + cellSize / 2
+                            val centerY = offsetY + robotY * cellSize + cellSize / 2
+                            val radius = cellSize * 0.35f
+
+                            if (offset.x >= centerX - radius && offset.x <= centerX + radius &&
+                                offset.y >= centerY - radius && offset.y <= centerY + radius) {
+                                dragStartRobot = i
+                                selectedRobot = i
+                                dragStartPos = offset
+                                break
+                            }
+                        }
+                    },
+                    onDragEnd = {
+                        val cellSize = min(size.width, size.height) / maxOf(board.width, board.height).toFloat()
+                        val offsetX = (size.width - board.width * cellSize) / 2
+                        val offsetY = (size.height - board.height * cellSize) / 2
+
+                        // Check if this was a tap (no significant movement)
+                        val totalDrag = dragStartPos?.let { startTouch - it } ?: Offset.Zero
+                        val isTap = kotlin.math.abs(totalDrag.x) < MIN_SWIPE_DISTANCE &&
+                                    kotlin.math.abs(totalDrag.y) < MIN_SWIPE_DISTANCE
+
+                        // ACTION_UP logic from fragment-app
+                        if (dragStartRobot != null && !isTap && pendingMoveDirection != null && !robotMoveInitiated) {
+                            val (dx, dy) = pendingMoveDirection!!
+                            onRobotMove(dragStartRobot!!, if (dx > 0) Board.EAST else if (dx < 0) Board.WEST else if (dy > 0) Board.SOUTH else Board.NORTH)
+                        } else if (isTap && dragStartRobot != null) {
+                            // Tap behavior: move robot in direction of tap relative to robot
+                            val robotIndex = dragStartRobot!!
+                            val position = board.robotPositions[robotIndex]
+                            val robotX = position % board.width
+                            val robotY = position / board.width
+                            val gridX = touchStartGridX
+                            val gridY = touchStartGridY
+
+                            if (robotX == gridX || robotY == gridY) {
+                                // Direct movement along row or column
+                                val direction = if (robotX == gridX) {
+                                    if (gridY > robotY) Board.SOUTH else Board.NORTH
+                                } else {
+                                    if (gridX > robotX) Board.EAST else Board.WEST
+                                }
+                                onRobotMove(robotIndex, direction)
+                            }
+                        }
+
+                        // Reset all tracking variables
+                        dragStartRobot = null
+                        dragStartPos = null
+                        hasMovedRobotInCurrentGesture = false
+                        pendingMoveDirection = null
+                        robotActivatedBySwipe = false
+                        robotMoveInitiated = false
+                        startTouch = Offset.Zero
+                        touchStartGridX = -1
+                        touchStartGridY = -1
+                    },
+                    onDragCancel = {
+                        dragStartRobot = null
+                        dragStartPos = null
+                        hasMovedRobotInCurrentGesture = false
+                        pendingMoveDirection = null
+                        robotActivatedBySwipe = false
+                        robotMoveInitiated = false
+                        startTouch = Offset.Zero
+                        touchStartGridX = -1
+                        touchStartGridY = -1
+                    },
+                    onDrag = { change, dragAmount ->
+                        val robotIndex = dragStartRobot
+                        val startPos = dragStartPos
+                        if (robotIndex != null && startPos != null) {
+                            val totalDrag = change.position - startPos
+                            val distance = kotlin.math.sqrt(totalDrag.x * totalDrag.x + totalDrag.y * totalDrag.y)
+
+                            // For an activated robot, we need a larger swipe to start moving
+                            val movementThreshold = if (robotActivatedBySwipe) ROBOT_MOVE_THRESHOLD else MIN_SWIPE_DISTANCE
+
+                            if (distance >= movementThreshold && !robotMoveInitiated) {
+                                // Determine the dominant direction (horizontal or vertical)
+                                val dx = if (kotlin.math.abs(totalDrag.x) > kotlin.math.abs(totalDrag.y)) {
+                                    if (totalDrag.x > 0) 1 else -1
+                                } else {
+                                    0
+                                }
+                                val dy = if (kotlin.math.abs(totalDrag.y) > kotlin.math.abs(totalDrag.x)) {
+                                    if (totalDrag.y > 0) 1 else -1
+                                } else {
+                                    0
+                                }
+
+                                robotMoveInitiated = true
+                                robotActivatedBySwipe = false
+
+                                val direction = if (dx > 0) Board.EAST else if (dx < 0) Board.WEST else if (dy > 0) Board.SOUTH else Board.NORTH
+                                onRobotMove(robotIndex, direction)
+
+                                hasMovedRobotInCurrentGesture = true
+                                dragStartRobot = null
+                                dragStartPos = null
+                                pendingMoveDirection = null
+                            } else if (distance < movementThreshold) {
+                                // Store the direction for retry on ACTION_UP
+                                val dx = if (kotlin.math.abs(totalDrag.x) > kotlin.math.abs(totalDrag.y)) {
+                                    if (totalDrag.x > 0) 1 else -1
+                                } else {
+                                    0
+                                }
+                                val dy = if (kotlin.math.abs(totalDrag.y) > kotlin.math.abs(totalDrag.x)) {
+                                    if (totalDrag.y > 0) 1 else -1
+                                } else {
+                                    0
+                                }
+                                pendingMoveDirection = Pair(dx, dy)
+                            }
                         }
                     }
-                },
-                onDragEnd = {
-                    dragStartRobot = null
-                    dragStartPos = null
-                },
-                onDragCancel = {
-                    dragStartRobot = null
-                    dragStartPos = null
-                },
-                onDrag = { change, dragAmount ->
-                    val robotIndex = dragStartRobot
-                    val startPos = dragStartPos
-                    if (robotIndex != null && startPos != null) {
-                        val totalDrag = change.position - startPos
-                        val threshold = 30f
-
-                        if (totalDrag.x > threshold && kotlin.math.abs(totalDrag.y) < threshold) {
-                            onRobotMove(robotIndex, Board.EAST)
-                            dragStartRobot = null
-                            dragStartPos = null
-                        } else if (totalDrag.x < -threshold && kotlin.math.abs(totalDrag.y) < threshold) {
-                            onRobotMove(robotIndex, Board.WEST)
-                            dragStartRobot = null
-                            dragStartPos = null
-                        } else if (totalDrag.y > threshold && kotlin.math.abs(totalDrag.x) < threshold) {
-                            onRobotMove(robotIndex, Board.SOUTH)
-                            dragStartRobot = null
-                            dragStartPos = null
-                        } else if (totalDrag.y < -threshold && kotlin.math.abs(totalDrag.x) < threshold) {
-                            onRobotMove(robotIndex, Board.NORTH)
-                            dragStartRobot = null
-                            dragStartPos = null
-                        }
-                    }
-                }
-            )
-        }
+                )
+            }
     ) {
         val cellSize = min(size.width, size.height) / maxOf(board.width, board.height).toFloat()
         val offsetX = (size.width - board.width * cellSize) / 2

@@ -51,6 +51,7 @@ import driftingdroids.model.Board
 import roboyard.logic.core.LevelLoader
 import roboyard.logic.core.GameLogic
 import roboyard.logic.core.Preferences
+import roboyard.logic.core.MapGenerator
 
 @Composable
 fun App() {
@@ -58,26 +59,20 @@ fun App() {
     var board by remember { mutableStateOf<Board?>(null) }
     var selectedLevelId by remember { mutableStateOf(1) }
 
-    // Initialize GameLogic for random game generation
-    val gameLogic = remember {
-        GameLogic(
-            Preferences.boardSizeWidth,
-            Preferences.boardSizeHeight,
-            Preferences.difficulty
-        )
-    }
-
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
             when (currentScreen) {
                 Screen.MainMenu -> MainMenuScreen(
                     onNewRandomGame = {
-                        // Use GameLogic to generate random game map
-                        val gridElements = gameLogic.generateGameMap(null)
+                        // Use MapGenerator to generate random game map (same as fragment-app)
+                        val mapGenerator = MapGenerator()
+                        mapGenerator.robotCount = Preferences.robotCount
+                        mapGenerator.targetColors = Preferences.targetColors
+                        val gridElements = mapGenerator.generatedGameMap
                         board = if (gridElements != null) {
                             gridElementsToBoard(gridElements)
                         } else {
-                            // Fallback to standard random board if GameLogic fails
+                            // Fallback to standard random board if MapGenerator fails
                             Board.createBoardRandom(4)
                         }
                         currentScreen = Screen.Game
@@ -110,12 +105,15 @@ fun App() {
                                 board = null
                             },
                             onNewGame = {
-                                // Use GameLogic to generate random game map
-                                val gridElements = gameLogic.generateGameMap(null)
+                                // Use MapGenerator to generate random game map (same as fragment-app)
+                                val mapGenerator = MapGenerator()
+                                mapGenerator.robotCount = Preferences.robotCount
+                                mapGenerator.targetColors = Preferences.targetColors
+                                val gridElements = mapGenerator.generatedGameMap
                                 board = if (gridElements != null) {
                                     gridElementsToBoard(gridElements)
                                 } else {
-                                    // Fallback to standard random board if GameLogic fails
+                                    // Fallback to standard random board if MapGenerator fails
                                     Board.createBoardRandom(4)
                                 }
                             }
