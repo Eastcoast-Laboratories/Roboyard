@@ -908,7 +908,7 @@ fun BoardCanvas(
                             }
                         }
 
-                        // Reset all tracking variables
+                        // Reset all tracking variables (matching fragment-app ACTION_UP)
                         dragStartRobot = null
                         dragStartPos = null
                         hasMovedRobotInCurrentGesture = false
@@ -960,9 +960,12 @@ fun BoardCanvas(
                                 onRobotMove(robotIndex, direction)
 
                                 hasMovedRobotInCurrentGesture = true
-                                dragStartRobot = null
-                                dragStartPos = null
+                                // Reset starting position for next movement (matching fragment-app)
+                                dragStartPos = change.position
+                                // Don't reset dragStartRobot - allow continuous movements in same gesture
                                 pendingMoveDirection = null
+                                // Reset robotMoveInitiated to allow continuous movements (matching fragment-app)
+                                robotMoveInitiated = false
                             } else if (distance < movementThreshold) {
                                 // Store the direction for retry on ACTION_UP
                                 val dx = if (kotlin.math.abs(totalDrag.x) > kotlin.math.abs(totalDrag.y)) {
