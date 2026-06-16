@@ -1008,3 +1008,111 @@ fun SaveSlotItem(
         )
     }
 }
+
+@Composable
+fun AchievementsScreen(
+    onBack: () -> Unit = {}
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        // Top row with back button, title, and profile button
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            FancyButton(
+                text = "Back",
+                color = FancyButtonColor.BLUE,
+                onClick = onBack,
+                modifier = Modifier.width(100.dp)
+            )
+            Text(
+                text = "Achievements",
+                color = Color(0xFF333333),
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center
+            )
+            CircularButton(
+                text = null,
+                color = CircularButtonColor.TURQUOISE,
+                onClick = { },
+                modifier = Modifier.size(48.dp)
+            )
+        }
+
+        // Progress text
+        Text(
+            text = "0 / 0 Unlocked",
+            color = Color(0xFF666666),
+            fontSize = 16.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            textAlign = TextAlign.Center
+        )
+
+        // Scrollable achievements list
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+        ) {
+            repeat(5) { index ->
+                AchievementItem(
+                    title = "Achievement $index",
+                    description = "Description for achievement $index",
+                    unlocked = false,
+                    progress = "0 / 10"
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun AchievementItem(
+    title: String,
+    description: String,
+    unlocked: Boolean,
+    progress: String
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(if (unlocked) Color(0xFFE8F5E9) else Color(0xFFF5F5F5), RoundedCornerShape(8.dp))
+            .border(BorderStroke(1.dp, if (unlocked) Color(0xFF4CAF50) else Color(0xFFE0E0E0)), RoundedCornerShape(8.dp))
+            .padding(16.dp)
+    ) {
+        Column {
+            Text(
+                text = title,
+                color = if (unlocked) Color(0xFF2E7D32) else Color(0xFF757575),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = description,
+                color = Color(0xFF616161),
+                fontSize = 14.sp,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+            Text(
+                text = progress,
+                color = Color(0xFF9E9E9E),
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+    }
+}
