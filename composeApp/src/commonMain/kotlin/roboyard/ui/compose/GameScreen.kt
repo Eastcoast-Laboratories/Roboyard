@@ -83,6 +83,7 @@ import roboyard.composeapp.generated.resources.target_multi
 import roboyard.logic.core.GridElement
 import roboyard.logic.core.GameLogic
 import roboyard.logic.core.Preferences
+import roboyard.logic.storage.PlatformStorage
 
 @Composable
 fun GameScreen(
@@ -96,6 +97,9 @@ fun GameScreen(
     val startBoard = remember(board) { Board.Companion.createClone(board).also { it.setRobots(board.robotPositions.copyOf()) } }
     var hintMessage by remember(board) { mutableStateOf<String?>(null) }
     var gameWon by remember(board) { mutableStateOf(false) }
+    var solution by remember(board) { mutableStateOf<driftingdroids.model.Solution?>(null) }
+    var currentHintStep by remember(board) { mutableIntStateOf(0) }
+    var isSolverRunning by remember(board) { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
     Column(
@@ -208,28 +212,90 @@ fun GameScreen(
                 FancyButton(
                     text = "Save Map",
                     color = FancyButtonColor.RED,
-                    onClick = { },
+                    onClick = {
+                        // Save current board state to storage
+                        val storage = Preferences.storageProvider?.invoke()
+                        if (storage != null) {
+                            val saveData = buildString {
+                                appendLine("width:${currentBoard.width}")
+                                appendLine("height:${currentBoard.height}")
+                                appendLine("moveCount:$moveCount")
+                                appendLine("squaresMoved:$squaresMoved")
+                                appendLine("robots:${currentBoard.robotPositions.joinToString(",")}")
+                                // Save goals
+                                for (goal in currentBoard.goals) {
+                                    appendLine("goal:${goal.position},${goal.robotNumber}")
+                                }
+                            }
+                            storage.putString("saved_game", saveData)
+                            hintMessage = "Game saved!"
+                        } else {
+                            hintMessage = "Save failed: no storage"
+                        }
+                    },
                     modifier = Modifier.weight(1f).padding(end = 3.dp)
                 )
                 FancyButton(
-                    text = "💡Hint",
+                    text = if (isSolverRunning) "Calculating..." else "💡Hint",
                     color = FancyButtonColor.HINT,
                     onClick = {
-                        val solver = SolverIDDFS(currentBoard)
-                        val solutions = solver.execute()
-                        hintMessage = if (solutions.isNotEmpty()) {
-                            val firstMove = solutions[0].getNextMove()
-                            if (firstMove != null) {
-                                val directionName = when (firstMove.direction) {
+                        if (isSolverRunning) {
+                            // Cancel solver (not implemented for now)
+                            return@FancyButton
+                        }
+
+                        if (solution == null) {
+                            // Calculate solution using SolverIDDFS
+                            isSolverRunning = true
+                            hintMessage = "Calculating solution..."
+
+                            // Run solver in background thread
+                            Thread {
+                                try {
+                                    val solver = driftingdroids.model.SolverIDDFS(currentBoard)
+                                    val solutions = solver.execute()
+                                    if (solutions.isNotEmpty()) {
+                                        solution = solutions[0]
+                                        currentHintStep = 0
+                                        val firstMove = solution!!.getNextMove()
+                                        if (firstMove != null) {
+                                            val directionName = when (firstMove.direction) {
+                                                Board.NORTH -> "North"
+                                                Board.SOUTH -> "South"
+                                                Board.EAST -> "East"
+                                                Board.WEST -> "West"
+                                                else -> "Unknown"
+                                            }
+                                            hintMessage = "Hint: Move robot ${firstMove.robotNumber} $directionName"
+                                        } else {
+                                            hintMessage = "Already at goal!"
+                                        }
+                                    } else {
+                                        hintMessage = "No solution found"
+                                    }
+                                } catch (e: Exception) {
+                                    hintMessage = "Solver error: ${e.message}"
+                                } finally {
+                                    isSolverRunning = false
+                                }
+                            }.start()
+                        } else {
+                            // Show next hint
+                            val nextMove = solution!!.getNextMove()
+                            if (nextMove != null) {
+                                val directionName = when (nextMove.direction) {
                                     Board.NORTH -> "North"
-                                    Board.EAST -> "East"
                                     Board.SOUTH -> "South"
+                                    Board.EAST -> "East"
                                     Board.WEST -> "West"
                                     else -> "Unknown"
                                 }
-                                "Hint: Move robot ${firstMove.robotNumber} $directionName"
-                            } else "Already at goal!"
-                        } else "No solution found"
+                                hintMessage = "Hint ${currentHintStep + 1}: Move robot ${nextMove.robotNumber} $directionName"
+                                currentHintStep++
+                            } else {
+                                hintMessage = "All hints shown"
+                            }
+                        }
                     },
                     modifier = Modifier.weight(1f).padding(end = 3.dp)
                 )
@@ -259,6 +325,71 @@ fun GameScreen(
                         moveCount = 0
                         squaresMoved = 0
                         hintMessage = null
+                    },
+                    modifier = Modifier.weight(1f).padding(end = 3.dp)
+                )
+                FancyButton(
+                    text = "Load",
+                    color = FancyButtonColor.BLUE,
+                    onClick = {
+                        // Load board state from storage
+                        val storage = Preferences.storageProvider?.invoke()
+                        if (storage != null) {
+                            val saveData = storage.getString("saved_game", null)
+                            if (saveData != null) {
+                                try {
+                                    val lines = saveData.lines()
+                                    var width = 12
+                                    var height = 14
+                                    var savedMoveCount = 0
+                                    var savedSquaresMoved = 0
+                                    val robotPositions = mutableListOf<Int>()
+                                    val goals = mutableListOf<Pair<Int, Int>>()
+
+                                    for (line in lines) {
+                                        if (line.startsWith("width:")) {
+                                            width = line.substringAfter("width:").toInt()
+                                        } else if (line.startsWith("height:")) {
+                                            height = line.substringAfter("height:").toInt()
+                                        } else if (line.startsWith("moveCount:")) {
+                                            savedMoveCount = line.substringAfter("moveCount:").toInt()
+                                        } else if (line.startsWith("squaresMoved:")) {
+                                            savedSquaresMoved = line.substringAfter("squaresMoved:").toInt()
+                                        } else if (line.startsWith("robots:")) {
+                                            val positions = line.substringAfter("robots:").split(",")
+                                            robotPositions.addAll(positions.map { it.toInt() })
+                                        } else if (line.startsWith("goal:")) {
+                                            val parts = line.substringAfter("goal:").split(",")
+                                            if (parts.size == 2) {
+                                                goals.add(Pair(parts[0].toInt(), parts[1].toInt()))
+                                            }
+                                        }
+                                    }
+
+                                    // Create new board with loaded state
+                                    val loadedBoard = Board.createBoardFreestyle(null, width, height, 4)
+                                    if (loadedBoard != null) {
+                                        loadedBoard.setRobots(robotPositions.toIntArray())
+                                        for (goal in goals) {
+                                            loadedBoard.addGoal(goal.first, goal.second, 0)
+                                        }
+                                        loadedBoard.setGoalRandom()
+                                        currentBoard = loadedBoard
+                                        moveCount = savedMoveCount
+                                        squaresMoved = savedSquaresMoved
+                                        hintMessage = "Game loaded!"
+                                    } else {
+                                        hintMessage = "Load failed: board creation error"
+                                    }
+                                } catch (e: Exception) {
+                                    hintMessage = "Load failed: ${e.message}"
+                                }
+                            } else {
+                                hintMessage = "No saved game found"
+                            }
+                        } else {
+                            hintMessage = "Load failed: no storage"
+                        }
                     },
                     modifier = Modifier.weight(1f).padding(end = 3.dp)
                 )
