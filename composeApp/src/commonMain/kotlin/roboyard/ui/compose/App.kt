@@ -471,3 +471,215 @@ fun LevelItem(
         )
     }
 }
+
+@Composable
+fun SettingsScreen(
+    onBack: () -> Unit = {}
+) {
+    var soundEnabled by remember { mutableStateOf(true) }
+    var fullscreenEnabled by remember { mutableStateOf(false) }
+    var highContrastEnabled by remember { mutableStateOf(false) }
+    var accessibilityEnabled by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
+        // Scrollable settings content
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+        ) {
+            // Sound Section
+            Text(
+                text = "Sound",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(32.dp)
+            ) {
+                RadioButtonWithLabel(
+                    text = "Yes",
+                    selected = soundEnabled,
+                    onClick = { soundEnabled = true }
+                )
+                RadioButtonWithLabel(
+                    text = "No",
+                    selected = !soundEnabled,
+                    onClick = { soundEnabled = false }
+                )
+            }
+
+            // Fullscreen Section
+            Text(
+                text = "Fullscreen",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(32.dp)
+            ) {
+                RadioButtonWithLabel(
+                    text = "Yes",
+                    selected = fullscreenEnabled,
+                    onClick = { fullscreenEnabled = true }
+                )
+                RadioButtonWithLabel(
+                    text = "No",
+                    selected = !fullscreenEnabled,
+                    onClick = { fullscreenEnabled = false }
+                )
+            }
+
+            // High Contrast Mode Section
+            Text(
+                text = "High Contrast Mode",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(32.dp)
+            ) {
+                RadioButtonWithLabel(
+                    text = "Yes",
+                    selected = highContrastEnabled,
+                    onClick = { highContrastEnabled = true }
+                )
+                RadioButtonWithLabel(
+                    text = "No",
+                    selected = !highContrastEnabled,
+                    onClick = { highContrastEnabled = false }
+                )
+            }
+
+            // Accessibility Mode Section (secret: black on black)
+            Text(
+                text = "Accessibility Mode:",
+                color = Color(0xFF333333),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Black),
+                horizontalArrangement = Arrangement.spacedBy(32.dp)
+            ) {
+                RadioButtonWithLabel(
+                    text = "On",
+                    selected = accessibilityEnabled,
+                    onClick = { accessibilityEnabled = true },
+                    textColor = Color(0xFF333333)
+                )
+                RadioButtonWithLabel(
+                    text = "Off",
+                    selected = !accessibilityEnabled,
+                    onClick = { accessibilityEnabled = false },
+                    textColor = Color(0xFF333333)
+                )
+            }
+
+            // Data Export/Import Section
+            Spacer(modifier = Modifier.height(24.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(Color(0xFF444444)
+                    )
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Data",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Text(
+                text = "Export or import all your game data including preferences, achievements, level progress, and save games.",
+                color = Color(0xFFAAAAAA),
+                fontSize = 14.sp,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+            FancyButton(
+                text = "Export Data",
+                color = FancyButtonColor.BLUE,
+                onClick = { },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            FancyButton(
+                text = "Import Data",
+                color = FancyButtonColor.BLUE,
+                onClick = { },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            FancyButton(
+                text = "Reset Data",
+                color = FancyButtonColor.RED,
+                onClick = { },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            FancyButton(
+                text = "View Logs",
+                color = FancyButtonColor.GRAY,
+                onClick = { },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        // Back button
+        FancyButton(
+            text = "Back",
+            color = FancyButtonColor.GRAY,
+            onClick = onBack,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        )
+    }
+}
+
+@Composable
+fun RadioButtonWithLabel(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    textColor: Color = Color.White
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        androidx.compose.material3.RadioButton(
+            selected = selected,
+            onClick = onClick,
+            colors = androidx.compose.material3.RadioButtonDefaults.colors(
+                selectedColor = Color.White,
+                unselectedColor = Color.White
+            )
+        )
+        Text(
+            text = text,
+            color = textColor,
+            fontSize = 16.sp
+        )
+    }
+}
