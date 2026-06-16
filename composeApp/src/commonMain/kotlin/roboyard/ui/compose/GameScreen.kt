@@ -89,7 +89,7 @@ import roboyard.logic.core.Preferences
 import roboyard.logic.storage.PlatformStorage
 
 // Compose App Version - increment after each session
-const val COMPOSE_APP_VERSION = "v1.6"
+const val COMPOSE_APP_VERSION = "v1.7"
 
 // Helper function to format time as MM:SS
 fun formatTime(elapsedTimeMs: Long): String {
@@ -880,6 +880,8 @@ fun BoardCanvas(
                         touchStartGridX = gridX
                         touchStartGridY = gridY
 
+                        println("[UI] ACTION_DOWN - Start touch: ($startTouchX, $startTouchY), Grid: ($gridX, $gridY)")
+
                         // Check if a robot was touched at the start (matching fragment-app)
                         var foundRobot = false
                         for (i in board.robotPositions.indices) {
@@ -894,12 +896,14 @@ fun BoardCanvas(
                                 offset.y >= centerY - radius && offset.y <= centerY + radius) {
                                 touchedRobot = i
                                 foundRobot = true
+                                println("[UI] ACTION_DOWN - Robot $i touched at ($robotX, $robotY)")
                                 break
                             }
                         }
                         // If no robot was found, ensure touchedRobot is null (matching fragment-app)
                         if (!foundRobot) {
                             touchedRobot = null
+                            println("[UI] ACTION_DOWN - No robot touched")
                         }
                     },
                     onDrag = { change, dragAmount ->
@@ -936,6 +940,8 @@ fun BoardCanvas(
                             // Mark that we activated this robot by swiping
                             robotActivatedBySwipe = true
 
+                            println("[UI] ACTION_MOVE - Robot $touchedRobot activated by swipe at ($gridX, $gridY)")
+
                             // Return without movement - require additional swiping to move
                             return@detectDragGestures
                         }
@@ -949,6 +955,8 @@ fun BoardCanvas(
 
                             // For an activated robot, we need a larger swipe to start moving
                             val movementThreshold = if (robotActivatedBySwipe) ROBOT_MOVE_THRESHOLD else MIN_SWIPE_DISTANCE
+
+                            println("[UI] ACTION_MOVE - Robot $touchedRobot, Distance: $distance, Threshold: $movementThreshold, robotMoveInitiated: $robotMoveInitiated")
 
                             // Only process if the distance exceeds the threshold
                             if (distance >= movementThreshold) {
@@ -973,6 +981,7 @@ fun BoardCanvas(
                                     robotActivatedBySwipe = false
 
                                     val direction = if (dx > 0) Board.EAST else if (dx < 0) Board.WEST else if (dy > 0) Board.SOUTH else Board.NORTH
+                                    println("[UI] ACTION_MOVE - Moving robot $touchedRobot direction: $direction (dx=$dx, dy=$dy)")
                                     onRobotMove(touchedRobot!!, direction)
 
                                     // Record that we've moved a robot in this gesture
@@ -993,6 +1002,8 @@ fun BoardCanvas(
                                     pendingMoveDirectionX = 0
                                     pendingMoveDirectionY = 0
                                     robotActivatedBySwipe = false
+
+                                    println("[UI] ACTION_MOVE - Move completed, tracking variables reset")
                                 }
                             }
                         }
@@ -1003,6 +1014,8 @@ fun BoardCanvas(
                         val offsetY = (size.height - board.height * cellSize) / 2
 
                         // ACTION_UP logic from fragment-app
+                        println("[UI] ACTION_UP - touchedRobot: $touchedRobot, hasMovedRobotInCurrentGesture: $hasMovedRobotInCurrentGesture")
+
                         // Check if this was a tap (no significant movement)
                         // We need to store the initial touch position to calculate the distance
                         // For now, we'll just reset all tracking variables
@@ -1018,6 +1031,8 @@ fun BoardCanvas(
                         pendingMoveDirectionY = 0
                         robotActivatedBySwipe = false
                         robotMoveInitiated = false
+
+                        println("[UI] ACTION_UP - Tracking variables reset")
                     }
                 )
             }
