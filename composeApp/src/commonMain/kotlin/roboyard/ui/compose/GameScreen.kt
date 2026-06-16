@@ -89,7 +89,7 @@ import roboyard.logic.core.Preferences
 import roboyard.logic.storage.PlatformStorage
 
 // Compose App Version - increment after each session
-const val COMPOSE_APP_VERSION = "v1.0"
+const val COMPOSE_APP_VERSION = "v1.1"
 
 // Helper function to format time as MM:SS
 fun formatTime(elapsedTimeMs: Long): String {
@@ -992,6 +992,7 @@ fun BoardCanvas(
                                 // This ensures that the robot cannot be activated or moved again
                                 // until the user performs a new ACTION_DOWN on a robot.
                                 dragStartRobot = null
+                                dragStartPos = null
                                 pendingMoveDirection = null
                                 robotActivatedBySwipe = false
                                 robotMoveInitiated = false
