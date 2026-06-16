@@ -1272,31 +1272,70 @@ fun gridElementsToBoard(gridElements: ArrayList<GridElement>): Board? {
     val robotPositions = IntArray(numRobots) { -1 }
     var robotIndex = 0
 
-    // Parse walls, targets, robots from GridElements
+    // Parse walls, targets, robots from GridElements (matching fragment-app GameState.createRandom)
     for (element in gridElements) {
         val type = element.type
         val x = element.x
         val y = element.y
 
-        when {
-            type == "h" || type == "mh" -> {
+        when (type) {
+            "h", "mh" -> {
                 board.setWall(x, y, Board.NORTH, true)
                 if (y > 0) board.setWall(x, y - 1, Board.SOUTH, true)
             }
-            type == "v" || type == "mv" -> {
+            "v", "mv" -> {
                 board.setWall(x, y, Board.WEST, true)
                 if (x > 0) board.setWall(x - 1, y, Board.EAST, true)
             }
-            type != null && type.startsWith("t") -> {
-                val colorId = parseColorChar(type)
-                if (colorId >= -1) {
-                    val pos = x + y * width
-                    board.addGoal(pos, colorId, 0)
+            "target_red" -> {
+                val pos = x + y * width
+                board.addGoal(pos, 0, 0) // COLOR_PINK = 0
+            }
+            "target_green" -> {
+                val pos = x + y * width
+                board.addGoal(pos, 1, 0) // COLOR_GREEN = 1
+            }
+            "target_blue" -> {
+                val pos = x + y * width
+                board.addGoal(pos, 2, 0) // COLOR_BLUE = 2
+            }
+            "target_yellow" -> {
+                val pos = x + y * width
+                board.addGoal(pos, 3, 0) // COLOR_YELLOW = 3
+            }
+            "target_silver" -> {
+                val pos = x + y * width
+                board.addGoal(pos, 4, 0) // COLOR_SILVER = 4
+            }
+            "target_multi" -> {
+                // Multi-color target - skip (not supported in Board.addGoal with -1)
+            }
+            "robot_red" -> {
+                if (robotIndex < numRobots) {
+                    robotPositions[robotIndex] = x + y * width
+                    robotIndex++
                 }
             }
-            type != null && type.startsWith("r") -> {
-                val colorId = parseColorChar(type)
-                if (colorId >= 0 && robotIndex < numRobots) {
+            "robot_green" -> {
+                if (robotIndex < numRobots) {
+                    robotPositions[robotIndex] = x + y * width
+                    robotIndex++
+                }
+            }
+            "robot_blue" -> {
+                if (robotIndex < numRobots) {
+                    robotPositions[robotIndex] = x + y * width
+                    robotIndex++
+                }
+            }
+            "robot_yellow" -> {
+                if (robotIndex < numRobots) {
+                    robotPositions[robotIndex] = x + y * width
+                    robotIndex++
+                }
+            }
+            "robot_silver" -> {
+                if (robotIndex < numRobots) {
                     robotPositions[robotIndex] = x + y * width
                     robotIndex++
                 }
