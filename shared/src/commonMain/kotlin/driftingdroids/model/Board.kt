@@ -43,12 +43,14 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
 
     private val quadrants: IntArray // quadrants used for this board (indexes in QUADRANTS) 
 
-    /**
-     * Gets wall configuration of the board.
-     * @return 2D boolean array representing walls
-     */
+    /** add all outer walls (just to make sure, because the solver requires them) and return the array of walls. */
     @JvmField
     val walls: Array<BooleanArray> // [4][width*height] 4 directions
+
+    fun getWalls(): Array<BooleanArray> {
+        addOuterWalls() // the outer walls are required by the solver
+        return this.walls
+    }
     @JvmField
     val goals: MutableList<Goal> // all possible goals on the board
     private val randomGoals: MutableList<Goal?>
@@ -209,11 +211,15 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
                 data.add(quadrant.toByte())
             }
             // 4. walls
+            // we could exclude the outer walls to shorten the exported data (to be added by createBoardGameDump)
+            // however this would break backward compatibility with DriftingDroids 1.3.10 and earlier
+            //removeOuterWalls()
             for (dir in this.walls.indices) {
                 for (pos in this.walls[dir].indices) {
                     data.add(if (this.walls[dir][pos]) 1.toByte() else 0.toByte())
                 }
             }
+            //addOuterWalls() // add them back because they are required
             // 5. list of goals
             putInteger(this.goals.size, data)
             for (goal in this.goals) {  //6 bytes
@@ -1269,6 +1275,7 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
          * 
          * @param dump a String that represents the state of a Board object.
          * @return a new Board object.
+         * @see gameDump
          */
         fun createBoardGameDump(dump: String): Board? {
             val data: ByteArray? = unb64unzip(dump.replace("\\s".toRegex(), "")) //remove whitespace
@@ -1311,6 +1318,7 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
                     board.walls[dir][pos] = (0 != data[didx++].toInt())
                 }
             }
+            board.addOuterWalls() // the outer walls are required by the solver
             // 5. list of goals
             val numGoals: Int = getInteger(data, didx)
             didx += 4
