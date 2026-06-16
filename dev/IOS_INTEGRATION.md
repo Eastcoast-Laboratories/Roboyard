@@ -42,17 +42,22 @@ The Compose Multiplatform UI can be fully developed and tested on Linux using th
 
 ### Build and Run
 
+**Important:** Always use `--no-configuration-cache` to ensure code changes are applied. The Gradle configuration cache can prevent changes from being reflected in the running app.
+
 ```bash
 cd /var/www/Roboyard
 
+# Clean build (recommended after code changes)
+./gradlew clean --no-configuration-cache
+
 # Compile Desktop target
-./gradlew :composeApp:desktopMainClasses
+./gradlew :composeApp:desktopMainClasses --no-configuration-cache
 
 # Run the application
-./gradlew :composeApp:run
+./gradlew :composeApp:run --no-configuration-cache
 
 # Create distributable
-./gradlew :composeApp:createDistributable
+./gradlew :composeApp:createDistributable --no-configuration-cache
 ```
 
 The distributable is created at: `composeApp/build/compose/binaries/main/app/composeApp/bin/composeApp`
