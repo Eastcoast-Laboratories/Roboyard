@@ -89,7 +89,7 @@ import roboyard.logic.core.Preferences
 import roboyard.logic.storage.PlatformStorage
 
 // Compose App Version - increment after each session
-const val COMPOSE_APP_VERSION = "v1.4"
+const val COMPOSE_APP_VERSION = "v1.5"
 
 // Helper function to format time as MM:SS
 fun formatTime(elapsedTimeMs: Long): String {
@@ -998,8 +998,17 @@ fun BoardCanvas(
                         }
                     },
                     onDragEnd = {
+                        val cellSize = min(size.width, size.height) / maxOf(board.width, board.height).toFloat()
+                        val offsetX = (size.width - board.width * cellSize) / 2
+                        val offsetY = (size.height - board.height * cellSize) / 2
+
                         // ACTION_UP logic from fragment-app
-                        // Reset all tracking variables
+                        // Check if this was a tap (no significant movement)
+                        // We need to store the initial touch position to calculate the distance
+                        // For now, we'll just reset all tracking variables
+                        // The tap logic will be implemented in a future iteration
+
+                        // Reset all tracking variables (matching fragment-app ACTION_UP)
                         touchedRobot = null
                         startTouchX = -1f
                         startTouchY = -1f
