@@ -867,12 +867,13 @@ fun BoardCanvas(
 
                         // Store initial touch position
                         startTouch = offset
+                        dragStartPos = offset
                         val gridX = ((offset.x - offsetX) / cellSize).toInt()
                         val gridY = ((offset.y - offsetY) / cellSize).toInt()
                         touchStartGridX = gridX
                         touchStartGridY = gridY
 
-                        // Check if a robot was touched at the start
+                        // Check if a robot was touched at the start (matching fragment-app)
                         var foundRobot = false
                         for (i in board.robotPositions.indices) {
                             val position = board.robotPositions[i]
@@ -886,7 +887,6 @@ fun BoardCanvas(
                                 offset.y >= centerY - radius && offset.y <= centerY + radius) {
                                 dragStartRobot = i
                                 selectedRobot = i
-                                dragStartPos = offset
                                 foundRobot = true
                                 break
                             }
@@ -1288,6 +1288,7 @@ private fun parseColorChar(type: String): Int {
 /**
  * Converts a GridElement list (from GameLogic) to a Board instance.
  * This is used for random game generation with GameLogic.
+ * Matches fragment-app GameState.createRandom logic 1:1
  */
 fun gridElementsToBoard(gridElements: ArrayList<GridElement>): Board? {
     // Use Preferences for board dimensions
@@ -1297,7 +1298,6 @@ fun gridElementsToBoard(gridElements: ArrayList<GridElement>): Board? {
     val board = Board.createBoardFreestyle(null, width, height, 4) ?: return null
     val numRobots = 4
     val robotPositions = IntArray(numRobots) { -1 }
-    var robotIndex = 0
 
     // Parse walls, targets, robots from GridElements (matching fragment-app GameState.createRandom)
     for (element in gridElements) {
@@ -1338,34 +1338,24 @@ fun gridElementsToBoard(gridElements: ArrayList<GridElement>): Board? {
                 // Multi-color target - skip (not supported in Board.addGoal with -1)
             }
             "robot_red" -> {
-                if (robotIndex < numRobots) {
-                    robotPositions[robotIndex] = x + y * width
-                    robotIndex++
-                }
+                val pos = x + y * width
+                robotPositions[0] = pos
             }
             "robot_green" -> {
-                if (robotIndex < numRobots) {
-                    robotPositions[robotIndex] = x + y * width
-                    robotIndex++
-                }
+                val pos = x + y * width
+                robotPositions[1] = pos
             }
             "robot_blue" -> {
-                if (robotIndex < numRobots) {
-                    robotPositions[robotIndex] = x + y * width
-                    robotIndex++
-                }
+                val pos = x + y * width
+                robotPositions[2] = pos
             }
             "robot_yellow" -> {
-                if (robotIndex < numRobots) {
-                    robotPositions[robotIndex] = x + y * width
-                    robotIndex++
-                }
+                val pos = x + y * width
+                robotPositions[3] = pos
             }
             "robot_silver" -> {
-                if (robotIndex < numRobots) {
-                    robotPositions[robotIndex] = x + y * width
-                    robotIndex++
-                }
+                val pos = x + y * width
+                robotPositions[4] = pos
             }
         }
     }
