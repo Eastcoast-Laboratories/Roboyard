@@ -1117,6 +1117,226 @@ fun DebugSettingsScreen(
 }
 
 @Composable
+fun LevelDesignEditorScreen(
+    onBack: () -> Unit = {},
+    onPlayMap: (Board) -> Unit = {}
+) {
+    var selectedTool by remember { mutableStateOf("Wall") }
+    var selectedTarget by remember { mutableStateOf("None") }
+    var boardWidth by remember { mutableStateOf("12") }
+    var boardHeight by remember { mutableStateOf("14") }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Level Design Editor",
+            color = Color.White,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+        ) {
+            // Wall Tool Selection
+            Text(
+                text = "Wall Tool",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FancyButton(
+                    text = "Wall",
+                    color = if (selectedTool == "Wall") FancyButtonColor.BLUE else FancyButtonColor.GRAY,
+                    onClick = { selectedTool = "Wall" },
+                    modifier = Modifier.weight(1f)
+                )
+                FancyButton(
+                    text = "Eraser",
+                    color = if (selectedTool == "Eraser") FancyButtonColor.BLUE else FancyButtonColor.GRAY,
+                    onClick = { selectedTool = "Eraser" },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Target Tool Selection
+            Text(
+                text = "Target Tool",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FancyButton(
+                    text = "None",
+                    color = if (selectedTarget == "None") FancyButtonColor.BLUE else FancyButtonColor.GRAY,
+                    onClick = { selectedTarget = "None" },
+                    modifier = Modifier.weight(1f)
+                )
+                FancyButton(
+                    text = "R",
+                    color = if (selectedTarget == "R") FancyButtonColor.RED else FancyButtonColor.GRAY,
+                    onClick = { selectedTarget = "R" },
+                    modifier = Modifier.weight(1f)
+                )
+                FancyButton(
+                    text = "G",
+                    color = if (selectedTarget == "G") FancyButtonColor.GREEN else FancyButtonColor.GRAY,
+                    onClick = { selectedTarget = "G" },
+                    modifier = Modifier.weight(1f)
+                )
+                FancyButton(
+                    text = "B",
+                    color = if (selectedTarget == "B") FancyButtonColor.BLUE else FancyButtonColor.GRAY,
+                    onClick = { selectedTarget = "B" },
+                    modifier = Modifier.weight(1f)
+                )
+                FancyButton(
+                    text = "Y",
+                    color = if (selectedTarget == "Y") FancyButtonColor.YELLOW else FancyButtonColor.GRAY,
+                    onClick = { selectedTarget = "Y" },
+                    modifier = Modifier.weight(1f)
+                )
+                FancyButton(
+                    text = "S",
+                    color = if (selectedTarget == "S") FancyButtonColor.GRAY else FancyButtonColor.GRAY,
+                    onClick = { selectedTarget = "S" },
+                    modifier = Modifier.weight(1f)
+                )
+                FancyButton(
+                    text = "M",
+                    color = if (selectedTarget == "M") FancyButtonColor.PURPLE else FancyButtonColor.GRAY,
+                    onClick = { selectedTarget = "M" },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Board Preview
+            Text(
+                text = "Board Preview",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(400.dp)
+                    .background(Color(0xFF1A1A1A), RoundedCornerShape(8.dp))
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Board preview will appear here",
+                    color = Color(0xFF888888),
+                    fontSize = 16.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Board Size Configuration
+            Text(
+                text = "Board Size",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Width:",
+                    color = Color(0xFFCCCCCC),
+                    fontSize = 16.sp
+                )
+                Text(
+                    text = boardWidth,
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = "Height:",
+                    color = Color(0xFFCCCCCC),
+                    fontSize = 16.sp
+                )
+                Text(
+                    text = boardHeight,
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Export/Import Buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FancyButton(
+                    text = "Export Level",
+                    color = FancyButtonColor.RED,
+                    onClick = { },
+                    modifier = Modifier.weight(1f)
+                )
+                FancyButton(
+                    text = "Import ASCII",
+                    color = FancyButtonColor.BLUE,
+                    onClick = { },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Play Map Button
+            FancyButton(
+                text = "Play Map",
+                color = FancyButtonColor.GREEN,
+                onClick = { },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        // Cancel Button
+        FancyButton(
+            text = "Cancel",
+            color = FancyButtonColor.GRAY,
+            onClick = onBack,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
 fun AchievementsScreen(
     onBack: () -> Unit = {}
 ) {

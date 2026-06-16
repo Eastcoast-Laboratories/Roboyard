@@ -38,7 +38,8 @@ enum class FancyButtonColor(
     BLUE(Color(0xFF4A90E2), Color(0xFF357ABD), Color(0xFF5BA3F5), Color.White),
     GRAY(Color(0xFF6C7B7F), Color(0xFF556065), Color(0xFF8A9499), Color.White),
     HINT(Color(0xFFFFE082), Color(0xFFFFCC02), Color(0xFFFFB300), Color(0xFF1A1A1A)),
-    PURPLE(Color(0xFF9C27B0), Color(0xFF7B1FA2), Color(0xFFBA68C8), Color.White)
+    PURPLE(Color(0xFF9C27B0), Color(0xFF7B1FA2), Color(0xFFBA68C8), Color.White),
+    YELLOW(Color(0xFFFFC107), Color(0xFFFFA000), Color(0xFFFFD54F), Color.Black)
 }
 
 /**
