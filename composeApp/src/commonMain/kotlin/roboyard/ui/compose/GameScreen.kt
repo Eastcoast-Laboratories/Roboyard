@@ -89,7 +89,7 @@ import roboyard.logic.core.Preferences
 import roboyard.logic.storage.PlatformStorage
 
 // Compose App Version - increment after each session
-const val COMPOSE_APP_VERSION = "v1.5"
+const val COMPOSE_APP_VERSION = "v1.6"
 
 // Helper function to format time as MM:SS
 fun formatTime(elapsedTimeMs: Long): String {
@@ -807,7 +807,7 @@ fun BoardCanvas(
     onRobotMove: (robotIndex: Int, direction: Int) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
-    val gameState = remember { ComposeGameState(board) }
+    val gameState = remember(board) { ComposeGameState(board) }
     // Tracking variables matching fragment-app GameGridView
     var hasMovedRobotInCurrentGesture by remember { mutableStateOf(false) }
     var lastMoveX by remember { mutableStateOf(-1) }
