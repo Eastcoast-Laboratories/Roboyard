@@ -166,8 +166,13 @@ fun GameScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(0.dp)
+                .background(Color(0xFF303030))
+                .shadow(elevation = 10.dp, shape = RoundedCornerShape(0.dp))
         ) {
             // Accessibility controls placeholder
+            // Top row: Announce, North, Select
+            // Middle row: West, East
+            // Bottom row: Selected Robot, South, Robot Goal
         }
 
         // Bottom button container (two rows of fancy buttons)
