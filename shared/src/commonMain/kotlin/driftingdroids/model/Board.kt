@@ -16,9 +16,7 @@
 */
 package driftingdroids.model
 
-import android.os.Build
 import roboyard.logic.core.Constants
-import roboyard.ui.activities.MainActivity
 import java.nio.charset.StandardCharsets
 import java.util.Arrays
 import java.util.Base64
@@ -861,10 +859,10 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
     }
 
     companion object {
-        val WIDTH_STANDARD: Int = MainActivity.boardSizeX
+        val WIDTH_STANDARD: Int = Constants.DEFAULT_BOARD_SIZE_X
         const val WIDTH_MIN: Int = 3
         const val WIDTH_MAX: Int = 100
-        val HEIGHT_STANDARD: Int = MainActivity.boardSizeY
+        val HEIGHT_STANDARD: Int = Constants.DEFAULT_BOARD_SIZE_Y
         const val HEIGHT_MIN: Int = 3
         const val HEIGHT_MAX: Int = 100
         const val SIZE_MAX: Int = 4096 // 12 bits
@@ -1381,13 +1379,7 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
                 4 + zip.deflate(zipOutput, 4, zipOutput.size - 4) //skip uncompressed length
             //encode base64
             val b64Input = zipOutput.copyOf(zipOutLen)
-            val b64Output: String
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                b64Output = Base64.getEncoder().encodeToString(b64Input)
-            } else {
-                b64Output =
-                    android.util.Base64.encodeToString(b64Input, android.util.Base64.DEFAULT)
-            }
+            val b64Output = Base64.getEncoder().encodeToString(b64Input)
             //compute CRC of encoded data
             val crc32 = CRC32()
             crc32.update(b64Output.toByteArray(StandardCharsets.UTF_8))
@@ -1415,14 +1407,7 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
                 crc32.update(inputSplit[3]!!.toByteArray(StandardCharsets.UTF_8))
                 require(crc32.getValue() == b64crc) { "data CRC mismatch" }
                 //parse base64 string
-                val b64Output: ByteArray
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    b64Output =
-                        Base64.getDecoder().decode(inputSplit[3]) //throws IllegalArgumentException
-                } else {
-                    b64Output =
-                        android.util.Base64.decode(inputSplit[3], android.util.Base64.DEFAULT)
-                }
+                val b64Output = Base64.getDecoder().decode(inputSplit[3]) //throws IllegalArgumentException
                 //unzip/inflate data
                 var unzipLen = 0
                 for (i in 0..3) {

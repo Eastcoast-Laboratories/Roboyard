@@ -49,33 +49,28 @@ The following files have Android-specific dependencies and remain in the Android
 ### Achievements
 - **AchievementManager.kt** - Activity, Toast, PlayGames (Android Achievements)
 
-## DriftingDroids Solver (Kotlin - Converted, Android Dependencies to Remove)
+## DriftingDroids Solver (Kotlin - Converted, Migrated to KMP)
 
-The DriftingDroids solver package has been converted to Kotlin but still has Android dependencies:
+The DriftingDroids solver package has been converted to Kotlin and migrated to KMP:
 
-**Location:** `app/src/main/java/driftingdroids/model/`
+**Location:** `shared/src/commonMain/kotlin/driftingdroids/model/`
 
-**Files (all .kt now):**
-- Board.kt - Uses android.os.Build, roboyard.ui.activities.MainActivity ❌
-- KeyDepthMap.kt - Platform-agnostic ✅
-- KeyDepthMapFactory.kt - Platform-agnostic ✅
-- KeyDepthMapTrieGeneric.kt - Platform-agnostic ✅
-- KeyDepthMapTrieSpecial.kt - Platform-agnostic ✅
-- KeyMakerInt.kt - Platform-agnostic ✅
-- KeyMakerLong.kt - Platform-agnostic ✅
-- L10N.kt - Platform-agnostic ✅
-- Logger.kt - Platform-agnostic ✅
-- Move.kt - Platform-agnostic ✅
-- Solution.kt - Platform-agnostic ✅
-- Solver.kt - Platform-agnostic ✅
-- SolverIDDFS.kt - Platform-agnostic ✅
+**Files (all .kt, platform-agnostic):**
+- Board.kt - ✅ Android dependencies removed (android.os.Build, MainActivity)
+- KeyDepthMap.kt - ✅ Platform-agnostic
+- KeyDepthMapFactory.kt - ✅ Platform-agnostic
+- KeyDepthMapTrieGeneric.kt - ✅ Platform-agnostic
+- KeyDepthMapTrieSpecial.kt - ✅ Platform-agnostic
+- KeyMakerInt.kt - ✅ Platform-agnostic
+- KeyMakerLong.kt - ✅ Platform-agnostic
+- L10N.kt - ✅ Platform-agnostic
+- Logger.kt - ✅ Platform-agnostic
+- Move.kt - ✅ Platform-agnostic
+- Solution.kt - ✅ Platform-agnostic
+- Solver.kt - ✅ Platform-agnostic
+- SolverIDDFS.kt - ✅ Platform-agnostic
 
-**Status:** Converted to Kotlin ✅, but needs Android dependency removal for KMP:
-1. ❌ Remove android.os.Build import from Board.kt
-2. ❌ Remove roboyard.ui.activities.MainActivity import from Board.kt
-3. ❌ Move DriftingDroids package to shared/commonMain/driftingdroids/model/
-4. ❌ Update shared/build.gradle to include DriftingDroids package
-5. ❌ Test KMP build with DriftingDroids included
+**Status:** Converted to Kotlin ✅, Android dependencies removed ✅, Migrated to shared/commonMain ✅, Build successful ✅
 
 ## iOS Integration
 
@@ -89,8 +84,8 @@ The shared module is configured for iOS with:
 - **IosNetworkMonitor.kt** - Currently returns true, needs NWPathMonitor implementation ❌
 
 **Next steps for iOS:**
-1. ❌ Remove Android dependencies from DriftingDroids (Board.kt)
-2. ❌ Move DriftingDroids to shared/commonMain
+1. ✅ Remove Android dependencies from DriftingDroids (Board.kt)
+2. ✅ Move DriftingDroids to shared/commonMain
 3. ❌ Implement IosStorage.kt with platform.Foundation.NSUserDefaults
 4. ❌ Implement IosNetworkMonitor.kt with platform.Network.NWPathMonitor
 5. ❌ Create iOS Xcode project (SwiftUI/UIKit)
