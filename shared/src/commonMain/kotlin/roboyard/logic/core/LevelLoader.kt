@@ -52,7 +52,6 @@ object LevelLoader {
         val board = Board.createBoardFreestyle(null, width, height, 4) ?: return null
         val numRobots = 4
         val robotPositions = IntArray(numRobots) { -1 }
-        var robotIndex = 0
 
         // Second pass: parse walls, targets, robots
         for (entry in entries) {
@@ -84,9 +83,8 @@ object LevelLoader {
                 }
                 type.startsWith("r") -> {
                     val colorId = parseColorChar(type)
-                    if (colorId >= 0 && robotIndex < numRobots) {
-                        robotPositions[robotIndex] = x + y * width
-                        robotIndex++
+                    if (colorId >= 0 && colorId < numRobots) {
+                        robotPositions[colorId] = x + y * width
                     }
                 }
             }

@@ -976,11 +976,13 @@ fun BoardCanvas(
                                 onRobotMove(robotIndex, direction)
 
                                 hasMovedRobotInCurrentGesture = true
-                                // Reset starting position for next movement (matching fragment-app)
-                                dragStartPos = change.position
-                                // Don't reset dragStartRobot - allow continuous movements in same gesture
+                                // After a successful move, reset all swipe and activation state (matching fragment-app)
+                                // This ensures that the robot cannot be activated or moved again
+                                // until the user performs a new ACTION_DOWN on a robot.
+                                dragStartRobot = null
+                                dragStartPos = null
                                 pendingMoveDirection = null
-                                // Reset robotMoveInitiated to allow continuous movements (matching fragment-app)
+                                robotActivatedBySwipe = false
                                 robotMoveInitiated = false
                             } else if (distance < movementThreshold) {
                                 // Store the direction for retry on ACTION_UP

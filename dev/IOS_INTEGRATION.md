@@ -56,6 +56,10 @@ cd /var/www/Roboyard
 # Run the application
 ./gradlew :composeApp:run --no-configuration-cache
 
+# or in one line:
+./gradlew clean --no-configuration-cache ; ./gradlew :composeApp:desktopMainClasses --no-configuration-cache; ./gradlew :composeApp:run --no-configuration-cache
+
+
 # Create distributable
 ./gradlew :composeApp:createDistributable --no-configuration-cache
 ```
