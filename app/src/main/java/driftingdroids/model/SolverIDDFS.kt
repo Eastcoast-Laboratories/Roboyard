@@ -669,7 +669,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
             )
 
             override fun add(state: IntArray?, depth: Int): Boolean {
-                val key = this.keyMaker!!.run(state)
+                val key = this.keyMaker!!.run(state!!)
                 return this.theMap.putIfGreater(key, depth)
             }
 
@@ -688,7 +688,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
             )
 
             override fun add(state: IntArray?, depth: Int): Boolean {
-                val key = this.keyMaker!!.run(state)
+                val key = this.keyMaker!!.run(state!!)
                 return this.theMap.putIfGreater(key, depth)
             }
 

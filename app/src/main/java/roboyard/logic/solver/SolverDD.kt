@@ -197,15 +197,15 @@ class SolverDD : ISolver {
         while (m != null) {
             moveCount++
             val mv: ERRGameMove?
-            when (m.direction) {
+            when (m!!.direction) {
                 0 -> mv = ERRGameMove.UP
                 1 -> mv = ERRGameMove.RIGHT
                 2 -> mv = ERRGameMove.DOWN
                 3 -> mv = ERRGameMove.LEFT
                 else -> mv = ERRGameMove.NOMOVE
             }
-            print(m.direction.toString() + "," + pieces[m.robotNumber]!!.color + ";")
-            s.addMove(RRGameMove(pieces[m.robotNumber]!!, mv))
+            print(m!!.direction.toString() + "," + pieces[m!!.robotNumber]!!.color + ";")
+            s.addMove(RRGameMove(pieces[m!!.robotNumber]!!, mv))
             m = solution.getNextMove()
         }
 
