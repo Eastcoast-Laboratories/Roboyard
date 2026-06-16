@@ -2,16 +2,22 @@ package roboyard.ui.compose
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,11 +26,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import driftingdroids.model.Board
+import roboyard.logic.core.LevelLoader
 
 @Composable
 fun App() {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.MainMenu) }
     var board by remember { mutableStateOf<Board?>(null) }
+    var selectedLevelId by remember { mutableStateOf(1) }
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
@@ -70,9 +78,20 @@ fun App() {
                             currentScreen = Screen.MainMenu
                         },
                         onLevelSelected = { levelId ->
-                            // TODO: Load specific level
-                            board = Board.createBoardRandom(4)
+                            selectedLevelId = levelId
+                            currentScreen = Screen.Loading
+                        }
+                    )
+                }
+                Screen.Loading -> {
+                    LoadingScreen(
+                        levelId = selectedLevelId,
+                        onLoadComplete = { loadedBoard ->
+                            board = loadedBoard
                             currentScreen = Screen.Game
+                        },
+                        onBack = {
+                            currentScreen = Screen.MainMenu
                         }
                     )
                 }
@@ -125,6 +144,7 @@ enum class Screen {
     MainMenu,
     Game,
     LevelSelection,
+    Loading,
     Settings,
     Help,
     Credits,
@@ -186,5 +206,29 @@ fun MenuButton(text: String, onClick: () -> Unit) {
             .height(56.dp)
     ) {
         Text(text = text, style = MaterialTheme.typography.titleMedium)
+    }
+}
+
+@Composable
+fun LoadingScreen(
+    levelId: Int = 1,
+    onLoadComplete: (Board) -> Unit = {},
+    onBack: () -> Unit = {}
+) {
+    LaunchedEffect(levelId) {
+        val board = LevelLoader.loadLevel(levelId)
+        if (board != null) {
+            onLoadComplete(board)
+        } else {
+            onBack()
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(text = "Loading level $levelId...", style = MaterialTheme.typography.bodyLarge)
     }
 }
