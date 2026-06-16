@@ -48,9 +48,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
-
-// Compose App Version - increment after each session
-const val COMPOSE_APP_VERSION = "v1.0"
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -90,6 +87,9 @@ import roboyard.logic.core.GridElement
 import roboyard.logic.core.GameLogic
 import roboyard.logic.core.Preferences
 import roboyard.logic.storage.PlatformStorage
+
+// Compose App Version - increment after each session
+const val COMPOSE_APP_VERSION = "v1.0"
 
 // Helper function to format time as MM:SS
 fun formatTime(elapsedTimeMs: Long): String {
