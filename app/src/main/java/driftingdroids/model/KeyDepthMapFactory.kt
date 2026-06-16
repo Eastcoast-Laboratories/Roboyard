@@ -14,36 +14,24 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+package driftingdroids.model
 
-package driftingdroids.model;
+import kotlin.math.max
 
 /**
  * Factory that creates instances of KeyDepthMap.
  */
-public class KeyDepthMapFactory {
-
-    private static Class<? extends KeyDepthMap> defaultClazz = KeyDepthMapTrieSpecial.class;
+object KeyDepthMapFactory {
+    private var defaultClazz: Class<out KeyDepthMap?>? = KeyDepthMapTrieSpecial::class.java
 
 
     /**
      * Set this factory's default implementation class of KeyDepthMap.
-	 
+     * 
      * @param clazz the implementation class of KeyDepthMap
      */
-    public static void setDefaultClass(Class<? extends KeyDepthMap> clazz) {
-        defaultClazz = clazz;
-    }
-
-
-    /**
-     * Creates a new instance of KeyDepthMap.
-     * Uses this factory's default implementation class of KeyDepthMap.
-     * 
-     * @param board the board that is to be solved
-     * @return
-     */
-    public static KeyDepthMap newInstance(Board board) {
-        return newInstance(board, defaultClazz);
+    fun setDefaultClass(clazz: Class<out KeyDepthMap?>?) {
+        defaultClazz = clazz
     }
 
 
@@ -54,14 +42,21 @@ public class KeyDepthMapFactory {
      * @param clazz the implementation class of KeyDepthMap
      * @return a new instance of KeyDepthMap
      */
-    public static KeyDepthMap newInstance(Board board, Class<? extends KeyDepthMap> clazz) {
-        if (KeyDepthMapTrieGeneric.class.equals(clazz)) {
-            return new KeyDepthMapTrieGeneric(Math.max(12, board.getNumRobots() * board.sizeNumBits));
-        } else if (KeyDepthMapTrieSpecial.class.equals(clazz)) {
-            return KeyDepthMapTrieSpecial.createInstance(board, true);
+    /**
+     * Creates a new instance of KeyDepthMap.
+     * Uses this factory's default implementation class of KeyDepthMap.
+     * 
+     * @param board the board that is to be solved
+     * @return
+     */
+    @JvmOverloads
+    fun newInstance(board: Board, clazz: Class<out KeyDepthMap?>? = defaultClazz): KeyDepthMap {
+        if (KeyDepthMapTrieGeneric::class.java == clazz) {
+            return KeyDepthMapTrieGeneric(max(12, board.numRobots * board.sizeNumBits))
+        } else if (KeyDepthMapTrieSpecial::class.java == clazz) {
+            return KeyDepthMapTrieSpecial.Companion.createInstance(board, true)
         } else {
-            throw new IllegalArgumentException("unknown KeyDepthMap class: " + clazz);
+            throw IllegalArgumentException("unknown KeyDepthMap class: " + clazz)
         }
     }
-
 }

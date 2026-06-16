@@ -14,18 +14,16 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+package driftingdroids.model
 
-package driftingdroids.model;
+import android.util.Log
 
-import android.util.Log;
-
-/** a very simple logger class */
-public class Logger {
-
-    public static void println(String msg) {
-        System.out.println(msg);
+/** a very simple logger class  */
+object Logger {
+    fun println(msg: String?) {
+        kotlin.io.println(msg)
     }
-    
+
     /**
      * Log a formatted message with variable arguments
      * @param level Log level (from android.util.Log)
@@ -33,18 +31,20 @@ public class Logger {
      * @param format Format string (like in String.format)
      * @param args Variable arguments to insert into the format string
      */
-    public static void println(int level, String tag, String format, Object... args) {
-        String message;
+    fun println(level: Int, tag: String?, format: String, vararg args: Any?) {
+        var message: String?
         try {
-            message = String.format(format, args);
-        } catch (Exception e) {
-            message = format + " [Error formatting log message: " + e.getMessage() + "]";
+            message = String.format(format, *args)
+        } catch (e: Exception) {
+            message = format + " [Error formatting log message: " + e.message + "]"
         }
-        
+
+
         // First log to Android system log
-        Log.println(level, tag, message);
-        
+        Log.println(level, tag, message)
+
+
         // Also output to standard output for debugging purposes
-        System.out.println(tag + ": " + message);
+        kotlin.io.println(tag + ": " + message)
     }
 }
