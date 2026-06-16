@@ -1,16 +1,20 @@
 package roboyard.ui.compose
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,11 +24,14 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -33,9 +40,11 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlin.math.min
 import kotlin.math.roundToInt
 import driftingdroids.model.Board
@@ -74,61 +83,17 @@ fun GameScreen(
     onBack: () -> Unit = {}
 ) {
     var moveCount by remember { mutableIntStateOf(0) }
+    var squaresMoved by remember { mutableIntStateOf(0) }
     var currentBoard by remember { mutableStateOf(board) }
+    val startBoard = remember { Board.Companion.createClone(board).also { it.setRobots(board.robotPositions.copyOf()) } }
     var hintMessage by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF2C2C2C))
+            .background(Color.Black)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            Button(onClick = onBack) {
-                Text("Back")
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = {
-                val solver = SolverIDDFS(currentBoard)
-                val solutions = solver.execute()
-                if (solutions.isNotEmpty()) {
-                    val solution = solutions[0]
-                    val firstMove = solution.getNextMove()
-                    if (firstMove != null) {
-                        val directionName = when (firstMove.direction) {
-                            Board.NORTH -> "North"
-                            Board.EAST -> "East"
-                            Board.SOUTH -> "South"
-                            Board.WEST -> "West"
-                            else -> "Unknown"
-                        }
-                        hintMessage = "Hint: Move robot ${firstMove.robotNumber} $directionName"
-                    } else {
-                        hintMessage = "Already at goal!"
-                    }
-                } else {
-                    hintMessage = "No solution found"
-                }
-            }) {
-                Text("Hint")
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "Robots: ${currentBoard.numRobots} | Moves: $moveCount",
-                color = Color.White,
-                modifier = Modifier.padding(vertical = 12.dp)
-            )
-        }
-        hintMessage?.let { message ->
-            Text(
-                text = message,
-                color = Color(0xFF4CAF50),
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
-        }
+        // Game grid at top, full width, maintaining square aspect ratio
         BoardCanvas(
             board = currentBoard,
             onRobotMove = { robotIndex, direction ->
@@ -140,9 +105,154 @@ fun GameScreen(
                 }
             },
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
+                .fillMaxWidth()
+                .aspectRatio(currentBoard.width.toFloat() / currentBoard.height.toFloat())
         )
+
+        // Game info card below the board
+        GameInfoCard(
+            moveCount = moveCount,
+            squaresMoved = squaresMoved,
+            difficulty = "Beginner",
+            timer = "00:00",
+            hintMessage = hintMessage
+        )
+
+        // Flexible space pushes the buttons to the bottom
+        Spacer(modifier = Modifier.weight(1f))
+
+        // Bottom button container (two rows of fancy buttons)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.Black)
+                .padding(4.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 3.dp)
+            ) {
+                FancyButton(
+                    text = "Save Map",
+                    color = FancyButtonColor.RED,
+                    onClick = { },
+                    modifier = Modifier.weight(1f).padding(end = 3.dp)
+                )
+                FancyButton(
+                    text = "💡Hint",
+                    color = FancyButtonColor.HINT,
+                    onClick = {
+                        val solver = SolverIDDFS(currentBoard)
+                        val solutions = solver.execute()
+                        hintMessage = if (solutions.isNotEmpty()) {
+                            val firstMove = solutions[0].getNextMove()
+                            if (firstMove != null) {
+                                val directionName = when (firstMove.direction) {
+                                    Board.NORTH -> "North"
+                                    Board.EAST -> "East"
+                                    Board.SOUTH -> "South"
+                                    Board.WEST -> "West"
+                                    else -> "Unknown"
+                                }
+                                "Hint: Move robot ${firstMove.robotNumber} $directionName"
+                            } else "Already at goal!"
+                        } else "No solution found"
+                    },
+                    modifier = Modifier.weight(1f).padding(end = 3.dp)
+                )
+                FancyButton(
+                    text = "Back",
+                    color = FancyButtonColor.HINT,
+                    onClick = onBack,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                FancyButton(
+                    text = "Menu",
+                    color = FancyButtonColor.GRAY,
+                    onClick = onBack,
+                    modifier = Modifier.weight(1f).padding(end = 3.dp)
+                )
+                FancyButton(
+                    text = "Reset",
+                    color = FancyButtonColor.BLUE,
+                    onClick = {
+                        currentBoard = Board.Companion.createClone(startBoard).also {
+                            it.setRobots(startBoard.robotPositions.copyOf())
+                        }
+                        moveCount = 0
+                        squaresMoved = 0
+                        hintMessage = null
+                    },
+                    modifier = Modifier.weight(1f).padding(end = 3.dp)
+                )
+                FancyButton(
+                    text = "New Game",
+                    color = FancyButtonColor.GREEN,
+                    onClick = { },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Game information card shown below the board, matching the original
+ * game_info_card_background gradient with Moves / Squares / Difficulty on the
+ * left and the timer on the right.
+ */
+@Composable
+fun GameInfoCard(
+    moveCount: Int,
+    squaresMoved: Int,
+    difficulty: String,
+    timer: String,
+    hintMessage: String?
+) {
+    val cardBrush = Brush.linearGradient(
+        colors = listOf(Color(0xFF1A1A1A), Color(0xFF2D2D2D)),
+        start = Offset(0f, 0f),
+        end = Offset.Infinite
+    )
+    val shape = RoundedCornerShape(16.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(cardBrush, shape)
+            .border(BorderStroke(2.dp, Color(0xFF404040)), shape)
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Top
+        ) {
+            Column(modifier = Modifier.weight(0.6f)) {
+                Text("Moves: $moveCount", color = Color(0xFFEEEEEE), fontSize = 10.sp)
+                Text("Squares: $squaresMoved", color = Color(0xFFEEEEEE), fontSize = 8.sp)
+                Text("Difficulty: $difficulty", color = Color(0xFFEEEEEE), fontSize = 8.sp)
+            }
+            Text(
+                text = timer,
+                color = Color(0xFFEEEEEE),
+                fontSize = 16.sp,
+                modifier = Modifier.weight(0.4f),
+                textAlign = TextAlign.End
+            )
+        }
+        hintMessage?.let { message ->
+            Text(
+                text = message,
+                color = Color(0xFF4CAF50),
+                fontSize = 10.sp,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+        }
     }
 }
 
@@ -301,6 +411,8 @@ fun BoardCanvas(
         val offsetY = (size.height - board.height * cellSize) / 2
 
         // 1. Grid tiles (rotated per cell, like gridTileDrawable in GameGridView)
+        //    plus the green grid stroke around each cell (#4ae600, 3px stroke)
+        val gridStrokeColor = Color(0xFF4AE600)
         for (y in 0 until board.height) {
             for (x in 0 until board.width) {
                 val cellX = offsetX + x * cellSize
@@ -309,6 +421,13 @@ fun BoardCanvas(
                 rotate(rotation, pivot = Offset(cellX + cellSize / 2, cellY + cellSize / 2)) {
                     drawImageScaled(gridTile, cellX, cellY, cellSize, cellSize)
                 }
+                // Green grid line around the cell (matches gridPaint in GameGridView)
+                drawRect(
+                    color = gridStrokeColor,
+                    topLeft = Offset(cellX, cellY),
+                    size = Size(cellSize, cellSize),
+                    style = Stroke(width = 3f)
+                )
             }
         }
 
@@ -341,41 +460,80 @@ fun BoardCanvas(
             )
         }
 
-        // 4. Walls using the mh/mv drawables (draw NORTH+WEST per cell, plus outer SOUTH/EAST)
-        val wallThickness = cellSize * 0.18f
+        // 4. Walls using the mh/mv drawables, matching WallRenderer's thickness
+        //    (0.6 * cellSize) and overhang (0.24 * cellSize), skipping the center cross.
+        val wallThickness = cellSize * 0.6f
+        val wallOffset = cellSize * 0.24f
+        val cWallX = board.width / 2 - 1
+        val cWallY = board.height / 2 - 1
         for (y in 0 until board.height) {
             for (x in 0 until board.width) {
                 val position = x + y * board.width
                 val cellX = offsetX + x * cellSize
                 val cellY = offsetY + y * cellSize
-                if (board.walls[0][position]) { // NORTH
-                    drawImageScaled(wallH, cellX, cellY - wallThickness / 2, cellSize, wallThickness)
+                // NORTH (horizontal wall at top edge of cell x,y)
+                if (board.walls[0][position]) {
+                    val isCenter = (y == cWallY + 1 && (x == cWallX || x == cWallX + 1))
+                    if (!isCenter) {
+                        drawImageScaled(
+                            wallH,
+                            cellX - wallOffset,
+                            cellY - wallThickness / 2,
+                            cellSize + 2 * wallOffset,
+                            wallThickness
+                        )
+                    }
                 }
-                if (board.walls[3][position]) { // WEST
-                    drawImageScaled(wallV, cellX - wallThickness / 2, cellY, wallThickness, cellSize)
+                // WEST (vertical wall at left edge of cell x,y)
+                if (board.walls[3][position]) {
+                    val isCenter = (x == cWallX + 1 && (y == cWallY || y == cWallY + 1))
+                    if (!isCenter) {
+                        drawImageScaled(
+                            wallV,
+                            cellX - wallThickness / 2,
+                            cellY - wallOffset,
+                            wallThickness,
+                            cellSize + 2 * wallOffset
+                        )
+                    }
                 }
-                if (y == board.height - 1 && board.walls[2][position]) { // outer SOUTH
-                    drawImageScaled(wallH, cellX, cellY + cellSize - wallThickness / 2, cellSize, wallThickness)
+                // outer SOUTH
+                if (y == board.height - 1 && board.walls[2][position]) {
+                    drawImageScaled(
+                        wallH,
+                        cellX - wallOffset,
+                        cellY + cellSize - wallThickness / 2,
+                        cellSize + 2 * wallOffset,
+                        wallThickness
+                    )
                 }
-                if (x == board.width - 1 && board.walls[1][position]) { // outer EAST
-                    drawImageScaled(wallV, cellX + cellSize - wallThickness / 2, cellY, wallThickness, cellSize)
+                // outer EAST
+                if (x == board.width - 1 && board.walls[1][position]) {
+                    drawImageScaled(
+                        wallV,
+                        cellX + cellSize - wallThickness / 2,
+                        cellY - wallOffset,
+                        wallThickness,
+                        cellSize + 2 * wallOffset
+                    )
                 }
             }
         }
 
-        // 5. Robots using the color sprites
+        // 5. Robots using the color sprites at DEFAULT_ROBOT_SCALE (1.1 * cellSize)
+        val robotScale = 1.1f
+        val robotInset = (robotScale - 1f) * cellSize / 2f
         for (i in board.robotPositions.indices) {
             val position = board.robotPositions[i]
             val robotX = position % board.width
             val robotY = position / board.width
             val sprite = if (i in robotSprites.indices) robotSprites[i] else robotSprites.last()
-            val pad = cellSize * 0.08f
             drawImageScaled(
                 sprite,
-                offsetX + robotX * cellSize + pad,
-                offsetY + robotY * cellSize + pad,
-                cellSize - 2 * pad,
-                cellSize - 2 * pad
+                offsetX + robotX * cellSize - robotInset,
+                offsetY + robotY * cellSize - robotInset,
+                cellSize * robotScale,
+                cellSize * robotScale
             )
         }
     }
