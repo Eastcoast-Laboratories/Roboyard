@@ -177,11 +177,40 @@ Only the **rendering layer** is migrated, not the logic. This principle underlie
 
 ## Big-Bang Migration Steps
 
-### 1. Enable `androidTarget()` in composeApp
+### 1. Enable `androidTarget()` in composeApp ✅ DONE
 
-Re-add `androidTarget()` to `composeApp/build.gradle`. Resolve the AGP 9.2.1 / Compose 1.8.2 compatibility issue (bump Compose MP and/or adjust AGP) until the Android target builds cleanly.
+`composeApp` now builds for Android via the `com.android.kotlin.multiplatform.library`
+plugin with `androidLibrary {}`. The AGP 9.2.1 incompatibility was resolved by bumping
+Compose Multiplatform to **1.9.3** (1.8.2 crashed with
+`KotlinMultiplatformAndroidComponentsExtension.onVariant`). Verified:
+`./gradlew :composeApp:compileAndroidMain` builds cleanly.
 
-### 2. Share the graphic assets
+### 2. Share the graphic assets ✅ DONE
+
+All robot/wall/target/grid/logo PNGs are copied into
+`composeApp/src/commonMain/composeResources/drawable/` and accessed via
+`imageResource(Res.drawable.*)`.
+
+### 3. Rewrite the board renderer ✅ DONE
+
+`BoardCanvas` in `GameScreen.kt` draws grid tiles (rotated), the center logo, targets,
+walls (`mh`/`mv`) and robots with the shared PNG sprites via `DrawScope.drawImageScaled`.
+Verified running on Linux Desktop (`./gradlew :composeApp:run`).
+
+### 4-5. Menu/settings parity + delete legacy UI ⏳ NOT YET
+
+These steps are intentionally **not** executed yet: the Compose menu/level/save-load/
+settings screens in `App.kt` are still placeholders (e.g. level selection and save/load
+load a random board, settings are not persisted). Deleting the working Fragment UI and
+pointing `MainActivity` at `App()` before these screens reach feature parity would leave
+the Android app non-functional. Complete step 4 (real screens + persistence + a11y)
+before performing the destructive step 5.
+
+---
+
+### Original step list (kept for reference)
+
+### (old) 2. Share the graphic assets
 
 Copy the drawables from `app/src/main/res/drawable/` into Compose Multiplatform resources:
 
