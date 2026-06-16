@@ -41,6 +41,7 @@ import kotlin.math.roundToInt
 import driftingdroids.model.Board
 import roboyard.logic.core.LevelLoader
 import roboyard.logic.core.LevelFormatParser
+import roboyard.logic.core.ComposeGameState
 import roboyard.logic.storage.getPlatformStorage
 import driftingdroids.model.SolverIDDFS
 import driftingdroids.model.Solution
@@ -200,6 +201,7 @@ fun BoardCanvas(
     onRobotMove: (robotIndex: Int, direction: Int) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
+    val gameState = remember { ComposeGameState(board) }
     var dragStartRobot by remember { mutableStateOf<Int?>(null) }
     var dragStartPos by remember { mutableStateOf<Offset?>(null) }
 
