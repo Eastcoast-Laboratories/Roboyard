@@ -34,10 +34,18 @@ fun App() {
                         board = Board.createBoardRandom(4)
                         currentScreen = Screen.Game
                     },
-                    onLevelSelection = { /* TODO */ },
-                    onSettings = { /* TODO */ },
-                    onHelp = { /* TODO */ },
-                    onCredits = { /* TODO */ }
+                    onLevelSelection = {
+                        currentScreen = Screen.LevelSelection
+                    },
+                    onSettings = {
+                        currentScreen = Screen.Settings
+                    },
+                    onHelp = {
+                        currentScreen = Screen.Help
+                    },
+                    onCredits = {
+                        currentScreen = Screen.Credits
+                    }
                 )
                 Screen.Game -> {
                     board?.let { currentBoard ->
@@ -50,6 +58,39 @@ fun App() {
                         )
                     }
                 }
+                Screen.LevelSelection -> {
+                    LevelSelectionScreen(
+                        onBack = {
+                            currentScreen = Screen.MainMenu
+                        },
+                        onLevelSelected = { levelId ->
+                            // TODO: Load specific level
+                            board = Board.createBoardRandom(4)
+                            currentScreen = Screen.Game
+                        }
+                    )
+                }
+                Screen.Settings -> {
+                    SettingsScreen(
+                        onBack = {
+                            currentScreen = Screen.MainMenu
+                        }
+                    )
+                }
+                Screen.Help -> {
+                    HelpScreen(
+                        onBack = {
+                            currentScreen = Screen.MainMenu
+                        }
+                    )
+                }
+                Screen.Credits -> {
+                    CreditsScreen(
+                        onBack = {
+                            currentScreen = Screen.MainMenu
+                        }
+                    )
+                }
             }
         }
     }
@@ -57,7 +98,11 @@ fun App() {
 
 enum class Screen {
     MainMenu,
-    Game
+    Game,
+    LevelSelection,
+    Settings,
+    Help,
+    Credits
 }
 
 @Composable
