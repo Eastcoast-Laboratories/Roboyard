@@ -79,16 +79,18 @@ The shared module is configured for iOS with:
 - **iosArm64** - iOS Device (ARM64)
 - **iosSimulatorArm64** - iOS Simulator (Apple Silicon)
 
-**iOS-specific implementations (placeholders):**
-- **IosStorage.kt** - Currently uses in-memory map, needs UserDefaults/FileManager implementation ❌
-- **IosNetworkMonitor.kt** - Currently returns true, needs NWPathMonitor implementation ❌
+**iOS-specific implementations:**
+- **IosStorage.kt** - ✅ Implemented with NSUserDefaults and NSFileManager
+- **IosNetworkMonitor.kt** - ✅ Implemented with NWPathMonitor
 
 **Next steps for iOS:**
 1. ✅ Remove Android dependencies from DriftingDroids (Board.kt)
 2. ✅ Move DriftingDroids to shared/commonMain
-3. ❌ Implement IosStorage.kt with platform.Foundation.NSUserDefaults
-4. ❌ Implement IosNetworkMonitor.kt with platform.Network.NWPathMonitor
-5. ❌ Create iOS Xcode project (SwiftUI/UIKit)
-6. ❌ Configure shared module as CocoaPods or SPM dependency
-7. ❌ Create iOS UI layer that calls shared logic
-8. ❌ Test iOS build and run on simulator
+3. ✅ Implement IosStorage.kt with platform.Foundation.NSUserDefaults
+4. ✅ Implement IosNetworkMonitor.kt with platform.Network.NWPathMonitor
+5. ❌ Create iOS Xcode project (SwiftUI/UIKit) - Requires macOS/Xcode
+6. ❌ Configure shared module as CocoaPods or SPM dependency - Requires macOS/Xcode
+7. ❌ Create iOS UI layer that calls shared logic - Requires macOS/Xcode
+8. ❌ Test iOS build and run on simulator - Requires macOS/Xcode
+
+**Note:** Steps 5-8 require macOS with Xcode to create and build iOS projects. These cannot be done on Linux.

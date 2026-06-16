@@ -144,6 +144,4 @@ sorge dafür dass überall im solver, wo eine solutionmoves abgefragt wird, erst
 
 - Wenn man in einem history Eintrag schon einmal die Tipps benutzt hat, um sich die Anzahl optimale anzeigen zu lassen. Dann soll dies auch gleich beim Start eines history Games angezeigt werden
 
-- es kann vorkommen, dass bei benutzing der history back und vor und benutzung der hints beim level complete der nächste game button zwar neu startet, aber der optimal moves hint bleibt stehen, also die grosse ahl oprtimal oves im neuen gamnoch die alte zahl bleibt hängen.
-
-- @GridGameView.java#L1-68 der kann wohl weg, denn das legacy game gibt es ja nicht mehr
+- wenn man auf "view acheivements" im Popup  drückt soll auch der spinner kommen, der im main menu kommt, wenn man auuf den achievements button drückt
