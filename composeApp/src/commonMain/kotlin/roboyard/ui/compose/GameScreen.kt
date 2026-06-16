@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -115,16 +116,35 @@ fun GameScreen(
 
         // Hint container (visible when hint is active)
         if (hintMessage != null) {
-            Box(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color(0xDD000000))
-                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                // Previous hint button
+                FancyButton(
+                    text = "◂",
+                    color = FancyButtonColor.HINT,
+                    onClick = { },
+                    modifier = Modifier.height(32.dp)
+                )
+                // Hint text
                 Text(
                     text = hintMessage ?: "",
                     color = Color.White,
-                    fontSize = 12.sp
+                    fontSize = 12.sp,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center
+                )
+                // Next hint button
+                FancyButton(
+                    text = "▸",
+                    color = FancyButtonColor.HINT,
+                    onClick = { },
+                    modifier = Modifier.height(32.dp)
                 )
             }
         }
