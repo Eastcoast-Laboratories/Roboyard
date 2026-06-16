@@ -48,6 +48,9 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+
+// Compose App Version - increment after each session
+const val COMPOSE_APP_VERSION = "v1.0"
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -711,8 +714,8 @@ fun GameInfoCard(
                     fontSize = 16.sp
                 )
                 Text(
-                    text = "",
-                    color = Color(0xFFEEEEEE),
+                    text = COMPOSE_APP_VERSION,
+                    color = Color(0xFFAAAAAA),
                     fontSize = 8.sp,
                     modifier = Modifier.padding(top = 4.dp)
                 )
