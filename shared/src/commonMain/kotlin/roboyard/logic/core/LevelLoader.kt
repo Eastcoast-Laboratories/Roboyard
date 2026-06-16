@@ -29,6 +29,7 @@ object LevelLoader {
 
     /**
      * Parses level content (board:W,H; hX,Y; vX,Y; tcolorX,Y; rcolorX,Y;) into a Board.
+     * This matches the fragment-app GameState.parseLevel logic 1:1
      */
     private fun parseLevelToBoard(content: String): Board? {
         val entries = LevelFormatParser.parseRawEntries(content)
@@ -84,7 +85,8 @@ object LevelLoader {
                 type.startsWith("r") -> {
                     val colorId = parseColorChar(type)
                     if (colorId >= 0 && colorId < numRobots) {
-                        robotPositions[colorId] = x + y * width
+                        val pos = x + y * width
+                        robotPositions[colorId] = pos
                     }
                 }
             }
