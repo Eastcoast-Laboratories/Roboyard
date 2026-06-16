@@ -31,6 +31,8 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -38,6 +40,8 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 import driftingdroids.model.Board
 import roboyard.logic.core.LevelLoader
+import roboyard.logic.core.LevelFormatParser
+import roboyard.logic.storage.getPlatformStorage
 import driftingdroids.model.SolverIDDFS
 import driftingdroids.model.Solution
 import org.jetbrains.compose.resources.imageResource
@@ -226,7 +230,11 @@ fun BoardCanvas(
     }
 
     Canvas(
-        modifier = modifier.pointerInput(Unit) {
+        modifier = modifier
+            .semantics {
+                contentDescription = "Game board with ${board.width}x${board.height} cells, ${board.robotPositions.size} robots, and ${board.goals.size} targets"
+            }
+            .pointerInput(Unit) {
             detectDragGestures(
                 onDragStart = { offset ->
                     val cellSize = min(size.width, size.height) / maxOf(board.width, board.height).toFloat()
@@ -386,4 +394,130 @@ private fun DrawScope.drawImageScaled(
         dstOffset = IntOffset(left.roundToInt(), top.roundToInt()),
         dstSize = IntSize(width.roundToInt(), height.roundToInt())
     )
+}
+
+/** Serializes a Board to a string format for saving. */
+fun serializeBoard(board: Board): String {
+    val sb = StringBuilder()
+    sb.append("board:${board.width},${board.height};")
+    
+    // Serialize walls
+    for (y in 0 until board.height) {
+        for (x in 0 until board.width) {
+            val pos = x + y * board.width
+            if (board.walls[0][pos]) sb.append("h$x,$y;")
+            if (board.walls[3][pos]) sb.append("v$x,$y;")
+        }
+    }
+    
+    // Serialize targets
+    for (goal in board.goals) {
+        val colorChar = when (goal.robotNumber) {
+            0 -> 'p'
+            1 -> 'g'
+            2 -> 'b'
+            3 -> 'y'
+            4 -> 's'
+            else -> 'm'
+        }
+        sb.append("t$colorChar${goal.x},${goal.y};")
+    }
+    
+    // Serialize robots
+    for (i in board.robotPositions.indices) {
+        val pos = board.robotPositions[i]
+        val x = pos % board.width
+        val y = pos / board.width
+        val colorChar = when (i) {
+            0 -> 'p'
+            1 -> 'g'
+            2 -> 'b'
+            3 -> 'y'
+            4 -> 's'
+            else -> 'p'
+        }
+        sb.append("r$colorChar$x,$y;")
+    }
+    
+    return sb.toString()
+}
+
+/** Deserializes a Board from a string format for loading. */
+fun deserializeBoard(data: String): Board? {
+    val entries: List<LevelFormatParser.RawEntry> = LevelFormatParser.parseRawEntries(data)
+    var width = 14
+    var height = 14
+    
+    // First pass: extract board dimensions
+    for (entry in entries) {
+        if (entry.type == "board") {
+            val data = entry.data
+            val cleanData = if (data.startsWith(":")) data.substring(1) else data
+            val parts = cleanData.split(",").map { it.trim() }
+            if (parts.size == 2) {
+                width = parts[0].toIntOrNull() ?: 14
+                height = parts[1].toIntOrNull() ?: 14
+            }
+            break
+        }
+    }
+    
+    val board = Board.createBoardFreestyle(null, width, height, 4) ?: return null
+    val numRobots = 4
+    val robotPositions = IntArray(numRobots) { -1 }
+    var robotIndex = 0
+    
+    // Second pass: parse walls, targets, robots
+    for (entry in entries) {
+        val type = entry.type
+        val data = entry.data
+        
+        if (type == "board") continue
+        
+        val parts = data.split(",").map { it.trim() }
+        if (parts.size < 2) continue
+        val x = parts[0].toIntOrNull() ?: continue
+        val y = parts[1].toIntOrNull() ?: continue
+        
+        when {
+            type == "h" || type == "mh" -> {
+                board.setWall(x, y, Board.NORTH, true)
+                if (y > 0) board.setWall(x, y - 1, Board.SOUTH, true)
+            }
+            type == "v" || type == "mv" -> {
+                board.setWall(x, y, Board.WEST, true)
+                if (x > 0) board.setWall(x - 1, y, Board.EAST, true)
+            }
+            type.startsWith("t") -> {
+                val colorId = parseColorChar(type)
+                if (colorId >= -1) {
+                    val pos = x + y * width
+                    board.addGoal(pos, colorId, 0)
+                }
+            }
+            type.startsWith("r") -> {
+                val colorId = parseColorChar(type)
+                if (colorId >= 0 && robotIndex < numRobots) {
+                    robotPositions[robotIndex] = x + y * width
+                    robotIndex++
+                }
+            }
+        }
+    }
+    
+    board.setRobots(robotPositions)
+    return board
+}
+
+/** Parses color character (p/g/b/y/s) to robot index (0-4). */
+private fun parseColorChar(type: String): Int {
+    val char = if (type.length == 2) type[1] else type[0]
+    return when (char) {
+        'p' -> 0 // pink
+        'g' -> 1 // green
+        'b' -> 2 // blue
+        'y' -> 3 // yellow
+        's' -> 4 // silver
+        else -> -1
+    }
 }

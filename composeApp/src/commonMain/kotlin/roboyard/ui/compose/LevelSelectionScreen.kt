@@ -22,6 +22,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 
 data class Level(val id: Int, val name: String, val difficulty: String, val completed: Boolean = false)
@@ -44,7 +46,12 @@ fun LevelSelectionScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Button(onClick = onBack) {
+                Button(
+                    onClick = onBack,
+                    modifier = Modifier.semantics {
+                        contentDescription = "Back to main menu"
+                    }
+                ) {
                     Text("Back")
                 }
                 Text(

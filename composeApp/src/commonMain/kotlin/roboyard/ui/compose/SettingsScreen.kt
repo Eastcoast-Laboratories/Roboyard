@@ -15,21 +15,38 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import roboyard.logic.storage.getPlatformStorage
 
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit = {}
 ) {
+    val storage = remember { getPlatformStorage() }
     var difficulty by remember { mutableStateOf("Beginner") }
     var robotCount by remember { mutableStateOf(4) }
     var soundEnabled by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        difficulty = storage.getString("difficulty", "Beginner") ?: "Beginner"
+        robotCount = storage.getInt("robotCount", 4)
+        soundEnabled = storage.getBoolean("soundEnabled", true)
+    }
+
+    LaunchedEffect(difficulty, robotCount, soundEnabled) {
+        storage.putString("difficulty", difficulty)
+        storage.putInt("robotCount", robotCount)
+        storage.putBoolean("soundEnabled", soundEnabled)
+    }
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -42,7 +59,12 @@ fun SettingsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Button(onClick = onBack) {
+                Button(
+                    onClick = onBack,
+                    modifier = Modifier.semantics {
+                        contentDescription = "Back to main menu"
+                    }
+                ) {
                     Text("Back")
                 }
                 Text(

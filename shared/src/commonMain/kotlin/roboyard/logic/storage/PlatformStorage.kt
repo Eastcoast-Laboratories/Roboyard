@@ -28,3 +28,8 @@ interface PlatformStorage {
     fun readBitmap(fileName: String): Any?
     fun writeBitmap(fileName: String, bitmap: Any?): Boolean
 }
+
+/**
+ * Factory function to get the platform-specific storage implementation.
+ */
+expect fun getPlatformStorage(): PlatformStorage

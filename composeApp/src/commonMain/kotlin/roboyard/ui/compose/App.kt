@@ -24,6 +24,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import driftingdroids.model.Board
 import roboyard.logic.core.LevelLoader
@@ -121,9 +123,8 @@ fun App() {
                         onBack = {
                             currentScreen = Screen.MainMenu
                         },
-                        onLoadGame = { gameId ->
-                            // TODO: Load specific game
-                            board = Board.createBoardRandom(4)
+                        onLoadGame = { loadedBoard ->
+                            board = loadedBoard
                             currentScreen = Screen.Game
                         }
                     )
@@ -204,6 +205,9 @@ fun MenuButton(text: String, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp)
+            .semantics {
+                contentDescription = text
+            }
     ) {
         Text(text = text, style = MaterialTheme.typography.titleMedium)
     }
