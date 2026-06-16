@@ -22,14 +22,43 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import kotlin.math.min
+import kotlin.math.roundToInt
 import driftingdroids.model.Board
 import driftingdroids.model.SolverIDDFS
 import driftingdroids.model.Solution
+import org.jetbrains.compose.resources.imageResource
+import roboyard.composeapp.generated.resources.Res
+import roboyard.composeapp.generated.resources.grid_tiles
+import roboyard.composeapp.generated.resources.roboyard
+import roboyard.composeapp.generated.resources.mh
+import roboyard.composeapp.generated.resources.mv
+import roboyard.composeapp.generated.resources.robot_pink_left
+import roboyard.composeapp.generated.resources.robot_pink_right
+import roboyard.composeapp.generated.resources.robot_green_left
+import roboyard.composeapp.generated.resources.robot_green_right
+import roboyard.composeapp.generated.resources.robot_blue_left
+import roboyard.composeapp.generated.resources.robot_blue_right
+import roboyard.composeapp.generated.resources.robot_yellow_left
+import roboyard.composeapp.generated.resources.robot_yellow_right
+import roboyard.composeapp.generated.resources.robot_silver_left
+import roboyard.composeapp.generated.resources.robot_silver_right
+import roboyard.composeapp.generated.resources.target_pink
+import roboyard.composeapp.generated.resources.target_green
+import roboyard.composeapp.generated.resources.target_blue
+import roboyard.composeapp.generated.resources.target_yellow
+import roboyard.composeapp.generated.resources.target_silver
+import roboyard.composeapp.generated.resources.target_multi
 
 @Composable
 fun GameScreen(
@@ -167,6 +196,32 @@ fun BoardCanvas(
     var dragStartRobot by remember { mutableStateOf<Int?>(null) }
     var dragStartPos by remember { mutableStateOf<Offset?>(null) }
 
+    // Load shared PNG assets (same drawables as the Android GameGridView)
+    val gridTile = imageResource(Res.drawable.grid_tiles)
+    val centerLogo = imageResource(Res.drawable.roboyard)
+    val wallH = imageResource(Res.drawable.mh)
+    val wallV = imageResource(Res.drawable.mv)
+    val robotSprites = listOf(
+        imageResource(Res.drawable.robot_pink_right),
+        imageResource(Res.drawable.robot_green_right),
+        imageResource(Res.drawable.robot_blue_right),
+        imageResource(Res.drawable.robot_yellow_right),
+        imageResource(Res.drawable.robot_silver_right)
+    )
+    val targetSprites = listOf(
+        imageResource(Res.drawable.target_pink),
+        imageResource(Res.drawable.target_green),
+        imageResource(Res.drawable.target_blue),
+        imageResource(Res.drawable.target_yellow),
+        imageResource(Res.drawable.target_silver)
+    )
+    val targetMulti = imageResource(Res.drawable.target_multi)
+
+    // Per-tile rotations (0/90/180/270) chosen once, like the Android renderer
+    val tileRotations = remember(board.width, board.height) {
+        IntArray(board.width * board.height) { (it * 90) % 360 }
+    }
+
     Canvas(
         modifier = modifier.pointerInput(Unit) {
             detectDragGestures(
@@ -232,123 +287,100 @@ fun BoardCanvas(
         val offsetX = (size.width - board.width * cellSize) / 2
         val offsetY = (size.height - board.height * cellSize) / 2
 
-        // Draw grid cells
+        // 1. Grid tiles (rotated per cell, like gridTileDrawable in GameGridView)
         for (y in 0 until board.height) {
             for (x in 0 until board.width) {
                 val cellX = offsetX + x * cellSize
                 val cellY = offsetY + y * cellSize
-
-                // Draw cell background
-                drawRect(
-                    color = Color(0xFF3C3C3C),
-                    topLeft = Offset(cellX, cellY),
-                    size = androidx.compose.ui.geometry.Size(cellSize, cellSize)
-                )
-
-                // Draw cell border
-                drawRect(
-                    color = Color(0xFF4C4C4C),
-                    topLeft = Offset(cellX, cellY),
-                    size = androidx.compose.ui.geometry.Size(cellSize, cellSize),
-                    style = Stroke(width = 1.dp.toPx())
-                )
+                val rotation = tileRotations[x + y * board.width].toFloat()
+                rotate(rotation, pivot = Offset(cellX + cellSize / 2, cellY + cellSize / 2)) {
+                    drawImageScaled(gridTile, cellX, cellY, cellSize, cellSize)
+                }
             }
         }
 
-        // Draw walls
+        // 2. Center logo in the 2x2 carree (matches backgroundLogo placement)
+        val centerX0 = board.width / 2 - 1
+        val centerY0 = board.height / 2 - 1
+        if (centerX0 >= 0 && centerY0 >= 0) {
+            drawImageScaled(
+                centerLogo,
+                offsetX + centerX0 * cellSize,
+                offsetY + centerY0 * cellSize,
+                cellSize * 2,
+                cellSize * 2
+            )
+        }
+
+        // 3. Targets (drawn before robots so robots sit on top)
+        for (goal in board.goals) {
+            val sprite = if (goal.robotNumber in targetSprites.indices) {
+                targetSprites[goal.robotNumber]
+            } else {
+                targetMulti
+            }
+            drawImageScaled(
+                sprite,
+                offsetX + goal.x * cellSize,
+                offsetY + goal.y * cellSize,
+                cellSize,
+                cellSize
+            )
+        }
+
+        // 4. Walls using the mh/mv drawables (draw NORTH+WEST per cell, plus outer SOUTH/EAST)
+        val wallThickness = cellSize * 0.18f
         for (y in 0 until board.height) {
             for (x in 0 until board.width) {
                 val position = x + y * board.width
                 val cellX = offsetX + x * cellSize
                 val cellY = offsetY + y * cellSize
-
-                // North wall
-                if (board.walls[0][position]) {
-                    drawLine(
-                        color = Color(0xFF888888),
-                        start = Offset(cellX, cellY),
-                        end = Offset(cellX + cellSize, cellY),
-                        strokeWidth = 3.dp.toPx()
-                    )
+                if (board.walls[0][position]) { // NORTH
+                    drawImageScaled(wallH, cellX, cellY - wallThickness / 2, cellSize, wallThickness)
                 }
-                // East wall
-                if (board.walls[1][position]) {
-                    drawLine(
-                        color = Color(0xFF888888),
-                        start = Offset(cellX + cellSize, cellY),
-                        end = Offset(cellX + cellSize, cellY + cellSize),
-                        strokeWidth = 3.dp.toPx()
-                    )
+                if (board.walls[3][position]) { // WEST
+                    drawImageScaled(wallV, cellX - wallThickness / 2, cellY, wallThickness, cellSize)
                 }
-                // South wall
-                if (board.walls[2][position]) {
-                    drawLine(
-                        color = Color(0xFF888888),
-                        start = Offset(cellX, cellY + cellSize),
-                        end = Offset(cellX + cellSize, cellY + cellSize),
-                        strokeWidth = 3.dp.toPx()
-                    )
+                if (y == board.height - 1 && board.walls[2][position]) { // outer SOUTH
+                    drawImageScaled(wallH, cellX, cellY + cellSize - wallThickness / 2, cellSize, wallThickness)
                 }
-                // West wall
-                if (board.walls[3][position]) {
-                    drawLine(
-                        color = Color(0xFF888888),
-                        start = Offset(cellX, cellY),
-                        end = Offset(cellX, cellY + cellSize),
-                        strokeWidth = 3.dp.toPx()
-                    )
+                if (x == board.width - 1 && board.walls[1][position]) { // outer EAST
+                    drawImageScaled(wallV, cellX + cellSize - wallThickness / 2, cellY, wallThickness, cellSize)
                 }
             }
         }
 
-        // Draw robots
+        // 5. Robots using the color sprites
         for (i in board.robotPositions.indices) {
             val position = board.robotPositions[i]
             val robotX = position % board.width
             val robotY = position / board.width
-            val centerX = offsetX + robotX * cellSize + cellSize / 2
-            val centerY = offsetY + robotY * cellSize + cellSize / 2
-            val radius = cellSize * 0.35f
-
-            val robotColor = when (i) {
-                0 -> Color(0xFFE74C3C) // Red
-                1 -> Color(0xFF2ECC71) // Green
-                2 -> Color(0xFF3498DB) // Blue
-                3 -> Color(0xFFF1C40F) // Yellow
-                4 -> Color(0xFF9B59B6) // Silver/Purple
-                else -> Color(0xFF95A5A6)
-            }
-
-            drawCircle(
-                color = robotColor,
-                radius = radius,
-                center = Offset(centerX, centerY)
-            )
-        }
-
-        // Draw goal
-        val goal = board.getGoal()
-        if (goal != null) {
-            val goalX = offsetX + goal.x * cellSize + cellSize / 2
-            val goalY = offsetY + goal.y * cellSize + cellSize / 2
-            val goalRadius = cellSize * 0.25f
-
-            val goalColor = when (goal.robotNumber) {
-                0 -> Color(0xFFE74C3C)
-                1 -> Color(0xFF2ECC71)
-                2 -> Color(0xFF3498DB)
-                3 -> Color(0xFFF1C40F)
-                4 -> Color(0xFF9B59B6)
-                else -> Color(0xFF95A5A6)
-            }
-
-            // Draw goal as a hollow circle with the robot's color
-            drawCircle(
-                color = goalColor,
-                radius = goalRadius,
-                center = Offset(goalX, goalY),
-                style = Stroke(width = 2.dp.toPx())
+            val sprite = if (i in robotSprites.indices) robotSprites[i] else robotSprites.last()
+            val pad = cellSize * 0.08f
+            drawImageScaled(
+                sprite,
+                offsetX + robotX * cellSize + pad,
+                offsetY + robotY * cellSize + pad,
+                cellSize - 2 * pad,
+                cellSize - 2 * pad
             )
         }
     }
+}
+
+/** Draws an [ImageBitmap] scaled into the given destination rectangle. */
+private fun DrawScope.drawImageScaled(
+    image: ImageBitmap,
+    left: Float,
+    top: Float,
+    width: Float,
+    height: Float
+) {
+    drawImage(
+        image = image,
+        srcOffset = IntOffset.Zero,
+        srcSize = IntSize(image.width, image.height),
+        dstOffset = IntOffset(left.roundToInt(), top.roundToInt()),
+        dstSize = IntSize(width.roundToInt(), height.roundToInt())
+    )
 }
