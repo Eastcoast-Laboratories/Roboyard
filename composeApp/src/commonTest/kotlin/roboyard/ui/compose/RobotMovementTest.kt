@@ -152,6 +152,8 @@ class RobotMovementTest {
         board.setRobots(intArrayOf(12)) // Robot at (2, 2)
         board.setWall(2, 0, Board.NORTH, true) // Wall north of robot at (2, 0)
 
+        println("[TEST] Initial robot position: (${board.robotPositions[0] % board.width}, ${board.robotPositions[0] / board.width})")
+
         // Simulate fragment-app gesture logic
         var currentBoard = board
 
@@ -162,27 +164,37 @@ class RobotMovementTest {
         var robotMoveInitiated = false
         var touchedRobot: Int? = 0 // Robot 0 is touched
 
+        println("[TEST] Gesture 1: ACTION_DOWN - Robot ${touchedRobot} touched")
+
         // ACTION_MOVE: Calculate distance and move robot
         val deltaX = 0f
         val deltaY = -100f // Swipe north
         val distance = kotlin.math.sqrt(deltaX * deltaX + deltaY * deltaY)
         val MIN_SWIPE_DISTANCE = 30f
 
+        println("[TEST] Gesture 1: ACTION_MOVE - Distance: $distance, Threshold: $MIN_SWIPE_DISTANCE")
+
         if (distance >= MIN_SWIPE_DISTANCE && !robotMoveInitiated) {
             robotMoveInitiated = true
             robotActivatedBySwipe = false
 
             val direction = if (deltaY < 0) Board.NORTH else Board.SOUTH
+            println("[TEST] Gesture 1: ACTION_MOVE - Moving robot $touchedRobot direction: $direction (NORTH)")
+
             val newBoard = moveRobot(currentBoard, touchedRobot!!, direction)
 
             if (newBoard != null) {
                 hasMovedRobotInCurrentGesture = true
                 currentBoard = newBoard
 
+                println("[TEST] Gesture 1: ACTION_MOVE - Move succeeded. New position: (${currentBoard.robotPositions[0] % currentBoard.width}, ${currentBoard.robotPositions[0] / currentBoard.width})")
+
                 // Reset all tracking variables after successful move (matching fragment-app)
                 touchedRobot = null
                 robotMoveInitiated = false
                 robotActivatedBySwipe = false
+            } else {
+                println("[TEST] Gesture 1: ACTION_MOVE - Move failed")
             }
         }
 
@@ -192,8 +204,11 @@ class RobotMovementTest {
         robotMoveInitiated = false
         robotActivatedBySwipe = false
 
+        println("[TEST] Gesture 1: ACTION_UP - Tracking variables reset")
+
         // Verify first move succeeded
         assertEquals(2, currentBoard.robotPositions[0], "Robot should move to (2, 0)")
+        println("[TEST] Gesture 1: Verified - Robot at (2, 0)")
 
         // Gesture 2: ACTION_DOWN -> ACTION_MOVE (east) -> ACTION_UP
         // ACTION_DOWN: Reset tracking variables
@@ -202,26 +217,36 @@ class RobotMovementTest {
         robotMoveInitiated = false
         touchedRobot = 0 // Robot 0 is touched again
 
+        println("[TEST] Gesture 2: ACTION_DOWN - Robot ${touchedRobot} touched")
+
         // ACTION_MOVE: Calculate distance and move robot
         val deltaX2 = 100f // Swipe east
         val deltaY2 = 0f
         val distance2 = kotlin.math.sqrt(deltaX2 * deltaX2 + deltaY2 * deltaY2)
+
+        println("[TEST] Gesture 2: ACTION_MOVE - Distance: $distance2, Threshold: $MIN_SWIPE_DISTANCE")
 
         if (distance2 >= MIN_SWIPE_DISTANCE && !robotMoveInitiated) {
             robotMoveInitiated = true
             robotActivatedBySwipe = false
 
             val direction = if (deltaX2 > 0) Board.EAST else Board.WEST
+            println("[TEST] Gesture 2: ACTION_MOVE - Moving robot $touchedRobot direction: $direction (EAST)")
+
             val newBoard = moveRobot(currentBoard, touchedRobot!!, direction)
 
             if (newBoard != null) {
                 hasMovedRobotInCurrentGesture = true
                 currentBoard = newBoard
 
+                println("[TEST] Gesture 2: ACTION_MOVE - Move succeeded. New position: (${currentBoard.robotPositions[0] % currentBoard.width}, ${currentBoard.robotPositions[0] / currentBoard.width})")
+
                 // Reset all tracking variables after successful move (matching fragment-app)
                 touchedRobot = null
                 robotMoveInitiated = false
                 robotActivatedBySwipe = false
+            } else {
+                println("[TEST] Gesture 2: ACTION_MOVE - Move failed")
             }
         }
 
@@ -231,8 +256,11 @@ class RobotMovementTest {
         robotMoveInitiated = false
         robotActivatedBySwipe = false
 
+        println("[TEST] Gesture 2: ACTION_UP - Tracking variables reset")
+
         // Verify second move succeeded (robot slides to right edge at (4, 0))
         assertEquals(4, currentBoard.robotPositions[0], "Robot should move to (4, 0)")
+        println("[TEST] Gesture 2: Verified - Robot at (4, 0)")
 
         // Gesture 3: ACTION_DOWN -> ACTION_MOVE (south) -> ACTION_UP
         // ACTION_DOWN: Reset tracking variables
@@ -241,26 +269,36 @@ class RobotMovementTest {
         robotMoveInitiated = false
         touchedRobot = 0 // Robot 0 is touched again
 
+        println("[TEST] Gesture 3: ACTION_DOWN - Robot ${touchedRobot} touched")
+
         // ACTION_MOVE: Calculate distance and move robot
         val deltaX3 = 0f
         val deltaY3 = 100f // Swipe south
         val distance3 = kotlin.math.sqrt(deltaX3 * deltaX3 + deltaY3 * deltaY3)
+
+        println("[TEST] Gesture 3: ACTION_MOVE - Distance: $distance3, Threshold: $MIN_SWIPE_DISTANCE")
 
         if (distance3 >= MIN_SWIPE_DISTANCE && !robotMoveInitiated) {
             robotMoveInitiated = true
             robotActivatedBySwipe = false
 
             val direction = if (deltaY3 > 0) Board.SOUTH else Board.NORTH
+            println("[TEST] Gesture 3: ACTION_MOVE - Moving robot $touchedRobot direction: $direction (SOUTH)")
+
             val newBoard = moveRobot(currentBoard, touchedRobot!!, direction)
 
             if (newBoard != null) {
                 hasMovedRobotInCurrentGesture = true
                 currentBoard = newBoard
 
+                println("[TEST] Gesture 3: ACTION_MOVE - Move succeeded. New position: (${currentBoard.robotPositions[0] % currentBoard.width}, ${currentBoard.robotPositions[0] / currentBoard.width})")
+
                 // Reset all tracking variables after successful move (matching fragment-app)
                 touchedRobot = null
                 robotMoveInitiated = false
                 robotActivatedBySwipe = false
+            } else {
+                println("[TEST] Gesture 3: ACTION_MOVE - Move failed")
             }
         }
 
@@ -270,8 +308,12 @@ class RobotMovementTest {
         robotMoveInitiated = false
         robotActivatedBySwipe = false
 
+        println("[TEST] Gesture 3: ACTION_UP - Tracking variables reset")
+
         // Verify third move succeeded (robot slides to bottom edge at (4, 4))
         assertEquals(24, currentBoard.robotPositions[0], "Robot should move to (4, 4)")
+        println("[TEST] Gesture 3: Verified - Robot at (4, 4)")
+        println("[TEST] Test completed successfully - Robot moved 3 times in sequence")
     }
 
     /**
