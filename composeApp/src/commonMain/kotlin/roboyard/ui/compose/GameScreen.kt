@@ -89,7 +89,7 @@ import roboyard.logic.core.Preferences
 import roboyard.logic.storage.PlatformStorage
 
 // Compose App Version - increment after each session
-const val COMPOSE_APP_VERSION = "v1.7"
+const val COMPOSE_APP_VERSION = "v1.8"
 
 // Helper function to format time as MM:SS
 fun formatTime(elapsedTimeMs: Long): String {
@@ -178,7 +178,7 @@ fun GameScreen(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(currentBoard.width.toFloat() / currentBoard.height.toFloat())
+                .aspectRatio(board.width.toFloat() / board.height.toFloat())
                 .shadow(elevation = 20.dp, shape = RoundedCornerShape(0.dp))
         )
 
@@ -393,13 +393,13 @@ fun GameScreen(
                         val storage = Preferences.storageProvider?.invoke()
                         if (storage != null) {
                             val saveData = buildString {
-                                appendLine("width:${currentBoard.width}")
-                                appendLine("height:${currentBoard.height}")
+                                appendLine("width:${board.width}")
+                                appendLine("height:${board.height}")
                                 appendLine("moveCount:$moveCount")
                                 appendLine("squaresMoved:$squaresMoved")
-                                appendLine("robots:${currentBoard.robotPositions.joinToString(",")}")
+                                appendLine("robots:${board.robotPositions.joinToString(",")}")
                                 // Save goals
-                                for (goal in currentBoard.goals) {
+                                for (goal in board.goals) {
                                     appendLine("goal:${goal.position},${goal.robotNumber}")
                                 }
                             }
@@ -808,6 +808,9 @@ fun BoardCanvas(
     modifier: Modifier = Modifier
 ) {
     val gameState = remember(board) { ComposeGameState(board) }
+    // Use derivedStateOf to ensure recomposition when board changes
+    val currentBoard by remember { derivedStateOf { board } }
+
     // Tracking variables matching fragment-app GameGridView
     var hasMovedRobotInCurrentGesture by remember { mutableStateOf(false) }
     var lastMoveX by remember { mutableStateOf(-1) }
@@ -860,9 +863,9 @@ fun BoardCanvas(
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = { offset ->
-                        val cellSize = min(size.width, size.height) / maxOf(board.width, board.height).toFloat()
-                        val offsetX = (size.width - board.width * cellSize) / 2
-                        val offsetY = (size.height - board.height * cellSize) / 2
+                        val cellSize = min(size.width, size.height) / maxOf(currentBoard.width, currentBoard.height).toFloat()
+                        val offsetX = (size.width - currentBoard.width * cellSize) / 2
+                        val offsetY = (size.height - currentBoard.height * cellSize) / 2
 
                         // ACTION_DOWN logic from fragment-app
                         hasMovedRobotInCurrentGesture = false
@@ -881,16 +884,19 @@ fun BoardCanvas(
                         touchStartGridY = gridY
 
                         println("[UI] ACTION_DOWN - Start touch: ($startTouchX, $startTouchY), Grid: ($gridX, $gridY)")
+                        println("[UI] ACTION_DOWN - Robot positions: ${currentBoard.robotPositions.map { "${it % currentBoard.width},${it / currentBoard.width}" }}")
 
                         // Check if a robot was touched at the start (matching fragment-app)
                         var foundRobot = false
-                        for (i in board.robotPositions.indices) {
-                            val position = board.robotPositions[i]
-                            val robotX = position % board.width
-                            val robotY = position / board.width
+                        for (i in currentBoard.robotPositions.indices) {
+                            val position = currentBoard.robotPositions[i]
+                            val robotX = position % currentBoard.width
+                            val robotY = position / currentBoard.width
                             val centerX = offsetX + robotX * cellSize + cellSize / 2
                             val centerY = offsetY + robotY * cellSize + cellSize / 2
                             val radius = cellSize * 0.35f
+
+                            println("[UI] ACTION_DOWN - Checking robot $i at ($robotX, $robotY), center: ($centerX, $centerY), radius: $radius, touch: ($startTouchX, $startTouchY)")
 
                             if (offset.x >= centerX - radius && offset.x <= centerX + radius &&
                                 offset.y >= centerY - radius && offset.y <= centerY + radius) {
@@ -907,19 +913,19 @@ fun BoardCanvas(
                         }
                     },
                     onDrag = { change, dragAmount ->
-                        val cellSize = min(size.width, size.height) / maxOf(board.width, board.height).toFloat()
-                        val offsetX = (size.width - board.width * cellSize) / 2
-                        val offsetY = (size.height - board.height * cellSize) / 2
+                        val cellSize = min(size.width, size.height) / maxOf(currentBoard.width, currentBoard.height).toFloat()
+                        val offsetX = (size.width - currentBoard.width * cellSize) / 2
+                        val offsetY = (size.height - currentBoard.height * cellSize) / 2
                         val gridX = ((change.position.x - offsetX) / cellSize).toInt()
                         val gridY = ((change.position.y - offsetY) / cellSize).toInt()
 
                         // ACTION_MOVE logic from fragment-app
                         // Check if we just moved over a robot and none was selected before
                         var robotAtCurrentPos: Int? = null
-                        for (i in board.robotPositions.indices) {
-                            val position = board.robotPositions[i]
-                            val robotX = position % board.width
-                            val robotY = position / board.width
+                        for (i in currentBoard.robotPositions.indices) {
+                            val position = currentBoard.robotPositions[i]
+                            val robotX = position % currentBoard.width
+                            val robotY = position / currentBoard.width
                             if (robotX == gridX && robotY == gridY) {
                                 robotAtCurrentPos = i
                                 break
@@ -1009,9 +1015,9 @@ fun BoardCanvas(
                         }
                     },
                     onDragEnd = {
-                        val cellSize = min(size.width, size.height) / maxOf(board.width, board.height).toFloat()
-                        val offsetX = (size.width - board.width * cellSize) / 2
-                        val offsetY = (size.height - board.height * cellSize) / 2
+                        val cellSize = min(size.width, size.height) / maxOf(currentBoard.width, currentBoard.height).toFloat()
+                        val offsetX = (size.width - currentBoard.width * cellSize) / 2
+                        val offsetY = (size.height - currentBoard.height * cellSize) / 2
 
                         // ACTION_UP logic from fragment-app
                         println("[UI] ACTION_UP - touchedRobot: $touchedRobot, hasMovedRobotInCurrentGesture: $hasMovedRobotInCurrentGesture")
@@ -1037,18 +1043,18 @@ fun BoardCanvas(
                 )
             }
     ) {
-        val cellSize = min(size.width, size.height) / maxOf(board.width, board.height).toFloat()
-        val offsetX = (size.width - board.width * cellSize) / 2
-        val offsetY = (size.height - board.height * cellSize) / 2
+        val cellSize = min(size.width, size.height) / maxOf(currentBoard.width, currentBoard.height).toFloat()
+        val offsetX = (size.width - currentBoard.width * cellSize) / 2
+        val offsetY = (size.height - currentBoard.height * cellSize) / 2
 
         // 1. Grid tiles (rotated per cell, like gridTileDrawable in GameGridView)
         //    plus the green grid stroke around each cell (#4ae600, 3px stroke)
         val gridStrokeColor = Color(0xFF4AE600)
-        for (y in 0 until board.height) {
-            for (x in 0 until board.width) {
+        for (y in 0 until currentBoard.height) {
+            for (x in 0 until currentBoard.width) {
                 val cellX = offsetX + x * cellSize
                 val cellY = offsetY + y * cellSize
-                val rotation = tileRotations[x + y * board.width].toFloat()
+                val rotation = tileRotations[x + y * currentBoard.width].toFloat()
                 rotate(rotation, pivot = Offset(cellX + cellSize / 2, cellY + cellSize / 2)) {
                     drawImageScaled(gridTile, cellX, cellY, cellSize, cellSize)
                 }
@@ -1063,8 +1069,8 @@ fun BoardCanvas(
         }
 
         // 2. Center logo in the 2x2 carree (matches backgroundLogo placement)
-        val centerX0 = board.width / 2 - 1
-        val centerY0 = board.height / 2 - 1
+        val centerX0 = currentBoard.width / 2 - 1
+        val centerY0 = currentBoard.height / 2 - 1
         if (centerX0 >= 0 && centerY0 >= 0) {
             drawImageScaled(
                 centerLogo,
@@ -1076,7 +1082,7 @@ fun BoardCanvas(
         }
 
         // 3. Targets (drawn before robots so robots sit on top)
-        for (goal in board.goals) {
+        for (goal in currentBoard.goals) {
             val sprite = if (goal.robotNumber in targetSprites.indices) {
                 targetSprites[goal.robotNumber]
             } else {
@@ -1095,15 +1101,15 @@ fun BoardCanvas(
         //    (0.6 * cellSize) and overhang (0.24 * cellSize), skipping the center cross.
         val wallThickness = cellSize * 0.6f
         val wallOffset = cellSize * 0.24f
-        val cWallX = board.width / 2 - 1
-        val cWallY = board.height / 2 - 1
-        for (y in 0 until board.height) {
-            for (x in 0 until board.width) {
-                val position = x + y * board.width
+        val cWallX = currentBoard.width / 2 - 1
+        val cWallY = currentBoard.height / 2 - 1
+        for (y in 0 until currentBoard.height) {
+            for (x in 0 until currentBoard.width) {
+                val position = x + y * currentBoard.width
                 val cellX = offsetX + x * cellSize
                 val cellY = offsetY + y * cellSize
                 // NORTH (horizontal wall at top edge of cell x,y)
-                if (board.walls[0][position]) {
+                if (currentBoard.walls[0][position]) {
                     val isCenter = (y == cWallY + 1 && (x == cWallX || x == cWallX + 1))
                     if (!isCenter) {
                         drawImageScaled(
@@ -1116,7 +1122,7 @@ fun BoardCanvas(
                     }
                 }
                 // WEST (vertical wall at left edge of cell x,y)
-                if (board.walls[3][position]) {
+                if (currentBoard.walls[3][position]) {
                     val isCenter = (x == cWallX + 1 && (y == cWallY || y == cWallY + 1))
                     if (!isCenter) {
                         drawImageScaled(
@@ -1129,7 +1135,7 @@ fun BoardCanvas(
                     }
                 }
                 // outer SOUTH
-                if (y == board.height - 1 && board.walls[2][position]) {
+                if (y == currentBoard.height - 1 && currentBoard.walls[2][position]) {
                     drawImageScaled(
                         wallH,
                         cellX - wallOffset,
@@ -1139,7 +1145,7 @@ fun BoardCanvas(
                     )
                 }
                 // outer EAST
-                if (x == board.width - 1 && board.walls[1][position]) {
+                if (x == currentBoard.width - 1 && currentBoard.walls[1][position]) {
                     drawImageScaled(
                         wallV,
                         cellX + cellSize - wallThickness / 2,
@@ -1154,10 +1160,10 @@ fun BoardCanvas(
         // 5. Robots using the color sprites at DEFAULT_ROBOT_SCALE (1.1 * cellSize)
         val robotScale = 1.1f
         val robotInset = (robotScale - 1f) * cellSize / 2f
-        for (i in board.robotPositions.indices) {
-            val position = board.robotPositions[i]
-            val robotX = position % board.width
-            val robotY = position / board.width
+        for (i in currentBoard.robotPositions.indices) {
+            val position = currentBoard.robotPositions[i]
+            val robotX = position % currentBoard.width
+            val robotY = position / currentBoard.width
             val sprite = if (i in robotSprites.indices) robotSprites[i] else robotSprites.last()
             drawImageScaled(
                 sprite,
