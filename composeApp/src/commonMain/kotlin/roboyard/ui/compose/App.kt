@@ -49,6 +49,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import driftingdroids.model.Board
 import roboyard.logic.core.LevelLoader
+import roboyard.logic.core.GameLogic
+import roboyard.logic.core.Preferences
 
 @Composable
 fun App() {
@@ -56,12 +58,28 @@ fun App() {
     var board by remember { mutableStateOf<Board?>(null) }
     var selectedLevelId by remember { mutableStateOf(1) }
 
+    // Initialize GameLogic for random game generation
+    val gameLogic = remember {
+        GameLogic(
+            Preferences.boardSizeWidth,
+            Preferences.boardSizeHeight,
+            Preferences.difficulty
+        )
+    }
+
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
             when (currentScreen) {
                 Screen.MainMenu -> MainMenuScreen(
                     onNewRandomGame = {
-                        board = Board.createBoardRandom(4)
+                        // Use GameLogic to generate random game map
+                        val gridElements = gameLogic.generateGameMap(null)
+                        board = if (gridElements != null) {
+                            gridElementsToBoard(gridElements)
+                        } else {
+                            // Fallback to standard random board if GameLogic fails
+                            Board.createBoardRandom(4)
+                        }
                         currentScreen = Screen.Game
                     },
                     onLevelSelection = {
@@ -90,6 +108,16 @@ fun App() {
                             onBack = {
                                 currentScreen = Screen.MainMenu
                                 board = null
+                            },
+                            onNewGame = {
+                                // Use GameLogic to generate random game map
+                                val gridElements = gameLogic.generateGameMap(null)
+                                board = if (gridElements != null) {
+                                    gridElementsToBoard(gridElements)
+                                } else {
+                                    // Fallback to standard random board if GameLogic fails
+                                    Board.createBoardRandom(4)
+                                }
                             }
                         )
                     }

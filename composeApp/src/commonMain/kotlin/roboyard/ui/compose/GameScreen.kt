@@ -80,18 +80,24 @@ import roboyard.composeapp.generated.resources.target_blue
 import roboyard.composeapp.generated.resources.target_yellow
 import roboyard.composeapp.generated.resources.target_silver
 import roboyard.composeapp.generated.resources.target_multi
+import roboyard.logic.core.GridElement
+import roboyard.logic.core.GameLogic
+import roboyard.logic.core.Preferences
 
 @Composable
 fun GameScreen(
     board: Board,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onNewGame: () -> Unit = {}
 ) {
-    var moveCount by remember { mutableIntStateOf(0) }
-    var squaresMoved by remember { mutableIntStateOf(0) }
-    var currentBoard by remember { mutableStateOf(board) }
-    val startBoard = remember { Board.Companion.createClone(board).also { it.setRobots(board.robotPositions.copyOf()) } }
-    var hintMessage by remember { mutableStateOf<String?>(null) }
+    var moveCount by remember(board) { mutableIntStateOf(0) }
+    var squaresMoved by remember(board) { mutableIntStateOf(0) }
+    var currentBoard by remember(board) { mutableStateOf(board) }
+    val startBoard = remember(board) { Board.Companion.createClone(board).also { it.setRobots(board.robotPositions.copyOf()) } }
+    var hintMessage by remember(board) { mutableStateOf<String?>(null) }
+    var gameWon by remember(board) { mutableStateOf(false) }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -101,11 +107,23 @@ fun GameScreen(
         BoardCanvas(
             board = currentBoard,
             onRobotMove = { robotIndex, direction ->
-                val newBoard = moveRobot(currentBoard, robotIndex, direction)
-                if (newBoard != null) {
-                    currentBoard = newBoard
-                    moveCount++
-                    hintMessage = null
+                if (!gameWon) {
+                    val oldPos = currentBoard.robotPositions[robotIndex]
+                    val newBoard = moveRobot(currentBoard, robotIndex, direction)
+                    if (newBoard != null) {
+                        val newPos = newBoard.robotPositions[robotIndex]
+                        val w = newBoard.width
+                        val distance = kotlin.math.abs((newPos % w) - (oldPos % w)) +
+                            kotlin.math.abs((newPos / w) - (oldPos / w))
+                        currentBoard = newBoard
+                        moveCount++
+                        squaresMoved += distance
+                        hintMessage = null
+                        // [GAME_WIN] Check if the goal robot reached its target
+                        if (isSolved(newBoard)) {
+                            gameWon = true
+                        }
+                    }
                 }
             },
             modifier = Modifier
@@ -247,9 +265,56 @@ fun GameScreen(
                 FancyButton(
                     text = "New Game",
                     color = FancyButtonColor.GREEN,
-                    onClick = { },
+                    onClick = onNewGame,
                     modifier = Modifier.weight(1f)
                 )
+            }
+        }
+    }
+
+        // [GAME_WIN] Win overlay shown when the puzzle is solved
+        if (gameWon) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(0xCC000000)),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color(0xFF1A1A1A))
+                        .border(BorderStroke(2.dp, Color(0xFF4CAF50)), RoundedCornerShape(16.dp))
+                        .padding(24.dp)
+                ) {
+                    Text(
+                        text = "Solved!",
+                        color = Color(0xFF4CAF50),
+                        fontSize = 28.sp,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    )
+                    Text(
+                        text = "Moves: $moveCount   Squares: $squaresMoved",
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    Row(modifier = Modifier.padding(top = 16.dp)) {
+                        FancyButton(
+                            text = "Menu",
+                            color = FancyButtonColor.GRAY,
+                            onClick = onBack,
+                            modifier = Modifier.weight(1f).padding(end = 4.dp)
+                        )
+                        FancyButton(
+                            text = "New Game",
+                            color = FancyButtonColor.GREEN,
+                            onClick = onNewGame,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
             }
         }
     }
@@ -333,6 +398,20 @@ fun GameInfoCard(
                 modifier = Modifier.padding(top = 2.dp)
             )
         }
+    }
+}
+
+/**
+ * [GAME_WIN] Checks whether the puzzle is solved: the active goal's robot is on
+ * the goal position. For a multi-colored goal (robotNumber == -1) any robot counts.
+ */
+fun isSolved(board: Board): Boolean {
+    val goal = board.getGoal()
+    val goalRobot = goal.robotNumber
+    return if (goalRobot in board.robotPositions.indices) {
+        board.robotPositions[goalRobot] == goal.position
+    } else {
+        board.robotPositions.any { it == goal.position }
     }
 }
 
@@ -760,4 +839,55 @@ private fun parseColorChar(type: String): Int {
         's' -> 4 // silver
         else -> -1
     }
+}
+
+/**
+ * Converts a GridElement list (from GameLogic) to a Board instance.
+ * This is used for random game generation with GameLogic.
+ */
+fun gridElementsToBoard(gridElements: ArrayList<GridElement>): Board? {
+    // Use Preferences for board dimensions
+    val width = Preferences.boardSizeWidth
+    val height = Preferences.boardSizeHeight
+
+    val board = Board.createBoardFreestyle(null, width, height, 4) ?: return null
+    val numRobots = 4
+    val robotPositions = IntArray(numRobots) { -1 }
+    var robotIndex = 0
+
+    // Parse walls, targets, robots from GridElements
+    for (element in gridElements) {
+        val type = element.type
+        val x = element.x
+        val y = element.y
+
+        when {
+            type == "h" || type == "mh" -> {
+                board.setWall(x, y, Board.NORTH, true)
+                if (y > 0) board.setWall(x, y - 1, Board.SOUTH, true)
+            }
+            type == "v" || type == "mv" -> {
+                board.setWall(x, y, Board.WEST, true)
+                if (x > 0) board.setWall(x - 1, y, Board.EAST, true)
+            }
+            type != null && type.startsWith("t") -> {
+                val colorId = parseColorChar(type)
+                if (colorId >= -1) {
+                    val pos = x + y * width
+                    board.addGoal(pos, colorId, 0)
+                }
+            }
+            type != null && type.startsWith("r") -> {
+                val colorId = parseColorChar(type)
+                if (colorId >= 0 && robotIndex < numRobots) {
+                    robotPositions[robotIndex] = x + y * width
+                    robotIndex++
+                }
+            }
+        }
+    }
+
+    board.setRobots(robotPositions)
+    board.setGoalRandom()
+    return board
 }
