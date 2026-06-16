@@ -7,6 +7,8 @@
 .DS_Store
 /build
 /shared/build
+/composeApp/build
+composeApp/build/*
 /dev/images/yard/
 zzbak~*
 /app/release/output-metadata.json
