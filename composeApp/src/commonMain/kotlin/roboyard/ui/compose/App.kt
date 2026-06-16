@@ -748,3 +748,156 @@ fun HelpScreen(
         )
     }
 }
+
+@Composable
+fun CreditsScreen(
+    onBack: () -> Unit = {}
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF8FAFC))
+    ) {
+        // Scrollable credits content
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+        ) {
+            // Card header
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFFE9ECEF), RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                    .border(BorderStroke(1.dp, Color(0xFFDEE2E6)), RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                    .padding(12.dp)
+            ) {
+                Text(
+                    text = "Credits",
+                    color = Color(0xFF212529),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            // Card body
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White, RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
+                    .border(BorderStroke(1.dp, Color(0xFFDEE2E6)), RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
+                    .padding(16.dp)
+            ) {
+                Column {
+                    // Based on Section
+                    Text(
+                        text = "Based on",
+                        color = Color(0xFF212529),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Ricochet Robots®",
+                        color = Color(0xFF212529),
+                        fontSize = 14.sp,
+                        lineHeight = 22.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+
+                    // Imprint/privacy policy Section
+                    Text(
+                        text = "Imprint / Privacy Policy",
+                        color = Color(0xFF212529),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
+                    Text(
+                        text = "roboyard.z11.de/impressum",
+                        color = Color(0xFF0D6EFD),
+                        fontSize = 14.sp,
+                        lineHeight = 22.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+
+                    // Open Source Section
+                    Text(
+                        text = "Open Source",
+                        color = Color(0xFF212529),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
+                    Text(
+                        text = "github.com/Eastcoast-Laboratories/Roboyard",
+                        color = Color(0xFF0D6EFD),
+                        fontSize = 14.sp,
+                        lineHeight = 22.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    Text(
+                        text = "Version: 1.0.0 (Build 1)",
+                        color = Color(0xFF6C757D),
+                        fontSize = 14.sp,
+                        lineHeight = 22.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+
+                    // Contact Us Section
+                    Text(
+                        text = "Contact Us",
+                        color = Color(0xFF212529),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
+                    Text(
+                        text = "eclabs.de/#kontakt",
+                        color = Color(0xFF0D6EFD),
+                        fontSize = 14.sp,
+                        lineHeight = 22.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+
+                    // Created by Section
+                    Text(
+                        text = "Created by",
+                        color = Color(0xFF212529),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 16.dp)
+                    )
+                    Text(
+                        text = "Alain Caillaud",
+                        color = Color(0xFF212529),
+                        fontSize = 14.sp,
+                        lineHeight = 22.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    Text(
+                        text = "Pierre Michel",
+                        color = Color(0xFF212529),
+                        fontSize = 14.sp,
+                        lineHeight = 22.sp
+                    )
+                    Text(
+                        text = "Ruben Barkow-Kuder",
+                        color = Color(0xFF212529),
+                        fontSize = 14.sp,
+                        lineHeight = 22.sp,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+            }
+        }
+
+        // Back button
+        FancyButton(
+            text = "← Back",
+            color = FancyButtonColor.BLUE,
+            onClick = onBack,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
