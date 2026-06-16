@@ -89,7 +89,7 @@ import roboyard.logic.core.Preferences
 import roboyard.logic.storage.PlatformStorage
 
 // Compose App Version - increment after each session
-const val COMPOSE_APP_VERSION = "v1.3"
+const val COMPOSE_APP_VERSION = "v1.4"
 
 // Helper function to format time as MM:SS
 fun formatTime(elapsedTimeMs: Long): String {
@@ -808,12 +808,18 @@ fun BoardCanvas(
     modifier: Modifier = Modifier
 ) {
     val gameState = remember { ComposeGameState(board) }
-    var selectedRobot by remember { mutableStateOf<Int?>(null) }
-    var dragStartRobot by remember { mutableStateOf<Int?>(null) }
-    var dragStartPos by remember { mutableStateOf<Offset?>(null) }
+    // Tracking variables matching fragment-app GameGridView
     var hasMovedRobotInCurrentGesture by remember { mutableStateOf(false) }
+    var lastMoveX by remember { mutableStateOf(-1) }
+    var lastMoveY by remember { mutableStateOf(-1) }
+    var pendingMoveDirectionX by remember { mutableStateOf(0) }
+    var pendingMoveDirectionY by remember { mutableStateOf(0) }
     var robotActivatedBySwipe by remember { mutableStateOf(false) }
-    var pendingMoveDirection by remember { mutableStateOf<Pair<Int, Int>?>(null) }
+    var startTouchX by remember { mutableStateOf(-1f) }
+    var startTouchY by remember { mutableStateOf(-1f) }
+    var touchStartGridX by remember { mutableStateOf(-1) }
+    var touchStartGridY by remember { mutableStateOf(-1) }
+    var touchedRobot by remember { mutableStateOf<Int?>(null) }
     var robotMoveInitiated by remember { mutableStateOf(false) }
 
     // Constants matching fragment-app GameGridView
@@ -852,25 +858,23 @@ fun BoardCanvas(
                 contentDescription = "Game board with ${board.width}x${board.height} cells, ${board.robotPositions.size} robots, and ${board.goals.size} targets"
             }
             .pointerInput(Unit) {
-                var startTouch = Offset.Zero
-                var touchStartGridX = -1
-                var touchStartGridY = -1
-
                 detectDragGestures(
                     onDragStart = { offset ->
                         val cellSize = min(size.width, size.height) / maxOf(board.width, board.height).toFloat()
                         val offsetX = (size.width - board.width * cellSize) / 2
                         val offsetY = (size.height - board.height * cellSize) / 2
 
-                        // Reset continuous movement tracking (ACTION_DOWN logic from fragment-app)
+                        // ACTION_DOWN logic from fragment-app
                         hasMovedRobotInCurrentGesture = false
-                        pendingMoveDirection = null
+                        lastMoveX = -1
+                        lastMoveY = -1
+                        pendingMoveDirectionX = 0
+                        pendingMoveDirectionY = 0
                         robotActivatedBySwipe = false
-                        robotMoveInitiated = false
 
                         // Store initial touch position
-                        startTouch = offset
-                        dragStartPos = offset
+                        startTouchX = offset.x
+                        startTouchY = offset.y
                         val gridX = ((offset.x - offsetX) / cellSize).toInt()
                         val gridY = ((offset.y - offsetY) / cellSize).toInt()
                         touchStartGridX = gridX
@@ -888,131 +892,123 @@ fun BoardCanvas(
 
                             if (offset.x >= centerX - radius && offset.x <= centerX + radius &&
                                 offset.y >= centerY - radius && offset.y <= centerY + radius) {
-                                dragStartRobot = i
-                                selectedRobot = i
+                                touchedRobot = i
                                 foundRobot = true
                                 break
                             }
                         }
-                        // If no robot was found, ensure dragStartRobot is null (matching fragment-app)
+                        // If no robot was found, ensure touchedRobot is null (matching fragment-app)
                         if (!foundRobot) {
-                            dragStartRobot = null
+                            touchedRobot = null
                         }
                     },
-                    onDragEnd = {
+                    onDrag = { change, dragAmount ->
                         val cellSize = min(size.width, size.height) / maxOf(board.width, board.height).toFloat()
                         val offsetX = (size.width - board.width * cellSize) / 2
                         val offsetY = (size.height - board.height * cellSize) / 2
+                        val gridX = ((change.position.x - offsetX) / cellSize).toInt()
+                        val gridY = ((change.position.y - offsetY) / cellSize).toInt()
 
-                        // Check if this was a tap (no significant movement)
-                        val totalDrag = dragStartPos?.let { startTouch - it } ?: Offset.Zero
-                        val isTap = kotlin.math.abs(totalDrag.x) < MIN_SWIPE_DISTANCE &&
-                                    kotlin.math.abs(totalDrag.y) < MIN_SWIPE_DISTANCE
-
-                        // ACTION_UP logic from fragment-app
-                        if (dragStartRobot != null && !isTap && pendingMoveDirection != null && !robotMoveInitiated) {
-                            val (dx, dy) = pendingMoveDirection!!
-                            onRobotMove(dragStartRobot!!, if (dx > 0) Board.EAST else if (dx < 0) Board.WEST else if (dy > 0) Board.SOUTH else Board.NORTH)
-                        } else if (isTap && dragStartRobot != null) {
-                            // Tap behavior: move robot in direction of tap relative to robot
-                            val robotIndex = dragStartRobot!!
-                            val position = board.robotPositions[robotIndex]
+                        // ACTION_MOVE logic from fragment-app
+                        // Check if we just moved over a robot and none was selected before
+                        var robotAtCurrentPos: Int? = null
+                        for (i in board.robotPositions.indices) {
+                            val position = board.robotPositions[i]
                             val robotX = position % board.width
                             val robotY = position / board.width
-                            val gridX = touchStartGridX
-                            val gridY = touchStartGridY
-
-                            if (robotX == gridX || robotY == gridY) {
-                                // Direct movement along row or column
-                                val direction = if (robotX == gridX) {
-                                    if (gridY > robotY) Board.SOUTH else Board.NORTH
-                                } else {
-                                    if (gridX > robotX) Board.EAST else Board.WEST
-                                }
-                                onRobotMove(robotIndex, direction)
+                            if (robotX == gridX && robotY == gridY) {
+                                robotAtCurrentPos = i
+                                break
                             }
                         }
 
-                        // Reset all tracking variables (matching fragment-app ACTION_UP)
-                        dragStartRobot = null
-                        dragStartPos = null
-                        hasMovedRobotInCurrentGesture = false
-                        pendingMoveDirection = null
-                        robotActivatedBySwipe = false
-                        robotMoveInitiated = false
-                        startTouch = Offset.Zero
-                        touchStartGridX = -1
-                        touchStartGridY = -1
-                    },
-                    onDragCancel = {
-                        dragStartRobot = null
-                        dragStartPos = null
-                        hasMovedRobotInCurrentGesture = false
-                        pendingMoveDirection = null
-                        robotActivatedBySwipe = false
-                        robotMoveInitiated = false
-                        startTouch = Offset.Zero
-                        touchStartGridX = -1
-                        touchStartGridY = -1
-                    },
-                    onDrag = { change, dragAmount ->
-                        val robotIndex = dragStartRobot
-                        val startPos = dragStartPos
-                        // Only process if we have a selected robot and haven't moved yet in this gesture (matching fragment-app)
-                        if (robotIndex != null && startPos != null && !hasMovedRobotInCurrentGesture && !robotMoveInitiated) {
-                            val totalDrag = change.position - startPos
-                            val distance = kotlin.math.sqrt(totalDrag.x * totalDrag.x + totalDrag.y * totalDrag.y)
+                        // Detect a robot if we pass over one and no robot is currently being moved
+                        if (touchedRobot == null && robotAtCurrentPos != null && !hasMovedRobotInCurrentGesture && !robotMoveInitiated) {
+                            // We found a robot while swiping
+                            touchedRobot = robotAtCurrentPos
+
+                            // Update the start position for calculating movement direction
+                            startTouchX = change.position.x
+                            startTouchY = change.position.y
+                            touchStartGridX = gridX
+                            touchStartGridY = gridY
+
+                            // Mark that we activated this robot by swiping
+                            robotActivatedBySwipe = true
+
+                            // Return without movement - require additional swiping to move
+                            return@detectDragGestures
+                        }
+
+                        // If we have a touched/selected robot, calculate the movement direction
+                        if (touchedRobot != null && startTouchX >= 0 && startTouchY >= 0) {
+                            // Calculate the distance moved from the start position
+                            val deltaX = change.position.x - startTouchX
+                            val deltaY = change.position.y - startTouchY
+                            val distance = kotlin.math.sqrt(deltaX * deltaX + deltaY * deltaY)
 
                             // For an activated robot, we need a larger swipe to start moving
                             val movementThreshold = if (robotActivatedBySwipe) ROBOT_MOVE_THRESHOLD else MIN_SWIPE_DISTANCE
 
+                            // Only process if the distance exceeds the threshold
                             if (distance >= movementThreshold) {
                                 // Determine the dominant direction (horizontal or vertical)
-                                val dx = if (kotlin.math.abs(totalDrag.x) > kotlin.math.abs(totalDrag.y)) {
-                                    if (totalDrag.x > 0) 1 else -1
+                                val dx = if (kotlin.math.abs(deltaX) > kotlin.math.abs(deltaY)) {
+                                    if (deltaX > 0) 1 else -1
                                 } else {
                                     0
                                 }
-                                val dy = if (kotlin.math.abs(totalDrag.y) > kotlin.math.abs(totalDrag.x)) {
-                                    if (totalDrag.y > 0) 1 else -1
+                                val dy = if (kotlin.math.abs(deltaY) > kotlin.math.abs(deltaX)) {
+                                    if (deltaY > 0) 1 else -1
                                 } else {
                                     0
                                 }
 
-                                robotMoveInitiated = true
-                                robotActivatedBySwipe = false
+                                // For swipe gestures, move the robot immediately
+                                // But only if no robot is currently moving
+                                if (!robotMoveInitiated) {
+                                    robotMoveInitiated = true
 
-                                val direction = if (dx > 0) Board.EAST else if (dx < 0) Board.WEST else if (dy > 0) Board.SOUTH else Board.NORTH
-                                onRobotMove(robotIndex, direction)
+                                    // Reset the activation flag since we're proceeding with the move
+                                    robotActivatedBySwipe = false
 
-                                hasMovedRobotInCurrentGesture = true
-                                
-                                // After a successful move, reset all swipe and activation state (matching fragment-app)
-                                // This ensures that the robot cannot be activated or moved again
-                                // until the user performs a new ACTION_DOWN on a robot.
-                                dragStartRobot = null
-                                dragStartPos = null
-                                startTouch = Offset.Zero
-                                touchStartGridX = -1
-                                touchStartGridY = -1
-                                pendingMoveDirection = null
-                                robotActivatedBySwipe = false
-                                robotMoveInitiated = false
-                            } else if (distance < movementThreshold) {
-                                // Store the direction for retry on ACTION_UP
-                                val dx = if (kotlin.math.abs(totalDrag.x) > kotlin.math.abs(totalDrag.y)) {
-                                    if (totalDrag.x > 0) 1 else -1
-                                } else {
-                                    0
+                                    val direction = if (dx > 0) Board.EAST else if (dx < 0) Board.WEST else if (dy > 0) Board.SOUTH else Board.NORTH
+                                    onRobotMove(touchedRobot!!, direction)
+
+                                    // Record that we've moved a robot in this gesture
+                                    hasMovedRobotInCurrentGesture = true
+
+                                    // Reset starting position for next movement
+                                    startTouchX = change.position.x
+                                    startTouchY = change.position.y
+
+                                    // After a successful move, reset all swipe and activation state.
+                                    // This ensures that the robot cannot be activated or moved again
+                                    // until the user performs a new ACTION_DOWN on a robot.
+                                    touchedRobot = null
+                                    startTouchX = -1f
+                                    startTouchY = -1f
+                                    touchStartGridX = -1
+                                    touchStartGridY = -1
+                                    pendingMoveDirectionX = 0
+                                    pendingMoveDirectionY = 0
+                                    robotActivatedBySwipe = false
                                 }
-                                val dy = if (kotlin.math.abs(totalDrag.y) > kotlin.math.abs(totalDrag.x)) {
-                                    if (totalDrag.y > 0) 1 else -1
-                                } else {
-                                    0
-                                }
-                                pendingMoveDirection = Pair(dx, dy)
                             }
                         }
+                    },
+                    onDragEnd = {
+                        // ACTION_UP logic from fragment-app
+                        // Reset all tracking variables
+                        touchedRobot = null
+                        startTouchX = -1f
+                        startTouchY = -1f
+                        touchStartGridX = -1
+                        touchStartGridY = -1
+                        pendingMoveDirectionX = 0
+                        pendingMoveDirectionY = 0
+                        robotActivatedBySwipe = false
+                        robotMoveInitiated = false
                     }
                 )
             }
