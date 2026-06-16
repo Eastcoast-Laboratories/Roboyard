@@ -12,17 +12,52 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import driftingdroids.model.Board
 
 @Composable
 fun App() {
+    var currentScreen by remember { mutableStateOf<Screen>(Screen.MainMenu) }
+    var board by remember { mutableStateOf<Board?>(null) }
+
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            MainMenuScreen()
+            when (currentScreen) {
+                Screen.MainMenu -> MainMenuScreen(
+                    onNewRandomGame = {
+                        board = Board.createBoardRandom(4)
+                        currentScreen = Screen.Game
+                    },
+                    onLevelSelection = { /* TODO */ },
+                    onSettings = { /* TODO */ },
+                    onHelp = { /* TODO */ },
+                    onCredits = { /* TODO */ }
+                )
+                Screen.Game -> {
+                    board?.let { currentBoard ->
+                        GameScreen(
+                            board = currentBoard,
+                            onBack = {
+                                currentScreen = Screen.MainMenu
+                                board = null
+                            }
+                        )
+                    }
+                }
+            }
         }
     }
+}
+
+enum class Screen {
+    MainMenu,
+    Game
 }
 
 @Composable
