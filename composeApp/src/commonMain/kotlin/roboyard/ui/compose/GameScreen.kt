@@ -111,6 +111,22 @@ fun GameScreen(
                 .aspectRatio(currentBoard.width.toFloat() / currentBoard.height.toFloat())
         )
 
+        // Hint container (visible when hint is active)
+        if (hintMessage != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xDD000000))
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = hintMessage ?: "",
+                    color = Color.White,
+                    fontSize = 12.sp
+                )
+            }
+        }
+
         // Game info card below the board
         GameInfoCard(
             moveCount = moveCount,
@@ -122,6 +138,15 @@ fun GameScreen(
 
         // Flexible space pushes the buttons to the bottom
         Spacer(modifier = Modifier.weight(1f))
+
+        // Accessibility section (hidden by default)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(0.dp)
+        ) {
+            // Accessibility controls placeholder
+        }
 
         // Bottom button container (two rows of fancy buttons)
         Column(
