@@ -873,6 +873,7 @@ fun BoardCanvas(
                         touchStartGridY = gridY
 
                         // Check if a robot was touched at the start
+                        var foundRobot = false
                         for (i in board.robotPositions.indices) {
                             val position = board.robotPositions[i]
                             val robotX = position % board.width
@@ -886,8 +887,13 @@ fun BoardCanvas(
                                 dragStartRobot = i
                                 selectedRobot = i
                                 dragStartPos = offset
+                                foundRobot = true
                                 break
                             }
+                        }
+                        // If no robot was found, ensure dragStartRobot is null (matching fragment-app)
+                        if (!foundRobot) {
+                            dragStartRobot = null
                         }
                     },
                     onDragEnd = {
