@@ -1010,6 +1010,113 @@ fun SaveSlotItem(
 }
 
 @Composable
+fun DebugSettingsScreen(
+    onBack: () -> Unit = {}
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Debug Settings",
+            color = Color.White,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+        ) {
+            // Hint Auto Move Settings
+            Text(
+                text = "Hint Auto Move Mode",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Text(
+                text = "Current mode: Manual",
+                color = Color(0xFFFFFF00),
+                fontSize = 14.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FancyButton(
+                    text = "Manual",
+                    color = FancyButtonColor.BLUE,
+                    onClick = { },
+                    modifier = Modifier.weight(1f)
+                )
+                FancyButton(
+                    text = "Full-Auto",
+                    color = FancyButtonColor.BLUE,
+                    onClick = { },
+                    modifier = Modifier.weight(1f)
+                )
+                FancyButton(
+                    text = "Semi-Auto",
+                    color = FancyButtonColor.BLUE,
+                    onClick = { },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Dummy History Entries
+            Text(
+                text = "Dummy History Entries",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            FancyButton(
+                text = "Add 100 Dummy Entries",
+                color = FancyButtonColor.GREEN,
+                onClick = { },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // App Control
+            Text(
+                text = "App Control",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            FancyButton(
+                text = "Restart App",
+                color = FancyButtonColor.RED,
+                onClick = { },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        // Back button
+        FancyButton(
+            text = "Back",
+            color = FancyButtonColor.GRAY,
+            onClick = onBack,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
 fun AchievementsScreen(
     onBack: () -> Unit = {}
 ) {
