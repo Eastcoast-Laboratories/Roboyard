@@ -129,22 +129,25 @@ Roboyard/
 - iOS targets are configured but cannot be built on Linux
 - Desktop target provides full UI development capability on Linux
 - The same Compose UI code will run on iOS once built on macOS
-- Existing Android UI (Fragments) remains untouched
-- Compose UI is built in parallel for future migration
 
-# Concept: 1:1 Migration of Android Fragments to Compose Multiplatform
+# Concept: Big-Bang Migration – Replace Fragments with One Compose UI
 
-## Important: Current State of Compose Screens
+**Strategy: full one-step replacement.** The Android Fragments are removed and replaced by the shared Compose `App()` from `composeApp/commonMain`. No coexistence, no `AndroidView` interop, no intermediate steps still running on Fragments. The working Fragment-based version stays available in git history.
 
-**The current Compose screens are placeholders (dummies), NOT a faithful reproduction of the real Roboyard UI.**
+The same Compose UI then runs on **Android, iOS, and Desktop** from a single codebase.
 
-The iOS app will look **exactly** like whatever the shared Compose UI in `composeApp/commonMain` renders. Right now that is generic Material3 styling. To make iOS (and Desktop) look like the real Roboyard Android app, the Compose screens must be rewritten to use the **same graphics, sprites, and buttons** as the Android Fragments.
+## Why Compose Replaces the Fragments
 
-The good news: **Compose runs identically on Desktop, iOS, and Android.** So once a screen looks correct on Linux Desktop, it will look the same on iOS.
+Compose Multiplatform targets Android natively (Jetpack Compose *is* Android's UI framework). The identical `commonMain` UI runs on:
+- **Android** – Jetpack Compose (native)
+- **iOS** – Compose via Skia
+- **Desktop** – Compose via Skia (JVM)
 
-## How the Android UI Actually Works
+There is no separate "Android UI" – the shared Compose code *is* the Android UI.
 
-The Android UI is **not** built from simple Views – the game board is a single custom `View` (`GameGridView`) that draws everything onto an Android `Canvas` using `Drawable` PNG/vector assets:
+## How the Android UI Currently Works (what must be translated)
+
+The game board is a single custom `View` (`GameGridView`, ~2400 lines) that draws everything onto an Android `Canvas` using `Drawable` PNG assets:
 
 | Element | Android Implementation | Asset(s) |
 | --- | --- | --- |
@@ -156,39 +159,47 @@ The Android UI is **not** built from simple Views – the game board is a single
 | Robot paths | `Canvas.drawLine()` with per-color `Paint` | (drawn) |
 | Hint arrow | `drawHintArrow()` | (drawn) |
 | Animations | `ValueAnimator` scaling robots, move animation | (programmatic) |
+| Touch | swipe/drag gestures, robot selection | (programmatic) |
+| Accessibility | TalkBack support, focus, move buttons | (programmatic) |
 
 The menu/settings/help screens (`MainMenuFragment`, `SettingsFragment`, etc.) are standard XML layouts in `app/src/main/res/layout/`.
 
-## Migration Strategy
+Compose's `Canvas` API (`drawImage`, `drawLine`, `drawRect`, `rotate`) maps almost 1:1 to Android's `Canvas`, so the board migration is a **translation**, not a redesign.
 
-Compose's `Canvas` API (`drawImage`, `drawLine`, `drawRect`, `rotate`) maps almost 1:1 to Android's `Canvas`. The migration is therefore mostly a **translation**, not a redesign.
+## Foundational Principle: Reuse the Shared Logic (applies to every step)
 
-### Step 1 – Share the graphic assets
+Game logic, board model, solver, and `GameState` are already in `shared/commonMain` and are **not** rewritten. Throughout the entire migration, the Compose UI:
+- Reads state from the same `GameState` / `Board` classes
+- Calls the same `SolverIDDFS` for hints
+- Uses the real move logic instead of any placeholder
 
-Move/copy the drawables from `app/src/main/res/drawable/` into Compose Multiplatform resources:
+Only the **rendering layer** is migrated, not the logic. This principle underlies all steps below.
+
+## Big-Bang Migration Steps
+
+### 1. Enable `androidTarget()` in composeApp
+
+Re-add `androidTarget()` to `composeApp/build.gradle`. Resolve the AGP 9.2.1 / Compose 1.8.2 compatibility issue (bump Compose MP and/or adjust AGP) until the Android target builds cleanly.
+
+### 2. Share the graphic assets
+
+Copy the drawables from `app/src/main/res/drawable/` into Compose Multiplatform resources:
 
 ```
 composeApp/src/commonMain/composeResources/drawable/
-├── robot_pink_left.png / robot_pink_right.png
-├── robot_green_left.png / robot_green_right.png
-├── robot_blue_left.png  / robot_blue_right.png
-├── robot_yellow_left.png/ robot_yellow_right.png
-├── robot_silver_left.png/ robot_silver_right.png
+├── robot_{pink,green,blue,yellow,silver}_left.png
+├── robot_{pink,green,blue,yellow,silver}_right.png
 ├── grid_tiles.png
 ├── roboyard.png        (center logo)
 ├── mh.png / mv.png     (walls)
 └── target_{pink,green,blue,yellow,silver,multi}.png
 ```
 
-Add the `compose.components.resources` dependency in `composeApp/build.gradle` and access them via the generated `Res.drawable.*` accessors:
+Add `compose.components.resources` and access via `painterResource(Res.drawable.*)`.
 
-```kotlin
-val robotPink = painterResource(Res.drawable.robot_pink_right)
-```
+### 3. Rewrite the board renderer with full feature parity
 
-### Step 2 – Rewrite the board renderer (highest priority)
-
-`GameScreen.kt` already uses Compose `Canvas`. Replace the placeholder drawing with the real rendering logic translated from `GameGridView.onDraw()`:
+Translate `GameGridView.onDraw()` into the Compose `Canvas` in `GameScreen.kt`, including ALL features:
 
 | Android (`Canvas`) | Compose (`DrawScope`) |
 | --- | --- |
@@ -197,61 +208,41 @@ val robotPink = painterResource(Res.drawable.robot_pink_right)
 | `canvas.drawLine(x1,y1,x2,y2,paint)` | `drawLine(color, start, end, strokeWidth)` |
 | `canvas.drawRect(...)` | `drawRect(color, topLeft, size)` |
 
-Port these helper classes/methods to `commonMain`:
-- `WallRenderer` → a Compose function `DrawScope.drawWalls(wallModel, cellSize, offset)`
-- `getTargetDrawable()` → a `when(color)` returning the right `ImageBitmap`
+Port to `commonMain`:
+- `WallRenderer` → `DrawScope.drawWalls(wallModel, cellSize, offset)`
+- `getTargetDrawable()` → `when(color)` returning the right `ImageBitmap`
 - `drawRobotWithGraphics()` → `DrawScope.drawRobot(robot, sprite, scale)`
 - `drawHintArrow()` → `DrawScope.drawHintArrow(...)`
+- Robot paths, grid tile rotations, center logo
+- Touch/drag gestures → `Modifier.pointerInput { detectDragGestures }`
+- Animations (`ValueAnimator`) → `animateFloatAsState` / `Animatable`
+- Accessibility/TalkBack → Compose semantics (`Modifier.semantics`, move buttons)
 
-The board math (`offsetX/offsetY` centering, `cellSize` calculation in `onMeasure`) translates directly using `size.width/height` in the Compose `Canvas`.
+### 4. Rewrite all menu/settings screens with real assets
 
-### Step 3 – Port the menu/settings/help screens
+Replace the placeholder Material3 screens with faithful versions of the Fragment layouts: real logo, backgrounds, button styling/order/labels, using the shared `strings.xml` values.
 
-These are simpler. The XML layouts become Compose composables, but they must use the **real assets and colors** instead of Material3 defaults:
-- Background images / logo from the shared resources
-- The same button styling, ordering, and labels as the Fragments
-- Use the existing `strings.xml` values (see Step 5)
+### 5. Replace the Android entry point and delete the legacy UI
 
-### Step 4 – Reuse the shared logic (no rewrite needed)
+In one step:
+- `MainActivity` → `setContent { App() }`
+- Delete `app/src/main/java/roboyard/ui/fragments/*`, `GameGridView`, `WallRenderer`, and the XML layouts
+- Remove now-unused drawable references from `app`
 
-The game logic, board model, solver, and `GameState` are **already** in `shared/commonMain` and work on all platforms. The Compose UI should:
-- Read state from the same `GameState` / `Board` classes
-- Call the same `SolverIDDFS` for hints
-- Call the same move logic instead of the placeholder `moveRobot()` in `GameScreen.kt`
+## Verification
 
-This is the key win: only the **rendering layer** is migrated, not the logic.
-
-### Step 5 – Strings and localization
-
-Move the relevant strings from `app/src/main/res/values*/strings.xml` into Compose Multiplatform string resources (`composeResources/values/strings.xml`) so the same translations work on iOS/Desktop. Access via `stringResource(Res.string.key)`.
-
-### Step 6 – Animations
-
-Replace `ValueAnimator` with Compose `animateFloatAsState` / `Animatable`:
-- Robot selection scaling → `animateFloatAsState(if (selected) 1.3f else 1.1f)`
-- Robot move animation → `Animatable` interpolating grid position over ~300ms
-
-## Recommended Migration Order
-
-1. **Board rendering** (`GameScreen.kt`) – the visual core, biggest impact
-2. **Main Menu** – real logo, backgrounds, button layout
-3. **Level Selection** – real level thumbnails/graphics
-4. **Settings / Help / Credits / Save-Load / Achievements** – simpler layouts
-5. **Animations and polish** – robot scaling, move tweening, hint arrows
-
-## Testing Each Screen on Linux
-
-After migrating each screen, verify on Desktop before assuming it works on iOS:
+Develop on Linux Desktop, then verify on Android (and iOS on macOS):
 
 ```bash
-./gradlew :composeApp:run
+./gradlew :composeApp:run                 # Desktop
+./gradlew :composeApp:assembleDebug       # Android (after androidTarget enabled)
 ```
 
-Because Compose renders identically across platforms, a screen that looks correct on Linux Desktop will look the same on iOS once built on macOS.
+Verify gameplay, save/load, achievements, settings, levels, accessibility (TalkBack), animations.
 
 ## Summary
 
-- The iOS app shows **exactly** the shared Compose UI – currently dummies.
-- Migration = translate `GameGridView.onDraw()` + Fragment layouts to Compose `Canvas`/composables, reusing the same PNG assets and the already-shared game logic.
-- Compose `Canvas` maps almost 1:1 to Android `Canvas`, so this is a translation, not a redesign.
-- Develop and verify everything on Linux Desktop; iOS gets the same look "for free" once built on macOS.
+- One-step Big-Bang: Fragments removed, replaced by the shared Compose `App()`.
+- Same Compose UI for Android + iOS + Desktop.
+- Main work = translate `GameGridView.onDraw()` + Fragment layouts to Compose `Canvas`/composables with full feature parity, reusing the same PNG assets and the already-shared game logic.
+- The working Fragment version remains in git history as the safety net.
