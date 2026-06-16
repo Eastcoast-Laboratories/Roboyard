@@ -16,7 +16,6 @@
 */
 package driftingdroids.model
 
-import android.util.Log
 import java.util.Arrays
 import kotlin.concurrent.Volatile
 
@@ -121,7 +120,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
         Logger.println("***** " + this.javaClass.getSimpleName() + " *****")
         Logger.println("Options: " + this.getOptionsAsString())
         Logger.println(
-            Log.DEBUG,
+            3, // Log.DEBUG
             "DriftingDroid",
             "[SOLVER_MEMORY] Number of robots: %d, Using MAX_DEPTH: %d",
             board.numRobots,
@@ -129,7 +128,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
         )
         val rtMem = Runtime.getRuntime()
         Logger.println(
-            Log.DEBUG,
+            3, // Log.DEBUG
             "DriftingDroid",
             "[SOLVER_MEMORY] Available memory: %d MB (free=%d total=%d max=%d)",
             (rtMem.maxMemory() - rtMem.totalMemory() + rtMem.freeMemory()) / (1024 * 1024),

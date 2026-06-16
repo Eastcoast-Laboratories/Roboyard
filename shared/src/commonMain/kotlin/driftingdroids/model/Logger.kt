@@ -16,7 +16,6 @@
 */
 package driftingdroids.model
 
-import android.util.Log
 
 /** a very simple logger class  */
 object Logger {
@@ -40,11 +39,6 @@ object Logger {
         }
 
 
-        // First log to Android system log
-        Log.println(level, tag, message)
-
-
-        // Also output to standard output for debugging purposes
         kotlin.io.println(tag + ": " + message)
     }
 }
