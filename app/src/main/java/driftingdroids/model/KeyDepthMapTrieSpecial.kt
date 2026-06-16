@@ -109,9 +109,8 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
         this.maxNodeArrays = max(16, ((maxHeap / 4) / (NODE_ARRAY_SIZE * 4L)).toInt())
         this.maxLeafArrays = max(16, ((maxHeap / 10) / LEAF_ARRAY_SIZE).toInt())
 
-        this.nodeArrays = arrayOfNulls<IntArray>(64)
-        this.rootNode = IntArray(NODE_ARRAY_SIZE)
-        this.nodeArrays[0] = this.rootNode
+        this.nodeArrays = Array(64) { IntArray(NODE_ARRAY_SIZE) }
+        this.rootNode = this.nodeArrays[0]!!
         this.numNodeArrays = 1
         this.nextNode = board.size //root node already exists
         this.nextNodeArray = NODE_ARRAY_SIZE //first array already exists
@@ -121,7 +120,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
         this.leafNodeSize = this.leafNodeMask + 1
         this.leafSize = 1 shl (board.sizeNumBits - this.leafNodeShift)
         this.leafMask = this.leafSize - 1
-        this.leafArrays = arrayOfNulls<ByteArray>(64)
+        this.leafArrays = Array(64) { ByteArray(LEAF_ARRAY_SIZE) }
         this.numLeafArrays = 0
         this.nextLeaf =
             this.leafSize //no leaves yet, but skip leaf "0" because this is the special value
@@ -180,7 +179,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                 if (this.nextNode + nodeSize > this.nextNodeArray) {
                     if (this.nodeArrays.size <= this.numNodeArrays) {
                         this.nodeArrays =
-                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                     }
                     val newNodeArray = tryAllocateNodeArray()
                     if (newNodeArray == null) return false
@@ -227,7 +226,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                 if (this.nextNode + nodeSize > this.nextNodeArray) {
                     if (this.nodeArrays.size <= this.numNodeArrays) {
                         this.nodeArrays =
-                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                     }
                     val newNodeArray = tryAllocateNodeArray()
                     if (newNodeArray == null) return false
@@ -280,7 +279,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
             //create a new node
             if (this.nextNode + this.leafNodeSize > this.nextNodeArray) {
                 if (this.nodeArrays.size <= this.numNodeArrays) {
-                    this.nodeArrays = this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                    this.nodeArrays = this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                 }
                 val newNodeArray = tryAllocateNodeArray()
                 if (newNodeArray == null) return false
@@ -325,7 +324,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
             //create a new leaf
             if (this.nextLeaf >= this.nextLeafArray) {
                 if (this.leafArrays.size <= this.numLeafArrays) {
-                    this.leafArrays = this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1)
+                    this.leafArrays = this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1) as Array<ByteArray>
                 }
                 val newLeafArray = tryAllocateLeafArray()
                 if (newLeafArray == null) return false
@@ -374,7 +373,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                 if (this.nextNode + nodeSize > this.nextNodeArray) {
                     if (this.nodeArrays.size <= this.numNodeArrays) {
                         this.nodeArrays =
-                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                     }
                     val newNodeArray = tryAllocateNodeArray()
                     if (newNodeArray == null) return false
@@ -421,7 +420,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                 if (this.nextNode + nodeSize > this.nextNodeArray) {
                     if (this.nodeArrays.size <= this.numNodeArrays) {
                         this.nodeArrays =
-                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                     }
                     val newNodeArray = tryAllocateNodeArray()
                     if (newNodeArray == null) return false
@@ -474,7 +473,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
             //create a new node
             if (this.nextNode + this.leafNodeSize > this.nextNodeArray) {
                 if (this.nodeArrays.size <= this.numNodeArrays) {
-                    this.nodeArrays = this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                    this.nodeArrays = this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                 }
                 val newNodeArray = tryAllocateNodeArray()
                 if (newNodeArray == null) return false
@@ -519,7 +518,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
             //create a new leaf
             if (this.nextLeaf >= this.nextLeafArray) {
                 if (this.leafArrays.size <= this.numLeafArrays) {
-                    this.leafArrays = this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1)
+                    this.leafArrays = this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1) as Array<ByteArray>
                 }
                 val newLeafArray = tryAllocateLeafArray()
                 if (newLeafArray == null) return false
@@ -595,7 +594,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                     if (this.nextNode + nodeSize > this.nextNodeArray) {
                         if (this.nodeArrays.size <= this.numNodeArrays) {
                             this.nodeArrays =
-                                this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                                this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                         }
                         val newNodeArray = tryAllocateNodeArray()
                         if (newNodeArray == null) return false
@@ -642,7 +641,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                     if (this.nextNode + nodeSize > this.nextNodeArray) {
                         if (this.nodeArrays.size <= this.numNodeArrays) {
                             this.nodeArrays =
-                                this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                                this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                         }
                         val newNodeArray = tryAllocateNodeArray()
                         if (newNodeArray == null) return false
@@ -696,7 +695,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                 if (this.nextNode + this.leafNodeSize > this.nextNodeArray) {
                     if (this.nodeArrays.size <= this.numNodeArrays) {
                         this.nodeArrays =
-                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                     }
                     val newNodeArray = tryAllocateNodeArray()
                     if (newNodeArray == null) return false
@@ -743,7 +742,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                 if (this.nextLeaf >= this.nextLeafArray) {
                     if (this.leafArrays.size <= this.numLeafArrays) {
                         this.leafArrays =
-                            this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1)
+                            this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1) as Array<ByteArray>
                     }
                     val newLeafArray = tryAllocateLeafArray()
                     if (newLeafArray == null) return false
@@ -788,7 +787,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                     if (this.nextNode + nodeSize > this.nextNodeArray) {
                         if (this.nodeArrays.size <= this.numNodeArrays) {
                             this.nodeArrays =
-                                this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                                this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                         }
                         val newNodeArray = tryAllocateNodeArray()
                         if (newNodeArray == null) return false
@@ -835,7 +834,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                     if (this.nextNode + nodeSize > this.nextNodeArray) {
                         if (this.nodeArrays.size <= this.numNodeArrays) {
                             this.nodeArrays =
-                                this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                                this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                         }
                         val newNodeArray = tryAllocateNodeArray()
                         if (newNodeArray == null) return false
@@ -889,7 +888,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                 if (this.nextNode + this.leafNodeSize > this.nextNodeArray) {
                     if (this.nodeArrays.size <= this.numNodeArrays) {
                         this.nodeArrays =
-                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                     }
                     val newNodeArray = tryAllocateNodeArray()
                     if (newNodeArray == null) return false
@@ -936,7 +935,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                 if (this.nextLeaf >= this.nextLeafArray) {
                     if (this.leafArrays.size <= this.numLeafArrays) {
                         this.leafArrays =
-                            this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1)
+                            this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1) as Array<ByteArray>
                     }
                     val newLeafArray = tryAllocateLeafArray()
                     if (newLeafArray == null) return false
@@ -1002,7 +1001,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                 if (this.nextNode + this.leafNodeSize > this.nextNodeArray) {
                     if (this.nodeArrays.size <= this.numNodeArrays) {
                         this.nodeArrays =
-                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                     }
                     val newNodeArray = tryAllocateNodeArray()
                     if (newNodeArray == null) return false
@@ -1049,7 +1048,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                 if (this.nextLeaf >= this.nextLeafArray) {
                     if (this.leafArrays.size <= this.numLeafArrays) {
                         this.leafArrays =
-                            this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1)
+                            this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1) as Array<ByteArray>
                     }
                     val newLeafArray = tryAllocateLeafArray()
                     if (newLeafArray == null) return false
@@ -1106,7 +1105,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                 if (this.nextNode + nodeSize > this.nextNodeArray) {
                     if (this.nodeArrays.size <= this.numNodeArrays) {
                         this.nodeArrays =
-                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                     }
                     val newNodeArray = tryAllocateNodeArray()
                     if (newNodeArray == null) return false
@@ -1158,7 +1157,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                 if (this.nextNode + this.leafNodeSize > this.nextNodeArray) {
                     if (this.nodeArrays.size <= this.numNodeArrays) {
                         this.nodeArrays =
-                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                     }
                     val newNodeArray = tryAllocateNodeArray()
                     if (newNodeArray == null) return false
@@ -1205,7 +1204,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                 if (this.nextLeaf >= this.nextLeafArray) {
                     if (this.leafArrays.size <= this.numLeafArrays) {
                         this.leafArrays =
-                            this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1)
+                            this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1) as Array<ByteArray>
                     }
                     val newLeafArray = tryAllocateLeafArray()
                     if (newLeafArray == null) return false
@@ -1234,9 +1233,9 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
         }
 
         companion object {
-            protected val LOOKUP_SHIFT: Int = 3 * 8
-            protected val LOOKUP_SHIFT_2: Int = 2 * 8
-            protected val LOOKUP_MASK: Int = (1 shl LOOKUP_SHIFT) - 1
+            const val LOOKUP_SHIFT: Int = 3 * 8
+            const val LOOKUP_SHIFT_2: Int = 2 * 8
+            const val LOOKUP_MASK: Int = (1 shl LOOKUP_SHIFT) - 1
         }
     }
 
@@ -1279,7 +1278,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                 if (this.nextNode + this.leafNodeSize > this.nextNodeArray) {
                     if (this.nodeArrays.size <= this.numNodeArrays) {
                         this.nodeArrays =
-                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                     }
                     val newNodeArray = tryAllocateNodeArray()
                     if (newNodeArray == null) return false
@@ -1326,7 +1325,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                 if (this.nextLeaf >= this.nextLeafArray) {
                     if (this.leafArrays.size <= this.numLeafArrays) {
                         this.leafArrays =
-                            this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1)
+                            this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1) as Array<ByteArray>
                     }
                     val newLeafArray = tryAllocateLeafArray()
                     if (newLeafArray == null) return false
@@ -1383,7 +1382,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                 if (this.nextNode + nodeSize > this.nextNodeArray) {
                     if (this.nodeArrays.size <= this.numNodeArrays) {
                         this.nodeArrays =
-                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                     }
                     val newNodeArray = tryAllocateNodeArray()
                     if (newNodeArray == null) return false
@@ -1435,7 +1434,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                 if (this.nextNode + this.leafNodeSize > this.nextNodeArray) {
                     if (this.nodeArrays.size <= this.numNodeArrays) {
                         this.nodeArrays =
-                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                     }
                     val newNodeArray = tryAllocateNodeArray()
                     if (newNodeArray == null) return false
@@ -1482,7 +1481,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
                 if (this.nextLeaf >= this.nextLeafArray) {
                     if (this.leafArrays.size <= this.numLeafArrays) {
                         this.leafArrays =
-                            this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1)
+                            this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1) as Array<ByteArray>
                     }
                     val newLeafArray = tryAllocateLeafArray()
                     if (newLeafArray == null) return false

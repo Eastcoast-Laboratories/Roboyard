@@ -16,14 +16,13 @@
 */
 package driftingdroids.model
 
-import driftingdroids.model.Move.equals
 import java.util.Arrays
 import java.util.Deque
 import java.util.Formatter
 import java.util.LinkedList
 import java.util.TreeSet
 
-class Solution(private val board: Board) : Comparable<Solution?> {
+class Solution(private val board: Board) : Comparable<Solution> {
     private val movesList: MutableList<Move>
     private var moveIndex = 0
     private var numColors = 0
@@ -86,7 +85,7 @@ class Solution(private val board: Board) : Comparable<Solution?> {
             }
         }
 
-    val nextMove: Move?
+    val _nextMove: Move?
         get() {
             val result = this.currentMove
             if (null != result) {
@@ -94,6 +93,10 @@ class Solution(private val board: Board) : Comparable<Solution?> {
             }
             return result
         }
+
+    fun getNextMove(): Move? {
+        return this._nextMove
+    }
 
     val prevMove: Move?
         get() {
@@ -220,11 +223,11 @@ class Solution(private val board: Board) : Comparable<Solution?> {
     // transform Solution to list of lists of moves, grouped by colors
     private fun determineColorChanges(): MutableList<MutableList<Move>> {
         val colorSolution: MutableList<MutableList<Move>> = ArrayList<MutableList<Move>>()
-        var moveList = LinkedList<Move?>()
+        var moveList = LinkedList<Move>()
         for (move in this.movesList) {
-            if ((false == moveList.isEmpty()) && (moveList.getLast()!!.robotNumber != move.robotNumber)) { // color change
+            if ((false == moveList.isEmpty()) && (moveList.getLast().robotNumber != move.robotNumber)) { // color change
                 colorSolution.add(moveList)
-                moveList = LinkedList<Move?>()
+                moveList = LinkedList<Move>()
             }
             moveList.add(move)
         }
@@ -240,10 +243,10 @@ class Solution(private val board: Board) : Comparable<Solution?> {
             Logger.println("minimizeColorChanges: no search, already at global minimum " + this.numColorChanges)
             return  // nothing to be minimized here
         }
-        val knownSet: MutableSet<MutableList<MutableList<Move?>?>?> =
-            HashSet<MutableList<MutableList<Move?>?>?>()
-        val todoList: Deque<MutableList<MutableList<Move?>?>?> =
-            LinkedList<MutableList<MutableList<Move?>?>?>()
+        val knownSet: MutableSet<MutableList<MutableList<Move>>> =
+            HashSet<MutableList<MutableList<Move>>>()
+        val todoList: Deque<MutableList<MutableList<Move>>> =
+            LinkedList<MutableList<MutableList<Move>>>()
         knownSet.add(thisSolution)
         todoList.addLast(thisSolution)
         search_loop@ while (false == todoList.isEmpty()) {

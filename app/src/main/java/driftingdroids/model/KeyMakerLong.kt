@@ -25,7 +25,7 @@ abstract class KeyMakerLong {
      * @param state array of int values (positions of the robots on the board)
      * @return the key
      */
-    abstract fun run(state: IntArray?): Long
+    abstract fun run(state: IntArray): Long
 
 
     private class KeyMakerLongAll(

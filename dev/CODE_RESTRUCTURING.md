@@ -1,9 +1,9 @@
 # KMP Migration Status for Roboyard
 
 ## Current Status
-- **Date:** June 11, 2026
-- **Status:** Core logic package migrated to KMP (shared/commonMain)
-- **Build:** ✅ Successful (all 59 smoke tests passing)
+- **Date:** June 16, 2026
+- **Status:** Core logic package migrated to KMP (shared/commonMain), DriftingDroids solver converted to Kotlin
+- **Build:** ✅ Successful (Android build passing)
 
 ## Completed Work ✅
 
@@ -49,31 +49,33 @@ The following files have Android-specific dependencies and remain in the Android
 ### Achievements
 - **AchievementManager.kt** - Activity, Toast, PlayGames (Android Achievements)
 
-## DriftingDroids Solver (Java - Not Yet Migrated)
+## DriftingDroids Solver (Kotlin - Converted, Android Dependencies to Remove)
 
-The DriftingDroids solver package is still in Java and has Android dependencies:
+The DriftingDroids solver package has been converted to Kotlin but still has Android dependencies:
 
 **Location:** `app/src/main/java/driftingdroids/model/`
 
-**Files:**
-- Board.java - Uses android.util.Log, timber.log.Timber
-- KeyDepthMap.java
-- KeyDepthMapFactory.java
-- KeyDepthMapTrieGeneric.java
-- KeyDepthMapTrieSpecial.java
-- KeyMakerInt.java
-- KeyMakerLong.java
-- L10N.java
-- Logger.java
-- Move.java
-- Solution.java
-- Solver.java
-- SolverIDDFS.java
+**Files (all .kt now):**
+- Board.kt - Uses android.os.Build, roboyard.ui.activities.MainActivity ❌
+- KeyDepthMap.kt - Platform-agnostic ✅
+- KeyDepthMapFactory.kt - Platform-agnostic ✅
+- KeyDepthMapTrieGeneric.kt - Platform-agnostic ✅
+- KeyDepthMapTrieSpecial.kt - Platform-agnostic ✅
+- KeyMakerInt.kt - Platform-agnostic ✅
+- KeyMakerLong.kt - Platform-agnostic ✅
+- L10N.kt - Platform-agnostic ✅
+- Logger.kt - Platform-agnostic ✅
+- Move.kt - Platform-agnostic ✅
+- Solution.kt - Platform-agnostic ✅
+- Solver.kt - Platform-agnostic ✅
+- SolverIDDFS.kt - Platform-agnostic ✅
 
-**Status:** Not yet migrated to Kotlin/KMP. This is a separate solver component that may need:
-1. Java → Kotlin migration
-2. Android dependency removal (Log → RLog)
-3. KMP integration if shared with iOS
+**Status:** Converted to Kotlin ✅, but needs Android dependency removal for KMP:
+1. ❌ Remove android.os.Build import from Board.kt
+2. ❌ Remove roboyard.ui.activities.MainActivity import from Board.kt
+3. ❌ Move DriftingDroids package to shared/commonMain/driftingdroids/model/
+4. ❌ Update shared/build.gradle to include DriftingDroids package
+5. ❌ Test KMP build with DriftingDroids included
 
 ## iOS Integration
 
@@ -82,12 +84,16 @@ The shared module is configured for iOS with:
 - **iosArm64** - iOS Device (ARM64)
 - **iosSimulatorArm64** - iOS Simulator (Apple Silicon)
 
-**iOS-specific implementations:**
-- **IosStorage.kt** - UserDefaults/FileManager based storage
-- **IosNetworkMonitor.kt** - iOS network monitoring
+**iOS-specific implementations (placeholders):**
+- **IosStorage.kt** - Currently uses in-memory map, needs UserDefaults/FileManager implementation ❌
+- **IosNetworkMonitor.kt** - Currently returns true, needs NWPathMonitor implementation ❌
 
 **Next steps for iOS:**
-1. Create iOS Xcode project (SwiftUI/UIKit)
-2. Configure shared module as CocoaPods or SPM dependency
-3. Complete IosStorage.kt implementation
-4. Create iOS UI layer that calls shared logic
+1. ❌ Remove Android dependencies from DriftingDroids (Board.kt)
+2. ❌ Move DriftingDroids to shared/commonMain
+3. ❌ Implement IosStorage.kt with platform.Foundation.NSUserDefaults
+4. ❌ Implement IosNetworkMonitor.kt with platform.Network.NWPathMonitor
+5. ❌ Create iOS Xcode project (SwiftUI/UIKit)
+6. ❌ Configure shared module as CocoaPods or SPM dependency
+7. ❌ Create iOS UI layer that calls shared logic
+8. ❌ Test iOS build and run on simulator

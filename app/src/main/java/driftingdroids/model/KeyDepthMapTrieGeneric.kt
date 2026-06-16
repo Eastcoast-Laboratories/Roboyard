@@ -67,14 +67,13 @@ class KeyDepthMapTrieGeneric(keyBits: Int) : KeyDepthMap {
         this.leafSize = 1 shl this.leafBits
         this.leafMask = this.leafSize - 1
 
-        this.nodeArrays = arrayOfNulls<IntArray>(32)
-        this.rootNode = IntArray(NODE_ARRAY_SIZE)
-        this.nodeArrays[0] = this.rootNode
+        this.nodeArrays = Array(32) { IntArray(NODE_ARRAY_SIZE) }
+        this.rootNode = this.nodeArrays[0]!!
         this.numNodeArrays = 1
         this.nextNode = this.nodeSize //root node already exists
         this.nextNodeArray = NODE_ARRAY_SIZE //first array already exists
 
-        this.leafArrays = arrayOfNulls<ByteArray>(32)
+        this.leafArrays = Array(32) { ByteArray(LEAF_ARRAY_SIZE) }
         this.numLeafArrays = 0
         this.nextLeaf =
             this.leafSize //no leaves yet, but skip leaf "0" because this is the special value
@@ -102,7 +101,7 @@ class KeyDepthMapTrieGeneric(keyBits: Int) : KeyDepthMap {
                 if (this.nextNode >= this.nextNodeArray) {
                     if (this.nodeArrays.size <= this.numNodeArrays) {
                         this.nodeArrays =
-                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                     }
                     this.nodeArrays[this.numNodeArrays++] = IntArray(NODE_ARRAY_SIZE)
                     this.nextNodeArray += NODE_ARRAY_SIZE
@@ -142,7 +141,7 @@ class KeyDepthMapTrieGeneric(keyBits: Int) : KeyDepthMap {
                 if (this.nextNode >= this.nextNodeArray) {
                     if (this.nodeArrays.size <= this.numNodeArrays) {
                         this.nodeArrays =
-                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                     }
                     this.nodeArrays[this.numNodeArrays++] = IntArray(NODE_ARRAY_SIZE)
                     this.nextNodeArray += NODE_ARRAY_SIZE
@@ -186,7 +185,7 @@ class KeyDepthMapTrieGeneric(keyBits: Int) : KeyDepthMap {
             //create a new leaf
             if (this.nextLeaf >= this.nextLeafArray) {
                 if (this.leafArrays.size <= this.numLeafArrays) {
-                    this.leafArrays = this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1)
+                    this.leafArrays = this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1) as Array<ByteArray>
                 }
                 val newLeafArray = ByteArray(LEAF_ARRAY_SIZE)
                 Arrays.fill(newLeafArray, DEFAULT_VALUE)
@@ -233,7 +232,7 @@ class KeyDepthMapTrieGeneric(keyBits: Int) : KeyDepthMap {
                 if (this.nextNode >= this.nextNodeArray) {
                     if (this.nodeArrays.size <= this.numNodeArrays) {
                         this.nodeArrays =
-                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                     }
                     this.nodeArrays[this.numNodeArrays++] = IntArray(NODE_ARRAY_SIZE)
                     this.nextNodeArray += NODE_ARRAY_SIZE
@@ -273,7 +272,7 @@ class KeyDepthMapTrieGeneric(keyBits: Int) : KeyDepthMap {
                 if (this.nextNode >= this.nextNodeArray) {
                     if (this.nodeArrays.size <= this.numNodeArrays) {
                         this.nodeArrays =
-                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1)
+                            this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                     }
                     this.nodeArrays[this.numNodeArrays++] = IntArray(NODE_ARRAY_SIZE)
                     this.nextNodeArray += NODE_ARRAY_SIZE
@@ -317,7 +316,7 @@ class KeyDepthMapTrieGeneric(keyBits: Int) : KeyDepthMap {
             //create a new leaf
             if (this.nextLeaf >= this.nextLeafArray) {
                 if (this.leafArrays.size <= this.numLeafArrays) {
-                    this.leafArrays = this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1)
+                    this.leafArrays = this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1) as Array<ByteArray>
                 }
                 val newLeafArray = ByteArray(LEAF_ARRAY_SIZE)
                 Arrays.fill(newLeafArray, DEFAULT_VALUE)
