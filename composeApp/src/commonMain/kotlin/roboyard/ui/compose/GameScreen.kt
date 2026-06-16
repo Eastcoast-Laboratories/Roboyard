@@ -23,8 +23,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -32,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -85,6 +88,13 @@ import roboyard.logic.core.GameLogic
 import roboyard.logic.core.Preferences
 import roboyard.logic.storage.PlatformStorage
 
+// Helper function to format time as MM:SS
+fun formatTime(elapsedTimeMs: Long): String {
+    val seconds = (elapsedTimeMs / 1000) % 60
+    val minutes = (elapsedTimeMs / 1000) / 60
+    return String.format("%d:%02d", minutes, seconds)
+}
+
 @Composable
 fun GameScreen(
     board: Board,
@@ -100,6 +110,35 @@ fun GameScreen(
     var solution by remember(board) { mutableStateOf<driftingdroids.model.Solution?>(null) }
     var currentHintStep by remember(board) { mutableIntStateOf(0) }
     var isSolverRunning by remember(board) { mutableStateOf(false) }
+    val boardHistory = remember(board) { mutableListOf<Board>() }
+    var elapsedTime by remember(board) { mutableLongStateOf(0L) }
+    var timerRunning by remember(board) { mutableStateOf(false) }
+
+    // Timer effect - runs every second when timer is enabled
+    LaunchedEffect(timerRunning) {
+        if (timerRunning) {
+            while (timerRunning) {
+                delay(1000)
+                if (timerRunning) {
+                    elapsedTime += 1000
+                }
+            }
+        }
+    }
+
+    // Start timer when game starts (on first move)
+    LaunchedEffect(moveCount) {
+        if (moveCount > 0 && !timerRunning && !gameWon) {
+            timerRunning = true
+        }
+    }
+
+    // Stop timer when game is won
+    LaunchedEffect(gameWon) {
+        if (gameWon) {
+            timerRunning = false
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
     Column(
@@ -115,6 +154,8 @@ fun GameScreen(
                     val oldPos = currentBoard.robotPositions[robotIndex]
                     val newBoard = moveRobot(currentBoard, robotIndex, direction)
                     if (newBoard != null) {
+                        // Save current board to history before move (for undo)
+                        boardHistory.add(Board.Companion.createClone(currentBoard))
                         val newPos = newBoard.robotPositions[robotIndex]
                         val w = newBoard.width
                         val distance = kotlin.math.abs((newPos % w) - (oldPos % w)) +
@@ -135,6 +176,33 @@ fun GameScreen(
                 .aspectRatio(currentBoard.width.toFloat() / currentBoard.height.toFloat())
                 .shadow(elevation = 20.dp, shape = RoundedCornerShape(0.dp))
         )
+
+        // Game info row (move count, squares moved, timer)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xDD000000))
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Moves: $moveCount",
+                color = Color.White,
+                fontSize = 14.sp,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+            )
+            Text(
+                text = "Squares: $squaresMoved",
+                color = Color.White,
+                fontSize = 14.sp
+            )
+            Text(
+                text = formatTime(elapsedTime),
+                color = Color.White,
+                fontSize = 14.sp
+            )
+        }
 
         // Hint container (visible when hint is active)
         if (hintMessage != null) {
@@ -300,9 +368,23 @@ fun GameScreen(
                     modifier = Modifier.weight(1f).padding(end = 3.dp)
                 )
                 FancyButton(
-                    text = "Back",
+                    text = if (boardHistory.isNotEmpty()) "Undo" else "Back",
                     color = FancyButtonColor.HINT,
-                    onClick = onBack,
+                    onClick = {
+                        if (boardHistory.isNotEmpty()) {
+                            // Undo last move
+                            val previousBoard = boardHistory.removeAt(boardHistory.size - 1)
+                            currentBoard = previousBoard
+                            moveCount--
+                            // Recalculate squaresMoved (simplified - in fragment-app this is tracked in history)
+                            squaresMoved = maxOf(0, squaresMoved - 1)
+                            hintMessage = null
+                            gameWon = false
+                        } else {
+                            // No history, go back to menu
+                            onBack()
+                        }
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }

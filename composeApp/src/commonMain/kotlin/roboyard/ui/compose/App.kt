@@ -47,11 +47,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import driftingdroids.model.Board
 import roboyard.logic.core.LevelLoader
 import roboyard.logic.core.GameLogic
 import roboyard.logic.core.Preferences
 import roboyard.logic.core.MapGenerator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun App() {
@@ -134,7 +141,7 @@ fun App() {
                 Screen.Loading -> {
                     LoadingScreen(
                         levelId = selectedLevelId,
-                        onLoadComplete = { loadedBoard ->
+                        onLoadComplete = { loadedBoard: Board ->
                             board = loadedBoard
                             currentScreen = Screen.Game
                         },
@@ -341,30 +348,6 @@ fun MenuButton(text: String, onClick: () -> Unit) {
             }
     ) {
         Text(text = text, style = MaterialTheme.typography.titleMedium)
-    }
-}
-
-@Composable
-fun LoadingScreen(
-    levelId: Int = 1,
-    onLoadComplete: (Board) -> Unit = {},
-    onBack: () -> Unit = {}
-) {
-    LaunchedEffect(levelId) {
-        val board = LevelLoader.loadLevel(levelId)
-        if (board != null) {
-            onLoadComplete(board)
-        } else {
-            onBack()
-        }
-    }
-
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(text = "Loading level $levelId...", style = MaterialTheme.typography.bodyLarge)
     }
 }
 
@@ -1428,6 +1411,67 @@ fun AchievementsScreen(
                     progress = "0 / 10"
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun LoadingScreen(
+    levelId: Int,
+    onLoadComplete: (Board) -> Unit,
+    onBack: () -> Unit
+) {
+    var isLoading by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(levelId) {
+        isLoading = true
+        errorMessage = null
+        try {
+            // Load level using LevelLoader (same as fragment-app GameState.loadLevel)
+            val board = withContext(Dispatchers.IO) {
+                LevelLoader.loadLevel(levelId)
+            }
+            if (board != null) {
+                onLoadComplete(board)
+            } else {
+                errorMessage = "Level not found"
+            }
+        } catch (e: Exception) {
+            errorMessage = "Error loading level: ${e.message}"
+        } finally {
+            isLoading = false
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (isLoading) {
+                Text(
+                    text = "Loading Level $levelId...",
+                    color = Color.White,
+                    fontSize = 24.sp
+                )
+            } else if (errorMessage != null) {
+                val errorMsg = errorMessage ?: "Unknown error"
+                Text(
+                    text = errorMsg,
+                    color = Color.Red,
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = onBack) {
+                    Text("Back")
+                }
             }
         }
     }
