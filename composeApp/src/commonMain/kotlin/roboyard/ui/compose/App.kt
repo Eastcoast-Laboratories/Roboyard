@@ -45,6 +45,12 @@ fun App() {
                     },
                     onCredits = {
                         currentScreen = Screen.Credits
+                    },
+                    onSaveLoad = {
+                        currentScreen = Screen.SaveLoad
+                    },
+                    onAchievements = {
+                        currentScreen = Screen.Achievements
                     }
                 )
                 Screen.Game -> {
@@ -91,6 +97,25 @@ fun App() {
                         }
                     )
                 }
+                Screen.SaveLoad -> {
+                    SaveLoadScreen(
+                        onBack = {
+                            currentScreen = Screen.MainMenu
+                        },
+                        onLoadGame = { gameId ->
+                            // TODO: Load specific game
+                            board = Board.createBoardRandom(4)
+                            currentScreen = Screen.Game
+                        }
+                    )
+                }
+                Screen.Achievements -> {
+                    AchievementsScreen(
+                        onBack = {
+                            currentScreen = Screen.MainMenu
+                        }
+                    )
+                }
             }
         }
     }
@@ -102,7 +127,9 @@ enum class Screen {
     LevelSelection,
     Settings,
     Help,
-    Credits
+    Credits,
+    SaveLoad,
+    Achievements
 }
 
 @Composable
@@ -111,7 +138,9 @@ fun MainMenuScreen(
     onLevelSelection: () -> Unit = {},
     onSettings: () -> Unit = {},
     onHelp: () -> Unit = {},
-    onCredits: () -> Unit = {}
+    onCredits: () -> Unit = {},
+    onSaveLoad: () -> Unit = {},
+    onAchievements: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -135,6 +164,10 @@ fun MainMenuScreen(
         MenuButton(text = "New Random Game", onClick = onNewRandomGame)
         Spacer(modifier = Modifier.height(16.dp))
         MenuButton(text = "Level Selection", onClick = onLevelSelection)
+        Spacer(modifier = Modifier.height(16.dp))
+        MenuButton(text = "Save / Load", onClick = onSaveLoad)
+        Spacer(modifier = Modifier.height(16.dp))
+        MenuButton(text = "Achievements", onClick = onAchievements)
         Spacer(modifier = Modifier.height(16.dp))
         MenuButton(text = "Settings", onClick = onSettings)
         Spacer(modifier = Modifier.height(16.dp))
