@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +37,24 @@ enum class FancyButtonColor(
     GREEN(Color(0xFF50C878), Color(0xFF3A9B5C), Color(0xFF66D68A), Color.White),
     BLUE(Color(0xFF4A90E2), Color(0xFF357ABD), Color(0xFF5BA3F5), Color.White),
     GRAY(Color(0xFF6C7B7F), Color(0xFF556065), Color(0xFF8A9499), Color.White),
-    HINT(Color(0xFFFFE082), Color(0xFFFFCC02), Color(0xFFFFB300), Color(0xFF1A1A1A))
+    HINT(Color(0xFFFFE082), Color(0xFFFFCC02), Color(0xFFFFB300), Color(0xFF1A1A1A)),
+    PURPLE(Color(0xFF9C27B0), Color(0xFF7B1FA2), Color(0xFFBA68C8), Color.White)
+}
+
+/**
+ * Color variants for circular buttons in header/footer, matching
+ * circular_button_*.xml drawables from the fragment-app branch.
+ */
+enum class CircularButtonColor(
+    val fillColor: Color,
+    val strokeColor: Color,
+    val textColor: Color
+) {
+    TURQUOISE(Color(0xFF00BCD4), Color.Black, Color.White),
+    YELLOW(Color(0xFFFFC107), Color.Black, Color.Black),
+    ORANGE(Color(0xFFFF9800), Color.Black, Color.White),
+    PURPLE(Color(0xFF9C27B0), Color.Black, Color.White),
+    GRAY(Color(0xFF757575), Color.Black, Color.White)
 }
 
 /**
@@ -77,5 +95,38 @@ fun FancyButton(
             maxLines = 1,
             textAlign = TextAlign.Center
         )
+    }
+}
+
+/**
+ * A circular button matching the original circular_button_*.xml drawables.
+ * Used for header/footer icon buttons.
+ */
+@Composable
+fun CircularButton(
+    text: String? = null,
+    color: CircularButtonColor,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
+) {
+    val shape = RoundedCornerShape(percent = 50)
+    Box(
+        modifier = modifier
+            .size(48.dp)
+            .clip(shape)
+            .background(color.fillColor, shape)
+            .border(BorderStroke(2.dp, color.strokeColor), shape)
+            .clickable(enabled = enabled, onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        text?.let {
+            Text(
+                text = it,
+                color = color.textColor,
+                fontWeight = FontWeight.Bold,
+                fontSize = 30.sp
+            )
+        }
     }
 }
