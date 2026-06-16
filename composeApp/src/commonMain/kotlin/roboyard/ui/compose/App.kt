@@ -1,6 +1,8 @@
 package roboyard.ui.compose
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -680,6 +682,69 @@ fun RadioButtonWithLabel(
             text = text,
             color = textColor,
             fontSize = 16.sp
+        )
+    }
+}
+
+@Composable
+fun HelpScreen(
+    onBack: () -> Unit = {}
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF8FAFC))
+    ) {
+        // Scrollable help content
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+        ) {
+            // Card header
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFFE9ECEF), RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                    .border(BorderStroke(1.dp, Color(0xFFDEE2E6)), RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                    .padding(12.dp)
+            ) {
+                Text(
+                    text = "How to Play",
+                    color = Color(0xFF212529),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            // Card body
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White, RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
+                    .border(BorderStroke(1.dp, Color(0xFFDEE2E6)), RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
+                    .padding(16.dp)
+            ) {
+                Column {
+                    Text(
+                        text = "Roboyard is a puzzle game where you guide robots to their matching targets.\n\n" +
+                               "Drag a robot in any direction to slide it until it hits a wall or another robot.\n\n" +
+                               "Goal: Match each robot to its target of the same color.\n\n" +
+                               "Try to solve each level in the minimum number of moves!",
+                        color = Color(0xFF212529),
+                        fontSize = 14.sp
+                    )
+                }
+            }
+        }
+
+        // Back button
+        FancyButton(
+            text = "← Back",
+            color = FancyButtonColor.BLUE,
+            onClick = onBack,
+            modifier = Modifier.padding(16.dp)
         )
     }
 }
