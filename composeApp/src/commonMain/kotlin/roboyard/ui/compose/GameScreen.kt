@@ -859,7 +859,7 @@ fun BoardCanvas(
                         val offsetX = (size.width - board.width * cellSize) / 2
                         val offsetY = (size.height - board.height * cellSize) / 2
 
-                        // Reset tracking variables (ACTION_DOWN logic from fragment-app)
+                        // Reset continuous movement tracking (ACTION_DOWN logic from fragment-app)
                         hasMovedRobotInCurrentGesture = false
                         pendingMoveDirection = null
                         robotActivatedBySwipe = false
@@ -982,11 +982,13 @@ fun BoardCanvas(
                                 onRobotMove(robotIndex, direction)
 
                                 hasMovedRobotInCurrentGesture = true
+                                // Reset starting position for next movement (matching fragment-app)
+                                dragStartPos = change.position
+                                
                                 // After a successful move, reset all swipe and activation state (matching fragment-app)
                                 // This ensures that the robot cannot be activated or moved again
                                 // until the user performs a new ACTION_DOWN on a robot.
                                 dragStartRobot = null
-                                dragStartPos = null
                                 pendingMoveDirection = null
                                 robotActivatedBySwipe = false
                                 robotMoveInitiated = false
@@ -1272,11 +1274,11 @@ fun deserializeBoard(data: String): Board? {
     return board
 }
 
-/** Parses color character (p/g/b/y/s) to robot index (0-4). */
+/** Parses color character (r/g/b/y/s) to robot index (0-4). Matches fragment-app parseColorChar logic 1:1 */
 private fun parseColorChar(type: String): Int {
     val char = if (type.length == 2) type[1] else type[0]
     return when (char) {
-        'p' -> 0 // pink
+        'r' -> 0 // red (pink)
         'g' -> 1 // green
         'b' -> 2 // blue
         'y' -> 3 // yellow

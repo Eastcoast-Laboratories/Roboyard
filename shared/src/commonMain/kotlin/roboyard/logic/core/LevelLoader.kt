@@ -97,12 +97,13 @@ object LevelLoader {
     }
 
     /**
-     * Parses color character (p/g/b/y/s) to robot index (0-4).
+     * Parses color character (r/g/b/y/s) to robot index (0-4).
+     * Matches fragment-app parseColorChar logic 1:1
      */
     private fun parseColorChar(type: String): Int {
         val char = if (type.length == 2) type[1] else type[0]
         return when (char) {
-            'p' -> 0 // pink
+            'r' -> 0 // red (pink)
             'g' -> 1 // green
             'b' -> 2 // blue
             'y' -> 3 // yellow
