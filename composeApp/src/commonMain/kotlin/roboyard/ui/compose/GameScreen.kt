@@ -89,7 +89,7 @@ import roboyard.logic.core.Preferences
 import roboyard.logic.storage.PlatformStorage
 
 // Compose App Version - increment after each session
-const val COMPOSE_APP_VERSION = "v1.2"
+const val COMPOSE_APP_VERSION = "v1.3"
 
 // Helper function to format time as MM:SS
 fun formatTime(elapsedTimeMs: Long): String {
@@ -958,14 +958,15 @@ fun BoardCanvas(
                     onDrag = { change, dragAmount ->
                         val robotIndex = dragStartRobot
                         val startPos = dragStartPos
-                        if (robotIndex != null && startPos != null) {
+                        // Only process if we have a selected robot and haven't moved yet in this gesture (matching fragment-app)
+                        if (robotIndex != null && startPos != null && !hasMovedRobotInCurrentGesture && !robotMoveInitiated) {
                             val totalDrag = change.position - startPos
                             val distance = kotlin.math.sqrt(totalDrag.x * totalDrag.x + totalDrag.y * totalDrag.y)
 
                             // For an activated robot, we need a larger swipe to start moving
                             val movementThreshold = if (robotActivatedBySwipe) ROBOT_MOVE_THRESHOLD else MIN_SWIPE_DISTANCE
 
-                            if (distance >= movementThreshold && !robotMoveInitiated) {
+                            if (distance >= movementThreshold) {
                                 // Determine the dominant direction (horizontal or vertical)
                                 val dx = if (kotlin.math.abs(totalDrag.x) > kotlin.math.abs(totalDrag.y)) {
                                     if (totalDrag.x > 0) 1 else -1
