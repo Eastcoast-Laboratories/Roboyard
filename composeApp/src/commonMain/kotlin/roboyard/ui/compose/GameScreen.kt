@@ -167,7 +167,7 @@ fun GameScreen(
                         squaresMoved += distance
                         hintMessage = null
                         // [GAME_WIN] Check if the goal robot reached its target
-                        if (isSolved(newBoard)) {
+                        if (newBoard.goals.isNotEmpty() && isSolved(newBoard)) {
                             gameWon = true
                         }
                     }
@@ -238,7 +238,7 @@ fun GameScreen(
                                 moveCount++
                                 squaresMoved++
                                 hintMessage = null
-                                if (isSolved(newBoard)) {
+                                if (newBoard.goals.isNotEmpty() && isSolved(newBoard)) {
                                     gameWon = true
                                 }
                             }
@@ -258,7 +258,7 @@ fun GameScreen(
                                 moveCount++
                                 squaresMoved++
                                 hintMessage = null
-                                if (isSolved(newBoard)) {
+                                if (newBoard.goals.isNotEmpty() && isSolved(newBoard)) {
                                     gameWon = true
                                 }
                             }
@@ -278,7 +278,7 @@ fun GameScreen(
                                 moveCount++
                                 squaresMoved++
                                 hintMessage = null
-                                if (isSolved(newBoard)) {
+                                if (newBoard.goals.isNotEmpty() && isSolved(newBoard)) {
                                     gameWon = true
                                 }
                             }
@@ -298,7 +298,7 @@ fun GameScreen(
                                 moveCount++
                                 squaresMoved++
                                 hintMessage = null
-                                if (isSolved(newBoard)) {
+                                if (newBoard.goals.isNotEmpty() && isSolved(newBoard)) {
                                     gameWon = true
                                 }
                             }
@@ -439,7 +439,15 @@ fun GameScreen(
                                                 Board.WEST -> "West"
                                                 else -> "Unknown"
                                             }
-                                            hintMessage = "Hint: Move robot ${firstMove.robotNumber} $directionName"
+                                            val colorName = when (firstMove.robotNumber) {
+                                                0 -> "Pink"
+                                                1 -> "Green"
+                                                2 -> "Blue"
+                                                3 -> "Yellow"
+                                                4 -> "Silver"
+                                                else -> "Unknown"
+                                            }
+                                            hintMessage = "Hint: Move $colorName robot $directionName"
                                         } else {
                                             hintMessage = "Already at goal!"
                                         }
@@ -463,7 +471,15 @@ fun GameScreen(
                                     Board.WEST -> "West"
                                     else -> "Unknown"
                                 }
-                                hintMessage = "Hint ${currentHintStep + 1}: Move robot ${nextMove.robotNumber} $directionName"
+                                val colorName = when (nextMove.robotNumber) {
+                                    0 -> "Pink"
+                                    1 -> "Green"
+                                    2 -> "Blue"
+                                    3 -> "Yellow"
+                                    4 -> "Silver"
+                                    else -> "Unknown"
+                                }
+                                hintMessage = "Hint ${currentHintStep + 1}: Move $colorName robot $directionName"
                                 currentHintStep++
                             } else {
                                 hintMessage = "All hints shown"
