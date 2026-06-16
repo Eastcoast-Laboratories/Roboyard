@@ -5,6 +5,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -203,8 +205,8 @@ fun GameScreen(
 
 /**
  * Game information card shown below the board, matching the original
- * game_info_card_background gradient with Moves / Squares / Difficulty on the
- * left and the timer on the right.
+ * fragment-app 3-block layout: Left (60%) for Moves/Squares/Difficulty,
+ * Center (20%) for Optimal Moves button (hidden), Right (30%) for Timer/Map ID.
  */
 @Composable
 fun GameInfoCard(
@@ -232,18 +234,43 @@ fun GameInfoCard(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.Top
         ) {
-            Column(modifier = Modifier.weight(0.6f)) {
+            // Left block (60%): Moves, Squares, Difficulty
+            Column(
+                modifier = Modifier
+                    .weight(0.6f)
+                    .padding(end = 16.dp, bottom = 4.dp)
+            ) {
                 Text("Moves: $moveCount", color = Color(0xFFEEEEEE), fontSize = 10.sp)
-                Text("Squares: $squaresMoved", color = Color(0xFFEEEEEE), fontSize = 8.sp)
-                Text("Difficulty: $difficulty", color = Color(0xFFEEEEEE), fontSize = 8.sp)
+                Text("Squares: $squaresMoved", color = Color(0xFFEEEEEE), fontSize = 8.sp, modifier = Modifier.padding(top = 2.dp))
+                Text("Difficulty: $difficulty", color = Color(0xFFEEEEEE), fontSize = 8.sp, modifier = Modifier.padding(top = 2.dp))
             }
-            Text(
-                text = timer,
-                color = Color(0xFFEEEEEE),
-                fontSize = 16.sp,
-                modifier = Modifier.weight(0.4f),
-                textAlign = TextAlign.End
-            )
+            // Center block (20%): Optimal Moves button (hidden)
+            Box(modifier = Modifier.weight(0.2f)) {
+                // Hidden optimal moves button
+            }
+            // Right block (30%): Timer, Map ID, Close button
+            Column(
+                modifier = Modifier.weight(0.3f),
+                horizontalAlignment = Alignment.End
+            ) {
+                Text(
+                    text = timer,
+                    color = Color(0xFFEEEEEE),
+                    fontSize = 16.sp
+                )
+                Text(
+                    text = "",
+                    color = Color(0xFFEEEEEE),
+                    fontSize = 8.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+                // Close button placeholder
+                Box(
+                    modifier = Modifier
+                        .size(16.dp)
+                        .padding(top = 4.dp)
+                )
+            }
         }
         hintMessage?.let { message ->
             Text(
