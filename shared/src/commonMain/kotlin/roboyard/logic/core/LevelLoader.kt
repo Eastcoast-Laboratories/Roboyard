@@ -80,6 +80,7 @@ object LevelLoader {
                     if (colorId >= -1) {
                         val pos = x + y * width
                         board.addGoal(pos, colorId, 0)
+                        board.setGoal(pos)
                     }
                 }
                 type.startsWith("r") -> {
