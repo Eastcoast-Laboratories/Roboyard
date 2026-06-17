@@ -168,7 +168,8 @@ fun saveLevelCompletion(
     optimalMoves: Int,
     stars: Int,
     squaresMoved: Int = 0,
-    elapsedTime: Long = 0
+    elapsedTime: Long = 0,
+    robotsUsed: Int = 4 // Default to 4 robots (same as in main game)
 ) {
     val levelData = levelCompletionManager.getLevelCompletionData(levelId)
     if (levelData != null) {
@@ -178,7 +179,7 @@ fun saveLevelCompletion(
         levelData.optimalMoves = optimalMoves
         levelData.squaresSurpassed = squaresMoved
         levelData.timeNeeded = elapsedTime
-        levelData.robotsUsed = 4 // Default to 4 robots (same as in main game)
+        levelData.robotsUsed = robotsUsed
         
         // For beginner levels (1-10), always earn at least 1 star (same as in main game)
         val finalStars = if (stars < 1 && levelId <= roboyard.logic.core.Constants.MIN_STAR_GUARANTEE_LEVEL) {
