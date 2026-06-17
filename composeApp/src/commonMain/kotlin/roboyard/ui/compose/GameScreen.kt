@@ -167,6 +167,8 @@ fun GameScreen(
     var gameWon by remember(board) { mutableStateOf(false) }
     var solution by remember(board) { mutableStateOf<driftingdroids.model.Solution?>(null) }
     var currentHintStep by remember(board) { mutableIntStateOf(0) }
+    var currentHintRobot by remember(board) { mutableIntStateOf(-1) }
+    var currentHintDirection by remember(board) { mutableIntStateOf(-1) }
     var isSolverRunning by remember(board) { mutableStateOf(false) }
     val boardHistory = remember(board) { mutableListOf<Board>() }
     var elapsedTime by remember(board) { mutableLongStateOf(0L) }
@@ -225,7 +227,38 @@ fun GameScreen(
                         currentBoard = newBoard
                         moveCount++
                         squaresMoved += distance
-                        hintMessage = null
+                        
+                        // Check if player followed the current hint
+                        if (hintMessage != null && robotIndex == currentHintRobot && direction == currentHintDirection) {
+                            // Player followed the hint, show next hint automatically
+                            val nextMove = solution?.getNextMove()
+                            if (nextMove != null) {
+                                val directionName = when (nextMove.direction) {
+                                    Board.NORTH -> "North"
+                                    Board.SOUTH -> "South"
+                                    Board.EAST -> "East"
+                                    Board.WEST -> "West"
+                                    else -> "Unknown"
+                                }
+                                val colorName = when (nextMove.robotNumber) {
+                                    0 -> "Pink"
+                                    1 -> "Green"
+                                    2 -> "Blue"
+                                    3 -> "Yellow"
+                                    4 -> "Silver"
+                                    else -> "Unknown"
+                                }
+                                hintMessage = "Hint ${currentHintStep + 1}: Move $colorName robot $directionName"
+                                currentHintRobot = nextMove.robotNumber
+                                currentHintDirection = nextMove.direction
+                                currentHintStep++
+                            } else {
+                                hintMessage = "All hints shown"
+                            }
+                        } else {
+                            hintMessage = null
+                        }
+                        
                         // [GAME_WIN] Check if the goal robot reached its target
                         if (newBoard.goals.isNotEmpty() && isSolved(newBoard)) {
                             gameWon = true
@@ -531,6 +564,8 @@ fun GameScreen(
                                                 else -> "Unknown"
                                             }
                                             hintMessage = "Hint: Move $colorName robot $directionName"
+                                currentHintRobot = firstMove.robotNumber
+                                currentHintDirection = firstMove.direction
                                         } else {
                                             hintMessage = "Already at goal!"
                                         }
@@ -563,6 +598,8 @@ fun GameScreen(
                                     else -> "Unknown"
                                 }
                                 hintMessage = "Hint ${currentHintStep + 1}: Move $colorName robot $directionName"
+                                currentHintRobot = nextMove.robotNumber
+                                currentHintDirection = nextMove.direction
                                 currentHintStep++
                             } else {
                                 hintMessage = "All hints shown"
