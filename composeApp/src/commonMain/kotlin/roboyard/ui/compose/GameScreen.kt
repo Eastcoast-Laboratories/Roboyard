@@ -153,9 +153,10 @@ fun GameScreen(
             .background(Color.Black)
     ) {
         // Game grid at top, full width, maintaining square aspect ratio
-        BoardCanvas(
-            board = currentBoard,
-            onRobotMove = { robotIndex, direction ->
+        androidx.compose.runtime.key(currentBoard.robotPositions.contentHashCode()) {
+            BoardCanvas(
+                board = currentBoard,
+                onRobotMove = { robotIndex, direction ->
                 if (!gameWon) {
                     val oldPos = currentBoard.robotPositions[robotIndex]
                     val newBoard = moveRobot(currentBoard, robotIndex, direction)
@@ -186,6 +187,7 @@ fun GameScreen(
                 .aspectRatio(board.width.toFloat() / board.height.toFloat())
                 .shadow(elevation = 20.dp, shape = RoundedCornerShape(0.dp))
         )
+        }
 
         // Game info row (move count, squares moved, timer)
         Row(
@@ -750,6 +752,7 @@ fun BoardCanvas(
 ) {
     val gameState = remember(board) { ComposeGameState(board) }
     // Use the board parameter directly - it will be updated by the parent
+    // Since board is passed as a parameter, Compose will recompose when it changes
     val currentBoard = board
 
     // Tracking variables matching fragment-app GameGridView
