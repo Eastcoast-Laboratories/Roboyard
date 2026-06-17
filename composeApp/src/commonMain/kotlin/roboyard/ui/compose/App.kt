@@ -1440,7 +1440,7 @@ fun AchievementsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(Color.Black)
     ) {
         // Top row with back button, title, and profile button
         Row(
@@ -1451,14 +1451,14 @@ fun AchievementsScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             FancyButton(
-                text = "Back",
-                color = FancyButtonColor.BLUE,
+                text = "BACK",
+                color = FancyButtonColor.GRAY,
                 onClick = onBack,
                 modifier = Modifier.width(100.dp)
             )
             Text(
                 text = "Achievements",
-                color = Color(0xFF333333),
+                color = Color.White,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.weight(1f),
@@ -1475,7 +1475,7 @@ fun AchievementsScreen(
         // Progress text
         Text(
             text = "0 / 0 Unlocked",
-            color = Color(0xFF666666),
+            color = Color.White,
             fontSize = 16.sp,
             modifier = Modifier
                 .fillMaxWidth()
