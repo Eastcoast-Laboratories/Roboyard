@@ -16,8 +16,6 @@
 */
 package driftingdroids.model
 
-import java.util.Arrays
-
 /**
  * This class is a minimal `Map&ltK,V&gt` implementation for primitive
  * `int` or `long` keys K and <tt>byte</tt> values V,
@@ -188,7 +186,7 @@ class KeyDepthMapTrieGeneric(keyBits: Int) : KeyDepthMap {
                     this.leafArrays = this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1) as Array<ByteArray>
                 }
                 val newLeafArray = ByteArray(LEAF_ARRAY_SIZE)
-                Arrays.fill(newLeafArray, DEFAULT_VALUE)
+                newLeafArray.fill(DEFAULT_VALUE)
                 this.leafArrays[this.numLeafArrays++] = newLeafArray
                 this.nextLeafArray += LEAF_ARRAY_SIZE
             }
@@ -319,7 +317,7 @@ class KeyDepthMapTrieGeneric(keyBits: Int) : KeyDepthMap {
                     this.leafArrays = this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1) as Array<ByteArray>
                 }
                 val newLeafArray = ByteArray(LEAF_ARRAY_SIZE)
-                Arrays.fill(newLeafArray, DEFAULT_VALUE)
+                newLeafArray.fill(DEFAULT_VALUE)
                 this.leafArrays[this.numLeafArrays++] = newLeafArray
                 this.nextLeafArray += LEAF_ARRAY_SIZE
             }
@@ -362,7 +360,7 @@ class KeyDepthMapTrieGeneric(keyBits: Int) : KeyDepthMap {
     }
 
     private fun sizeRecursion(thisNodeDepth: Int, thisNodeIndex: Int): Int {
-        assert(0 < thisNodeIndex) { thisNodeIndex }
+        require(0 < thisNodeIndex) { thisNodeIndex.toString() }
         var size = 0
         val nodeArray = this.nodeArrays[thisNodeIndex ushr NODE_ARRAY_SHIFT]
         var nidx = thisNodeIndex and NODE_ARRAY_MASK

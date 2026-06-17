@@ -17,41 +17,27 @@
 package driftingdroids.model
 
 import roboyard.logic.core.Constants
-import java.nio.charset.StandardCharsets
-import java.util.Arrays
-import java.util.Base64
-import java.util.Collections
-import java.util.Formatter
-import java.util.Random
-import java.util.zip.CRC32
-import java.util.zip.Deflater
-import java.util.zip.Inflater
 import kotlin.math.min
 
 /**
  * Board class represents the game board state including walls, robots, and goals.
  * Handles board creation, modification, and game state management.
  */
-class Board private constructor(@JvmField val width: Int, val height: Int, numRobots: Int) {
-    @JvmField
+class Board private constructor(val width: Int, val height: Int, numRobots: Int) {
     val size: Int // width * height
-    @JvmField
     val sizeNumBits: Int //number of bits required to store any board position (size - 1)
 
-    @JvmField
     val directionIncrement: IntArray
 
     private val quadrants: IntArray // quadrants used for this board (indexes in QUADRANTS) 
 
     /** add all outer walls (just to make sure, because the solver requires them) and return the array of walls. */
-    @JvmField
     val walls: Array<BooleanArray> // [4][width*height] 4 directions
 
     fun getWalls(): Array<BooleanArray> {
         addOuterWalls() // the outer walls are required by the solver
         return this.walls
     }
-    @JvmField
     val goals: MutableList<Goal> // all possible goals on the board
     private val randomGoals: MutableList<Goal?>
     private var goal: Goal? // the current goal
@@ -71,9 +57,8 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
      * Inner class representing a goal on the board with position, robot, and shape information.
      * Implements Comparable to allow sorting of goals by robot number, shape, and position.
      */
-    inner class Goal(val x: Int, val y: Int, @JvmField val robotNumber: Int, val shape: Int) :
+    inner class Goal(val x: Int, val y: Int, val robotNumber: Int, val shape: Int) :
         Comparable<Goal> {
-        @JvmField
         val position: Int
 
         init {
@@ -140,7 +125,7 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
      */
     init {
         this.size = width * height
-        this.sizeNumBits = 32 - Integer.numberOfLeadingZeros(this.size - 1) //ceil(log2(x))
+        this.sizeNumBits = 32 - (this.size - 1).countLeadingZeroBits() //ceil(log2(x))
         this.directionIncrement = IntArray(4)
         this.directionIncrement[NORTH] = -width
         this.directionIncrement[EAST] = 1
@@ -171,17 +156,21 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
             if (this.isFreestyleBoard) {
                 return "freestyle"
             }
-            val fmt = Formatter()
+            val fmt = StringBuilder()
             val quad01 = (this.getQuadrantNum(0) shl 4) or this.getQuadrantNum(1)
             val quad23 = (this.getQuadrantNum(2) shl 4) or this.getQuadrantNum(3)
-            fmt.format("%02X%02X+", quad01, quad23)
+            fmt.append(quad01.toString(16).padStart(2, '0'))
+            fmt.append(quad23.toString(16).padStart(2, '0'))
+            fmt.append("+")
             val robos =
                 (this.robotPositions.size shl 4) or (if (this.goal!!.robotNumber >= 0) this.goal!!.robotNumber else 0x0f)
-            fmt.format("%02X+", robos)
+            fmt.append(robos.toString(16).padStart(2, '0'))
+            fmt.append("+")
             for (robot in this.robotPositions) {
-                fmt.format("%02X", robot)
+                fmt.append(robot.toString(16).padStart(2, '0'))
             }
-            fmt.format("+%02X", this.goal!!.position)
+            fmt.append("+")
+            fmt.append(this.goal!!.position.toString(16).padStart(2, '0'))
             return fmt.toString()
         }
 
@@ -451,7 +440,7 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
      */
     fun setRobotsRandom() {
         do {
-            Arrays.fill(this.robotPositions, -1)
+            this.robotPositions.fill(-1)
             for (i in this.robotPositions.indices) {
                 var position: Int
                 do {
@@ -471,11 +460,11 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
             return false
         }
         val backup = this.robotPositions.copyOf(this.robotPositions.size)
-        Arrays.fill(this.robotPositions, -1)
+        this.robotPositions.fill(-1)
         for (i in newRobots.indices) {
             if (!this.setRobot(i, newRobots[i], false)) {    //failed to set a robot
                 //undo all changes
-                System.arraycopy(backup, 0, this.robotPositions, 0, backup.size)
+                backup.copyInto(this.robotPositions, 0, 0, backup.size)
                 return false
             }
         }
@@ -524,7 +513,7 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
         }
         if (this.randomGoals.isEmpty()) {
             this.randomGoals.addAll(this.goals)
-            Collections.shuffle(this.randomGoals, RANDOM)
+            this.randomGoals.shuffle(RANDOM)
         }
         this.goal = this.randomGoals.removeAt(0)
         if (this.goal!!.robotNumber >= this.robotPositions.size) {  //goal not usable
@@ -679,7 +668,7 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
 
     fun removeWalls() {
         for (w in this.walls) {
-            Arrays.fill(w, false)
+            w.fill(false)
         }
         this.addOuterWalls()
     }
@@ -874,12 +863,10 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
         const val SIZE_MAX: Int = 4096 // 12 bits
         const val NUMROBOTS_STANDARD: Int = 4
 
-        @JvmField
         val ROBOT_COLOR_NAMES_SHORT: Array<String?> =
             arrayOf<String?>( //also used as part of L10N-keys
                 "r", "g", "b", "y", "s"
             )
-        @JvmField
         val ROBOT_COLOR_NAMES_LONG: Array<String?> =
             arrayOf<String?>( //also used as part of L10N-keys
                 "red", "green", "blue", "yellow", "silver"
@@ -1037,16 +1024,12 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
                 .addWall(7, 7, "NESW")
         }
 
-        @JvmField
         val NORTH: Int = Constants.NORTH // up
-        @JvmField
         val EAST: Int = Constants.EAST // right
-        @JvmField
         val SOUTH: Int = Constants.SOUTH // down
-        @JvmField
         val WEST: Int = Constants.WEST // left
 
-        private val RANDOM = Random()
+        private val RANDOM = kotlin.random.Random.Default
 
         /**
          * Gets a list of all goals in a specified quadrant.
@@ -1055,7 +1038,7 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
          */
         fun getStaticQuadrantGoals(quadrant: Int): MutableList<Goal> {
             val result: MutableList<Goal> = ArrayList<Goal>(QUADRANTS[quadrant]!!.goals)
-            Collections.sort(result)
+            result.sort()
             return result
         }
 
@@ -1070,18 +1053,12 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
             // 1. board size, numRobots
             val newBoard = Board(oldBoard.width, oldBoard.height, oldBoard.robotPositions.size)
             // 2. robots
-            System.arraycopy(
-                oldBoard.robotPositions,
-                0,
-                newBoard.robotPositions,
-                0,
-                newBoard.robotPositions.size
-            )
+            oldBoard.robotPositions.copyInto(newBoard.robotPositions, 0, 0, newBoard.robotPositions.size)
             // 3. quadrants
-            System.arraycopy(oldBoard.quadrants, 0, newBoard.quadrants, 0, newBoard.quadrants.size)
+            oldBoard.quadrants.copyInto(newBoard.quadrants, 0, 0, newBoard.quadrants.size)
             // 4. walls
             for (i in oldBoard.walls.indices) {
-                System.arraycopy(oldBoard.walls[i], 0, newBoard.walls[i], 0, newBoard.walls[i].size)
+                oldBoard.walls[i].copyInto(newBoard.walls[i], 0, 0, newBoard.walls[i].size)
             }
             // 5. list of goals
             newBoard.goals.clear()
@@ -1103,7 +1080,6 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
          * @param numRobots Number of robots on new board
          * @return New freestyle board instance
          */
-        @JvmStatic
         fun createBoardFreestyle(
             oldBoard: Board?,
             width: Int,
@@ -1119,7 +1095,7 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
             // Reset robot positions to -1 so they can be set correctly later
             // The constructor sets default positions, but for freestyle boards
             // the robots will be positioned by the caller (e.g., RRGetMap.createDDWorld)
-            Arrays.fill(newBoard.robotPositions, -1)
+            newBoard.robotPositions.fill(-1)
             if (null != oldBoard) {
                 // copy walls, goals and active goal
                 oldBoard.removeOuterWalls()
@@ -1149,7 +1125,7 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
                 }
                 oldBoard.addOuterWalls()
                 // copy robots
-                Arrays.fill(newBoard.robotPositions, -1)
+                newBoard.robotPositions.fill(-1)
                 for (robot in 0..<min(newBoard.robotPositions.size, oldBoard.robotPositions.size)) {
                     val oldX = oldBoard.robotPositions[robot] % oldBoard.width
                     val oldY = oldBoard.robotPositions[robot] / oldBoard.width
@@ -1212,7 +1188,7 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
             for (i in 0..3) {
                 indexList.add(i)
             }
-            Collections.shuffle(indexList, RANDOM)
+            indexList.shuffle(RANDOM)
             return createBoardQuadrants(
                 indexList.get(0)!! + RANDOM.nextInt(3 + 1) * 4,
                 indexList.get(1)!! + RANDOM.nextInt(3 + 1) * 4,
@@ -1379,59 +1355,22 @@ class Board private constructor(@JvmField val width: Int, val height: Int, numRo
                 rshift -= 8
                 i++
             }
-            //zip/deflate data
-            val zip = Deflater(9)
-            zip.setInput(input)
-            zip.finish()
-            val zipOutLen =
-                4 + zip.deflate(zipOutput, 4, zipOutput.size - 4) //skip uncompressed length
-            //encode base64
-            val b64Input = zipOutput.copyOf(zipOutLen)
-            val b64Output = Base64.getEncoder().encodeToString(b64Input)
-            //compute CRC of encoded data
-            val crc32 = CRC32()
-            crc32.update(b64Output.toByteArray(StandardCharsets.UTF_8))
-            val crc32Value = crc32.getValue()
-            val crc32String = Formatter().format("%08X", crc32Value).toString()
+            //zip/deflate data - not available in commonMain
+            TODO("Deflater not available in commonMain")
+            //encode base64 - not available in commonMain
+            TODO("Base64 not available in commonMain")
+            //compute CRC of encoded data - not available in commonMain
+            TODO("CRC32 not available in commonMain")
             //build output string:  starts and ends with "!", to be split at "!"
-            val result = "!DriftingDroids_game!" + crc32String + "!" + b64Output + "!"
+            val result = "!DriftingDroids_game!TODO!"
             return result
         }
 
 
         private fun unb64unzip(input: String): ByteArray? {
-            var result: ByteArray? = null
-            try {
-                //split input string and first validation
-                val inputSplit: Array<String?> =
-                    input.split("!".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                require(
-                    !((4 != inputSplit.size) || (inputSplit[1] != "DriftingDroids_game") ||
-                            ('!' != input.get(0)) || ('!' != input.get(input.length - 1)))
-                ) { "input string has wrong format" }
-                //validate data
-                val b64crc = inputSplit[2]!!.toLong(16) //throws NumberFormatException
-                val crc32 = CRC32()
-                crc32.update(inputSplit[3]!!.toByteArray(StandardCharsets.UTF_8))
-                require(crc32.getValue() == b64crc) { "data CRC mismatch" }
-                //parse base64 string
-                val b64Output = Base64.getDecoder().decode(inputSplit[3]) //throws IllegalArgumentException
-                //unzip/inflate data
-                var unzipLen = 0
-                for (i in 0..3) {
-                    unzipLen = (unzipLen shl 8) or (0xff and b64Output[i].toInt())
-                }
-                result = ByteArray(unzipLen)
-                val unzip = Inflater()
-                unzip.setInput(b64Output, 4, b64Output.size - 4)
-                val unzipLenActual = unzip.inflate(result) //throws DataFormatException
-                //validate unzip
-                require(unzipLen == unzipLenActual) { "uncompressed data length mismatch" }
-            } catch (e: Exception) {
-                Logger.println("error in unb64unzip: " + e.toString())
-                result = null
-            }
-            return result
+            // Not available in commonMain
+            TODO("Base64/Inflater/CRC32 not available in commonMain")
+            return null
         }
 
 

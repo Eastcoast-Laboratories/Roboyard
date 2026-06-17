@@ -16,8 +16,6 @@
 */
 package driftingdroids.model
 
-import java.util.Arrays
-
 abstract class KeyMakerInt {
     /**
      * Creates the <tt>int</tt> key from the values of the given <tt>state</tt>.
@@ -48,10 +46,10 @@ abstract class KeyMakerInt {
         }
 
         override fun run(state: IntArray): Int {
-            assert(this.tmpState.size == state.size) { state.size }
+            require(this.tmpState.size == state.size) { state.size.toString() }
             //copy and sort state
-            System.arraycopy(state, 0, this.tmpState, 0, state.size)
-            Arrays.sort(this.tmpState, 0, this.idxSort)
+            state.copyInto(this.tmpState, 0, 0, state.size)
+            this.tmpState.sort(0, this.idxSort)
             //pack state into a single int value
             var result = this.tmpState[this.idxLen1]
             for (i in this.idxLen2 downTo 0) {
@@ -65,7 +63,7 @@ abstract class KeyMakerInt {
     private class KeyMakerInt11 : KeyMakerInt() {
         //sort 1 of 1 elements
         override fun run(state: IntArray): Int {
-            assert(1 == state.size) { state.size }
+            require(1 == state.size) { state.size.toString() }
             return state[0]
         }
     }
@@ -75,7 +73,7 @@ abstract class KeyMakerInt {
         private val s1: Int
     ) : KeyMakerInt() {
         override fun run(state: IntArray): Int {
-            assert(2 == state.size) { state.size }
+            require(2 == state.size) { state.size.toString() }
             return state[0] or (state[1] shl this.s1)
         }
     }
@@ -85,7 +83,7 @@ abstract class KeyMakerInt {
         private val s1: Int
     ) : KeyMakerInt() {
         override fun run(state: IntArray): Int {
-            assert(2 == state.size) { state.size }
+            require(2 == state.size) { state.size.toString() }
             val result: Int
             if (state[0] < state[1]) {
                 result = state[0] or (state[1] shl this.s1)
@@ -107,7 +105,7 @@ abstract class KeyMakerInt {
         }
 
         override fun run(state: IntArray): Int {
-            assert(3 == state.size) { state.size }
+            require(3 == state.size) { state.size.toString() }
             val result: Int
             if (state[0] < state[1]) {
                 result = state[0] or (state[1] shl this.s1)
@@ -129,7 +127,7 @@ abstract class KeyMakerInt {
         }
 
         override fun run(state: IntArray): Int {
-            assert(this.len == state.size) { state.size }
+            require(this.len == state.size) { state.size.toString() }
             val a = state[0]
             val b = state[1]
             val c = state[2]
@@ -172,7 +170,7 @@ abstract class KeyMakerInt {
         }
 
         override fun run(state: IntArray): Int {
-            assert(4 == state.size) { state.size }
+            require(4 == state.size) { state.size.toString() }
             val a = state[0]
             val b = state[1]
             val c = state[2]
@@ -215,7 +213,7 @@ abstract class KeyMakerInt {
         }
 
         override fun run(state: IntArray): Int {
-            assert(this.len == state.size) { state.size }
+            require(this.len == state.size) { state.size.toString() }
             val a = state[0]
             val b = state[1]
             val c = state[2]

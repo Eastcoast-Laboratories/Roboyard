@@ -146,99 +146,99 @@ object AchievementDefinitions {
         "level_10_complete" to "pgs_getting_started",
         "level_50_complete" to "pgs_halfway_there",
         "level_140_complete" to "pgs_level_master",
-        "all_stars_collected" to "pgs_star_collector"
+        "all_stars_collected" to "pgs_star_collector",
 
 
                 // Performance
-        "perfect_solutions_5" to "pgs_perfect_mover"
-        "perfect_solutions_10" to "pgs_precision_player"
-        "perfect_solutions_50" to "pgs_optimization_expert"
-        "speedrun_under_30s" to "pgs_quick_thinker"
-        "speedrun_under_10s" to "pgs_lightning_fast"
+        "perfect_solutions_5" to "pgs_perfect_mover",
+        "perfect_solutions_10" to "pgs_precision_player",
+        "perfect_solutions_50" to "pgs_optimization_expert",
+        "speedrun_under_30s" to "pgs_quick_thinker",
+        "speedrun_under_10s" to "pgs_lightning_fast",
 
 
                 // Mastery
-        "3_star_hard_level" to "pgs_hard_level_star"
-        "3_star_10_levels" to "pgs_rising_star"
-        "3_star_10_hard_levels" to "pgs_hard_level_master"
-        "3_star_50_levels" to "pgs_superstar"
-        "3_star_all_levels" to "pgs_perfect_master"
+        "3_star_hard_level" to "pgs_hard_level_star",
+        "3_star_10_levels" to "pgs_rising_star",
+        "3_star_10_hard_levels" to "pgs_hard_level_master",
+        "3_star_50_levels" to "pgs_superstar",
+        "3_star_all_levels" to "pgs_perfect_master",
 
 
                 // Random - Speed
-        "speedrun_random_under_20s" to "pgs_speed_demon"
-        "speedrun_random_under_10s" to "pgs_lightning_speed"
-        "speedrun_random_5_games_under_30s" to "pgs_speed_streak"
+        "speedrun_random_under_20s" to "pgs_speed_demon",
+        "speedrun_random_under_10s" to "pgs_lightning_speed",
+        "speedrun_random_5_games_under_30s" to "pgs_speed_streak",
 
 
                 // Random - Streaks
-        "perfect_random_games_5" to "pgs_perfect_5"
-        "perfect_random_games_10" to "pgs_perfect_10"
-        "perfect_random_games_20" to "pgs_perfect_20"
-        "perfect_random_games_streak_5" to "pgs_perfect_streak_5"
-        "perfect_random_games_streak_10" to "pgs_perfect_streak_10"
-        "perfect_random_games_streak_20" to "pgs_perfect_streak_20"
-        "perfect_no_hints_random_1" to "pgs_perfect_no_help"
-        "no_hints_random_10" to "pgs_no_help_needed_10"
-        "no_hints_random_50" to "pgs_no_help_needed_50"
-        "no_hints_streak_random_10" to "pgs_no_help_streak_10"
-        "no_hints_streak_random_50" to "pgs_no_help_streak_50"
+        "perfect_random_games_5" to "pgs_perfect_5",
+        "perfect_random_games_10" to "pgs_perfect_10",
+        "perfect_random_games_20" to "pgs_perfect_20",
+        "perfect_random_games_streak_5" to "pgs_perfect_streak_5",
+        "perfect_random_games_streak_10" to "pgs_perfect_streak_10",
+        "perfect_random_games_streak_20" to "pgs_perfect_streak_20",
+        "perfect_no_hints_random_1" to "pgs_perfect_no_help",
+        "no_hints_random_10" to "pgs_no_help_needed_10",
+        "no_hints_random_50" to "pgs_no_help_needed_50",
+        "no_hints_streak_random_10" to "pgs_no_help_streak_10",
+        "no_hints_streak_random_50" to "pgs_no_help_streak_50",
 
 
                 // Random - Difficulty
-        "impossible_mode_1" to "pgs_impossible_dream"
-        "impossible_mode_5" to "pgs_impossible_champion"
-        "impossible_mode_streak_5" to "pgs_impossible_streak"
-        "impossible_mode_streak_10" to "pgs_impossible_legend"
+        "impossible_mode_1" to "pgs_impossible_dream",
+        "impossible_mode_5" to "pgs_impossible_champion",
+        "impossible_mode_streak_5" to "pgs_impossible_streak",
+        "impossible_mode_streak_10" to "pgs_impossible_legend",
 
 
                 // Random - Solution Length (18-29)
-        "solution_18_moves" to "pgs_18_move_master"
-        "solution_19_moves" to "pgs_19_move_master"
-        "solution_20_moves" to "pgs_20_move_master"
-        "solution_21_moves" to "pgs_21_move_master"
-        "solution_22_moves" to "pgs_22_move_master"
-        "solution_23_moves" to "pgs_23_move_master"
-        "solution_24_moves" to "pgs_24_move_master"
-        "solution_25_moves" to "pgs_25_move_master"
-        "solution_26_moves" to "pgs_26_move_master"
-        "solution_27_moves" to "pgs_27_move_master"
-        "solution_28_moves" to "pgs_28_move_master"
-        "solution_29_moves" to "pgs_29_move_master"
-        "solution_30_plus_moves" to "pgs_30_move_master"
+        "solution_18_moves" to "pgs_18_move_master",
+        "solution_19_moves" to "pgs_19_move_master",
+        "solution_20_moves" to "pgs_20_move_master",
+        "solution_21_moves" to "pgs_21_move_master",
+        "solution_22_moves" to "pgs_22_move_master",
+        "solution_23_moves" to "pgs_23_move_master",
+        "solution_24_moves" to "pgs_24_move_master",
+        "solution_25_moves" to "pgs_25_move_master",
+        "solution_26_moves" to "pgs_26_move_master",
+        "solution_27_moves" to "pgs_27_move_master",
+        "solution_28_moves" to "pgs_28_move_master",
+        "solution_29_moves" to "pgs_29_move_master",
+        "solution_30_plus_moves" to "pgs_30_move_master",
 
 
                 // Random - Resolution
-        "play_10_move_games_all_resolutions" to "pgs_resolution_explorer_10"
-        "play_12_move_games_all_resolutions" to "pgs_resolution_explorer_12"
-        "play_15_move_games_all_resolutions" to "pgs_resolution_explorer_15"
+        "play_10_move_games_all_resolutions" to "pgs_resolution_explorer_10",
+        "play_12_move_games_all_resolutions" to "pgs_resolution_explorer_12",
+        "play_15_move_games_all_resolutions" to "pgs_resolution_explorer_15",
 
 
                 // Random - Targets
-        "game_2_targets" to "pgs_double_target"
-        "game_3_targets" to "pgs_triple_target"
-        "game_4_targets" to "pgs_quad_target"
-        "game_2_of_2_targets" to "pgs_2_of_2"
-        "game_2_of_3_targets" to "pgs_2_of_3"
-        "game_2_of_4_targets" to "pgs_2_of_4"
-        "game_3_of_3_targets" to "pgs_3_of_3"
-        "game_3_of_4_targets" to "pgs_3_of_4"
-        "game_4_of_4_targets" to "pgs_4_of_4"
+        "game_2_targets" to "pgs_double_target",
+        "game_3_targets" to "pgs_triple_target",
+        "game_4_targets" to "pgs_quad_target",
+        "game_2_of_2_targets" to "pgs_2_of_2",
+        "game_2_of_3_targets" to "pgs_2_of_3",
+        "game_2_of_4_targets" to "pgs_2_of_4",
+        "game_3_of_3_targets" to "pgs_3_of_3",
+        "game_3_of_4_targets" to "pgs_3_of_4",
+        "game_4_of_4_targets" to "pgs_4_of_4",
 
 
                 // Random - Fun Challenges
-        "game_5_robots" to "pgs_full_team"
-        "gimme_five" to "pgs_gimme_five"
-        "same_walls_2" to "pgs_same_walls_2"
-        "same_walls_10" to "pgs_same_walls_10"
-        "same_walls_100" to "pgs_same_walls_100"
+        "game_5_robots" to "pgs_full_team",
+        "gimme_five" to "pgs_gimme_five",
+        "same_walls_2" to "pgs_same_walls_2",
+        "same_walls_10" to "pgs_same_walls_10",
+        "same_walls_100" to "pgs_same_walls_100",
 
 
                 // Random - Coverage
         "traverse_all_squares_1_robot" to "pgs_solo_explorer",
         "traverse_all_squares_1_robot_goal" to "pgs_solo_goal_explorer",
         "traverse_all_squares_all_robots" to "pgs_team_explorer",
-        "traverse_all_squares_all_robots_goal" to "pgs_team_goal_explorer"
+        "traverse_all_squares_all_robots_goal" to "pgs_team_goal_explorer",
     )
 
     /**

@@ -20,21 +20,21 @@ class Move(
     val board: Board,
     oldPositions: IntArray,
     newPositions: IntArray,
-    @JvmField var stepNumber: Int
+    var stepNumber: Int
 ) {
-    @JvmField
+   
     val robotNumber: Int
-    @JvmField
+   
     val oldPosition: Int
-    @JvmField
+   
     val newPosition: Int
-    @JvmField
+   
     val direction: Int
-    @JvmField
+   
     val pathMap: MutableMap<Int, Int> // key=position, value=PATH
-    @JvmField
+   
     val oldPositions: Long // positions of all robots before this move
-    @JvmField
+   
     val newPositions: Long // positions of all robots after this move
 
     companion object {

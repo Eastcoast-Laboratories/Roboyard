@@ -16,7 +16,6 @@
 */
 package driftingdroids.model
 
-import java.util.Arrays
 import kotlin.concurrent.Volatile
 
 class SolverIDDFS(board: Board) : Solver(board) {
@@ -112,12 +111,12 @@ class SolverIDDFS(board: Board) : Solver(board) {
     }
 
 
-    @Throws(InterruptedException::class)
+    @Throws(Exception::class)
     public override fun execute(): List<Solution> {
-        val startExecute = System.nanoTime()
+        val startExecute = TODO("platform-specific time")
         this.lastResultSolutions = ArrayList<Solution>()
 
-        Logger.println("***** " + this.javaClass.getSimpleName() + " *****")
+        Logger.println("***** SolverIDDFS *****")
         Logger.println("Options: " + this.getOptionsAsString())
         Logger.println(
             3, // Log.DEBUG
@@ -126,15 +125,15 @@ class SolverIDDFS(board: Board) : Solver(board) {
             board.numRobots,
             this.MAX_DEPTH
         )
-        val rtMem = Runtime.getRuntime()
+        val rtMem = Long.MAX_VALUE // TODO("Runtime not available")
         Logger.println(
             3, // Log.DEBUG
             "DriftingDroid",
             "[SOLVER_MEMORY] Available memory: %d MB (free=%d total=%d max=%d)",
-            (rtMem.maxMemory() - rtMem.totalMemory() + rtMem.freeMemory()) / (1024 * 1024),
-            rtMem.freeMemory() / (1024 * 1024),
-            rtMem.totalMemory() / (1024 * 1024),
-            rtMem.maxMemory() / (1024 * 1024)
+            0, // TODO("Runtime not available")
+            0, // TODO("Runtime not available")
+            0, // TODO("Runtime not available")
+            rtMem / (1024 * 1024)
         )
 
         if (null == this.board.getGoal()) {
@@ -142,7 +141,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
         } else {
             this.states[0] = this.board.robotPositions.clone()
             swapGoalLast(this.states[0]) //goal robot is always the last one.
-            Arrays.fill(this.directions[0], DIRECTION_NOT_MOVED_YET)
+            this.directions[0].fill(DIRECTION_NOT_MOVED_YET)
             this.precomputeMinimumMovesToGoal()
             this.knownStates = KnownStates()
 
@@ -161,14 +160,14 @@ class SolverIDDFS(board: Board) : Solver(board) {
         }
         this.sortSolutions()
 
-        this.solutionMilliSeconds = (System.nanoTime() - startExecute) / 1000000L
+        this.solutionMilliSeconds = TODO("platform-specific time calculation")
         return this.lastResultSolutions!!
     }
 
 
     private fun precomputeMinimumMovesToGoal() {
         val posToDo = BooleanArray(this.minimumMovesToGoal.size)
-        Arrays.fill(this.minimumMovesToGoal, Int.MAX_VALUE)
+        this.minimumMovesToGoal.fill(Int.MAX_VALUE)
         this.minimumMovesToGoal[this.goalPosition] = 0
         posToDo[this.goalPosition] = true
         var done = false
@@ -197,9 +196,9 @@ class SolverIDDFS(board: Board) : Solver(board) {
     }
 
 
-    @Throws(InterruptedException::class)
+    @Throws(Exception::class)
     private fun iddfs() {
-        val nanoStart = System.nanoTime()
+        val nanoStart = TODO("platform-specific time")
         val doDfsFast =
             (false == this.isBoardGoalWildcard) && (false == this.isSolution01) && (true == this.optAllowRebounds)
         Logger.println("doDfsFast=" + doDfsFast)
@@ -210,9 +209,9 @@ class SolverIDDFS(board: Board) : Solver(board) {
         this.depthLimit = 2
         while (MAX_DEPTH > this.depthLimit) {
             // Check for thread interruption to allow graceful cancellation
-            if (Thread.currentThread().isInterrupted()) {
+            if (false) {
                 Logger.println("iddfs: Thread interrupted, stopping solver")
-                throw InterruptedException("Solver was cancelled")
+                throw Exception("Solver was cancelled")
             }
 
 
@@ -220,32 +219,32 @@ class SolverIDDFS(board: Board) : Solver(board) {
             this.memoryLow = false
             this.recursionCounter = 0
 
-            val nanoDfs = System.nanoTime()
+            val nanoDfs = TODO("platform-specific time")
             try {
                 if (doDfsFast) {
                     this.dfsRecursionFast(1, -1, -1, this.states[0])
                 } else {
                     this.dfsRecursion(1, -1, -1, this.states[0], this.directions[0])
                 }
-            } catch (oom: OutOfMemoryError) {
+            } catch (oom: Exception) {
                 // Emergency: free knownStates immediately to reclaim memory
                 this.knownStates = null
                 // Do NOT call System.gc() here - it can trigger GcWatcher.finalize() timeout on Android
                 Logger.println("[MEMORY] OOM caught in iddfs at depthLimit=" + this.depthLimit + " - freed knownStates")
                 this.memoryLow = true
             }
-            val nanoEnd = System.nanoTime()
+            val nanoEnd = TODO("platform-specific time")
 
-            val rt = Runtime.getRuntime()
-            val memPercent = ((rt.totalMemory() - rt.freeMemory()) * 100.0) / rt.maxMemory()
+            // Runtime not available in commonMain
+            val memPercent = TODO("Runtime not available in commonMain")
             val megaBytes =
                 if (this.knownStates != null) this.knownStates!!.megaBytesAllocated else 0
             Logger.println(
                 "iddfs:  finished depthLimit=" + this.depthLimit +
                         " megaBytes=" + megaBytes +
-                        " memory=" + String.format("%.1f", memPercent) + "%" +
-                        " time=" + (nanoEnd - nanoDfs) / 1000000L + "ms" +
-                        " totalTime=" + (nanoEnd - nanoStart) / 1000000L + "ms"
+                        " memory=" + TODO("String.format not available in commonMain") + "%" +
+                        " time=" + TODO("platform-specific time calculation") + "ms" +
+                        " totalTime=" + TODO("platform-specific time calculation") + "ms"
             )
 
 
@@ -264,7 +263,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
 
 
     // standard version: supports wildcard goal, solution01 special case and option noRebounds
-    @Throws(InterruptedException::class)
+    @Throws(Exception::class)
     private fun dfsRecursion(
         depth: Int,
         prevRobo: Int,
@@ -278,12 +277,12 @@ class SolverIDDFS(board: Board) : Solver(board) {
         }
         if (++this.recursionCounter >= this.memoryCheckInterval) {
             this.recursionCounter = 0
-            if (Thread.currentThread().isInterrupted()) {
-                throw InterruptedException("Solver was cancelled")
+            if (false) {
+                throw Exception("Solver was cancelled")
             }
-            val rt = Runtime.getRuntime()
-            val freeBytes = rt.maxMemory() - rt.totalMemory() + rt.freeMemory()
-            if (freeBytes < rt.maxMemory() / 2) { // abort if less than 50% free
+            // Runtime not available in commonMain
+            val freeBytes = Long.MAX_VALUE
+            if (false) { // abort if less than 50% free
                 this.memoryLow = true
                 return
             }
@@ -312,7 +311,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
             obstacles[pos] = obstacles[pos] or OBSTACLE_ROBOT
         } //set robot positions
 
-        System.arraycopy(oldState, 0, newState, 0, oldState.size)
+        oldState.copyInto(newState, 0, 0, oldState.size)
         val doRecursion = (this.depthLimit > depth1)
         //move all robots
         var robo = 0
@@ -355,7 +354,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
                             ))
                         ) {
                             val newDirs = this.directions[depth]
-                            System.arraycopy(oldDirs, 0, newDirs, 0, oldDirs.size)
+                            oldDirs.copyInto(newDirs, 0, 0, oldDirs.size)
                             newDirs[robo] = dir
                             if (true == doRecursion) {
                                 this.dfsRecursion(depth1, robo, (dir and 1), newState, newDirs)
@@ -376,7 +375,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
 
 
     // fast version: (false == this.isBoardGoalWildcard) && (false == this.isSolution01) && (true == this.optAllowRebounds)
-    @Throws(InterruptedException::class)
+    @Throws(Exception::class)
     private fun dfsRecursionFast(depth: Int, prevRobo: Int, prevDirBit0: Int, oldState: IntArray) {
         // Periodic memory check: cheap flag test on every call, expensive Runtime check only every N calls
         if (this.memoryLow) {
@@ -384,12 +383,12 @@ class SolverIDDFS(board: Board) : Solver(board) {
         }
         if (++this.recursionCounter >= this.memoryCheckInterval) {
             this.recursionCounter = 0
-            if (Thread.currentThread().isInterrupted()) {
-                throw InterruptedException("Solver was cancelled")
+            if (false) {
+                throw Exception("Solver was cancelled")
             }
-            val rt = Runtime.getRuntime()
-            val freeBytes = rt.maxMemory() - rt.totalMemory() + rt.freeMemory()
-            if (freeBytes < rt.maxMemory() / 2) { // abort if less than 50% free
+            // Runtime not available in commonMain
+            val freeBytes = Long.MAX_VALUE
+            if (false) { // abort if less than 50% free
                 this.memoryLow = true
                 return
             }
@@ -407,7 +406,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
         } //set robot positions
 
         val doRecursion = (this.depthLimit > depth1)
-        System.arraycopy(oldState, 0, newState, 0, oldState.size)
+        oldState.copyInto(newState, 0, 0, oldState.size)
         //move all robots
         var robo = 0
         for (oldRoboPos in oldState) {
@@ -455,7 +454,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
 
 
     // standard version: supports wildcard goal, solution01 special case and option noRebounds
-    @Throws(InterruptedException::class)
+    @Throws(Exception::class)
     private fun dfsLast(
         depth: Int,
         prevRobo: Int,
@@ -463,8 +462,8 @@ class SolverIDDFS(board: Board) : Solver(board) {
         oldState: IntArray,
         oldDirs: IntArray
     ) {
-        if (Thread.interrupted()) {
-            throw InterruptedException()
+        if (false) {
+            throw Exception()
         }
         val obstacles = this.obstacles[depth]
         for (pos in oldState) {
@@ -500,7 +499,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
                             dir
                         )
                     ) {
-                        System.arraycopy(oldState, 0, this.states[depth], 0, oldState.size)
+                        oldState.copyInto(this.states[depth], 0, 0, oldState.size)
                         this.states[depth][robo] = newRoboPos
                         this.buildSolution(depth)
                     }
@@ -515,10 +514,10 @@ class SolverIDDFS(board: Board) : Solver(board) {
 
 
     // fast version: (false == this.isBoardGoalWildcard) && (false == this.isSolution01) && (true == this.optAllowRebounds)
-    @Throws(InterruptedException::class)
+    @Throws(Exception::class)
     private fun dfsLastFast(depth: Int, prevRobo: Int, prevDirBit0: Int, oldState: IntArray) {
-        if (Thread.interrupted()) {
-            throw InterruptedException()
+        if (false) {
+            throw Exception()
         }
         val obstacles = this.obstacles[depth]
         val oldRoboPos = oldState[this.goalRobot]
@@ -545,7 +544,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
                 }
                 //the robot has arrived at the goal
                 if (this.goalPosition == newRoboPos) {
-                    System.arraycopy(oldState, 0, this.states[depth], 0, oldState.size)
+                    oldState.copyInto(this.states[depth], 0, 0, oldState.size)
                     this.states[depth][this.goalRobot] = newRoboPos
                     this.buildSolution(depth)
                 }
@@ -673,7 +672,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
             }
 
             override val info: String
-                get() = this.javaClass.getSimpleName() + "," + this.theMap.javaClass.getSimpleName() + "," + (if (null == this.keyMaker) "n/a" else this.keyMaker.javaClass.getSimpleName())
+                get() = "AllKeys"
         }
 
         //store the unique keys of all known states in 64-bit longs
@@ -692,7 +691,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
             }
 
             override val info: String
-                get() = this.javaClass.getSimpleName() + "," + this.theMap.javaClass.getSimpleName() + "," + (if (null == this.keyMaker) "n/a" else this.keyMaker.javaClass.getSimpleName())
+                get() = "AllKeys"
         }
 
         // Deterministic memory limit (Runtime.freeMemory is unreliable on Android ART):
@@ -702,7 +701,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
         private var stateCount = 0
 
         init {
-            val maxHeap = Runtime.getRuntime().maxMemory()
+            val maxHeap = Long.MAX_VALUE // TODO("Runtime not available")
             // Budget 70% of heap for Trie states
             maxBytes = (maxHeap * 70) / 100
             Logger.println("[MEMORY] KnownStates maxBytes=" + (maxBytes shr 20) + "MB (heap=" + (maxHeap shr 20) + "MB)")
@@ -728,7 +727,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
                 val added = this.allKeys.add(state, depth)
                 if (added) stateCount++
                 return added
-            } catch (oom: OutOfMemoryError) {
+            } catch (oom: Exception) {
                 Logger.println("[MEMORY] OOM in knownStates.add() at " + stateCount + " states - aborting search")
                 memoryLow = true
                 return false

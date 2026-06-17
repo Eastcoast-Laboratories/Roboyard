@@ -33,7 +33,8 @@ object Logger {
     fun println(level: Int, tag: String?, format: String, vararg args: Any?) {
         var message: String?
         try {
-            message = String.format(format, *args)
+            // String.format not available in commonMain
+            TODO("String.format not available in commonMain")
         } catch (e: Exception) {
             message = format + " [Error formatting log message: " + e.message + "]"
         }

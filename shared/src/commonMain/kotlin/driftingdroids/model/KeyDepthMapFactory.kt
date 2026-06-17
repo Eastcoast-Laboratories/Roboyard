@@ -22,16 +22,16 @@ import kotlin.math.max
  * Factory that creates instances of KeyDepthMap.
  */
 object KeyDepthMapFactory {
-    private var defaultClazz: Class<out KeyDepthMap?>? = KeyDepthMapTrieSpecial::class.java
+    private var defaultImpl: String = "KeyDepthMapTrieSpecial"
 
 
     /**
      * Set this factory's default implementation class of KeyDepthMap.
      * 
-     * @param clazz the implementation class of KeyDepthMap
+     * @param impl the implementation name of KeyDepthMap
      */
-    fun setDefaultClass(clazz: Class<out KeyDepthMap?>?) {
-        defaultClazz = clazz
+    fun setDefaultImpl(impl: String) {
+        defaultImpl = impl
     }
 
 
@@ -39,7 +39,7 @@ object KeyDepthMapFactory {
      * Creates a new instance of KeyDepthMap.
      * 
      * @param board the board that is to be solved
-     * @param clazz the implementation class of KeyDepthMap
+     * @param impl the implementation name of KeyDepthMap
      * @return a new instance of KeyDepthMap
      */
     /**
@@ -49,14 +49,13 @@ object KeyDepthMapFactory {
      * @param board the board that is to be solved
      * @return
      */
-    @JvmOverloads
-    fun newInstance(board: Board, clazz: Class<out KeyDepthMap?>? = defaultClazz): KeyDepthMap {
-        if (KeyDepthMapTrieGeneric::class.java == clazz) {
+    fun newInstance(board: Board, impl: String = defaultImpl): KeyDepthMap {
+        if ("KeyDepthMapTrieGeneric" == impl) {
             return KeyDepthMapTrieGeneric(max(12, board.numRobots * board.sizeNumBits))
-        } else if (KeyDepthMapTrieSpecial::class.java == clazz) {
+        } else if ("KeyDepthMapTrieSpecial" == impl) {
             return KeyDepthMapTrieSpecial.Companion.createInstance(board, true)
         } else {
-            throw IllegalArgumentException("unknown KeyDepthMap class: " + clazz)
+            throw IllegalArgumentException("unknown KeyDepthMap implementation: " + impl)
         }
     }
 }

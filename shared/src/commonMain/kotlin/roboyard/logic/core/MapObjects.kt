@@ -164,16 +164,14 @@ object MapObjects {
         if (input.isNullOrEmpty()) return "ERROR"
 
         try {
-            // SHA-256 hash
-            val digest = input.hashCode()
-            val hashBytes = digest.digest(input.toByteArray())
-
+            // Simple hash for multiplatform compatibility
+            val hash = input.hashCode()
             val vowels = charArrayOf('A', 'E', 'I', 'O', 'U')
             val consonants = charArrayOf('B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z')
 
             val result = StringBuilder()
             for (i in 0..4) {
-                val index = kotlin.math.abs(hashBytes[i].toInt()) % (if (i % 2 == 0) consonants.size else vowels.size)
+                val index = kotlin.math.abs(hash shr (i * 6)) % (if (i % 2 == 0) consonants.size else vowels.size)
                 val letter = if (i % 2 == 0) consonants[index] else vowels[index]
                 result.append(letter)
             }

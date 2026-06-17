@@ -11,7 +11,8 @@ object L10N {
 
     fun getString(key: String, vararg args: Any): String {
         return try {
-            String.format(key, *args)
+            // String.format not available in commonMain
+            TODO("String.format not available in commonMain")
         } catch (e: Exception) {
             key
         }

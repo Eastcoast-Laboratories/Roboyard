@@ -33,7 +33,7 @@ class Wall
 ) {
     override fun equals(o: Any?): Boolean {
         if (this === o) return true
-        if (o == null || javaClass != o::class) return false
+        if (o == null || this::class != o::class) return false
 
         val wall = o as Wall
 

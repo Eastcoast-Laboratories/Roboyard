@@ -105,7 +105,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
         this.nodeMask = (1 shl board.sizeNumBits) - 1
 
         // Calculate hard allocation limits from heap size (25% for nodes, 10% for leaves)
-        val maxHeap = Runtime.getRuntime().maxMemory()
+        val maxHeap = Long.MAX_VALUE // TODO("Runtime not available")
         this.maxNodeArrays = max(16, ((maxHeap / 4) / (NODE_ARRAY_SIZE * 4L)).toInt())
         this.maxLeafArrays = max(16, ((maxHeap / 10) / LEAF_ARRAY_SIZE).toInt())
 
@@ -136,7 +136,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
         }
         try {
             return IntArray(NODE_ARRAY_SIZE)
-        } catch (oom: OutOfMemoryError) {
+        } catch (oom: Exception) {
             this.allocationLimitReached = true
             return null
         }
@@ -149,7 +149,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
         }
         try {
             return ByteArray(LEAF_ARRAY_SIZE)
-        } catch (oom: OutOfMemoryError) {
+        } catch (oom: Exception) {
             this.allocationLimitReached = true
             return null
         }
@@ -1517,7 +1517,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
         protected val LEAF_ARRAY_MASK: Int = LEAF_ARRAY_SIZE - 1
         fun createInstance(board: Board, useMoreMemoryForSpeedup: Boolean): KeyDepthMapTrieSpecial {
             // The 8Bit variant allocates a 64MB lookup array - only use it if heap is large enough
-            val maxHeapMB = Runtime.getRuntime().maxMemory() shr 20
+            val maxHeapMB = Long.MAX_VALUE shr 20 // TODO("Runtime not available")
             val heapLargeEnough = maxHeapMB > 768
             if (useMoreMemoryForSpeedup && heapLargeEnough && (8 == board.sizeNumBits) && ((4 == board.numRobots) || (5 == board.numRobots))) {
                 if (Solver.USE_SLOW_SEARCH_MORE_SOLUTIONS) {

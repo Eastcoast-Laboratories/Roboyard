@@ -16,8 +16,6 @@
 */
 package driftingdroids.model
 
-import java.util.Arrays
-
 abstract class KeyMakerLong {
     /**
      * Creates the <tt>long</tt> key from the values of the given <tt>state</tt>.
@@ -48,10 +46,10 @@ abstract class KeyMakerLong {
         }
 
         override fun run(state: IntArray): Long {
-            assert(this.tmpState.size == state.size) { state.size }
+            require(this.tmpState.size == state.size) { state.size.toString() }
             //copy and sort state
-            System.arraycopy(state, 0, this.tmpState, 0, state.size)
-            Arrays.sort(this.tmpState, 0, this.idxSort)
+            state.copyInto(this.tmpState, 0, 0, state.size)
+            this.tmpState.sort(0, this.idxSort)
             //pack state into a single long value
             var result = this.tmpState[this.idxLen1].toLong()
             for (i in this.idxLen2 downTo 0) {
@@ -72,7 +70,7 @@ abstract class KeyMakerLong {
         }
 
         override fun run(state: IntArray): Long {
-            assert(this.len == state.size) { state.size }
+            require(this.len == state.size) { state.size.toString() }
             val a = state[0]
             val b = state[1]
             val c = state[2]
@@ -115,7 +113,7 @@ abstract class KeyMakerLong {
         }
 
         override fun run(state: IntArray): Long {
-            assert(4 == state.size) { state.size }
+            require(4 == state.size) { state.size.toString() }
             val a = state[0]
             val b = state[1]
             val c = state[2]
@@ -158,7 +156,7 @@ abstract class KeyMakerLong {
         }
 
         override fun run(state: IntArray): Long {
-            assert(this.len == state.size) { state.size }
+            require(this.len == state.size) { state.size.toString() }
             val a = state[0]
             val b = state[1]
             val c = state[2]
@@ -300,7 +298,7 @@ abstract class KeyMakerLong {
         }
 
         override fun run(state: IntArray): Long {
-            assert(5 == state.size) { state.size }
+            require(5 == state.size) { state.size.toString() }
             val a = state[0]
             val b = state[1]
             val c = state[2]

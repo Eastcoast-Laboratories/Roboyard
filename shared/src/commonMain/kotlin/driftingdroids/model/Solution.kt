@@ -16,12 +16,6 @@
 */
 package driftingdroids.model
 
-import java.util.Arrays
-import java.util.Deque
-import java.util.Formatter
-import java.util.LinkedList
-import java.util.TreeSet
-
 class Solution(private val board: Board) : Comparable<Solution> {
     private val movesList: MutableList<Move>
     private var moveIndex = 0
@@ -45,11 +39,11 @@ class Solution(private val board: Board) : Comparable<Solution> {
 
     val robotsMoved: MutableSet<Int>
         get() {
-            val result = TreeSet<Int>() //sorted set
+            val result = mutableSetOf<Int>()
             for (move in this.movesList) {
                 result.add(move.robotNumber)
             }
-            return result
+            return result.sorted().toMutableSet()
         }
 
     val isRebound: Boolean
@@ -58,7 +52,7 @@ class Solution(private val board: Board) : Comparable<Solution> {
     fun isRebound(queryMove: Move?): Boolean {
         var result = false
         val directions = this.board.robotPositions.clone()
-        Arrays.fill(directions, -1)
+        directions.fill(-1)
         for (move in this.movesList) {
             if ((-1 == directions[move.robotNumber]) || (move.direction != (3 and (directions[move.robotNumber] + 2)))) {
                 directions[move.robotNumber] = move.direction
@@ -131,8 +125,7 @@ class Solution(private val board: Board) : Comparable<Solution> {
     override fun toString(): String {
         val s = StringBuilder()
         // 1. number of moves
-        val f = Formatter(s)
-        f.format("%02d", this.size())
+        s.append(this.size().toString().padStart(2, '0'))
         // 2. number of robots moved
         val thisRobotsMoved = this.robotsMoved
         s.append('/').append(thisRobotsMoved.size).append('/')
@@ -223,11 +216,11 @@ class Solution(private val board: Board) : Comparable<Solution> {
     // transform Solution to list of lists of moves, grouped by colors
     private fun determineColorChanges(): MutableList<MutableList<Move>> {
         val colorSolution: MutableList<MutableList<Move>> = ArrayList<MutableList<Move>>()
-        var moveList = LinkedList<Move>()
+        var moveList = ArrayDeque<Move>()
         for (move in this.movesList) {
-            if ((false == moveList.isEmpty()) && (moveList.getLast().robotNumber != move.robotNumber)) { // color change
+            if ((false == moveList.isEmpty()) && (moveList.last().robotNumber != move.robotNumber)) { // color change
                 colorSolution.add(moveList)
-                moveList = LinkedList<Move>()
+                moveList = ArrayDeque<Move>()
             }
             moveList.add(move)
         }
@@ -238,15 +231,15 @@ class Solution(private val board: Board) : Comparable<Solution> {
     // prettify the solution: transpose some moves and thus create longer runs of moves of the same robot color
     private fun minimizeColorChanges(thisSolution: MutableList<MutableList<Move>>) {
         var thisSolution = thisSolution
-        val startNano = System.nanoTime()
+        val startNano = TODO("platform-specific time")
         if (this.numColors == this.numColorChanges) {
             Logger.println("minimizeColorChanges: no search, already at global minimum " + this.numColorChanges)
             return  // nothing to be minimized here
         }
         val knownSet: MutableSet<MutableList<MutableList<Move>>> =
             HashSet<MutableList<MutableList<Move>>>()
-        val todoList: Deque<MutableList<MutableList<Move>>> =
-            LinkedList<MutableList<MutableList<Move>>>()
+        val todoList: ArrayDeque<MutableList<MutableList<Move>>> =
+            ArrayDeque<MutableList<MutableList<Move>>>()
         knownSet.add(thisSolution)
         todoList.addLast(thisSolution)
         search_loop@ while (false == todoList.isEmpty()) {
@@ -283,7 +276,7 @@ class Solution(private val board: Board) : Comparable<Solution> {
                 while (j < nextSolution.size) {
                     nextMoves = nextSolution.get(j)
                     if (thisMoves.get(0).robotNumber == nextMoves.get(0).robotNumber) {
-                        thisMoves = LinkedList<Move>(thisMoves)
+                        thisMoves = ArrayDeque<Move>(thisMoves)
                         thisMoves.addAll(nextMoves)
                         nextSolution.set(j - 1, thisMoves)
                         nextSolution.removeAt(j--)
@@ -321,7 +314,7 @@ class Solution(private val board: Board) : Comparable<Solution> {
                 }
             }
         }
-        val millis = (System.nanoTime() - startNano) / 1000000L
+        val millis = TODO("platform-specific time calculation")
         Logger.println("minimizeColorChanges: finished after " + millis + " ms.")
     }
 }

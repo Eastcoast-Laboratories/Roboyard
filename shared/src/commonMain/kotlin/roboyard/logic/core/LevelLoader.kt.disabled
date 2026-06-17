@@ -22,7 +22,7 @@ object LevelLoader {
      */
     private fun loadLevelContent(levelId: Int): String? {
         val resourcePath = "Maps/level_$levelId.txt"
-        val inputStream = javaClass.classLoader?.getResourceAsStream(resourcePath)
+        val inputStream = ::class.classLoader?.getResourceAsStream(resourcePath)
             ?: return null
         return inputStream.use { it.bufferedReader().readText() }
     }

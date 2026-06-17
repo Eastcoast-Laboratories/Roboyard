@@ -16,9 +16,6 @@
 */
 package driftingdroids.model
 
-import java.util.Collections
-import java.util.Formatter
-
 abstract class Solver protected constructor(board: Board) {
     enum class SOLUTION_MODE(private val modeName: String, private val l10nKey: String) {
         MINIMUM("minimum", "solver.Minimum.text"),
@@ -34,47 +31,46 @@ abstract class Solver protected constructor(board: Board) {
     }
 
     companion object {
-        @JvmField
+       
         val USE_SLOW_SEARCH_MORE_SOLUTIONS: Boolean
 
         init {
             var useSlowSearchMoreSolutions = false // TODO: test slow solver with more solutions
             try {
-                useSlowSearchMoreSolutions = null != System.getProperty("UseSlowSearchMoreSolutions")
+                useSlowSearchMoreSolutions = false // TODO("System.getProperty not available in commonMain")
             } catch (ignored: Exception) {
             }
             USE_SLOW_SEARCH_MORE_SOLUTIONS = useSlowSearchMoreSolutions
         }
 
-        @JvmStatic
         fun createInstance(board: Board): Solver {
             return SolverIDDFS(board)
         }
     }
 
-    @JvmField
+   
     protected val board: Board
-    @JvmField
+   
     protected val boardWalls: Array<BooleanArray>
-    @JvmField
+   
     protected val boardSizeBitMask: Int
-    @JvmField
+   
     protected val isBoardStateInt32: Boolean
-    @JvmField
+   
     protected val isBoardGoalWildcard: Boolean
 
-    @JvmField
+   
     protected var optSolutionMode: SOLUTION_MODE = SOLUTION_MODE.MINIMUM
-    @JvmField
+   
     protected var optAllowRebounds: Boolean = true
 
-    @JvmField
+   
     protected var lastResultSolutions: MutableList<Solution>? = null
-    @JvmField
+   
     protected var solutionMilliSeconds: Long = 0
-    @JvmField
+   
     protected var solutionStoredStates: Int = 0
-    @JvmField
+   
     protected var solutionMemoryMegabytes: Int = 0
 
     init {
@@ -89,17 +85,17 @@ abstract class Solver protected constructor(board: Board) {
         this.isBoardGoalWildcard = (null != this.board.getGoal() && this.board.getGoal().robotNumber < 0)
     }
 
-    @Throws(InterruptedException::class)
+    @Throws(Exception::class)
     abstract fun execute(): List<Solution>
 
     protected fun stateString(state: IntArray): String {
-        val formatter = Formatter()
+        val formatter = StringBuilder()
         this.swapGoalLast(state)
         for (i in state) {
-            formatter.format("%02x", i)
+            formatter.append(i.toString(16).padStart(2, '0'))
         }
         this.swapGoalLast(state)
-        return "0x" + formatter.out().toString()
+        return "0x" + formatter.toString()
     }
 
     protected fun swapGoalLast(state: IntArray) {
@@ -116,9 +112,9 @@ abstract class Solver protected constructor(board: Board) {
             this.lastResultSolutions!!.add(Solution(this.board))
         }
         if (SOLUTION_MODE.MINIMUM == this.optSolutionMode) {
-            Collections.sort(this.lastResultSolutions as List<Solution>)
+            this.lastResultSolutions!!.sort()
         } else if (SOLUTION_MODE.MAXIMUM == this.optSolutionMode) {
-            Collections.sort(this.lastResultSolutions as List<Solution>, Collections.reverseOrder())
+            this.lastResultSolutions!!.sortDescending()
         }
     }
 
