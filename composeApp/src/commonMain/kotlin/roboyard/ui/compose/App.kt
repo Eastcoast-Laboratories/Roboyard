@@ -113,6 +113,7 @@ fun App() {
                         GameScreen(
                             board = currentBoard,
                             isLevelGame = isLevelGame,
+                            levelId = selectedLevelId,
                             onBack = {
                                 currentScreen = Screen.MainMenu
                                 board = null

@@ -159,6 +159,26 @@ fun handleGameWin(
     return "$baseMessage Stars: $stars"
 }
 
+// Helper function to save level completion data (DRY)
+fun saveLevelCompletion(
+    levelCompletionManager: roboyard.logic.managers.LevelCompletionManager,
+    levelId: Int,
+    moveCount: Int,
+    hintsUsed: Int,
+    optimalMoves: Int,
+    stars: Int
+) {
+    val levelData = levelCompletionManager.getLevelCompletionData(levelId)
+    if (levelData != null) {
+        levelData.setCompleted(true)
+        levelData.movesNeeded = moveCount
+        levelData.hintsShown = hintsUsed
+        levelData.optimalMoves = optimalMoves
+        levelData.setStars(stars)
+        levelCompletionManager.saveLevelCompletionData(levelData)
+    }
+}
+
 fun calculateStars(playerMoves: Int, optimalMoves: Int, hintsUsed: Int): Int {
     if (optimalMoves <= 0) {
         return 0 // No optimal solution available
@@ -191,9 +211,13 @@ fun calculateStars(playerMoves: Int, optimalMoves: Int, hintsUsed: Int): Int {
 fun GameScreen(
     board: Board,
     isLevelGame: Boolean = false,
+    levelId: Int = 1,
     onBack: () -> Unit = {},
     onNewGame: () -> Unit = {}
 ) {
+    val storage = remember { getPlatformStorage() }
+    val levelCompletionManager = remember { roboyard.logic.managers.LevelCompletionManager.getInstance() }
+    
     var moveCount by remember(board) { mutableIntStateOf(0) }
     var squaresMoved by remember(board) { mutableIntStateOf(0) }
     var currentBoard by remember(board) { mutableStateOf(board) }
@@ -382,6 +406,12 @@ fun GameScreen(
                                     gameWon = true
                                     val optimalMoves = solution?.size() ?: 0
                                     val stars = calculateStars(moveCount, optimalMoves, hintsUsed)
+                                    
+                                    // Save level completion data if this is a level game
+                                    if (isLevelGame) {
+                                        saveLevelCompletion(levelCompletionManager, levelId, moveCount, hintsUsed, optimalMoves, stars)
+                                    }
+                                    
                                     val completionMessage = handleGameWin(moveCount, isLevelGame = isLevelGame, optimalMoves = optimalMoves, stars = stars)
                                     hintMessage = completionMessage
                                 }
@@ -406,6 +436,12 @@ fun GameScreen(
                                     gameWon = true
                                     val optimalMoves = solution?.size() ?: 0
                                     val stars = calculateStars(moveCount, optimalMoves, hintsUsed)
+                                    
+                                    // Save level completion data if this is a level game
+                                    if (isLevelGame) {
+                                        saveLevelCompletion(levelCompletionManager, levelId, moveCount, hintsUsed, optimalMoves, stars)
+                                    }
+                                    
                                     val completionMessage = handleGameWin(moveCount, isLevelGame = isLevelGame, optimalMoves = optimalMoves, stars = stars)
                                     hintMessage = completionMessage
                                 }
@@ -430,6 +466,12 @@ fun GameScreen(
                                     gameWon = true
                                     val optimalMoves = solution?.size() ?: 0
                                     val stars = calculateStars(moveCount, optimalMoves, hintsUsed)
+                                    
+                                    // Save level completion data if this is a level game
+                                    if (isLevelGame) {
+                                        saveLevelCompletion(levelCompletionManager, levelId, moveCount, hintsUsed, optimalMoves, stars)
+                                    }
+                                    
                                     val completionMessage = handleGameWin(moveCount, isLevelGame = isLevelGame, optimalMoves = optimalMoves, stars = stars)
                                     hintMessage = completionMessage
                                 }
@@ -454,6 +496,12 @@ fun GameScreen(
                                     gameWon = true
                                     val optimalMoves = solution?.size() ?: 0
                                     val stars = calculateStars(moveCount, optimalMoves, hintsUsed)
+                                    
+                                    // Save level completion data if this is a level game
+                                    if (isLevelGame) {
+                                        saveLevelCompletion(levelCompletionManager, levelId, moveCount, hintsUsed, optimalMoves, stars)
+                                    }
+                                    
                                     val completionMessage = handleGameWin(moveCount, isLevelGame = isLevelGame, optimalMoves = optimalMoves, stars = stars)
                                     hintMessage = completionMessage
                                 }
