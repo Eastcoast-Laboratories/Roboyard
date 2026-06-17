@@ -87,6 +87,8 @@ import roboyard.composeapp.generated.resources.target_multi
 import roboyard.logic.core.GridElement
 import roboyard.logic.core.GameLogic
 import roboyard.logic.core.Preferences
+import roboyard.logic.core.calculateStars
+import roboyard.logic.core.saveLevelCompletion
 import roboyard.logic.storage.PlatformStorage
 
 // Compose App Version - increment after each session
@@ -157,68 +159,6 @@ fun handleGameWin(
     }
     
     return "$baseMessage Stars: $stars"
-}
-
-// Helper function to save level completion data (DRY)
-fun saveLevelCompletion(
-    levelCompletionManager: roboyard.logic.managers.LevelCompletionManager,
-    levelId: Int,
-    moveCount: Int,
-    hintsUsed: Int,
-    optimalMoves: Int,
-    stars: Int,
-    squaresMoved: Int = 0,
-    elapsedTime: Long = 0,
-    robotsUsed: Int = 4 // Default to 4 robots (same as in main game)
-) {
-    val levelData = levelCompletionManager.getLevelCompletionData(levelId)
-    if (levelData != null) {
-        levelData.setCompleted(true)
-        levelData.movesNeeded = moveCount
-        levelData.hintsShown = hintsUsed
-        levelData.optimalMoves = optimalMoves
-        levelData.squaresSurpassed = squaresMoved
-        levelData.timeNeeded = elapsedTime
-        levelData.robotsUsed = robotsUsed
-        
-        // For beginner levels (1-10), always earn at least 1 star (same as in main game)
-        val finalStars = if (stars < 1 && levelId <= roboyard.logic.core.Constants.MIN_STAR_GUARANTEE_LEVEL) {
-            1
-        } else {
-            stars
-        }
-        
-        levelData.setStars(finalStars)
-        levelCompletionManager.saveLevelCompletionData(levelData)
-    }
-}
-
-fun calculateStars(playerMoves: Int, optimalMoves: Int, hintsUsed: Int): Int {
-    if (optimalMoves <= 0) {
-        return 0 // No optimal solution available
-    }
-
-    // Calculate stars based on the rules
-    if (playerMoves < optimalMoves) {
-        // hyper-Optimal solution (better than solver's solution)
-        return 4
-    } else if (playerMoves == optimalMoves && hintsUsed == 0) {
-        // Optimal solution (or better) and no hints
-        return 3
-    } else if ((playerMoves == optimalMoves + 1 && hintsUsed == 0) ||
-        (playerMoves == optimalMoves && hintsUsed == 1)
-    ) {
-        // One move more than optimal with no hints OR optimal with one hint
-        return 2
-    } else if ((playerMoves == optimalMoves && hintsUsed == 2) ||
-        (playerMoves == optimalMoves + 2 && hintsUsed == 0)
-    ) {
-        // Optimal with two hints OR two moves more than optimal with no hints
-        return 1
-    } else {
-        // All other cases
-        return 0
-    }
 }
 
 @Composable
@@ -423,11 +363,11 @@ fun GameScreen(
                                 if (newBoard.goals.isNotEmpty() && isSolved(newBoard)) {
                                     gameWon = true
                                     val optimalMoves = solution?.size() ?: 0
-                                    val stars = calculateStars(moveCount, optimalMoves, hintsUsed)
+                                    val stars = roboyard.logic.core.calculateStars(moveCount, optimalMoves, hintsUsed)
                                     
                                     // Save level completion data if this is a level game
                                     if (isLevelGame) {
-                                        saveLevelCompletion(levelCompletionManager, levelId, moveCount, hintsUsed, optimalMoves, stars, squaresMoved, elapsedTime)
+                                        roboyard.logic.core.saveLevelCompletion(levelCompletionManager, levelId, moveCount, hintsUsed, optimalMoves, stars, squaresMoved, elapsedTime)
                                     }
                                     
                                     val completionMessage = handleGameWin(moveCount, isLevelGame = isLevelGame, optimalMoves = optimalMoves, stars = stars)
@@ -453,11 +393,11 @@ fun GameScreen(
                                 if (newBoard.goals.isNotEmpty() && isSolved(newBoard)) {
                                     gameWon = true
                                     val optimalMoves = solution?.size() ?: 0
-                                    val stars = calculateStars(moveCount, optimalMoves, hintsUsed)
+                                    val stars = roboyard.logic.core.calculateStars(moveCount, optimalMoves, hintsUsed)
                                     
                                     // Save level completion data if this is a level game
                                     if (isLevelGame) {
-                                        saveLevelCompletion(levelCompletionManager, levelId, moveCount, hintsUsed, optimalMoves, stars, squaresMoved, elapsedTime)
+                                        roboyard.logic.core.saveLevelCompletion(levelCompletionManager, levelId, moveCount, hintsUsed, optimalMoves, stars, squaresMoved, elapsedTime)
                                     }
                                     
                                     val completionMessage = handleGameWin(moveCount, isLevelGame = isLevelGame, optimalMoves = optimalMoves, stars = stars)
@@ -483,11 +423,11 @@ fun GameScreen(
                                 if (newBoard.goals.isNotEmpty() && isSolved(newBoard)) {
                                     gameWon = true
                                     val optimalMoves = solution?.size() ?: 0
-                                    val stars = calculateStars(moveCount, optimalMoves, hintsUsed)
+                                    val stars = roboyard.logic.core.calculateStars(moveCount, optimalMoves, hintsUsed)
                                     
                                     // Save level completion data if this is a level game
                                     if (isLevelGame) {
-                                        saveLevelCompletion(levelCompletionManager, levelId, moveCount, hintsUsed, optimalMoves, stars, squaresMoved, elapsedTime)
+                                        roboyard.logic.core.saveLevelCompletion(levelCompletionManager, levelId, moveCount, hintsUsed, optimalMoves, stars, squaresMoved, elapsedTime)
                                     }
                                     
                                     val completionMessage = handleGameWin(moveCount, isLevelGame = isLevelGame, optimalMoves = optimalMoves, stars = stars)
@@ -513,11 +453,11 @@ fun GameScreen(
                                 if (newBoard.goals.isNotEmpty() && isSolved(newBoard)) {
                                     gameWon = true
                                     val optimalMoves = solution?.size() ?: 0
-                                    val stars = calculateStars(moveCount, optimalMoves, hintsUsed)
+                                    val stars = roboyard.logic.core.calculateStars(moveCount, optimalMoves, hintsUsed)
                                     
                                     // Save level completion data if this is a level game
                                     if (isLevelGame) {
-                                        saveLevelCompletion(levelCompletionManager, levelId, moveCount, hintsUsed, optimalMoves, stars, squaresMoved, elapsedTime)
+                                        roboyard.logic.core.saveLevelCompletion(levelCompletionManager, levelId, moveCount, hintsUsed, optimalMoves, stars, squaresMoved, elapsedTime)
                                     }
                                     
                                     val completionMessage = handleGameWin(moveCount, isLevelGame = isLevelGame, optimalMoves = optimalMoves, stars = stars)
