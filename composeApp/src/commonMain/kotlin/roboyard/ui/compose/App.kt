@@ -544,6 +544,10 @@ fun SettingsScreen(
     var fullscreenEnabled by remember { mutableStateOf(false) }
     var highContrastEnabled by remember { mutableStateOf(false) }
     var accessibilityEnabled by remember { mutableStateOf(false) }
+    var boardSize by remember { mutableStateOf(12) }
+    var difficulty by remember { mutableStateOf("Beginner") }
+    var gameMode by remember { mutableStateOf("Standard") }
+    var robotCount by remember { mutableStateOf(4) }
 
     Column(
         modifier = Modifier
@@ -558,6 +562,18 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
+            // Title
+            Text(
+                text = "Settings",
+                color = Color.White,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp, bottom = 16.dp)
+            )
+
             // Sound Section
             Text(
                 text = "Sound",
@@ -582,13 +598,15 @@ fun SettingsScreen(
                 )
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Fullscreen Section
             Text(
                 text = "Fullscreen",
                 color = Color.White,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 8.dp)
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -606,13 +624,41 @@ fun SettingsScreen(
                 )
             }
 
-            // High Contrast Mode Section
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Accessibility Section
             Text(
-                text = "High Contrast Mode",
+                text = "Accessibility",
                 color = Color.White,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(32.dp)
+            ) {
+                RadioButtonWithLabel(
+                    text = "Yes",
+                    selected = accessibilityEnabled,
+                    onClick = { accessibilityEnabled = true }
+                )
+                RadioButtonWithLabel(
+                    text = "No",
+                    selected = !accessibilityEnabled,
+                    onClick = { accessibilityEnabled = false }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // High Contrast Section
+            Text(
+                text = "High Contrast",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -630,94 +676,110 @@ fun SettingsScreen(
                 )
             }
 
-            // Accessibility Mode Section (secret: black on black)
-            Text(
-                text = "Accessibility Mode:",
-                color = Color(0xFF333333),
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.Black),
-                horizontalArrangement = Arrangement.spacedBy(32.dp)
-            ) {
-                RadioButtonWithLabel(
-                    text = "On",
-                    selected = accessibilityEnabled,
-                    onClick = { accessibilityEnabled = true },
-                    textColor = Color(0xFF333333)
-                )
-                RadioButtonWithLabel(
-                    text = "Off",
-                    selected = !accessibilityEnabled,
-                    onClick = { accessibilityEnabled = false },
-                    textColor = Color(0xFF333333)
-                )
-            }
-
-            // Data Export/Import Section
-            Spacer(modifier = Modifier.height(24.dp))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .background(Color(0xFF444444)
-                    )
-            )
             Spacer(modifier = Modifier.height(16.dp))
+
+            // Board Size Section
             Text(
-                text = "Data",
+                text = "Board Size",
                 color = Color.White,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                listOf(10, 12, 14).forEach { size ->
+                    RadioButtonWithLabel(
+                        text = "${size}x${size}",
+                        selected = boardSize == size,
+                        onClick = { boardSize = size }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Difficulty Section
             Text(
-                text = "Export or import all your game data including preferences, achievements, level progress, and save games.",
-                color = Color(0xFFAAAAAA),
-                fontSize = 14.sp,
-                modifier = Modifier.padding(bottom = 16.dp)
+                text = "Difficulty",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
             )
-            FancyButton(
-                text = "Export Data",
-                color = FancyButtonColor.BLUE,
-                onClick = { },
-                modifier = Modifier.fillMaxWidth()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                listOf("Beginner", "Advanced", "Insane", "Impossible").forEach { diff ->
+                    RadioButtonWithLabel(
+                        text = diff,
+                        selected = difficulty == diff,
+                        onClick = { difficulty = diff }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Game Mode Section
+            Text(
+                text = "Game Mode",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            FancyButton(
-                text = "Import Data",
-                color = FancyButtonColor.BLUE,
-                onClick = { },
-                modifier = Modifier.fillMaxWidth()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(32.dp)
+            ) {
+                RadioButtonWithLabel(
+                    text = "Standard",
+                    selected = gameMode == "Standard",
+                    onClick = { gameMode = "Standard" }
+                )
+                RadioButtonWithLabel(
+                    text = "Multi-Target",
+                    selected = gameMode == "Multi-Target",
+                    onClick = { gameMode = "Multi-Target" }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Robot Count Section
+            Text(
+                text = "Robot Count",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            FancyButton(
-                text = "Reset Data",
-                color = FancyButtonColor.RED,
-                onClick = { },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            FancyButton(
-                text = "View Logs",
-                color = FancyButtonColor.GRAY,
-                onClick = { },
-                modifier = Modifier.fillMaxWidth()
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                listOf(3, 4, 5, 6).forEach { count ->
+                    RadioButtonWithLabel(
+                        text = count.toString(),
+                        selected = robotCount == count,
+                        onClick = { robotCount = count }
+                    )
+                }
+            }
         }
 
         // Back button
         FancyButton(
-            text = "Back",
+            text = "BACK",
             color = FancyButtonColor.GRAY,
             onClick = onBack,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(horizontal = 24.dp, vertical = 8.dp)
         )
     }
 }
