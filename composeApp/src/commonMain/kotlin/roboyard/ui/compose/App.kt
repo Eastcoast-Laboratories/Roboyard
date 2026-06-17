@@ -400,6 +400,8 @@ fun LevelSelectionScreen(
 ) {
     val totalLevels = 140
     val levels = (1..totalLevels).toList()
+    val levelCompletionManager = remember { roboyard.logic.managers.LevelCompletionManager.getInstance() }
+    val totalStars = remember { levelCompletionManager.totalStars }
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Background color (placeholder for bg_level_screen)
@@ -451,7 +453,7 @@ fun LevelSelectionScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "0",
+                    text = "$totalStars",
                     color = Color(0xFFFFD700),
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
@@ -504,8 +506,10 @@ fun LevelSelectionScreen(
                 contentPadding = PaddingValues(vertical = 6.dp)
             ) {
                 items(levels) { levelId ->
+                    val levelData = remember { levelCompletionManager.getLevelCompletionData(levelId) }
                     LevelItem(
                         levelId = levelId,
+                        stars = levelData?.getStars() ?: 0,
                         onClick = { onLevelSelected(levelId) }
                     )
                 }
@@ -517,6 +521,7 @@ fun LevelSelectionScreen(
 @Composable
 fun LevelItem(
     levelId: Int,
+    stars: Int = 0,
     onClick: () -> Unit
 ) {
     Box(
@@ -527,12 +532,27 @@ fun LevelItem(
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = levelId.toString(),
-            color = Color.White,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = levelId.toString(),
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+            if (stars > 0) {
+                Row {
+                    repeat(stars) {
+                        Text(
+                            text = "★",
+                            color = Color(0xFFFFD700),
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -23,6 +23,7 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0"
                 implementation "co.touchlab:kermit:2.1.0"
+                implementation "com.google.code.gson:gson:2.13.2"
             }
         }
         commonTest {

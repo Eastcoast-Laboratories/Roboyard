@@ -103,7 +103,8 @@ fun formatTime(elapsedTimeMs: Long): String {
 fun handleGameWin(
     moveCount: Int,
     isLevelGame: Boolean = false,
-    optimalMoves: Int? = null
+    optimalMoves: Int? = null,
+    stars: Int = 0
 ): String {
     val baseMessage = if (isLevelGame) {
         "Level completed in $moveCount moves!"
@@ -114,13 +115,41 @@ fun handleGameWin(
     // Add optimal moves information if available
     if (optimalMoves != null) {
         if (moveCount == optimalMoves) {
-            return "$baseMessage Perfect solution!"
+            return "$baseMessage Perfect solution! Stars: $stars"
         } else {
-            return "$baseMessage (Optimal: $optimalMoves moves)"
+            return "$baseMessage (Optimal: $optimalMoves moves) Stars: $stars"
         }
     }
     
-    return baseMessage
+    return "$baseMessage Stars: $stars"
+}
+
+fun calculateStars(playerMoves: Int, optimalMoves: Int, hintsUsed: Int): Int {
+    if (optimalMoves <= 0) {
+        return 0 // No optimal solution available
+    }
+
+    // Calculate stars based on the rules
+    if (playerMoves < optimalMoves) {
+        // hyper-Optimal solution (better than solver's solution)
+        return 4
+    } else if (playerMoves == optimalMoves && hintsUsed == 0) {
+        // Optimal solution (or better) and no hints
+        return 3
+    } else if ((playerMoves == optimalMoves + 1 && hintsUsed == 0) ||
+        (playerMoves == optimalMoves && hintsUsed == 1)
+    ) {
+        // One move more than optimal with no hints OR optimal with one hint
+        return 2
+    } else if ((playerMoves == optimalMoves && hintsUsed == 2) ||
+        (playerMoves == optimalMoves + 2 && hintsUsed == 0)
+    ) {
+        // Optimal with two hints OR two moves more than optimal with no hints
+        return 1
+    } else {
+        // All other cases
+        return 0
+    }
 }
 
 @Composable
@@ -144,6 +173,7 @@ fun GameScreen(
     var timerRunning by remember(board) { mutableStateOf(false) }
     var selectedRobotIndex by remember(board) { mutableIntStateOf(0) }
     var accessibilityControlsVisible by remember(board) { mutableStateOf(false) }
+    var hintsUsed by remember(board) { mutableIntStateOf(0) }
 
     // Timer effect - runs every second when timer is enabled
     LaunchedEffect(timerRunning) {
@@ -201,8 +231,9 @@ fun GameScreen(
                             gameWon = true
                             // Play win sound and show completion message
                             // Note: Sound playback is platform-specific and will be implemented separately
-                            val optimalMoves = solution?.size()
-                            val completionMessage = handleGameWin(moveCount, isLevelGame = isLevelGame, optimalMoves = optimalMoves)
+                            val optimalMoves = solution?.size() ?: 0
+                            val stars = calculateStars(moveCount, optimalMoves, hintsUsed)
+                            val completionMessage = handleGameWin(moveCount, isLevelGame = isLevelGame, optimalMoves = optimalMoves, stars = stars)
                             hintMessage = completionMessage
                         }
                     }
@@ -276,6 +307,10 @@ fun GameScreen(
                                 hintMessage = null
                                 if (newBoard.goals.isNotEmpty() && isSolved(newBoard)) {
                                     gameWon = true
+                                    val optimalMoves = solution?.size() ?: 0
+                                    val stars = calculateStars(moveCount, optimalMoves, hintsUsed)
+                                    val completionMessage = handleGameWin(moveCount, isLevelGame = isLevelGame, optimalMoves = optimalMoves, stars = stars)
+                                    hintMessage = completionMessage
                                 }
                             }
                         }
@@ -296,6 +331,10 @@ fun GameScreen(
                                 hintMessage = null
                                 if (newBoard.goals.isNotEmpty() && isSolved(newBoard)) {
                                     gameWon = true
+                                    val optimalMoves = solution?.size() ?: 0
+                                    val stars = calculateStars(moveCount, optimalMoves, hintsUsed)
+                                    val completionMessage = handleGameWin(moveCount, isLevelGame = isLevelGame, optimalMoves = optimalMoves, stars = stars)
+                                    hintMessage = completionMessage
                                 }
                             }
                         }
@@ -316,6 +355,10 @@ fun GameScreen(
                                 hintMessage = null
                                 if (newBoard.goals.isNotEmpty() && isSolved(newBoard)) {
                                     gameWon = true
+                                    val optimalMoves = solution?.size() ?: 0
+                                    val stars = calculateStars(moveCount, optimalMoves, hintsUsed)
+                                    val completionMessage = handleGameWin(moveCount, isLevelGame = isLevelGame, optimalMoves = optimalMoves, stars = stars)
+                                    hintMessage = completionMessage
                                 }
                             }
                         }
@@ -336,6 +379,10 @@ fun GameScreen(
                                 hintMessage = null
                                 if (newBoard.goals.isNotEmpty() && isSolved(newBoard)) {
                                     gameWon = true
+                                    val optimalMoves = solution?.size() ?: 0
+                                    val stars = calculateStars(moveCount, optimalMoves, hintsUsed)
+                                    val completionMessage = handleGameWin(moveCount, isLevelGame = isLevelGame, optimalMoves = optimalMoves, stars = stars)
+                                    hintMessage = completionMessage
                                 }
                             }
                         }
