@@ -11,10 +11,20 @@ object L10N {
 
     fun getString(key: String, vararg args: Any): String {
         return try {
-            // String.format not available in commonMain
-            TODO("String.format not available in commonMain")
+            // Simple string formatting without String.format
+            key.formatSimple(*args)
         } catch (e: Exception) {
             key
         }
+    }
+
+    private fun String.formatSimple(vararg args: Any?): String {
+        var result = this
+        args.forEach { arg ->
+            result = result.replaceFirst("%d", arg?.toString() ?: "null")
+                .replaceFirst("%s", arg?.toString() ?: "null")
+                .replaceFirst("%f", arg?.toString() ?: "null")
+        }
+        return result
     }
 }

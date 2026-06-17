@@ -113,7 +113,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
 
     @Throws(Exception::class)
     public override fun execute(): List<Solution> {
-        val startExecute = TODO("platform-specific time")
+        val startExecute = TimeProvider.currentTimeMillis()
         this.lastResultSolutions = ArrayList<Solution>()
 
         Logger.println("***** SolverIDDFS *****")
@@ -160,7 +160,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
         }
         this.sortSolutions()
 
-        this.solutionMilliSeconds = TODO("platform-specific time calculation")
+        this.solutionMilliSeconds = (TimeProvider.currentTimeMillis() - startExecute)
         return this.lastResultSolutions!!
     }
 
@@ -198,7 +198,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
 
     @Throws(Exception::class)
     private fun iddfs() {
-        val nanoStart = TODO("platform-specific time")
+        val nanoStart = TimeProvider.nanoTime()
         val doDfsFast =
             (false == this.isBoardGoalWildcard) && (false == this.isSolution01) && (true == this.optAllowRebounds)
         Logger.println("doDfsFast=" + doDfsFast)
@@ -219,7 +219,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
             this.memoryLow = false
             this.recursionCounter = 0
 
-            val nanoDfs = TODO("platform-specific time")
+            val nanoDfs = TimeProvider.nanoTime()
             try {
                 if (doDfsFast) {
                     this.dfsRecursionFast(1, -1, -1, this.states[0])
@@ -233,18 +233,18 @@ class SolverIDDFS(board: Board) : Solver(board) {
                 Logger.println("[MEMORY] OOM caught in iddfs at depthLimit=" + this.depthLimit + " - freed knownStates")
                 this.memoryLow = true
             }
-            val nanoEnd = TODO("platform-specific time")
+            val nanoEnd = TimeProvider.nanoTime()
 
             // Runtime not available in commonMain
-            val memPercent = TODO("Runtime not available in commonMain")
+            val memPercent = 0.0
             val megaBytes =
                 if (this.knownStates != null) this.knownStates!!.megaBytesAllocated else 0
             Logger.println(
                 "iddfs:  finished depthLimit=" + this.depthLimit +
                         " megaBytes=" + megaBytes +
-                        " memory=" + TODO("String.format not available in commonMain") + "%" +
-                        " time=" + TODO("platform-specific time calculation") + "ms" +
-                        " totalTime=" + TODO("platform-specific time calculation") + "ms"
+                        " memory=" + memPercent + "%" +
+                        " time=" + (nanoEnd - nanoDfs) / 1000000L + "ms" +
+                        " totalTime=" + (nanoEnd - nanoStart) / 1000000L + "ms"
             )
 
 

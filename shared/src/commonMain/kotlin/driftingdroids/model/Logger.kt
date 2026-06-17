@@ -33,13 +33,23 @@ object Logger {
     fun println(level: Int, tag: String?, format: String, vararg args: Any?) {
         var message: String?
         try {
-            // String.format not available in commonMain
-            TODO("String.format not available in commonMain")
+            // Simple string formatting without String.format
+            message = format.formatSimple(*args)
         } catch (e: Exception) {
             message = format + " [Error formatting log message: " + e.message + "]"
         }
 
 
         kotlin.io.println(tag + ": " + message)
+    }
+
+    private fun String.formatSimple(vararg args: Any?): String {
+        var result = this
+        args.forEach { arg ->
+            result = result.replaceFirst("%d", arg?.toString() ?: "null")
+                .replaceFirst("%s", arg?.toString() ?: "null")
+                .replaceFirst("%f", arg?.toString() ?: "null")
+        }
+        return result
     }
 }

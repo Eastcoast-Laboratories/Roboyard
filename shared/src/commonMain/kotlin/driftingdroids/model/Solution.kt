@@ -231,7 +231,7 @@ class Solution(private val board: Board) : Comparable<Solution> {
     // prettify the solution: transpose some moves and thus create longer runs of moves of the same robot color
     private fun minimizeColorChanges(thisSolution: MutableList<MutableList<Move>>) {
         var thisSolution = thisSolution
-        val startNano = TODO("platform-specific time")
+        val startNano = TimeProvider.nanoTime()
         if (this.numColors == this.numColorChanges) {
             Logger.println("minimizeColorChanges: no search, already at global minimum " + this.numColorChanges)
             return  // nothing to be minimized here
@@ -314,7 +314,7 @@ class Solution(private val board: Board) : Comparable<Solution> {
                 }
             }
         }
-        val millis = TODO("platform-specific time calculation")
+        val millis = (TimeProvider.nanoTime() - startNano) / 1000000L
         Logger.println("minimizeColorChanges: finished after " + millis + " ms.")
     }
 }
