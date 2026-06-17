@@ -224,7 +224,11 @@ fun GameScreen(
     onNewGame: () -> Unit = {}
 ) {
     val storage = remember { getPlatformStorage() }
-    val levelCompletionManager = remember { roboyard.logic.managers.LevelCompletionManager.getInstance() }
+    // LevelCompletionManager requires Context - for now, skip star saving in ComposeApp
+    // TODO: Implement expect/actual for Context or pass Context parameter
+    val levelCompletionManager = remember { roboyard.logic.managers.LevelCompletionManager.getInstance(
+        roboyard.platform.AndroidStorage.getInstance(null).getContext()
+    ) }
     
     var moveCount by remember(board) { mutableIntStateOf(0) }
     var squaresMoved by remember(board) { mutableIntStateOf(0) }
