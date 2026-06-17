@@ -43,13 +43,11 @@ class GameMove constructor(
  val toX: Int = endX
  val toY: Int = endY
 
-    fun getRobotColor(): Int = robotColor
-    
     /**
      * Calculate direction from coordinates (for Java test compatibility).
      * Returns UP(0), RIGHT(1), DOWN(2), or LEFT(3) based on coordinate changes.
      */
-    fun getDirection(): Int {
+    fun calculateDirection(): Int {
         val dx = toX - fromX
         val dy = toY - fromY
         return when {
@@ -74,7 +72,7 @@ class GameMove constructor(
     }
 
     override fun toString(): String {
-        val dirName = when (getDirection()) {
+        val dirName = when (calculateDirection()) {
             UP -> "Up"
             RIGHT -> "Right"
             DOWN -> "Down"

@@ -22,8 +22,6 @@ class GameHistoryEntry(
  var movesMade: Int = 0
  var completionCount: Int = 0
 
-    fun getCompletionCount(): Int = completionCount
-    
     fun isFirstCompletion(): Boolean = completionCount == 1
  var timestamp: Long = 0
  var lastCompletionTimestamp: Long = 0

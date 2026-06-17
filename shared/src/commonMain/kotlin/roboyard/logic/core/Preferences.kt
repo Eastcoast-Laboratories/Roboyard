@@ -80,51 +80,76 @@ object Preferences {
     // Cached values - accessible as static fields
 
     var robotCount: Int = 0
+        private set
 
     var targetColors: Int = 0
+        private set
 
     var soundEnabled: Boolean = false
+        private set
 
     var difficulty: Int = 0
+        private set
 
     var boardSizeWidth: Int = 0
+        private set
 
     var boardSizeHeight: Int = 0
+        private set
 
     var generateNewMapEachTime: Boolean = false
+        private set
 
     var accessibilityMode: Boolean = false
+        private set
 
     var appLanguage: String? = null
+        private set
 
     var talkbackLanguage: String? = null
+        private set
 
     var gameMode: Int = 0
+        private set
 
     var fullscreenEnabled: Boolean = false
+        private set
 
     var minSolutionMoves: Int = 0
+        private set
 
     var maxSolutionMoves: Int = 0
+        private set
 
     var allowMulticolorTarget: Boolean = false
+        private set
 
     var highContrastMode: Boolean = false
+        private set
 
     var backgroundSoundVolume: Int = 0
+        private set
 
     var liveMoveCounterEnabled: Boolean = false
+        private set
     var hintAutoMoveEnabled: Boolean = false
+        private set
 
     var hintAutoMoveMode: Int = 0
+        private set
 
     var soundEffectsVolume: Int = 0
+        private set
 
     // For compatibility with existing code
     var boardSizeX: Int = 0
+        private set
     var boardSizeY: Int = 0
+        private set
     var generateNewMap: Boolean = false
+        private set
     var accessibility: Boolean = false
+        private set
 
     // Listener for preference changes
     private var preferenceChangeListener: PreferenceChangeListener? = null

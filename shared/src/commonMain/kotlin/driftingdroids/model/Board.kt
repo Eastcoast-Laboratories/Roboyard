@@ -33,11 +33,6 @@ class Board private constructor(val width: Int, val height: Int, numRobots: Int)
 
     /** add all outer walls (just to make sure, because the solver requires them) and return the array of walls. */
     val walls: Array<BooleanArray> // [4][width*height] 4 directions
-
-    fun getWalls(): Array<BooleanArray> {
-        addOuterWalls() // the outer walls are required by the solver
-        return this.walls
-    }
     val goals: MutableList<Goal> // all possible goals on the board
     private val randomGoals: MutableList<Goal?>
     private var goal: Goal? // the current goal
