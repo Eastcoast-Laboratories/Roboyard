@@ -73,7 +73,7 @@ fun SettingsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF2C3E50))
+            .background(Color.Black)
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -81,44 +81,86 @@ fun SettingsScreen(
         // Title
         Text(
             text = "Settings",
-            fontSize = 32.sp,
+            fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White,
-            modifier = Modifier.padding(bottom = 24.dp)
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp, bottom = 16.dp)
         )
+        
+        // Language Section
+        SettingsSection(title = "Language") {
+            var expanded by remember { mutableStateOf(false) }
+            Box {
+                Button(onClick = { expanded = true }) {
+                    Text(appLanguage.uppercase())
+                }
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    listOf("en", "de", "fr", "es").forEach { lang ->
+                        DropdownMenuItem(
+                            text = { Text(lang.uppercase()) },
+                            onClick = {
+                                appLanguage = lang
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
+        }
+        
+        // Talkback Language Section (only shown when accessibility is enabled)
+        if (accessibilityMode) {
+            SettingsSection(title = "Talkback Language") {
+                var expanded by remember { mutableStateOf(false) }
+                Box {
+                    Button(onClick = { expanded = true }) {
+                        Text(talkbackLanguage.uppercase())
+                    }
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        listOf("same", "en", "de", "fr", "es").forEach { lang ->
+                            DropdownMenuItem(
+                                text = { Text(lang.uppercase()) },
+                                onClick = {
+                                    talkbackLanguage = lang
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
         
         // Board Size Section
         SettingsSection(title = "Board Size") {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Width: ${boardSizeWidth}", color = Color.White)
-                Button(onClick = {
-                    val currentIndex = validBoardSizes.indexOfFirst { it[0] == boardSizeWidth && it[1] == boardSizeHeight }
-                    if (currentIndex < validBoardSizes.size - 1) {
-                        boardSizeWidth = validBoardSizes[currentIndex + 1][0]
-                        boardSizeHeight = validBoardSizes[currentIndex + 1][1]
-                    }
-                }) {
-                    Text("+")
+            var expanded by remember { mutableStateOf(false) }
+            Box {
+                Button(onClick = { expanded = true }) {
+                    Text("${boardSizeWidth}x${boardSizeHeight}")
                 }
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Height: ${boardSizeHeight}", color = Color.White)
-                Button(onClick = {
-                    val currentIndex = validBoardSizes.indexOfFirst { it[0] == boardSizeWidth && it[1] == boardSizeHeight }
-                    if (currentIndex > 0) {
-                        boardSizeWidth = validBoardSizes[currentIndex - 1][0]
-                        boardSizeHeight = validBoardSizes[currentIndex - 1][1]
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    validBoardSizes.forEach { size ->
+                        DropdownMenuItem(
+                            text = { Text("${size[0]}x${size[1]}") },
+                            onClick = {
+                                boardSizeWidth = size[0]
+                                boardSizeHeight = size[1]
+                                expanded = false
+                            }
+                        )
                     }
-                }) {
-                    Text("-")
                 }
             }
         }
@@ -181,6 +223,54 @@ fun SettingsScreen(
             )
         }
         
+        // Puzzle Parameters Section
+        SettingsSection(title = "Puzzle Parameters") {
+            // Min Solution Moves
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Min: $minSolutionMoves", color = Color.White)
+                Row {
+                    Button(onClick = { if (minSolutionMoves > 1) minSolutionMoves-- }) {
+                        Text("-")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(onClick = { if (minSolutionMoves < 20) minSolutionMoves++ }) {
+                        Text("+")
+                    }
+                }
+            }
+            
+            // Max Solution Moves
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Max: $maxSolutionMoves", color = Color.White)
+                Row {
+                    Button(onClick = { if (maxSolutionMoves > minSolutionMoves) maxSolutionMoves-- }) {
+                        Text("-")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(onClick = { if (maxSolutionMoves < 99) maxSolutionMoves++ }) {
+                        Text("+")
+                    }
+                }
+            }
+            
+            // Allow Multicolor Target
+            RadioGroup(
+                options = listOf("Yes", "No"),
+                selectedOption = if (allowMulticolorTarget) "Yes" else "No",
+                onOptionSelected = { option ->
+                    allowMulticolorTarget = (option == "Yes")
+                }
+            )
+        }
+        
         // New Map Section
         SettingsSection(title = "Generate New Map") {
             RadioGroup(
@@ -190,6 +280,88 @@ fun SettingsScreen(
                     generateNewMap = (option == "Yes")
                 }
             )
+        }
+        
+        // Hint Auto Move Section
+        SettingsSection(title = "Hint Auto Move") {
+            RadioGroup(
+                options = listOf("Manual", "Full-Auto", "Semi-Auto"),
+                selectedOption = when (hintAutoMoveMode) {
+                    Preferences.HINT_AUTO_MOVE_MANUAL -> "Manual"
+                    Preferences.HINT_AUTO_MOVE_FULL_AUTO -> "Full-Auto"
+                    Preferences.HINT_AUTO_MOVE_SEMI_AUTO -> "Semi-Auto"
+                    else -> "Manual"
+                },
+                onOptionSelected = { option ->
+                    hintAutoMoveMode = when (option) {
+                        "Manual" -> Preferences.HINT_AUTO_MOVE_MANUAL
+                        "Full-Auto" -> Preferences.HINT_AUTO_MOVE_FULL_AUTO
+                        "Semi-Auto" -> Preferences.HINT_AUTO_MOVE_SEMI_AUTO
+                        else -> Preferences.HINT_AUTO_MOVE_MANUAL
+                    }
+                }
+            )
+        }
+        
+        // Game Mode Section
+        SettingsSection(title = "Game Mode") {
+            RadioGroup(
+                options = listOf("Standard", "Multi-Target"),
+                selectedOption = when (gameMode) {
+                    Constants.GAME_MODE_STANDARD -> "Standard"
+                    Constants.GAME_MODE_MULTI_TARGET -> "Multi-Target"
+                    else -> "Standard"
+                },
+                onOptionSelected = { option ->
+                    gameMode = when (option) {
+                        "Standard" -> Constants.GAME_MODE_STANDARD
+                        "Multi-Target" -> Constants.GAME_MODE_MULTI_TARGET
+                        else -> Constants.GAME_MODE_STANDARD
+                    }
+                }
+            )
+        }
+        
+        // Target Colors Section (only shown in Multi-Target mode)
+        if (gameMode == Constants.GAME_MODE_MULTI_TARGET) {
+            SettingsSection(title = "Target Colors") {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Colors: $targetColors", color = Color.White)
+                    Row {
+                        Button(onClick = { if (targetColors > 1) targetColors-- }) {
+                            Text("-")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(onClick = { if (targetColors < 5) targetColors++ }) {
+                            Text("+")
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Robot Count Section
+        SettingsSection(title = "Robot Count") {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Robots: $robotCount", color = Color.White)
+                Row {
+                    Button(onClick = { if (robotCount > 1) robotCount-- }) {
+                        Text("-")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(onClick = { if (robotCount < 5) robotCount++ }) {
+                        Text("+")
+                    }
+                }
+            }
         }
         
         // Sound Section
@@ -225,160 +397,6 @@ fun SettingsScreen(
             )
         }
         
-        // Game Mode Section
-        SettingsSection(title = "Game Mode") {
-            RadioGroup(
-                options = listOf("Standard", "Multi-Target"),
-                selectedOption = when (gameMode) {
-                    Constants.GAME_MODE_STANDARD -> "Standard"
-                    Constants.GAME_MODE_MULTI_TARGET -> "Multi-Target"
-                    else -> "Standard"
-                },
-                onOptionSelected = { option ->
-                    gameMode = when (option) {
-                        "Standard" -> Constants.GAME_MODE_STANDARD
-                        "Multi-Target" -> Constants.GAME_MODE_MULTI_TARGET
-                        else -> Constants.GAME_MODE_STANDARD
-                    }
-                }
-            )
-        }
-        
-        // Robot Count Section
-        SettingsSection(title = "Robot Count") {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Robots: $robotCount", color = Color.White)
-                Row {
-                    Button(onClick = { if (robotCount > 1) robotCount-- }) {
-                        Text("-")
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(onClick = { if (robotCount < 5) robotCount++ }) {
-                        Text("+")
-                    }
-                }
-            }
-        }
-        
-        // Target Colors Section
-        SettingsSection(title = "Target Colors") {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Colors: $targetColors", color = Color.White)
-                Row {
-                    Button(onClick = { if (targetColors > 1) targetColors-- }) {
-                        Text("-")
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(onClick = { if (targetColors < 5) targetColors++ }) {
-                        Text("+")
-                    }
-                }
-            }
-        }
-        
-        // Language Section
-        SettingsSection(title = "App Language") {
-            var expanded by remember { mutableStateOf(false) }
-            Box {
-                Button(onClick = { expanded = true }) {
-                    Text(appLanguage.uppercase())
-                }
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    listOf("en", "de", "fr", "es").forEach { lang ->
-                        DropdownMenuItem(
-                            text = { Text(lang.uppercase()) },
-                            onClick = {
-                                appLanguage = lang
-                                expanded = false
-                            }
-                        )
-                    }
-                }
-            }
-        }
-        
-        // Talkback Language Section
-        SettingsSection(title = "Talkback Language") {
-            var expanded by remember { mutableStateOf(false) }
-            Box {
-                Button(onClick = { expanded = true }) {
-                    Text(talkbackLanguage.uppercase())
-                }
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    listOf("same", "en", "de", "fr", "es").forEach { lang ->
-                        DropdownMenuItem(
-                            text = { Text(lang.uppercase()) },
-                            onClick = {
-                                talkbackLanguage = lang
-                                expanded = false
-                            }
-                        )
-                    }
-                }
-            }
-        }
-        
-        // Solution Moves Section
-        SettingsSection(title = "Solution Moves") {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Min: $minSolutionMoves", color = Color.White)
-                Row {
-                    Button(onClick = { if (minSolutionMoves > 1) minSolutionMoves-- }) {
-                        Text("-")
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(onClick = { if (minSolutionMoves < 20) minSolutionMoves++ }) {
-                        Text("+")
-                    }
-                }
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Max: $maxSolutionMoves", color = Color.White)
-                Row {
-                    Button(onClick = { if (maxSolutionMoves > minSolutionMoves) maxSolutionMoves-- }) {
-                        Text("-")
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(onClick = { if (maxSolutionMoves < 50) maxSolutionMoves++ }) {
-                        Text("+")
-                    }
-                }
-            }
-        }
-        
-        // Allow Multicolor Target Section
-        SettingsSection(title = "Allow Multicolor Target") {
-            RadioGroup(
-                options = listOf("Yes", "No"),
-                selectedOption = if (allowMulticolorTarget) "Yes" else "No",
-                onOptionSelected = { option ->
-                    allowMulticolorTarget = (option == "Yes")
-                }
-            )
-        }
-        
         // High Contrast Mode Section
         SettingsSection(title = "High Contrast Mode") {
             RadioGroup(
@@ -386,27 +404,6 @@ fun SettingsScreen(
                 selectedOption = if (highContrastMode) "Yes" else "No",
                 onOptionSelected = { option ->
                     highContrastMode = (option == "Yes")
-                }
-            )
-        }
-        
-        // Hint Auto Move Section
-        SettingsSection(title = "Hint Auto Move") {
-            RadioGroup(
-                options = listOf("Manual", "Full-Auto", "Semi-Auto"),
-                selectedOption = when (hintAutoMoveMode) {
-                    Preferences.HINT_AUTO_MOVE_MANUAL -> "Manual"
-                    Preferences.HINT_AUTO_MOVE_FULL_AUTO -> "Full-Auto"
-                    Preferences.HINT_AUTO_MOVE_SEMI_AUTO -> "Semi-Auto"
-                    else -> "Manual"
-                },
-                onOptionSelected = { option ->
-                    hintAutoMoveMode = when (option) {
-                        "Manual" -> Preferences.HINT_AUTO_MOVE_MANUAL
-                        "Full-Auto" -> Preferences.HINT_AUTO_MOVE_FULL_AUTO
-                        "Semi-Auto" -> Preferences.HINT_AUTO_MOVE_SEMI_AUTO
-                        else -> Preferences.HINT_AUTO_MOVE_MANUAL
-                    }
                 }
             )
         }
@@ -484,24 +481,19 @@ fun SettingsSection(
     title: String,
     content: @Composable () -> Unit
 ) {
-    Card(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF34495E))
+            .padding(vertical = 8.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = title,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            content()
-        }
+        Text(
+            text = title,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        content()
     }
 }
 
