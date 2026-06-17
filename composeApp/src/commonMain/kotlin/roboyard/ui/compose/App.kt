@@ -509,7 +509,7 @@ fun LevelSelectionScreen(
                     val levelData = remember { levelCompletionManager.getLevelCompletionData(levelId) }
                     LevelItem(
                         levelId = levelId,
-                        stars = levelData?.getStars() ?: 0,
+                        stars = levelData?.starCount ?: 0,
                         onClick = { onLevelSelected(levelId) }
                     )
                 }
@@ -1538,7 +1538,7 @@ fun LoadingScreen(
         errorMessage = null
         try {
             // Load level using LevelLoader (same as fragment-app GameState.loadLevel)
-            val board = withContext(Dispatchers.IO) {
+            val board: Board? = withContext(Dispatchers.IO) {
                 LevelLoader.loadLevel(levelId)
             }
             if (board != null) {

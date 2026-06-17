@@ -19,12 +19,10 @@ object LevelLoader {
 
     /**
      * Loads the raw content of a level file from shared resources.
+     * Platform-specific implementation via expect/actual.
      */
     private fun loadLevelContent(levelId: Int): String? {
-        val resourcePath = "Maps/level_$levelId.txt"
-        val inputStream = ::class.classLoader?.getResourceAsStream(resourcePath)
-            ?: return null
-        return inputStream.use { it.bufferedReader().readText() }
+        TODO("Platform-specific resource loading not available in commonMain")
     }
 
     /**
