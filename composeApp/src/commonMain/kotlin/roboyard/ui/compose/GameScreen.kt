@@ -174,7 +174,15 @@ fun saveLevelCompletion(
         levelData.movesNeeded = moveCount
         levelData.hintsShown = hintsUsed
         levelData.optimalMoves = optimalMoves
-        levelData.setStars(stars)
+        
+        // For beginner levels (1-10), always earn at least 1 star (same as in main game)
+        val finalStars = if (stars < 1 && levelId <= roboyard.logic.core.Constants.MIN_STAR_GUARANTEE_LEVEL) {
+            1
+        } else {
+            stars
+        }
+        
+        levelData.setStars(finalStars)
         levelCompletionManager.saveLevelCompletionData(levelData)
     }
 }
