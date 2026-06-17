@@ -1452,7 +1452,9 @@ fun gridElementsToBoard(gridElements: ArrayList<GridElement>): Board? {
                 board.addGoal(pos, 4, 0) // COLOR_SILVER = 4
             }
             "target_multi" -> {
-                // Multi-color target - skip (not supported in Board.addGoal with -1)
+                // Multi-color target - use -1 for robotNumber to indicate multi-color
+                val pos = x + y * width
+                board.addGoal(pos, -1, 0) // robotNumber = -1 for multi-color
             }
             "robot_red" -> {
                 val pos = x + y * width
