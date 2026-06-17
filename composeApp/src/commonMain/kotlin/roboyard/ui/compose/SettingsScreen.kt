@@ -44,14 +44,30 @@ fun SettingsScreen(
     var hintAutoMoveMode by remember { mutableIntStateOf(Preferences.hintAutoMoveMode) }
     var soundEffectsVolume by remember { mutableIntStateOf(Preferences.soundEffectsVolume) }
     
-    // Valid board sizes
+    // Valid board sizes - exactly as in the original game
     val validBoardSizes = listOf(
+        intArrayOf(8, 7),
         intArrayOf(8, 8),
+        intArrayOf(8, 12),
+        intArrayOf(10, 8),
         intArrayOf(10, 10),
+        intArrayOf(10, 12),
+        intArrayOf(10, 14),
         intArrayOf(12, 12),
         intArrayOf(12, 14),
+        intArrayOf(12, 16),
+        intArrayOf(12, 18),
         intArrayOf(14, 14),
-        intArrayOf(16, 16)
+        intArrayOf(14, 16),
+        intArrayOf(14, 18),
+        intArrayOf(16, 14),
+        intArrayOf(16, 16),
+        intArrayOf(16, 18),
+        intArrayOf(16, 20),
+        intArrayOf(16, 22),
+        intArrayOf(18, 18),
+        intArrayOf(18, 20),
+        intArrayOf(18, 22)
     )
     
     Column(
@@ -119,12 +135,47 @@ fun SettingsScreen(
                     else -> "Beginner"
                 },
                 onOptionSelected = { option ->
+                    val previousDifficulty = difficulty
                     difficulty = when (option) {
                         "Beginner" -> Constants.DIFFICULTY_BEGINNER
                         "Advanced" -> Constants.DIFFICULTY_ADVANCED
                         "Insane" -> Constants.DIFFICULTY_INSANE
                         "Impossible" -> Constants.DIFFICULTY_IMPOSSIBLE
                         else -> Constants.DIFFICULTY_BEGINNER
+                    }
+                    
+                    // Adjust puzzle parameters based on difficulty
+                    when (difficulty) {
+                        Constants.DIFFICULTY_BEGINNER -> {
+                            minSolutionMoves = 4
+                            maxSolutionMoves = 6
+                            allowMulticolorTarget = true
+                            generateNewMap = true
+                        }
+                        Constants.DIFFICULTY_ADVANCED -> {
+                            minSolutionMoves = 6
+                            maxSolutionMoves = 10
+                            allowMulticolorTarget = false
+                            generateNewMap = true
+                        }
+                        Constants.DIFFICULTY_INSANE -> {
+                            minSolutionMoves = 10
+                            maxSolutionMoves = 99
+                            allowMulticolorTarget = false
+                            generateNewMap = false
+                        }
+                        Constants.DIFFICULTY_IMPOSSIBLE -> {
+                            minSolutionMoves = 17
+                            maxSolutionMoves = 99
+                            allowMulticolorTarget = false
+                            // Keep current generateNewMapEachTime setting for impossible difficulty
+                        }
+                    }
+                    
+                    // Adjust board size for beginner mode
+                    if (difficulty == Constants.DIFFICULTY_BEGINNER && previousDifficulty != Constants.DIFFICULTY_BEGINNER) {
+                        boardSizeWidth = 12
+                        boardSizeHeight = 14
                     }
                 }
             )

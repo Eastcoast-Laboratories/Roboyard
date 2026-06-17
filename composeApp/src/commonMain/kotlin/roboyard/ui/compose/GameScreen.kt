@@ -176,6 +176,11 @@ fun GameScreen(
     var selectedRobotIndex by remember(board) { mutableIntStateOf(0) }
     var accessibilityControlsVisible by remember(board) { mutableStateOf(false) }
     var hintsUsed by remember(board) { mutableIntStateOf(0) }
+    var regenerationCount by remember(board) { mutableIntStateOf(0) }
+    var allowRegeneration by remember(board) { mutableStateOf(true) }
+    
+    // Maximum auto-regeneration attempts (same as in main game)
+    val MAX_AUTO_REGENERATIONS = 999
 
     // Timer effect - runs every second when timer is enabled
     LaunchedEffect(timerRunning) {
@@ -544,6 +549,24 @@ fun GameScreen(
                                     val solver = driftingdroids.model.SolverIDDFS(currentBoard)
                                     val solutions = solver.execute()
                                     if (solutions.isNotEmpty() && solutions[0].size() > 0) {
+                                        val moveCount = solutions[0].size()
+                                        val minRequiredMoves = Preferences.minSolutionMoves
+                                        val maxRequiredMoves = Preferences.maxSolutionMoves
+                                        
+                                        // Check if solution is too easy or too hard (regeneration logic)
+                                        if (allowRegeneration && regenerationCount < MAX_AUTO_REGENERATIONS) {
+                                            val isTooEasy = moveCount < minRequiredMoves
+                                            val isTooHard = moveCount > maxRequiredMoves
+                                            
+                                            if (isTooEasy || isTooHard) {
+                                                // Regenerate map
+                                                regenerationCount++
+                                                // Trigger new game generation
+                                                onNewGame()
+                                                return@Thread
+                                            }
+                                        }
+                                        
                                         solution = solutions[0]
                                         currentHintStep = 0
                                         val firstMove = solution!!.getNextMove()
@@ -570,6 +593,12 @@ fun GameScreen(
                                             hintMessage = "Already at goal!"
                                         }
                                     } else {
+                                        // No solution found - regenerate map
+                                        if (allowRegeneration && regenerationCount < MAX_AUTO_REGENERATIONS) {
+                                            regenerationCount++
+                                            onNewGame()
+                                            return@Thread
+                                        }
                                         hintMessage = "No solution found"
                                     }
                                 } catch (e: Exception) {
