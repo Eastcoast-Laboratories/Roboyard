@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -749,7 +750,7 @@ fun BoardCanvas(
 ) {
     val gameState = remember(board) { ComposeGameState(board) }
     // Use derivedStateOf to ensure recomposition when board changes
-    val currentBoard by remember { derivedStateOf { board } }
+    val currentBoard: Board by remember { derivedStateOf { board } }
 
     // Tracking variables matching fragment-app GameGridView
     var hasMovedRobotInCurrentGesture by remember { mutableStateOf(false) }
