@@ -56,7 +56,7 @@ fun calculateStars(playerMoves: Int, optimalMoves: Int, hintsUsed: Int): Int {
  * @param stars Stars earned
  * @param squaresMoved Number of squares moved
  * @param elapsedTime Time elapsed in milliseconds
- * @param robotsUsed Number of robots used
+ * @param robotsUsed Number of robots used (calculated as robotsUsed.size in main game)
  */
 fun saveLevelCompletion(
     levelCompletionManager: LevelCompletionManager,
