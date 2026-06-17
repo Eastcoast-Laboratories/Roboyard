@@ -401,104 +401,115 @@ fun LevelSelectionScreen(
     val totalLevels = 140
     val levels = (1..totalLevels).toList()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-    ) {
-        // Header with title
-        Row(
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Background color (placeholder for bg_level_screen)
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "Level Selection",
-                color = Color.White,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+                .fillMaxSize()
+                .background(Color(0xFF4CAF50))
+        )
 
-        // Progress bar section
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Text(
-                text = "0",
-                color = Color(0xFFFFD700),
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                style = TextStyle(
-                    shadow = Shadow(
-                        color = Color(0x80000000),
-                        offset = Offset(1f, 1f),
-                        blurRadius = 2f
+            // Header with title and profile button
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp, bottom = 4.dp, start = 16.dp, end = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Level Selection",
+                    color = Color.White,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center,
+                    style = TextStyle(
+                        shadow = Shadow(
+                            color = Color(0x80000000),
+                            offset = Offset(1f, 1f),
+                            blurRadius = 3f
+                        )
                     )
                 )
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Box(
+                Spacer(modifier = Modifier.width(8.dp))
+                CircularButton(
+                    text = null,
+                    color = CircularButtonColor.TURQUOISE,
+                    onClick = { },
+                    modifier = Modifier.size(40.dp)
+                )
+            }
+
+            // Progress bar section
+            Row(
                 modifier = Modifier
-                    .size(32.dp)
-                    .background(Color(0xFFFFD700), RoundedCornerShape(50))
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(32.dp)
-                    .background(Color(0xFF4A90E2), RoundedCornerShape(4.dp))
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                Text(
+                    text = "0",
+                    color = Color(0xFFFFD700),
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    style = TextStyle(
+                        shadow = Shadow(
+                            color = Color(0x80000000),
+                            offset = Offset(1f, 1f),
+                            blurRadius = 2f
+                        )
+                    )
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                // Star icon placeholder
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(0f)
-                        .fillMaxHeight()
-                        .background(Color(0xFFFFC107), RoundedCornerShape(4.dp))
+                        .size(32.dp)
+                        .background(Color(0xFFFFD700), RoundedCornerShape(50))
                 )
-                Text(
-                    text = "0 / $totalLevels",
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                Spacer(modifier = Modifier.width(8.dp))
+                // Progress bar
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(32.dp)
+                        .background(Color(0xFF4A90E2), RoundedCornerShape(4.dp))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0f)
+                            .fillMaxHeight()
+                            .background(Color(0xFFFFC107), RoundedCornerShape(4.dp))
+                    )
+                    Text(
+                        text = "0 / $totalLevels",
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
             }
-        }
 
-        // Level grid
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(5),
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            contentPadding = PaddingValues(vertical = 6.dp)
-        ) {
-            items(levels) { levelId ->
-                LevelItem(
-                    levelId = levelId,
-                    onClick = { onLevelSelected(levelId) }
-                )
+            // Level grid (3 columns in portrait, 6 in landscape)
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                contentPadding = PaddingValues(vertical = 6.dp)
+            ) {
+                items(levels) { levelId ->
+                    LevelItem(
+                        levelId = levelId,
+                        onClick = { onLevelSelected(levelId) }
+                    )
+                }
             }
-        }
-
-        // Bottom button row
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 0.dp)
-        ) {
-            FancyButton(
-                text = "BACK",
-                color = FancyButtonColor.GRAY,
-                onClick = onBack,
-                modifier = Modifier.weight(1f)
-            )
         }
     }
 }
