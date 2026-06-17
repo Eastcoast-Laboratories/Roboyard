@@ -65,6 +65,7 @@ fun App() {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.MainMenu) }
     var board by remember { mutableStateOf<Board?>(null) }
     var selectedLevelId by remember { mutableStateOf(1) }
+    var isLevelGame by remember { mutableStateOf(false) }
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
@@ -82,6 +83,7 @@ fun App() {
                             // Fallback to standard random board if MapGenerator fails
                             Board.createBoardRandom(4)
                         }
+                        isLevelGame = false
                         currentScreen = Screen.Game
                     },
                     onLevelSelection = {
@@ -107,6 +109,7 @@ fun App() {
                     board?.let { currentBoard ->
                         GameScreen(
                             board = currentBoard,
+                            isLevelGame = isLevelGame,
                             onBack = {
                                 currentScreen = Screen.MainMenu
                                 board = null
@@ -143,6 +146,7 @@ fun App() {
                         levelId = selectedLevelId,
                         onLoadComplete = { loadedBoard: Board ->
                             board = loadedBoard
+                            isLevelGame = true
                             currentScreen = Screen.Game
                         },
                         onBack = {
@@ -178,6 +182,7 @@ fun App() {
                         },
                         onLoadGame = { loadedBoard ->
                             board = loadedBoard
+                            isLevelGame = false // Default to false for loaded games
                             currentScreen = Screen.Game
                         }
                     )

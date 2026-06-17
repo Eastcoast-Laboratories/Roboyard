@@ -99,9 +99,34 @@ fun formatTime(elapsedTimeMs: Long): String {
     return String.format("%d:%02d", minutes, seconds)
 }
 
+// Helper function to handle game win logic (DRY)
+fun handleGameWin(
+    moveCount: Int,
+    isLevelGame: Boolean = false,
+    optimalMoves: Int? = null
+): String {
+    val baseMessage = if (isLevelGame) {
+        "Level completed in $moveCount moves!"
+    } else {
+        "Game completed in $moveCount moves!"
+    }
+    
+    // Add optimal moves information if available
+    if (optimalMoves != null) {
+        if (moveCount == optimalMoves) {
+            return "$baseMessage Perfect solution!"
+        } else {
+            return "$baseMessage (Optimal: $optimalMoves moves)"
+        }
+    }
+    
+    return baseMessage
+}
+
 @Composable
 fun GameScreen(
     board: Board,
+    isLevelGame: Boolean = false,
     onBack: () -> Unit = {},
     onNewGame: () -> Unit = {}
 ) {
@@ -176,7 +201,8 @@ fun GameScreen(
                             gameWon = true
                             // Play win sound and show completion message
                             // Note: Sound playback is platform-specific and will be implemented separately
-                            val completionMessage = "Game completed in $moveCount moves!"
+                            val optimalMoves = solution?.size()
+                            val completionMessage = handleGameWin(moveCount, isLevelGame = isLevelGame, optimalMoves = optimalMoves)
                             hintMessage = completionMessage
                         }
                     }
