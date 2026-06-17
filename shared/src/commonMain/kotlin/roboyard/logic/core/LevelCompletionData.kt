@@ -31,7 +31,7 @@ class LevelCompletionData(
     }
 
     fun setStars(stars: Int) {
-        this.starCount = stars.coerceIn(0, 3)
+        this.starCount = stars.coerceIn(0, 4) // Allow up to 4 stars (hyper-optimal)
     }
 
     override fun toString(): String {
