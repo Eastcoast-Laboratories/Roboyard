@@ -402,6 +402,10 @@ fun LevelSelectionScreen(
     val levels = (1..totalLevels).toList()
     val levelCompletionManager = remember { roboyard.logic.managers.LevelCompletionManager.getInstance() }
     val totalStars = remember { levelCompletionManager.totalStars }
+    val STARS_PER_LEVEL = 1 // Number of stars required per level (same as in main game)
+    
+    // Calculate unlocked levels based on total stars
+    val unlockedLevels = remember(totalStars) { totalStars / STARS_PER_LEVEL + 1 }
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Background color (placeholder for bg_level_screen)
@@ -507,10 +511,12 @@ fun LevelSelectionScreen(
             ) {
                 items(levels) { levelId ->
                     val levelData = remember { levelCompletionManager.getLevelCompletionData(levelId) }
+                    val isUnlocked = levelId <= unlockedLevels
                     LevelItem(
                         levelId = levelId,
                         stars = levelData?.starCount ?: 0,
-                        onClick = { onLevelSelected(levelId) }
+                        isUnlocked = isUnlocked,
+                        onClick = { if (isUnlocked) onLevelSelected(levelId) }
                     )
                 }
             }
@@ -522,14 +528,18 @@ fun LevelSelectionScreen(
 fun LevelItem(
     levelId: Int,
     stars: Int = 0,
+    isUnlocked: Boolean = true,
     onClick: () -> Unit
 ) {
+    val backgroundColor = if (isUnlocked) Color(0xFF2C2C2C) else Color(0xFF1A1A1A)
+    val textColor = if (isUnlocked) Color.White else Color.Gray
+    
     Box(
         modifier = Modifier
             .padding(4.dp)
             .aspectRatio(1f)
-            .background(Color(0xFF2C2C2C), RoundedCornerShape(8.dp))
-            .clickable(onClick = onClick),
+            .background(backgroundColor, RoundedCornerShape(8.dp))
+            .clickable(enabled = isUnlocked, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -537,11 +547,11 @@ fun LevelItem(
         ) {
             Text(
                 text = levelId.toString(),
-                color = Color.White,
+                color = textColor,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
-            if (stars > 0) {
+            if (stars > 0 && isUnlocked) {
                 Row {
                     repeat(stars) {
                         Text(
@@ -551,6 +561,12 @@ fun LevelItem(
                         )
                     }
                 }
+            } else if (!isUnlocked) {
+                Text(
+                    text = "🔒",
+                    color = Color.Gray,
+                    fontSize = 12.sp
+                )
             }
         }
     }

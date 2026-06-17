@@ -99,6 +99,41 @@ fun formatTime(elapsedTimeMs: Long): String {
     return String.format("%d:%02d", minutes, seconds)
 }
 
+// Calculate star rating based on player performance (same as in main game)
+// Star allocation rules:
+// - 4 stars: Hyper-optimal solution (better than solver's optimal solution)
+// - 3 stars: Optimal solution (same as solver) with no hints
+// - 2 stars: One move more than optimal with no hints, OR optimal with one hint
+// - 1 star: Optimal solution with two hints, OR two moves more than optimal with no hints
+// - 0 stars: All other cases
+fun calculateStars(playerMoves: Int, optimalMoves: Int, hintsUsed: Int): Int {
+    if (optimalMoves <= 0) {
+        return 0 // No optimal solution available
+    }
+
+    // Calculate stars based on the rules
+    if (playerMoves < optimalMoves) {
+        // hyper-Optimal solution (better than solver's solution)
+        return 4
+    } else if (playerMoves == optimalMoves && hintsUsed == 0) {
+        // Optimal solution (or better) and no hints
+        return 3
+    } else if ((playerMoves == optimalMoves + 1 && hintsUsed == 0) ||
+        (playerMoves == optimalMoves && hintsUsed == 1)
+    ) {
+        // One move more than optimal with no hints OR optimal with one hint
+        return 2
+    } else if ((playerMoves == optimalMoves && hintsUsed == 2) ||
+        (playerMoves == optimalMoves + 2 && hintsUsed == 0)
+    ) {
+        // Optimal with two hints OR two moves more than optimal with no hints
+        return 1
+    } else {
+        // All other cases
+        return 0
+    }
+}
+
 // Helper function to handle game win logic (DRY)
 fun handleGameWin(
     moveCount: Int,
