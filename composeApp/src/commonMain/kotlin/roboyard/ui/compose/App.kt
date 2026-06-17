@@ -1,6 +1,7 @@
 package roboyard.ui.compose
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -47,6 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,6 +59,7 @@ import roboyard.logic.core.LevelLoader
 import roboyard.logic.core.GameLogic
 import roboyard.logic.core.Preferences
 import roboyard.logic.core.MapGenerator
+import org.jetbrains.compose.resources.imageResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -227,116 +230,150 @@ fun MainMenuScreen(
         end = Offset.Infinite
     )
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-    ) {
-        // Header bar with title and profile button
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(barBrush)
-                .padding(start = 44.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "ROBOYARD",
-                color = Color.White,
-                fontSize = 39.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Center,
-                style = androidx.compose.ui.text.TextStyle(
-                    shadow = Shadow(
-                        color = Color.Black,
-                        offset = Offset(2f, 2f),
-                        blurRadius = 3f
-                    )
-                )
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            CircularButton(
-                text = null,
-                color = CircularButtonColor.TURQUOISE,
-                onClick = { },
-                modifier = Modifier.size(48.dp)
-            )
-        }
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Background color (placeholder for background image)
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(2.dp)
-                .background(Color.Black)
+                .fillMaxSize()
+                .background(Color(0xFF1a1a1a))
         )
 
-        // Scrollable content with fancy buttons
         Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.fillMaxSize()
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
-            FancyButton(
-                text = "Play",
-                color = FancyButtonColor.GREEN,
-                onClick = onNewRandomGame,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            FancyButton(
-                text = "Levels",
-                color = FancyButtonColor.BLUE,
-                onClick = onLevelSelection,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            FancyButton(
-                text = "Load Game",
-                color = FancyButtonColor.RED,
-                onClick = onSaveLoad,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+            // Header bar with title and profile button
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(barBrush)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 44.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "ROBOYARD",
+                        color = Color.White,
+                        fontSize = 39.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center,
+                        style = androidx.compose.ui.text.TextStyle(
+                            shadow = Shadow(
+                                color = Color.Black,
+                                offset = Offset(2f, 2f),
+                                blurRadius = 3f
+                            )
+                        )
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    CircularButton(
+                        text = null,
+                        color = CircularButtonColor.TURQUOISE,
+                        onClick = { },
+                        modifier = Modifier.size(48.dp)
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(2.dp)
+                        .background(Color.Black)
+                )
+            }
 
-        // Footer bar with icon buttons
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(2.dp)
-                .background(Color.Black)
-        )
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(barBrush)
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            CircularButton(
-                text = "©",
-                color = CircularButtonColor.YELLOW,
-                onClick = onCredits
-            )
-            CircularButton(
-                text = null,
-                color = CircularButtonColor.ORANGE,
-                onClick = onHelp
-            )
-            CircularButton(
-                text = null,
-                color = CircularButtonColor.PURPLE,
-                onClick = onAchievements
-            )
-            CircularButton(
-                text = null,
-                color = CircularButtonColor.GRAY,
-                onClick = onSettings
-            )
+            // Scrollable content with fancy buttons
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(24.dp))
+                // Button container with 70% width
+                Column(
+                    modifier = Modifier.fillMaxWidth(0.7f)
+                ) {
+                    FancyButton(
+                        text = "New Random Game",
+                        color = FancyButtonColor.GREEN,
+                        onClick = onNewRandomGame,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    FancyButton(
+                        text = "Level Game",
+                        color = FancyButtonColor.BLUE,
+                        onClick = onLevelSelection,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    // Load Game button - hidden (visibility gone in fragment-app)
+                    // FancyButton(
+                    //     text = "Load Game",
+                    //     color = FancyButtonColor.RED,
+                    //     onClick = onSaveLoad,
+                    //     modifier = Modifier.fillMaxWidth()
+                    // )
+                }
+            }
+
+            // Footer bar with icon buttons
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(barBrush)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(2.dp)
+                        .background(Color.Black)
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 0.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Credits button - X symbol
+                    CircularButton(
+                        text = "©",
+                        color = CircularButtonColor.YELLOW,
+                        onClick = onCredits,
+                        modifier = Modifier.size(48.dp).padding(8.dp)
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    // Help button
+                    CircularButton(
+                        text = null,
+                        color = CircularButtonColor.ORANGE,
+                        onClick = onHelp,
+                        modifier = Modifier.size(48.dp).padding(8.dp)
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    // Achievements button
+                    CircularButton(
+                        text = null,
+                        color = CircularButtonColor.PURPLE,
+                        onClick = onAchievements,
+                        modifier = Modifier.size(48.dp).padding(8.dp)
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    // Settings button
+                    CircularButton(
+                        text = null,
+                        color = CircularButtonColor.GRAY,
+                        onClick = onSettings,
+                        modifier = Modifier.size(48.dp).padding(8.dp)
+                    )
+                }
+            }
         }
     }
 }
