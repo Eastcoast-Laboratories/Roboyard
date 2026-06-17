@@ -19,10 +19,10 @@ object LevelLoader {
 
     /**
      * Loads the raw content of a level file from shared resources.
-     * Platform-specific implementation via expect/actual.
+     * Platform-specific implementation via ResourceLoader.
      */
     private fun loadLevelContent(levelId: Int): String? {
-        TODO("Platform-specific resource loading not available in commonMain")
+        return ResourceLoader.loadLevelContent(levelId)
     }
 
     /**
