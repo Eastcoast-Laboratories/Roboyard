@@ -403,8 +403,6 @@ fun LevelSelectionScreen(
     val levels = (1..totalLevels).toList()
     val levelCompletionManager = remember { roboyard.logic.managers.LevelCompletionManager.getInstance() }
     val totalStars = remember { levelCompletionManager.totalStars }
-    val STARS_PER_LEVEL = 1 // Number of stars required per level (same as in main game)
-    val CUSTOM_LEVEL_START_ID = 141 // Custom levels start at 141
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Background color (placeholder for bg_level_screen)
@@ -510,8 +508,8 @@ fun LevelSelectionScreen(
             ) {
                 items(levels) { levelId ->
                     val levelData = remember { levelCompletionManager.getLevelCompletionData(levelId) }
-                    val isUnlocked = levelId >= CUSTOM_LEVEL_START_ID || 
-                            (STARS_PER_LEVEL * (levelId - 1) <= totalStars)
+                    val isUnlocked = levelId >= roboyard.logic.core.Constants.CUSTOM_LEVEL_START_ID || 
+                            (roboyard.logic.core.Constants.STARS_PER_LEVEL * (levelId - 1) <= totalStars)
                     LevelItem(
                         levelId = levelId,
                         stars = levelData?.starCount ?: 0,

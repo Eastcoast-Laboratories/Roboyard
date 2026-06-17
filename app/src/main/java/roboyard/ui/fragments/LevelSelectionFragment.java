@@ -71,9 +71,9 @@ public class LevelSelectionFragment extends BaseGameFragment {
     /** Maps level file map name (e.g. "level_1") to history entry, for minimap + info-box reuse */
     private final Map<String, GameHistoryEntry> historyByMapName = new HashMap<>();
 
-    // Constants for custom level support
-    private static final int CUSTOM_LEVEL_START_ID = 141;
-    private static final int STARS_PER_LEVEL = 1; // Number of stars required per level
+    // Constants for custom level support (now in shared Constants)
+    private static final int CUSTOM_LEVEL_START_ID = roboyard.logic.core.Constants.CUSTOM_LEVEL_START_ID;
+    private static final int STARS_PER_LEVEL = roboyard.logic.core.Constants.STARS_PER_LEVEL;
 
     /**
      * Interface for handling level selection events.

@@ -235,8 +235,6 @@ class LevelCompletionManager private constructor() {
 
         private var instance: LevelCompletionManager? = null
 
-
-
         fun getInstance(): LevelCompletionManager {
             if (instance == null) {
                 instance = LevelCompletionManager()

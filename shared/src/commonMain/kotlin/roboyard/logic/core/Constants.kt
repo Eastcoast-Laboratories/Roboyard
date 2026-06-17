@@ -122,4 +122,6 @@ object Constants {
     // Levels 1-10: always earn at least 1 star (beginner-friendly)
     // Levels 11+: must earn stars based on performance (no guaranteed star)
     const val MIN_STAR_GUARANTEE_LEVEL: Int = 10
+    const val CUSTOM_LEVEL_START_ID: Int = 141
+    const val STARS_PER_LEVEL: Int = 1
 }

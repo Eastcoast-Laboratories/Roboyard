@@ -2442,40 +2442,31 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
         // Get the level completion manager
         val manager = LevelCompletionManager.getInstance(context!!)
 
-        // Get or create completion data for this level
-        val data = manager.getLevelCompletionData(levelId)
-
-        // Update completion data
-        data!!.setCompleted(true)
-        data.hintsShown = hintsShown
-        data.timeNeeded = System.currentTimeMillis() - startTime
-        data.movesNeeded = (if (moveCount.getValue() != null) moveCount.getValue() else 0)!!
-        data.robotsUsed = robotsUsed.size
-        data.squaresSurpassed =
-            (if (squaresMoved.getValue() != null) squaresMoved.getValue() else 0)!!
-
-        // Set optimal moves if we have a solution
+        // Calculate optimal moves
         var optimalMoves = 0
         if (currentSolution != null && currentSolution!!.moves != null) {
             optimalMoves = currentSolution!!.moves.size
-            data.optimalMoves = optimalMoves
         }
 
-        // Calculate stars based on the criteria
+        // Calculate stars using shared function
         val playerMoves: Int = (if (moveCount.getValue() != null) moveCount.getValue() else 0)!!
-        var starCount = calculateStars(playerMoves, optimalMoves, hintsShown)
-        // For beginner levels (1-10), always earn at least 1 star
-        if (starCount < 1 && levelId <= Constants.MIN_STAR_GUARANTEE_LEVEL) {
-            starCount = 1
-        }
-        data.setStars(starCount)
+        val starCount = roboyard.logic.core.calculateStars(playerMoves, optimalMoves, hintsShown)
 
-        d(
-            "[STARS] gameStateManager: Level %d completed with %d moves (optimal: %d), %d hints, earned %d stars",
-            levelId, playerMoves, optimalMoves, hintsShown, starCount
+        // Save level completion data using shared function
+        roboyard.logic.core.saveLevelCompletion(
+            manager,
+            levelId,
+            playerMoves,
+            hintsShown,
+            optimalMoves,
+            starCount,
+            (if (squaresMoved.getValue() != null) squaresMoved.getValue() else 0)!!,
+            System.currentTimeMillis() - startTime,
+            robotsUsed.size
         )
 
-        // Return the prepared data without saving it
+        // Return the prepared data without saving it (already saved by shared function)
+        val data = manager.getLevelCompletionData(levelId)
         d("Prepared level completion data: %s", data)
         return data
     }
@@ -2497,34 +2488,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
      * @return Number of stars earned (0-4)
      */
     fun calculateStars(playerMoves: Int, optimalMoves: Int, hintsUsed: Int): Int {
-        if (optimalMoves <= 0) {
-            d("[stars] No optimal solution available")
-            return 0 // No optimal solution available
-        }
-
-        // Calculate stars based on the rules
-        if (playerMoves < optimalMoves) {
-            // hyper-Optimal solution (better than solver's solution)
-            d("[stars] hyper-optimal solution! 4 stars")
-            return 4
-        } else if (playerMoves == optimalMoves && hintsUsed == 0) {
-            // Optimal solution (or better) and no hints
-            d("[stars] optimal solution! 3 stars")
-            return 3
-        } else if ((playerMoves == optimalMoves + 1 && hintsUsed == 0) ||
-            (playerMoves == optimalMoves && hintsUsed == 1)
-        ) {
-            // One move more than optimal with no hints OR optimal with one hint
-            return 2
-        } else if ((playerMoves == optimalMoves && hintsUsed == 2) ||
-            (playerMoves == optimalMoves + 2 && hintsUsed == 0)
-        ) {
-            // Optimal with two hints OR two moves more than optimal with no hints
-            return 1
-        } else {
-            // All other cases
-            return 0
-        }
+        return roboyard.logic.core.calculateStars(playerMoves, optimalMoves, hintsUsed)
     }
 
     val totalStars: Int
