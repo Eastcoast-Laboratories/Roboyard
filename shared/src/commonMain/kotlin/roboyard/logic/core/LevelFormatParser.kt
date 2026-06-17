@@ -23,10 +23,10 @@ object LevelFormatParser {
         val solution: String? = null,
         val mapData: String = "",
         // Compact format fields for Java test compatibility
-        @JvmField val type: String = "",
-        @JvmField val data: String = "",  // Raw data string
-        @JvmField var x: Int = 0,
-        @JvmField var y: Int = 0
+ val type: String = "",
+ val data: String = "",  // Raw data string
+ var x: Int = 0,
+ var y: Int = 0
     ) {
         // Secondary constructor for Java tests: type and data (coordinates as string)
         constructor(entryType: String, entryData: String) : this(type = entryType, data = entryData) {
@@ -53,7 +53,7 @@ object LevelFormatParser {
      * Parse entries from compact format (e.g., "tb9,0;h0,0;rr1,3")
      * Returns LevelEntry objects with type/x/y for Java test compatibility.
      */
-    @JvmStatic
+
     fun parseEntries(content: String): List<LevelEntry> {
         val result = mutableListOf<LevelEntry>()
         if (content.isBlank()) return result
@@ -103,7 +103,7 @@ object LevelFormatParser {
      * Serialize entries back to string format.
      * Format: type:x,y; for compact entries
      */
-    @JvmStatic
+
     fun serializeEntries(entries: List<LevelEntry>): String {
         val result = StringBuilder()
         for (entry in entries) {
@@ -123,7 +123,7 @@ object LevelFormatParser {
     /**
      * Parse raw entries from a level or save file (detailed format).
      */
-    @JvmStatic
+
     fun parseRawEntries(content: String): List<RawEntry> {
         val entries = mutableListOf<RawEntry>()
         // Split by both ; and \n to handle various formats, then trim each part

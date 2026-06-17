@@ -145,7 +145,7 @@ class MapGenerator {
     }
 
 
-    fun removeGameElementsFromMap(data: java.util.ArrayList<GridElement>): java.util.ArrayList<GridElement> {
+    fun removeGameElementsFromMap(data: ArrayList<GridElement>): ArrayList<GridElement> {
         // Delegate to GameLogic
         return gameLogic!!.removeGameElementsFromMap(data)
     }
@@ -153,7 +153,7 @@ class MapGenerator {
     fun translateArraysToMap(
         horizontalWalls: Array<IntArray?>,
         verticalWalls: Array<IntArray?>
-    ): java.util.ArrayList<GridElement> {
+    ): ArrayList<GridElement> {
         // Delegate to GameLogic
         return gameLogic!!.translateArraysToMap(horizontalWalls, verticalWalls)
     }
@@ -177,7 +177,7 @@ class MapGenerator {
                 generateNewMapEachTime
             )
 
-            var data = java.util.ArrayList<GridElement>()
+            var data = ArrayList<GridElement>()
 
 
             // Synchronize static settings with GameLogic
@@ -265,7 +265,7 @@ class MapGenerator {
 
         // Flag to force generating a new map once (used by dice button in game screen)
         // This flag is automatically reset to false after the next map generation
-        @JvmField
+
         var forceGenerateNewMapOnce: Boolean = false
     }
 }

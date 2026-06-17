@@ -6,40 +6,40 @@ import roboyard.logic.util.RLog
  * Represents an entry in the game's move history.
  */
 class GameHistoryEntry(
-    @JvmField val robotColor: Int,
-    @JvmField val fromX: Int,
-    @JvmField val fromY: Int,
-    @JvmField val toX: Int,
-    @JvmField val toY: Int,
-    @JvmField val moveNumber: Int
+ val robotColor: Int,
+ val fromX: Int,
+ val fromY: Int,
+ val toX: Int,
+ val toY: Int,
+ val moveNumber: Int
 ) {
     private val log = RLog.tag("GameHistoryEntry")
 
 
     // Additional fields required by Java code
-    @JvmField var mapName: String? = null
-    @JvmField var starsEarned: Int = 0
-    @JvmField var movesMade: Int = 0
-    @JvmField var completionCount: Int = 0
+ var mapName: String? = null
+ var starsEarned: Int = 0
+ var movesMade: Int = 0
+ var completionCount: Int = 0
 
     fun getCompletionCount(): Int = completionCount
     
     fun isFirstCompletion(): Boolean = completionCount == 1
-    @JvmField var timestamp: Long = 0
-    @JvmField var lastCompletionTimestamp: Long = 0
-    @JvmField var difficulty: Int = 0
-    @JvmField var wallSignature: String? = null
-    @JvmField var positionSignature: String? = null
-    @JvmField var mapSignature: String? = null
-    @JvmField var maxHintUsed: Int = -1
-    @JvmField var lastSolvedWithoutHints: Long = 0
-    @JvmField var lastPerfectlySolvedWithoutHints: Long = 0
-    @JvmField var optimalMoves: Int = 0
-    @JvmField var bestTime: Int = 0
-    @JvmField var bestMoves: Int = 0
-    @JvmField var playDuration: Int = 0
-    @JvmField var boardSize: String? = null
-    @JvmField var previewImagePath: String? = null
+ var timestamp: Long = 0
+ var lastCompletionTimestamp: Long = 0
+ var difficulty: Int = 0
+ var wallSignature: String? = null
+ var positionSignature: String? = null
+ var mapSignature: String? = null
+ var maxHintUsed: Int = -1
+ var lastSolvedWithoutHints: Long = 0
+ var lastPerfectlySolvedWithoutHints: Long = 0
+ var optimalMoves: Int = 0
+ var bestTime: Int = 0
+ var bestMoves: Int = 0
+ var playDuration: Int = 0
+ var boardSize: String? = null
+ var previewImagePath: String? = null
 
     private var everUsedHints: Boolean = false
     private var solvedWithoutHints: Boolean = true
@@ -75,7 +75,7 @@ class GameHistoryEntry(
 
     fun recordCompletion(time: Int, moves: Int, stars: Int): Boolean {
         completionCount++
-        lastCompletionTimestamp = System.currentTimeMillis()
+        lastCompletionTimestamp = TODO("platform-specific time")
         playDuration += time
         var newRecord = false
         if (movesMade == 0 || moves < movesMade) {
@@ -108,8 +108,8 @@ class GameHistoryEntry(
     }
     fun recordSolvedWithoutHints(optimal: Boolean) {
         solvedWithoutHints = true
-        lastSolvedWithoutHints = System.currentTimeMillis()
-        if (optimal) lastPerfectlySolvedWithoutHints = System.currentTimeMillis()
+        lastSolvedWithoutHints = TODO("platform-specific time")
+        if (optimal) lastPerfectlySolvedWithoutHints = TODO("platform-specific time")
     }
     fun markEverUsedHints() { everUsedHints = true }
     fun isEverUsedHints(): Boolean = everUsedHints

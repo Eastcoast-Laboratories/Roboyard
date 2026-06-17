@@ -19,7 +19,7 @@ import roboyard.logic.core.IGameMove
  * 
  * @see ERRGameMove
  */
-class RRGameMove(private val actor: RRPiece, @JvmField val move: ERRGameMove) : IGameMove {
+class RRGameMove(private val actor: RRPiece, val move: ERRGameMove) : IGameMove {
     val color: Int
         get() = this.actor.color
 
@@ -27,6 +27,6 @@ class RRGameMove(private val actor: RRPiece, @JvmField val move: ERRGameMove) : 
         get() = this.move.direction
 
     override fun toString(): String {
-        return String.format("%d -> %s", this.actor.id, this.move.toString())
+        return "${this.actor.id} -> ${this.move.toString()}"
     }
 }

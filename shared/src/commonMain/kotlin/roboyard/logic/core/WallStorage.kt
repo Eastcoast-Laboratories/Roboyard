@@ -386,7 +386,7 @@ private constructor() {
         private const val PREFS_NAME = "WallStoragePrefs"
         private const val KEY_WALLS_PREFIX = "walls_"
 
-        @JvmStatic
+
         var storage: PlatformStorage? = null
 
         private var instance: WallStorage? = null
@@ -395,8 +395,8 @@ private constructor() {
          * Get the singleton instance of WallStorage
          * @return The WallStorage instance
          */
-        @JvmStatic
-        @Synchronized
+
+
         fun getInstance(): WallStorage {
             if (instance == null) {
                 instance = WallStorage()

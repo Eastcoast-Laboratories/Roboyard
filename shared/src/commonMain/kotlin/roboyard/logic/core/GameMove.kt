@@ -4,14 +4,14 @@ package roboyard.logic.core
 /**
  * Represents a single move of a robot in the game.
  */
-class GameMove @JvmOverloads constructor(
-    @JvmField val robotColor: Int,
-    @JvmField val direction: Int,
-    @JvmField val startX: Int,
-    @JvmField val startY: Int,
-    @JvmField var endX: Int,
-    @JvmField var endY: Int,
-    @JvmField val robotId: Int = 0
+class GameMove constructor(
+ val robotColor: Int,
+ val direction: Int,
+ val startX: Int,
+ val startY: Int,
+ var endX: Int,
+ var endY: Int,
+ val robotId: Int = 0
 ) : IGameMove {
 
     // Secondary constructor for Java tests: robotId, direction, distance
@@ -38,10 +38,10 @@ class GameMove @JvmOverloads constructor(
     )
 
     // Java-compatible field aliases
-    @JvmField val fromX: Int = startX
-    @JvmField val fromY: Int = startY
-    @JvmField val toX: Int = endX
-    @JvmField val toY: Int = endY
+ val fromX: Int = startX
+ val fromY: Int = startY
+ val toX: Int = endX
+ val toY: Int = endY
 
     fun getRobotColor(): Int = robotColor
     
@@ -88,9 +88,9 @@ class GameMove @JvmOverloads constructor(
         private const val serialVersionUID = 1L
 
         // Direction constants for Java compatibility
-        @JvmField val UP: Int = 0
-        @JvmField val RIGHT: Int = 1
-        @JvmField val DOWN: Int = 2
-        @JvmField val LEFT: Int = 3
+ val UP: Int = 0
+ val RIGHT: Int = 1
+ val DOWN: Int = 2
+ val LEFT: Int = 3
     }
 }

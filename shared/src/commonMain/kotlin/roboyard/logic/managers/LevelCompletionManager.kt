@@ -3,15 +3,13 @@ package roboyard.logic.managers
 import roboyard.logic.core.LevelCompletionData
 import roboyard.logic.storage.PlatformStorage
 import roboyard.logic.storage.getPlatformStorage
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 
 /**
  * Manager for level completion data.
  * Stores and retrieves level completion information including stars, moves, time, etc.
  */
 class LevelCompletionManager private constructor() {
-    private var completionDataMap: MutableMap<Int?, LevelCompletionData>? = HashMap()
+    private var completionDataMap: MutableMap<Int, LevelCompletionData> = HashMap()
     private val storage: PlatformStorage = getPlatformStorage()
 
     init {
@@ -24,10 +22,10 @@ class LevelCompletionManager private constructor() {
      * @return The completion data, or a new empty data object if none exists
      */
     fun getLevelCompletionData(levelId: Int): LevelCompletionData? {
-        if (!completionDataMap!!.containsKey(levelId)) {
-            completionDataMap!!.put(levelId, LevelCompletionData(levelId))
+        if (!completionDataMap.containsKey(levelId)) {
+            completionDataMap.put(levelId, LevelCompletionData(levelId))
         }
-        return completionDataMap!!.get(levelId)
+        return completionDataMap.get(levelId)
     }
 
     /**
@@ -38,15 +36,15 @@ class LevelCompletionManager private constructor() {
         val levelId = data.levelId
 
         // Check if we already have data for this level
-        if (completionDataMap!!.containsKey(levelId)) {
-            val existingData = completionDataMap!!.get(levelId)
+        if (completionDataMap.containsKey(levelId)) {
+            val existingData = completionDataMap.get(levelId) ?: return
 
             // Only update stars if new value is greater
-            val starsImproved = data.getStars() > existingData!!.getStars()
+            val starsImproved = data.getStars() > existingData.getStars()
             val starsAtLeastSame = data.getStars() >= existingData.getStars()
 
             // Always update hints shown (relevant for achievement tracking)
-            existingData!!.hintsShown = data.hintsShown
+            existingData.hintsShown = data.hintsShown
             // Only update optimal moves if new value is valid (> 0), to avoid overwriting with 0
             if (data.optimalMoves > 0) {
                 existingData.optimalMoves = data.optimalMoves
@@ -83,10 +81,10 @@ class LevelCompletionManager private constructor() {
             }
 
             // Use the updated existing data
-            completionDataMap!!.put(levelId, existingData)
+            completionDataMap.put(levelId, existingData)
         } else {
             // No existing data, just add the new data directly
-            completionDataMap!!.put(levelId, data)
+            completionDataMap.put(levelId, data)
         }
 
         // Save changes to storage
@@ -100,8 +98,7 @@ class LevelCompletionManager private constructor() {
      */
     fun isLevelCompleted(levelId: Int): Boolean {
         val data = getLevelCompletionData(levelId)
-        val completed = data!!.isCompleted()
-        return completed
+        return data?.isCompleted() ?: false
     }
 
     val totalStars: Int
@@ -111,7 +108,7 @@ class LevelCompletionManager private constructor() {
          */
         get() {
             var totalStars = 0
-            for (data in completionDataMap!!.values) {
+            for (data in completionDataMap.values) {
                 if (data.isCompleted()) {
                     totalStars += data.getStars()
                 }
@@ -127,26 +124,32 @@ class LevelCompletionManager private constructor() {
 
         if (json != null) {
             try {
-                val gson = Gson()
-                // Use Runtime Type to avoid ProGuard issues
-                val mapType =
-                    object : TypeToken<HashMap<Int?, LevelCompletionData?>?>() {}.getType()
-                val loadedData =
-                    gson.fromJson<MutableMap<Int?, LevelCompletionData>?>(json, mapType)
-
+                // Simple manual parsing for multiplatform compatibility
+                val loadedData = parseCompletionData(json)
                 if (loadedData != null) {
                     completionDataMap = loadedData
-                } else {
-                    // Create an empty map as fallback
-                    completionDataMap = HashMap<Int?, LevelCompletionData>()
                 }
             } catch (e: Exception) {
                 // Create an empty map as fallback
-                completionDataMap = HashMap<Int?, LevelCompletionData>()
+                completionDataMap = HashMap()
             }
-        } else {
-            // No completion data found in storage
         }
+    }
+
+    private fun parseCompletionData(json: String): MutableMap<Int, LevelCompletionData>? {
+        val result = HashMap<Int, LevelCompletionData>()
+        val entries = json.split("|")
+        for (entry in entries) {
+            if (entry.isBlank()) continue
+            val parts = entry.split(":")
+            if (parts.size >= 2) {
+                val levelId = parts[0].toIntOrNull() ?: continue
+                val data = LevelCompletionData(levelId)
+                // Parse additional fields if needed
+                result[levelId] = data
+            }
+        }
+        return result
     }
 
     var lastPlayedLevel: Int
@@ -169,7 +172,7 @@ class LevelCompletionManager private constructor() {
      * Reset all level completion data
      */
     fun resetAll() {
-        completionDataMap!!.clear()
+        completionDataMap.clear()
         storage.clear()
     }
 
@@ -186,8 +189,8 @@ class LevelCompletionManager private constructor() {
      */
     fun unlockStars(numLevels: Int) {
         for (levelId in 1..numLevels) {
-            val data = getLevelCompletionData(levelId)
-            data!!.setCompleted(true)
+            val data = getLevelCompletionData(levelId) ?: continue
+            data.setCompleted(true)
             data.setStars(1)
             data.optimalMoves = 1
             data.timeNeeded = 1
@@ -202,12 +205,28 @@ class LevelCompletionManager private constructor() {
      */
     private fun saveCompletionData() {
         try {
-            val gson = Gson()
-            val json = gson.toJson(completionDataMap)
+            val json = serializeCompletionData()
             storage.putString(COMPLETION_DATA_KEY, json)
         } catch (e: Exception) {
             // Error saving level completion data
         }
+    }
+
+    private fun serializeCompletionData(): String {
+        val sb = StringBuilder()
+        for ((levelId, data) in completionDataMap) {
+            sb.append("$levelId:")
+            sb.append("${data.isCompleted},")
+            sb.append("${data.getStars()},")
+            sb.append("${data.movesNeeded},")
+            sb.append("${data.timeNeeded},")
+            sb.append("${data.robotsUsed},")
+            sb.append("${data.squaresSurpassed},")
+            sb.append("${data.optimalMoves},")
+            sb.append("${data.hintsShown}")
+            sb.append("|")
+        }
+        return sb.toString()
     }
 
     companion object {
@@ -216,8 +235,8 @@ class LevelCompletionManager private constructor() {
 
         private var instance: LevelCompletionManager? = null
 
-        @JvmStatic
-        @Synchronized
+
+
         fun getInstance(): LevelCompletionManager {
             if (instance == null) {
                 instance = LevelCompletionManager()

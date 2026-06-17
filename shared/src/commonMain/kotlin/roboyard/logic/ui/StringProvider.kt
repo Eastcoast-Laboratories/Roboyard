@@ -21,7 +21,11 @@ fun interface StringProvider {
     fun getString(name: String, vararg formatArgs: Any): String? {
         val base = getString(name) ?: return null
         return try {
-            String.format(base, *formatArgs)
+            var result = base
+            formatArgs.forEachIndexed { index, arg ->
+                result = result.replace("{$index}", arg.toString())
+            }
+            result
         } catch (e: Exception) {
             base
         }

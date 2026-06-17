@@ -77,7 +77,7 @@ object Constants {
     const val COLOR_BROWN: Int = 6
     const val COLOR_ORANGE: Int = 7
     const val COLOR_WHITE: Int = 8
-    @JvmField
+
     val COLOR_MULTI: Int = -1 // the multi target
 
     const val NUM_ROBOTS: Int = 4 // number of robots

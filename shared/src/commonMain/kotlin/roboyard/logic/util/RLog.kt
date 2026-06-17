@@ -36,7 +36,17 @@ class RLog private constructor(private val logger: Logger) {
     }
 
     private fun formatMsg(message: String, args: Array<out Any?>): String {
-        return if (args.isEmpty()) message else String.format(message, *args)
+        if (args.isEmpty()) return message
+        var result = message
+        var argIndex = 0
+        val regex = Regex("%[sd]")
+        regex.findAll(message).forEach { match ->
+            if (argIndex < args.size) {
+                result = result.replaceFirst(match.value, args[argIndex].toString())
+                argIndex++
+            }
+        }
+        return result
     }
 
     companion object {

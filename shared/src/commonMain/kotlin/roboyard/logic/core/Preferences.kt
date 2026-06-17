@@ -19,7 +19,7 @@ object Preferences {
      * Provider for lazy storage initialization, set by the platform at app start.
      * Lets commonMain obtain a PlatformStorage without a platform Context.
      */
-    @JvmField
+
     var storageProvider: (() -> PlatformStorage?)? = null
 
     // Preference keys
@@ -78,46 +78,46 @@ object Preferences {
     const val DEFAULT_SOUND_EFFECTS_VOLUME: Int = 20
 
     // Cached values - accessible as static fields
-    @JvmField
+
     var robotCount: Int = 0
-    @JvmField
+
     var targetColors: Int = 0
-    @JvmField
+
     var soundEnabled: Boolean = false
-    @JvmField
+
     var difficulty: Int = 0
-    @JvmField
+
     var boardSizeWidth: Int = 0
-    @JvmField
+
     var boardSizeHeight: Int = 0
-    @JvmField
+
     var generateNewMapEachTime: Boolean = false
-    @JvmField
+
     var accessibilityMode: Boolean = false
-    @JvmField
+
     var appLanguage: String? = null
-    @JvmField
+
     var talkbackLanguage: String? = null
-    @JvmField
+
     var gameMode: Int = 0
-    @JvmField
+
     var fullscreenEnabled: Boolean = false
-    @JvmField
+
     var minSolutionMoves: Int = 0
-    @JvmField
+
     var maxSolutionMoves: Int = 0
-    @JvmField
+
     var allowMulticolorTarget: Boolean = false
-    @JvmField
+
     var highContrastMode: Boolean = false
-    @JvmField
+
     var backgroundSoundVolume: Int = 0
-    @JvmField
+
     var liveMoveCounterEnabled: Boolean = false
     var hintAutoMoveEnabled: Boolean = false
-    @JvmField
+
     var hintAutoMoveMode: Int = 0
-    @JvmField
+
     var soundEffectsVolume: Int = 0
 
     // For compatibility with existing code
@@ -133,7 +133,7 @@ object Preferences {
      * Set a listener to be notified when preferences change
      * @param listener The listener to notify
      */
-    @JvmStatic
+
     fun setPreferenceChangeListener(listener: PreferenceChangeListener?) {
         preferenceChangeListener = listener
     }
@@ -143,8 +143,8 @@ object Preferences {
      * @param storage Platform storage implementation
      * @param accessibilityActive Whether a screen reader is active (platform-detected)
      */
-    @JvmStatic
-    @JvmOverloads
+
+
     fun initialize(storage: PlatformStorage?, accessibilityActive: Boolean = false) {
         if (storage == null) {
             log.e("Cannot initialize Preferences with null storage")
@@ -473,7 +473,7 @@ object Preferences {
      * Set the robot count and save to preferences
      * @param count Number of robots
      */
-    @JvmStatic
+
     fun setRobotCount(count: Int) {
         // Ensure preferences are initialized
         if (storage == null) {
@@ -511,7 +511,7 @@ object Preferences {
      * Set the target colors count and save to preferences
      * @param count Number of target colors
      */
-    @JvmStatic
+
     fun setTargetColors(count: Int) {
         // Ensure preferences are initialized
         if (storage == null) {
@@ -549,7 +549,7 @@ object Preferences {
      * Set the sound enabled state and save to preferences
      * @param enabled True to enable sound, false to disable
      */
-    @JvmStatic
+
     fun setSoundEnabled(enabled: Boolean) {
         // Ensure preferences are initialized
         if (storage == null) {
@@ -583,7 +583,7 @@ object Preferences {
      * Set the background sound volume and save to preferences
      * @param volume Volume level 0-100 (0 = off)
      */
-    @JvmStatic
+
     fun setBackgroundSoundVolume(volume: Int) {
         if (storage == null) {
             log.w("[PREFERENCES] SharedPreferences is null in setBackgroundSoundVolume, attempting to initialize")
@@ -609,7 +609,7 @@ object Preferences {
      * Set the live move counter enabled state and save to preferences
      * @param enabled True to enable live move counter, false to disable
      */
-    @JvmStatic
+
     fun setLiveMoveCounterEnabled(enabled: Boolean) {
         if (storage == null) {
             log.w("[PREFERENCES] SharedPreferences is null in setLiveMoveCounterEnabled, attempting to initialize")
@@ -634,7 +634,7 @@ object Preferences {
      * Set the hint auto-move mode and save to preferences
      * @param mode 0=Manual, 1=Full-Auto, 2=Semi-Auto (move on next-hint button)
      */
-    @JvmStatic
+
     fun setHintAutoMoveMode(mode: Int) {
         if (storage == null) {
             log.w("[PREFERENCES] SharedPreferences is null in setHintAutoMoveMode, attempting to initialize")
@@ -660,7 +660,7 @@ object Preferences {
      * Set the sound effects volume and save to preferences
      * @param volume Volume level 0-100
      */
-    @JvmStatic
+
     fun setSoundEffectsVolume(volume: Int) {
         if (storage == null) {
             log.w("[PREFERENCES] SharedPreferences is null in setSoundEffectsVolume, attempting to initialize")
@@ -686,7 +686,7 @@ object Preferences {
      * Set the difficulty level and save to preferences
      * @param difficultyLevel Difficulty level (0-3)
      */
-    @JvmStatic
+
     fun setDifficulty(difficultyLevel: Int) {
         // Ensure preferences are initialized
         if (storage == null) {
@@ -731,7 +731,7 @@ object Preferences {
      * @param width Board width
      * @param height Board height
      */
-    @JvmStatic
+
     fun setBoardSize(width: Int, height: Int) {
         // Ensure preferences are initialized
         if (storage == null) {
@@ -781,7 +781,7 @@ object Preferences {
      * Set whether to generate a new map each time
      * @param generateNewMapEachTime Whether to generate a new map each time
      */
-    @JvmStatic
+
     fun setGenerateNewMapEachTime(generateNewMapEachTime: Boolean) {
         if (storage == null) {
             log.e("[PREFERENCES] Cannot save preference: SharedPreferences not initialized")
@@ -834,7 +834,7 @@ object Preferences {
      * Set whether accessibility mode is enabled and save to preferences
      * @param enabled True if accessibility mode is enabled, false otherwise
      */
-    @JvmStatic
+
     fun setAccessibilityMode(enabled: Boolean) {
         // Ensure preferences are initialized
         if (storage == null) {
@@ -890,7 +890,7 @@ object Preferences {
      * Set the app language and save to preferences
      * @param language App language
      */
-    @JvmStatic
+
     fun setAppLanguage(language: String?) {
         // Ensure preferences are initialized
         if (storage == null) {
@@ -926,7 +926,7 @@ object Preferences {
      * Set the talkback language and save to preferences
      * @param language Talkback language
      */
-    @JvmStatic
+
     fun setTalkbackLanguage(language: String?) {
         // Ensure preferences are initialized
         if (storage == null) {
@@ -962,7 +962,7 @@ object Preferences {
      * Set the game mode and save to preferences
      * @param gameMode Game mode
      */
-    @JvmStatic
+
     fun setGameMode(gameMode: Int) {
         // Ensure preferences are initialized
         if (storage == null) {
@@ -996,7 +996,7 @@ object Preferences {
      * Set whether fullscreen mode is enabled and save to preferences
      * @param enabled True if fullscreen mode is enabled, false otherwise
      */
-    @JvmStatic
+
     fun setFullscreenEnabled(enabled: Boolean) {
         // Ensure preferences are initialized
         if (storage == null) {
@@ -1030,7 +1030,7 @@ object Preferences {
      * Reload all preference values from disk
      * Call this if preferences might have been changed by another component
      */
-    @JvmStatic
+
     fun reloadPreferences() {
         loadCachedValues()
         log.d("[PREFERENCES] Preferences reloaded from disk")
@@ -1040,7 +1040,7 @@ object Preferences {
      * Set the minimum solution moves and save to preferences
      * @param moves Minimum number of moves required for a solution
      */
-    @JvmStatic
+
     fun setMinSolutionMoves(moves: Int) {
         if (storage == null) {
             log.w("[PREFERENCES] SharedPreferences is null in setMinSolutionMoves, attempting to initialize")
@@ -1065,7 +1065,7 @@ object Preferences {
      * Set the maximum solution moves and save to preferences
      * @param moves Maximum number of moves required for a solution
      */
-    @JvmStatic
+
     fun setMaxSolutionMoves(moves: Int) {
         if (storage == null) {
             log.w("[PREFERENCES] SharedPreferences is null in setMaxSolutionMoves, attempting to initialize")
@@ -1090,7 +1090,7 @@ object Preferences {
      * Set whether multicolor targets are allowed and save to preferences
      * @param allowed True to allow multicolor targets, false to disallow
      */
-    @JvmStatic
+
     fun setAllowMulticolorTarget(allowed: Boolean) {
         if (storage == null) {
             log.w("[PREFERENCES] SharedPreferences is null in setAllowMulticolorTarget, attempting to initialize")
@@ -1115,7 +1115,7 @@ object Preferences {
      * Set high contrast mode and save to preferences
      * @param enabled True to enable high contrast mode, false to disable
      */
-    @JvmStatic
+
     fun setHighContrastMode(enabled: Boolean) {
         if (storage == null) {
             log.w("[PREFERENCES] SharedPreferences is null in setHighContrastMode, attempting to initialize")
@@ -1148,7 +1148,7 @@ object Preferences {
      * @param sliderValue Linear slider value 0-100
      * @return Logarithmic volume 0.0-1.0
      */
-    @JvmStatic
+
     fun getLogarithmicVolume(sliderValue: Int): Float {
         if (sliderValue <= 0) return 0.0f
         if (sliderValue >= 100) return 1.0f

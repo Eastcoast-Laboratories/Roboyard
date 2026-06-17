@@ -17,13 +17,13 @@ class WallModel
      * 
      * @return The board width
      */
-    @JvmField val boardWidth: Int,
+ val boardWidth: Int,
     /**
      * Gets the height of the board.
      * 
      * @return The board height
      */
-    @JvmField val boardHeight: Int
+ val boardHeight: Int
 ) {
     private val walls: MutableList<Wall?> = ArrayList<Wall?>()
 
@@ -60,7 +60,7 @@ class WallModel
          * @param height The height of the game board
          * @return A new WallModel containing all walls from the game elements
          */
-        @JvmStatic
+
         fun fromGameElements(
             elements: MutableList<GameElement>,
             width: Int,
@@ -90,7 +90,7 @@ class WallModel
          * @param height The height of the game board
          * @return A new WallModel containing all walls from the grid elements
          */
-        @JvmStatic
+
         fun fromGridElements(
             elements: MutableList<GridElement>,
             width: Int,

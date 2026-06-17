@@ -8,7 +8,7 @@ import roboyard.logic.util.RLog
 /**
  * A UI-agnostic class that contains the core game logic for map generation.
  */
-class GameLogic @JvmOverloads constructor(// Board dimensions
+class GameLogic constructor(// Board dimensions
     private val boardWidth: Int,
     private val boardHeight: Int,
     difficultyLevel: Int,
@@ -29,7 +29,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
         /**
          * Set whether to generate a new map each time
          */
-        @JvmStatic
+
         fun setgenerateNewMapEachTime(value: Boolean) {
             generateNewMapEachTime = value
         }
@@ -40,7 +40,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
          * @param capitalize Whether to capitalize the first letter of the color name
          * @return The color name as a string
          */
-        @JvmStatic
+
         fun getColorName(colorId: Int, capitalize: Boolean): String {
             val name: String?
             when (colorId) {
@@ -121,7 +121,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
          * @param objectType The object type string (e.g., "robot_red", "target_blue")
          * @return The RGB color value
          */
-        @JvmStatic
+
         fun getColor(objectType: String): Int {
             val colorId: Int = getColorIdFromObjectType(objectType)
             // Special case for multi-colored targets
@@ -167,7 +167,7 @@ class GameLogic @JvmOverloads constructor(// Board dimensions
          * Check if debug logging is enabled
          * @return true if debug logging is enabled
          */
-        @JvmStatic
+
         fun hasDebugLogging(): Boolean {
             // For now, always return false to minimize log output
             return false

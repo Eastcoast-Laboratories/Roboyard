@@ -15,7 +15,7 @@ class GameSolution {
         this.moves.add(move)
     }
 
-    @JvmField
+
     val moves: ArrayList<IGameMove?>
 
     init {

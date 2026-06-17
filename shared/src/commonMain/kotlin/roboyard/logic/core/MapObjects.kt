@@ -96,10 +96,10 @@ object MapObjects {
     /**
      * Extract map data from a string
      */
-    @JvmStatic
+
     fun extractDataFromString(data: String?): ArrayList<GridElement> = extractDataFromString(data, false)
 
-    @JvmStatic
+
     fun extractDataFromString(data: String?, someFlag: Boolean): ArrayList<GridElement> {
         val result = ArrayList<GridElement>()
         if (data.isNullOrBlank()) return result
@@ -159,13 +159,13 @@ object MapObjects {
      * Alternates vowels and consonants.
      * Uses SHA-256 hash for consistency with Java implementation.
      */
-    @JvmStatic
+
     fun generateUnique5LetterFromString(input: String?): String {
         if (input.isNullOrEmpty()) return "ERROR"
 
         try {
             // SHA-256 hash
-            val digest = java.security.MessageDigest.getInstance("SHA-256")
+            val digest = input.hashCode()
             val hashBytes = digest.digest(input.toByteArray())
 
             val vowels = charArrayOf('A', 'E', 'I', 'O', 'U')

@@ -18,7 +18,7 @@ object AchievementDefinitions {
      * Colors are assigned deterministically based on achievement ID hash.
      * This array is also mirrored in Laravel: app/Config/AchievementDefinitions.php
      */
-    @JvmField
+
     val ACHIEVEMENT_COLORS: IntArray = intArrayOf(
         -0xb350b0,  // Green
         -0x6800,  // Orange
@@ -86,7 +86,7 @@ object AchievementDefinitions {
      * @param achievementId The achievement ID (used to determine color)
      * @return The color for this achievement
      */
-    @JvmStatic
+
     fun getAchievementColor(achievementId: String): Int {
         val hash = achievementId.hashCode()
         val colorIndex = abs(hash) % ACHIEVEMENT_COLORS.size
@@ -134,128 +134,124 @@ object AchievementDefinitions {
      * Mapping of local achievement IDs to Google Play Games string resource keys.
      * Used by AchievementManager.getPlayGamesAchievementId() to look up PGS IDs.
      */
-    private val PLAY_GAMES_MAPPINGS: MutableMap<String?, String?> =
-        object : LinkedHashMap<String?, String?>() {
-            init {
-                // Login & Special
-                put("daily_login_7", "pgs_weekly_player")
-                put("daily_login_30", "pgs_dedicated_player")
-                put("comeback_player", "pgs_welcome_back")
+    private val PLAY_GAMES_MAPPINGS: MutableMap<String?, String?> = linkedMapOf(
+        // Login & Special
+        "daily_login_7" to "pgs_weekly_player",
+        "daily_login_30" to "pgs_dedicated_player",
+        "comeback_player" to "pgs_welcome_back",
 
-
-                // Progression
-                put("first_game", "pgs_welcome")
-                put("level_1_complete", "pgs_first_steps")
-                put("level_10_complete", "pgs_getting_started")
-                put("level_50_complete", "pgs_halfway_there")
-                put("level_140_complete", "pgs_level_master")
-                put("all_stars_collected", "pgs_star_collector")
+        // Progression
+        "first_game" to "pgs_welcome",
+        "level_1_complete" to "pgs_first_steps",
+        "level_10_complete" to "pgs_getting_started",
+        "level_50_complete" to "pgs_halfway_there",
+        "level_140_complete" to "pgs_level_master",
+        "all_stars_collected" to "pgs_star_collector"
 
 
                 // Performance
-                put("perfect_solutions_5", "pgs_perfect_mover")
-                put("perfect_solutions_10", "pgs_precision_player")
-                put("perfect_solutions_50", "pgs_optimization_expert")
-                put("speedrun_under_30s", "pgs_quick_thinker")
-                put("speedrun_under_10s", "pgs_lightning_fast")
+        "perfect_solutions_5" to "pgs_perfect_mover"
+        "perfect_solutions_10" to "pgs_precision_player"
+        "perfect_solutions_50" to "pgs_optimization_expert"
+        "speedrun_under_30s" to "pgs_quick_thinker"
+        "speedrun_under_10s" to "pgs_lightning_fast"
 
 
                 // Mastery
-                put("3_star_hard_level", "pgs_hard_level_star")
-                put("3_star_10_levels", "pgs_rising_star")
-                put("3_star_10_hard_levels", "pgs_hard_level_master")
-                put("3_star_50_levels", "pgs_superstar")
-                put("3_star_all_levels", "pgs_perfect_master")
+        "3_star_hard_level" to "pgs_hard_level_star"
+        "3_star_10_levels" to "pgs_rising_star"
+        "3_star_10_hard_levels" to "pgs_hard_level_master"
+        "3_star_50_levels" to "pgs_superstar"
+        "3_star_all_levels" to "pgs_perfect_master"
 
 
                 // Random - Speed
-                put("speedrun_random_under_20s", "pgs_speed_demon")
-                put("speedrun_random_under_10s", "pgs_lightning_speed")
-                put("speedrun_random_5_games_under_30s", "pgs_speed_streak")
+        "speedrun_random_under_20s" to "pgs_speed_demon"
+        "speedrun_random_under_10s" to "pgs_lightning_speed"
+        "speedrun_random_5_games_under_30s" to "pgs_speed_streak"
 
 
                 // Random - Streaks
-                put("perfect_random_games_5", "pgs_perfect_5")
-                put("perfect_random_games_10", "pgs_perfect_10")
-                put("perfect_random_games_20", "pgs_perfect_20")
-                put("perfect_random_games_streak_5", "pgs_perfect_streak_5")
-                put("perfect_random_games_streak_10", "pgs_perfect_streak_10")
-                put("perfect_random_games_streak_20", "pgs_perfect_streak_20")
-                put("perfect_no_hints_random_1", "pgs_perfect_no_help")
-                put("no_hints_random_10", "pgs_no_help_needed_10")
-                put("no_hints_random_50", "pgs_no_help_needed_50")
-                put("no_hints_streak_random_10", "pgs_no_help_streak_10")
-                put("no_hints_streak_random_50", "pgs_no_help_streak_50")
+        "perfect_random_games_5" to "pgs_perfect_5"
+        "perfect_random_games_10" to "pgs_perfect_10"
+        "perfect_random_games_20" to "pgs_perfect_20"
+        "perfect_random_games_streak_5" to "pgs_perfect_streak_5"
+        "perfect_random_games_streak_10" to "pgs_perfect_streak_10"
+        "perfect_random_games_streak_20" to "pgs_perfect_streak_20"
+        "perfect_no_hints_random_1" to "pgs_perfect_no_help"
+        "no_hints_random_10" to "pgs_no_help_needed_10"
+        "no_hints_random_50" to "pgs_no_help_needed_50"
+        "no_hints_streak_random_10" to "pgs_no_help_streak_10"
+        "no_hints_streak_random_50" to "pgs_no_help_streak_50"
 
 
                 // Random - Difficulty
-                put("impossible_mode_1", "pgs_impossible_dream")
-                put("impossible_mode_5", "pgs_impossible_champion")
-                put("impossible_mode_streak_5", "pgs_impossible_streak")
-                put("impossible_mode_streak_10", "pgs_impossible_legend")
+        "impossible_mode_1" to "pgs_impossible_dream"
+        "impossible_mode_5" to "pgs_impossible_champion"
+        "impossible_mode_streak_5" to "pgs_impossible_streak"
+        "impossible_mode_streak_10" to "pgs_impossible_legend"
 
 
                 // Random - Solution Length (18-29)
-                put("solution_18_moves", "pgs_18_move_master")
-                put("solution_19_moves", "pgs_19_move_master")
-                put("solution_20_moves", "pgs_20_move_master")
-                put("solution_21_moves", "pgs_21_move_master")
-                put("solution_22_moves", "pgs_22_move_master")
-                put("solution_23_moves", "pgs_23_move_master")
-                put("solution_24_moves", "pgs_24_move_master")
-                put("solution_25_moves", "pgs_25_move_master")
-                put("solution_26_moves", "pgs_26_move_master")
-                put("solution_27_moves", "pgs_27_move_master")
-                put("solution_28_moves", "pgs_28_move_master")
-                put("solution_29_moves", "pgs_29_move_master")
-                put("solution_30_plus_moves", "pgs_30_move_master")
+        "solution_18_moves" to "pgs_18_move_master"
+        "solution_19_moves" to "pgs_19_move_master"
+        "solution_20_moves" to "pgs_20_move_master"
+        "solution_21_moves" to "pgs_21_move_master"
+        "solution_22_moves" to "pgs_22_move_master"
+        "solution_23_moves" to "pgs_23_move_master"
+        "solution_24_moves" to "pgs_24_move_master"
+        "solution_25_moves" to "pgs_25_move_master"
+        "solution_26_moves" to "pgs_26_move_master"
+        "solution_27_moves" to "pgs_27_move_master"
+        "solution_28_moves" to "pgs_28_move_master"
+        "solution_29_moves" to "pgs_29_move_master"
+        "solution_30_plus_moves" to "pgs_30_move_master"
 
 
                 // Random - Resolution
-                put("play_10_move_games_all_resolutions", "pgs_resolution_explorer_10")
-                put("play_12_move_games_all_resolutions", "pgs_resolution_explorer_12")
-                put("play_15_move_games_all_resolutions", "pgs_resolution_explorer_15")
+        "play_10_move_games_all_resolutions" to "pgs_resolution_explorer_10"
+        "play_12_move_games_all_resolutions" to "pgs_resolution_explorer_12"
+        "play_15_move_games_all_resolutions" to "pgs_resolution_explorer_15"
 
 
                 // Random - Targets
-                put("game_2_targets", "pgs_double_target")
-                put("game_3_targets", "pgs_triple_target")
-                put("game_4_targets", "pgs_quad_target")
-                put("game_2_of_2_targets", "pgs_2_of_2")
-                put("game_2_of_3_targets", "pgs_2_of_3")
-                put("game_2_of_4_targets", "pgs_2_of_4")
-                put("game_3_of_3_targets", "pgs_3_of_3")
-                put("game_3_of_4_targets", "pgs_3_of_4")
-                put("game_4_of_4_targets", "pgs_4_of_4")
+        "game_2_targets" to "pgs_double_target"
+        "game_3_targets" to "pgs_triple_target"
+        "game_4_targets" to "pgs_quad_target"
+        "game_2_of_2_targets" to "pgs_2_of_2"
+        "game_2_of_3_targets" to "pgs_2_of_3"
+        "game_2_of_4_targets" to "pgs_2_of_4"
+        "game_3_of_3_targets" to "pgs_3_of_3"
+        "game_3_of_4_targets" to "pgs_3_of_4"
+        "game_4_of_4_targets" to "pgs_4_of_4"
 
 
                 // Random - Fun Challenges
-                put("game_5_robots", "pgs_full_team")
-                put("gimme_five", "pgs_gimme_five")
-                put("same_walls_2", "pgs_same_walls_2")
-                put("same_walls_10", "pgs_same_walls_10")
-                put("same_walls_100", "pgs_same_walls_100")
+        "game_5_robots" to "pgs_full_team"
+        "gimme_five" to "pgs_gimme_five"
+        "same_walls_2" to "pgs_same_walls_2"
+        "same_walls_10" to "pgs_same_walls_10"
+        "same_walls_100" to "pgs_same_walls_100"
 
 
                 // Random - Coverage
-                put("traverse_all_squares_1_robot", "pgs_solo_explorer")
-                put("traverse_all_squares_1_robot_goal", "pgs_solo_goal_explorer")
-                put("traverse_all_squares_all_robots", "pgs_team_explorer")
-                put("traverse_all_squares_all_robots_goal", "pgs_team_goal_explorer")
-            }
-        }
+        "traverse_all_squares_1_robot" to "pgs_solo_explorer",
+        "traverse_all_squares_1_robot_goal" to "pgs_solo_goal_explorer",
+        "traverse_all_squares_all_robots" to "pgs_team_explorer",
+        "traverse_all_squares_all_robots_goal" to "pgs_team_goal_explorer"
+    )
 
     /**
      * Get the Play Games string resource key for an achievement ID.
      * @param achievementId The local achievement ID
      * @return The Play Games string resource key, or null if not found
      */
-    @JvmStatic
+
     fun getPlayGamesResourceKey(achievementId: String?): String? {
         return PLAY_GAMES_MAPPINGS.get(achievementId)
     }
 
-    @JvmStatic
+
     val all: MutableMap<String?, Achievement?>?
         get() {
             if (achievements == null) {
@@ -274,22 +270,22 @@ object AchievementDefinitions {
         // ========== Login Streak ==========
         add(
             Achievement(
-                "daily_login_7",
-                "achievement_streak_7", "achievement_streak_7_desc",
+        "daily_login_7",
+        "achievement_streak_7", "achievement_streak_7_desc",
                 AchievementCategory.SPECIAL, ICON_FLAME
             )
         )
         add(
             Achievement(
-                "daily_login_30",
-                "achievement_streak_30", "achievement_streak_30_desc",
+        "daily_login_30",
+        "achievement_streak_30", "achievement_streak_30_desc",
                 AchievementCategory.SPECIAL, ICON_INFINITY
             )
         )
         add(
             Achievement(
-                "comeback_player",
-                "achievement_comeback", "achievement_comeback_desc",
+        "comeback_player",
+        "achievement_comeback", "achievement_comeback_desc",
                 AchievementCategory.SPECIAL, ICON_POWER
             )
         )
@@ -298,43 +294,43 @@ object AchievementDefinitions {
         // ========== PROGRESSION ACHIEVEMENTS ==========
         add(
             Achievement(
-                "first_game",
-                "achievement_first_game", "achievement_first_game_desc",
+        "first_game",
+        "achievement_first_game", "achievement_first_game_desc",
                 AchievementCategory.PROGRESSION, ICON_HEART_GEAR
             )
         )
         add(
             Achievement(
-                "level_1_complete",
-                "achievement_level_1_complete", "achievement_level_1_complete_desc",
+        "level_1_complete",
+        "achievement_level_1_complete", "achievement_level_1_complete_desc",
                 AchievementCategory.PROGRESSION, ICON_MEDAL
             )
         )
         add(
             Achievement(
-                "level_10_complete",
-                "achievement_level_10_complete", "achievement_level_10_complete_desc",
+        "level_10_complete",
+        "achievement_level_10_complete", "achievement_level_10_complete_desc",
                 AchievementCategory.PROGRESSION, ICON_CHART_UP
             )
         )
         add(
             Achievement(
-                "level_50_complete",
-                "achievement_level_50_complete", "achievement_level_50_complete_desc",
+        "level_50_complete",
+        "achievement_level_50_complete", "achievement_level_50_complete_desc",
                 AchievementCategory.PROGRESSION, ICON_BUILDINGS
             )
         )
         add(
             Achievement(
-                "level_140_complete",
-                "achievement_level_140_complete", "achievement_level_140_complete_desc",
+        "level_140_complete",
+        "achievement_level_140_complete", "achievement_level_140_complete_desc",
                 AchievementCategory.PROGRESSION, ICON_DIAMOND_CUP
             )
         )
         add(
             Achievement(
-                "all_stars_collected",
-                "achievement_all_stars", "achievement_all_stars_desc",
+        "all_stars_collected",
+        "achievement_all_stars", "achievement_all_stars_desc",
                 AchievementCategory.PROGRESSION, ICON_STARS
             )
         )
@@ -343,43 +339,43 @@ object AchievementDefinitions {
         // ========== PERFORMANCE ACHIEVEMENTS ==========
         add(
             Achievement(
-                "perfect_solutions_5",
-                "achievement_perfect_5", "achievement_perfect_5_desc",
+        "perfect_solutions_5",
+        "achievement_perfect_5", "achievement_perfect_5_desc",
                 AchievementCategory.PERFORMANCE, ICON_SHIELD_STAR
             )
         )
         add(
             Achievement(
-                "perfect_solutions_10",
-                "achievement_perfect_10", "achievement_perfect_10_desc",
+        "perfect_solutions_10",
+        "achievement_perfect_10", "achievement_perfect_10_desc",
                 AchievementCategory.PERFORMANCE, ICON_TROPHY_STAR
             )
         )
         add(
             Achievement(
-                "perfect_solutions_50",
-                "achievement_perfect_50", "achievement_perfect_50_desc",
+        "perfect_solutions_50",
+        "achievement_perfect_50", "achievement_perfect_50_desc",
                 AchievementCategory.PERFORMANCE, ICON_CROWN
             )
         )
         add(
             Achievement(
-                "speedrun_under_30s",
-                "achievement_speedrun_30s", "achievement_speedrun_30s_desc",
+        "speedrun_under_30s",
+        "achievement_speedrun_30s", "achievement_speedrun_30s_desc",
                 AchievementCategory.PERFORMANCE, ICON_SPEEDOMETER
             )
         )
         add(
             Achievement(
-                "speedrun_under_10s",
-                "achievement_speedrun_10s", "achievement_speedrun_10s_desc",
+        "speedrun_under_10s",
+        "achievement_speedrun_10s", "achievement_speedrun_10s_desc",
                 AchievementCategory.PERFORMANCE, ICON_LIGHTNING
             )
         )
         add(
             Achievement(
-                "view_1_hour",
-                "achievement_view_1_hour", "achievement_view_1_hour_desc",
+        "view_1_hour",
+        "achievement_view_1_hour", "achievement_view_1_hour_desc",
                 AchievementCategory.PERFORMANCE, ICON_HOURGLASS
             )
         )
@@ -401,36 +397,36 @@ object AchievementDefinitions {
         // ========== MASTERY ACHIEVEMENTS ==========
         add(
             Achievement(
-                "3_star_hard_level",
-                "achievement_3_star_1", "achievement_3_star_1_desc",
+        "3_star_hard_level",
+        "achievement_3_star_1", "achievement_3_star_1_desc",
                 AchievementCategory.MASTERY, ICON_STAR
             )
         )
         add(
             Achievement(
-                "3_star_10_levels",
-                "achievement_3_star_10", "achievement_3_star_10_desc",
+        "3_star_10_levels",
+        "achievement_3_star_10", "achievement_3_star_10_desc",
                 AchievementCategory.MASTERY, ICON_STARS
             )
         )
         add(
             Achievement(
-                "3_star_10_hard_levels",
-                "achievement_3_star_10_hard", "achievement_3_star_10_hard_desc",
+        "3_star_10_hard_levels",
+        "achievement_3_star_10_hard", "achievement_3_star_10_hard_desc",
                 AchievementCategory.MASTERY, ICON_STARS
             )
         )
         add(
             Achievement(
-                "3_star_50_levels",
-                "achievement_3_star_50", "achievement_3_star_50_desc",
+        "3_star_50_levels",
+        "achievement_3_star_50", "achievement_3_star_50_desc",
                 AchievementCategory.MASTERY, ICON_WREATH
             )
         )
         add(
             Achievement(
-                "3_star_all_levels",
-                "achievement_3_star_all", "achievement_3_star_all_desc",
+        "3_star_all_levels",
+        "achievement_3_star_all", "achievement_3_star_all_desc",
                 AchievementCategory.MASTERY, ICON_TROPHY_GOLD
             )
         )
@@ -438,22 +434,22 @@ object AchievementDefinitions {
         // ========== RANDOM GAME - SPEED ==========
         add(
             Achievement(
-                "speedrun_random_under_20s",
-                "achievement_speedrun_random_20s", "achievement_speedrun_random_20s_desc",
+        "speedrun_random_under_20s",
+        "achievement_speedrun_random_20s", "achievement_speedrun_random_20s_desc",
                 AchievementCategory.RANDOM_SPEED, ICON_HOURGLASS
             )
         )
         add(
             Achievement(
-                "speedrun_random_under_10s",
-                "achievement_speedrun_random_10s", "achievement_speedrun_random_10s_desc",
+        "speedrun_random_under_10s",
+        "achievement_speedrun_random_10s", "achievement_speedrun_random_10s_desc",
                 AchievementCategory.RANDOM_SPEED, ICON_LIGHTNING
             )
         )
         add(
             Achievement(
-                "speedrun_random_5_games_under_30s",
-                "achievement_speedrun_random_5x30s", "achievement_speedrun_random_5x30s_desc",
+        "speedrun_random_5_games_under_30s",
+        "achievement_speedrun_random_5x30s", "achievement_speedrun_random_5x30s_desc",
                 AchievementCategory.RANDOM_SPEED, "icon_55_cone"
             )
         ) // Rocket
@@ -463,53 +459,53 @@ object AchievementDefinitions {
         // Perfect random games (cumulative - no reset)
         add(
             Achievement(
-                "perfect_random_games_5",
-                "achievement_perfect_random_5", "achievement_perfect_random_5_desc",
+        "perfect_random_games_5",
+        "achievement_perfect_random_5", "achievement_perfect_random_5_desc",
                 AchievementCategory.RANDOM_STREAKS, ICON_FLAME
             )
         )
         add(
             Achievement(
-                "perfect_random_games_10",
-                "achievement_perfect_random_10", "achievement_perfect_random_10_desc",
+        "perfect_random_games_10",
+        "achievement_perfect_random_10", "achievement_perfect_random_10_desc",
                 AchievementCategory.RANDOM_STREAKS, ICON_INFINITY
             )
         )
         add(
             Achievement(
-                "perfect_random_games_20",
-                "achievement_perfect_random_20", "achievement_perfect_random_20_desc",
+        "perfect_random_games_20",
+        "achievement_perfect_random_20", "achievement_perfect_random_20_desc",
                 AchievementCategory.RANDOM_STREAKS, ICON_CROWN
             )
         )
         // Perfect random games streak (resets on non-optimal)
         add(
             Achievement(
-                "perfect_random_games_streak_5",
-                "achievement_perfect_random_streak_5", "achievement_perfect_random_streak_5_desc",
+        "perfect_random_games_streak_5",
+        "achievement_perfect_random_streak_5", "achievement_perfect_random_streak_5_desc",
                 AchievementCategory.RANDOM_STREAKS, ICON_FLAME
             )
         )
         add(
             Achievement(
-                "perfect_random_games_streak_10",
-                "achievement_perfect_random_streak_10", "achievement_perfect_random_streak_10_desc",
+        "perfect_random_games_streak_10",
+        "achievement_perfect_random_streak_10", "achievement_perfect_random_streak_10_desc",
                 AchievementCategory.RANDOM_STREAKS, ICON_INFINITY
             )
         )
         add(
             Achievement(
-                "perfect_random_games_streak_20",
-                "achievement_perfect_random_streak_20", "achievement_perfect_random_streak_20_desc",
+        "perfect_random_games_streak_20",
+        "achievement_perfect_random_streak_20", "achievement_perfect_random_streak_20_desc",
                 AchievementCategory.RANDOM_STREAKS, ICON_CROWN
             )
         )
         // Perfect solution with no hints (10+ moves optimal)
         add(
             Achievement(
-                "perfect_no_hints_random_1",
-                "achievement_perfect_no_hints_random_1",
-                "achievement_perfect_no_hints_random_1_desc",
+        "perfect_no_hints_random_1",
+        "achievement_perfect_no_hints_random_1",
+        "achievement_perfect_no_hints_random_1_desc",
                 AchievementCategory.RANDOM_STREAKS,
                 ICON_BRAIN
             )
@@ -517,33 +513,33 @@ object AchievementDefinitions {
         // No hints random games (cumulative - no reset)
         add(
             Achievement(
-                "no_hints_random_10",
-                "achievement_no_hints_random_10", "achievement_no_hints_random_10_desc",
+        "no_hints_random_10",
+        "achievement_no_hints_random_10", "achievement_no_hints_random_10_desc",
                 AchievementCategory.RANDOM_STREAKS, ICON_BRAIN
             )
         )
         add(
             Achievement(
-                "no_hints_random_50",
-                "achievement_no_hints_random_50", "achievement_no_hints_random_50_desc",
+        "no_hints_random_50",
+        "achievement_no_hints_random_50", "achievement_no_hints_random_50_desc",
                 AchievementCategory.RANDOM_STREAKS, ICON_SHIELD_STAR
             )
         )
         // No hints random games streak (resets on hint usage)
         add(
             Achievement(
-                "no_hints_streak_random_10",
-                "achievement_no_hints_streak_random_10",
-                "achievement_no_hints_streak_random_10_desc",
+        "no_hints_streak_random_10",
+        "achievement_no_hints_streak_random_10",
+        "achievement_no_hints_streak_random_10_desc",
                 AchievementCategory.RANDOM_STREAKS,
                 ICON_BRAIN
             )
         )
         add(
             Achievement(
-                "no_hints_streak_random_50",
-                "achievement_no_hints_streak_random_50",
-                "achievement_no_hints_streak_random_50_desc",
+        "no_hints_streak_random_50",
+        "achievement_no_hints_streak_random_50",
+        "achievement_no_hints_streak_random_50_desc",
                 AchievementCategory.RANDOM_STREAKS,
                 ICON_SHIELD_STAR
             )
@@ -553,29 +549,29 @@ object AchievementDefinitions {
         // ========== RANDOM GAME - DIFFICULTY ==========
         add(
             Achievement(
-                "impossible_mode_1",
-                "achievement_impossible_1", "achievement_impossible_1_desc",
+        "impossible_mode_1",
+        "achievement_impossible_1", "achievement_impossible_1_desc",
                 AchievementCategory.RANDOM_DIFFICULTY, ICON_SHIELD_RED
             )
         )
         add(
             Achievement(
-                "impossible_mode_5",
-                "achievement_impossible_5", "achievement_impossible_5_desc",
+        "impossible_mode_5",
+        "achievement_impossible_5", "achievement_impossible_5_desc",
                 AchievementCategory.RANDOM_DIFFICULTY, ICON_FLAME
             )
         )
         add(
             Achievement(
-                "impossible_mode_streak_5",
-                "achievement_impossible_streak_5", "achievement_impossible_streak_5_desc",
+        "impossible_mode_streak_5",
+        "achievement_impossible_streak_5", "achievement_impossible_streak_5_desc",
                 AchievementCategory.RANDOM_DIFFICULTY, ICON_TROPHY_STAR
             )
         )
         add(
             Achievement(
-                "impossible_mode_streak_10",
-                "achievement_impossible_streak_10", "achievement_impossible_streak_10_desc",
+        "impossible_mode_streak_10",
+        "achievement_impossible_streak_10", "achievement_impossible_streak_10_desc",
                 AchievementCategory.RANDOM_DIFFICULTY, ICON_CROWN
             )
         )
@@ -592,16 +588,16 @@ object AchievementDefinitions {
         for (moves in 18..29) {
             add(
                 Achievement(
-                    "solution_" + moves + "_moves",
-                    "achievement_solution_" + moves, "achievement_solution_" + moves + "_desc",
+        "solution_" + moves + "_moves",
+        "achievement_solution_" + moves, "achievement_solution_" + moves + "_desc",
                     AchievementCategory.RANDOM_SOLUTION, solutionIcons[moves - 18]
                 )
             )
         }
         add(
             Achievement(
-                "solution_30_plus_moves",
-                "achievement_solution_30_plus", "achievement_solution_30_plus_desc",
+        "solution_30_plus_moves",
+        "achievement_solution_30_plus", "achievement_solution_30_plus_desc",
                 AchievementCategory.RANDOM_SOLUTION, ICON_SPARKLES
             )
         )
@@ -610,22 +606,22 @@ object AchievementDefinitions {
         // ========== RANDOM GAME - SCREEN RESOLUTIONS ==========
         add(
             Achievement(
-                "play_10_move_games_all_resolutions",
-                "achievement_resolution_10", "achievement_resolution_10_desc",
+        "play_10_move_games_all_resolutions",
+        "achievement_resolution_10", "achievement_resolution_10_desc",
                 AchievementCategory.RANDOM_RESOLUTION, ICON_TABLET
             )
         )
         add(
             Achievement(
-                "play_12_move_games_all_resolutions",
-                "achievement_resolution_12", "achievement_resolution_12_desc",
+        "play_12_move_games_all_resolutions",
+        "achievement_resolution_12", "achievement_resolution_12_desc",
                 AchievementCategory.RANDOM_RESOLUTION, "icon_5_monitor"
             )
         ) // Monitor icon
         add(
             Achievement(
-                "play_15_move_games_all_resolutions",
-                "achievement_resolution_15", "achievement_resolution_15_desc",
+        "play_15_move_games_all_resolutions",
+        "achievement_resolution_15", "achievement_resolution_15_desc",
                 AchievementCategory.RANDOM_RESOLUTION, "icon_5_monitor"
             )
         ) // Computer monitor
@@ -634,64 +630,64 @@ object AchievementDefinitions {
         // ========== RANDOM GAME - MULTIPLE TARGETS ==========
         add(
             Achievement(
-                "game_2_targets",
-                "achievement_2_targets", "achievement_2_targets_desc",
+        "game_2_targets",
+        "achievement_2_targets", "achievement_2_targets_desc",
                 AchievementCategory.RANDOM_TARGETS, ICON_TARGET
             )
         )
         add(
             Achievement(
-                "game_3_targets",
-                "achievement_3_targets", "achievement_3_targets_desc",
+        "game_3_targets",
+        "achievement_3_targets", "achievement_3_targets_desc",
                 AchievementCategory.RANDOM_TARGETS, ICON_TARGET_BLUE
             )
         )
         add(
             Achievement(
-                "game_4_targets",
-                "achievement_4_targets", "achievement_4_targets_desc",
+        "game_4_targets",
+        "achievement_4_targets", "achievement_4_targets_desc",
                 AchievementCategory.RANDOM_TARGETS, "icon_51_spiral"
             )
         ) // Pyramid/triangle
         add(
             Achievement(
-                "game_2_of_2_targets",
-                "achievement_2_of_2_targets", "achievement_2_of_2_targets_desc",
+        "game_2_of_2_targets",
+        "achievement_2_of_2_targets", "achievement_2_of_2_targets_desc",
                 AchievementCategory.RANDOM_TARGETS, ICON_TARGET_BLUE
             )
         ) // Target blue
         add(
             Achievement(
-                "game_2_of_3_targets",
-                "achievement_2_of_3_targets", "achievement_2_of_3_targets_desc",
+        "game_2_of_3_targets",
+        "achievement_2_of_3_targets", "achievement_2_of_3_targets_desc",
                 AchievementCategory.RANDOM_TARGETS, "icon_53_ring_blue"
             )
         ) // Hexagon
         add(
             Achievement(
-                "game_2_of_4_targets",
-                "achievement_2_of_4_targets", "achievement_2_of_4_targets_desc",
+        "game_2_of_4_targets",
+        "achievement_2_of_4_targets", "achievement_2_of_4_targets_desc",
                 AchievementCategory.RANDOM_TARGETS, "icon_54_cube"
             )
         ) // Cube
         add(
             Achievement(
-                "game_3_of_3_targets",
-                "achievement_3_of_3_targets", "achievement_3_of_3_targets_desc",
+        "game_3_of_3_targets",
+        "achievement_3_of_3_targets", "achievement_3_of_3_targets_desc",
                 AchievementCategory.RANDOM_TARGETS, ICON_MAP
             )
         ) // Map
         add(
             Achievement(
-                "game_3_of_4_targets",
-                "achievement_3_of_4_targets", "achievement_3_of_4_targets_desc",
+        "game_3_of_4_targets",
+        "achievement_3_of_4_targets", "achievement_3_of_4_targets_desc",
                 AchievementCategory.RANDOM_TARGETS, "icon_50_folders"
             )
         ) // Triangle eye
         add(
             Achievement(
-                "game_4_of_4_targets",
-                "achievement_4_of_4_targets", "achievement_4_of_4_targets_desc",
+        "game_4_of_4_targets",
+        "achievement_4_of_4_targets", "achievement_4_of_4_targets_desc",
                 AchievementCategory.RANDOM_TARGETS, ICON_CROWN
             )
         ) // Crown for completing all 4
@@ -700,15 +696,15 @@ object AchievementDefinitions {
         // ========== RANDOM GAME - FUN CHALLENGES ==========
         add(
             Achievement(
-                "game_5_robots",
-                "achievement_5_robots", "achievement_5_robots_desc",
+        "game_5_robots",
+        "achievement_5_robots", "achievement_5_robots_desc",
                 AchievementCategory.RANDOM_ROBOTS, ICON_ROBOT_YELLOW
             )
         )
         add(
             Achievement(
-                "gimme_five",
-                "achievement_gimme_five", "achievement_gimme_five_desc",
+        "gimme_five",
+        "achievement_gimme_five", "achievement_gimme_five_desc",
                 AchievementCategory.RANDOM_ROBOTS, ICON_SPARKLES
             )
         )
@@ -716,22 +712,22 @@ object AchievementDefinitions {
         // Same-walls achievements: same wall layout solved with N different robot positions
         add(
             Achievement(
-                "same_walls_2",
-                "achievement_same_walls_2", "achievement_same_walls_2_desc",
+        "same_walls_2",
+        "achievement_same_walls_2", "achievement_same_walls_2_desc",
                 AchievementCategory.RANDOM_ROBOTS, ICON_MAP
             )
         )
         add(
             Achievement(
-                "same_walls_10",
-                "achievement_same_walls_10", "achievement_same_walls_10_desc",
+        "same_walls_10",
+        "achievement_same_walls_10", "achievement_same_walls_10_desc",
                 AchievementCategory.RANDOM_ROBOTS, ICON_SATELLITE
             )
         )
         add(
             Achievement(
-                "same_walls_100",
-                "achievement_same_walls_100", "achievement_same_walls_100_desc",
+        "same_walls_100",
+        "achievement_same_walls_100", "achievement_same_walls_100_desc",
                 AchievementCategory.RANDOM_ROBOTS, ICON_CROWN
             )
         )
@@ -741,29 +737,29 @@ object AchievementDefinitions {
         // 4 achievements: with/without goal requirement, 1 robot/all robots
         add(
             Achievement(
-                "traverse_all_squares_all_robots",
-                "achievement_traverse_all_robots", "achievement_traverse_all_robots_desc",
+        "traverse_all_squares_all_robots",
+        "achievement_traverse_all_robots", "achievement_traverse_all_robots_desc",
                 AchievementCategory.RANDOM_COVERAGE, ICON_SATELLITE
             )
         )
         add(
             Achievement(
-                "traverse_all_squares_all_robots_goal",
-                "achievement_traverse_all_robots_goal", "achievement_traverse_all_robots_goal_desc",
+        "traverse_all_squares_all_robots_goal",
+        "achievement_traverse_all_robots_goal", "achievement_traverse_all_robots_goal_desc",
                 AchievementCategory.RANDOM_COVERAGE, ICON_TARGET_BLUE
             )
         )
         add(
             Achievement(
-                "traverse_all_squares_1_robot",
-                "achievement_traverse_1_robot", "achievement_traverse_1_robot_desc",
+        "traverse_all_squares_1_robot",
+        "achievement_traverse_1_robot", "achievement_traverse_1_robot_desc",
                 AchievementCategory.RANDOM_COVERAGE, ICON_MAP
             )
         )
         add(
             Achievement(
-                "traverse_all_squares_1_robot_goal",
-                "achievement_traverse_1_robot_goal", "achievement_traverse_1_robot_goal_desc",
+        "traverse_all_squares_1_robot_goal",
+        "achievement_traverse_1_robot_goal", "achievement_traverse_1_robot_goal_desc",
                 AchievementCategory.RANDOM_COVERAGE, ICON_TARGET
             )
         )

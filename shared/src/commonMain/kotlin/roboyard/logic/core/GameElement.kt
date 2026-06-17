@@ -17,21 +17,21 @@ class GameElement
      * @return Element type (TYPE_ROBOT or TYPE_TARGET)
      */
     // Element properties
-    @JvmField val type: Int,
+ val type: Int,
     /**
      * Set the X position
      * @param x New X position
      */
-    @JvmField var x: Int,
+ var x: Int,
     /**
      * Set the Y position
      * @param y New Y position
      */
-    @JvmField var y: Int
+ var y: Int
 ) {
     private val log = RLog.tag("GameElement")
 
-    @JvmField
+
     var color: Int = 0 // 0=red, 1=green, 2=blue, 3=yellow
 
     var isSelected: Boolean = false
@@ -52,18 +52,18 @@ class GameElement
         }
 
     // Transient properties for animation (not serialized)
-    @Transient
+
     var animationX: Float = 0f
         private set
 
-    @Transient
+
     var animationY: Float = 0f
         private set
 
-    @Transient
+
     private var hasAnimationPosition = false
 
-    @Transient
+
     private var animationPositionSet = false
 
     val isRobot: Boolean

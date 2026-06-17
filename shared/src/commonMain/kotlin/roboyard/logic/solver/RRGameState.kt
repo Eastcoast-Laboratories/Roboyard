@@ -15,29 +15,13 @@ class RRGameState(parentState: AGameState?, previousMove: IGameMove?) :
         str.append("\nMain Piece:\n")
         for (p in this.mainPieces) {
             if (p != null) {
-                str.append(
-                    String.format(
-                        "%d -> x:%d, y:%d, color:%d\n",
-                        p.hashCode(),
-                        p.x,
-                        p.y,
-                        p.color
-                    )
-                )
+                str.append("${p.hashCode()} -> x:${p.x}, y:${p.y}, color:${p.color}\n")
             }
         }
         str.append("Secondary Pieces:\n")
         for (p in this.secondaryPieces) {
             if (p != null) {
-                str.append(
-                    String.format(
-                        "%d -> x:%d, y:%d, color:%d\n",
-                        p.hashCode(),
-                        p.x,
-                        p.y,
-                        p.color
-                    )
-                )
+                str.append("${p.hashCode()} -> x:${p.x}, y:${p.y}, color:${p.color}\n")
             }
         }
 

@@ -17,23 +17,23 @@ class Wall
      * 
      * @return The x-coordinate
      */
-    @JvmField val x: Int,
+ val x: Int,
     /**
      * Gets the y-coordinate of the wall.
      * 
      * @return The y-coordinate
      */
-    @JvmField val y: Int,
+ val y: Int,
     /**
      * Gets the type of the wall.
      * 
      * @return The wall type (horizontal or vertical)
      */
-    @JvmField val type: WallType?
+ val type: WallType?
 ) {
     override fun equals(o: Any?): Boolean {
         if (this === o) return true
-        if (o == null || javaClass != o.javaClass) return false
+        if (o == null || javaClass != o::class) return false
 
         val wall = o as Wall
 

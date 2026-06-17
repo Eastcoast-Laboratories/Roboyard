@@ -10,17 +10,17 @@ class GridElement(
      * Get the X coordinate
      * @return X coordinate
      */
-    @JvmField var x: Int,
+ var x: Int,
     /**
      * Get the Y coordinate
      * @return Y coordinate
      */
-    @JvmField var y: Int,
+ var y: Int,
     /**
      * Get the element type string
      * @return Type string (e.g., "mh", "robot_blue", "target_red")
      */
-    @JvmField var type: String?
+ var type: String?
 ) {
     companion object {
         private const val serialVersionUID = 1L
