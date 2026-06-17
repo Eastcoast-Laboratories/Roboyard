@@ -543,7 +543,7 @@ fun GameScreen(
                                 try {
                                     val solver = driftingdroids.model.SolverIDDFS(currentBoard)
                                     val solutions = solver.execute()
-                                    if (solutions.isNotEmpty()) {
+                                    if (solutions.isNotEmpty() && solutions[0].size() > 0) {
                                         solution = solutions[0]
                                         currentHintStep = 0
                                         val firstMove = solution!!.getNextMove()
@@ -564,8 +564,8 @@ fun GameScreen(
                                                 else -> "Unknown"
                                             }
                                             hintMessage = "Hint: Move $colorName robot $directionName"
-                                currentHintRobot = firstMove.robotNumber
-                                currentHintDirection = firstMove.direction
+                                            currentHintRobot = firstMove.robotNumber
+                                            currentHintDirection = firstMove.direction
                                         } else {
                                             hintMessage = "Already at goal!"
                                         }

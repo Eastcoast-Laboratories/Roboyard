@@ -125,15 +125,15 @@ class SolverIDDFS(board: Board) : Solver(board) {
             board.numRobots,
             this.MAX_DEPTH
         )
-        val rtMem = Long.MAX_VALUE // TODO("Runtime not available")
+        val memInfo = TimeProvider.getRuntimeMemoryInfo()
         Logger.println(
             3, // Log.DEBUG
             "DriftingDroid",
             "[SOLVER_MEMORY] Available memory: %d MB (free=%d total=%d max=%d)",
-            0, // TODO("Runtime not available")
-            0, // TODO("Runtime not available")
-            0, // TODO("Runtime not available")
-            rtMem / (1024 * 1024)
+            (memInfo.maxMemory - memInfo.totalMemory + memInfo.freeMemory) / (1024 * 1024),
+            memInfo.freeMemory / (1024 * 1024),
+            memInfo.totalMemory / (1024 * 1024),
+            memInfo.maxMemory / (1024 * 1024)
         )
 
         if (null == this.board.getGoal()) {
@@ -701,7 +701,8 @@ class SolverIDDFS(board: Board) : Solver(board) {
         private var stateCount = 0
 
         init {
-            val maxHeap = Long.MAX_VALUE // TODO("Runtime not available")
+            val memInfo = TimeProvider.getRuntimeMemoryInfo()
+            val maxHeap = memInfo.maxMemory
             // Budget 70% of heap for Trie states
             maxBytes = (maxHeap * 70) / 100
             Logger.println("[MEMORY] KnownStates maxBytes=" + (maxBytes shr 20) + "MB (heap=" + (maxHeap shr 20) + "MB)")
