@@ -806,6 +806,157 @@ fun CreditsScreen(
     }
 }
 
+/**
+ * Serialize a Board to Main Game format for save/load compatibility
+ */
+private fun serializeBoardToMainGameFormat(board: Board, isLevelGame: Boolean): String {
+    val sb = StringBuilder()
+    
+    // Generate the metadata section
+    sb.append("#MAPNAME:Random")
+        .append(";TIME:0")
+        .append(";MOVES:0")
+        .append("\n")
+    
+    // Add board dimensions
+    sb.append("WIDTH:").append(board.width).append(";\n")
+    sb.append("HEIGHT:").append(board.height).append(";\n")
+    
+    // Generate the board representation (walls excluded)
+    for (y in 0 until board.height) {
+        for (x in 0 until board.width) {
+            if (x > 0) {
+                sb.append(",")
+            }
+            
+            val position = y * board.width + x
+            
+            // Check if this position has a robot
+            val hasRobot = board.robotPositions.contains(position)
+            
+            // Check if this position has a target
+            val goal = board.goals.find { it.position == position }
+            
+            when {
+                hasRobot -> sb.append(4) // TYPE_ROBOT
+                goal != null -> {
+                    // Target with color
+                    val color = goal.robotNumber
+                    sb.append(3).append(":").append(color) // TYPE_TARGET with color
+                }
+                else -> sb.append(0) // TYPE_EMPTY
+            }
+        }
+        sb.append("\n")
+    }
+    
+    // Save targets in compact format: tcolorX,Y; (e.g., tb8,7;)
+    for (goal in board.goals) {
+        val x = goal.position % board.width
+        val y = goal.position / board.width
+        val color = goal.robotNumber
+        val colorChar = when (color) {
+            0 -> 'b' // blue
+            1 -> 'g' // green
+            2 -> 'r' // red (pink)
+            3 -> 'y' // yellow
+            4 -> 's' // silver
+            else -> 'm' // multi
+        }
+        sb.append("t").append(colorChar).append(x).append(",").append(y).append(";")
+    }
+    
+    return sb.toString()
+}
+
+/**
+ * Deserialize a Board from Main Game format
+ */
+private fun deserializeBoardFromMainGameFormat(saveData: String): Board? {
+    val lines = saveData.lines()
+    var width = 0
+    var height = 0
+    var boardData = mutableListOf<String>()
+    var targetsData = ""
+    
+    for (line in lines) {
+        when {
+            line.startsWith("WIDTH:") -> width = line.substringAfter("WIDTH:").substringBefore(";").toInt()
+            line.startsWith("HEIGHT:") -> height = line.substringAfter("HEIGHT:").substringBefore(";").toInt()
+            line.startsWith("#") -> { /* Skip metadata */ }
+            line.startsWith("t") -> targetsData += line
+            else -> boardData.add(line)
+        }
+    }
+    
+    if (width == 0 || height == 0) {
+        println("[DESERIALIZE] Invalid dimensions: width=$width, height=$height")
+        return null
+    }
+    
+    // Parse board data to find robots and targets
+    val robotPositions = mutableListOf<Int>()
+    val goalData = mutableListOf<Triple<Int, Int, Int>>() // x, y, robotNumber
+    
+    for (y in 0 until height) {
+        if (y >= boardData.size) break
+        val row = boardData[y].split(",")
+        for (x in 0 until width) {
+            if (x >= row.size) break
+            val cell = row[x]
+            when {
+                cell.startsWith("4") -> { // TYPE_ROBOT
+                    robotPositions.add(y * width + x)
+                }
+            }
+        }
+    }
+    
+    // Parse targets
+    val targetPattern = Regex("t([a-z])(\\d+),(\\d+);")
+    targetPattern.findAll(targetsData).forEach { match ->
+        val colorChar = match.groupValues[1][0] // Get first character
+        val tx = match.groupValues[2].toInt()
+        val ty = match.groupValues[3].toInt()
+        val robotNumber = when (colorChar) {
+            'b' -> 0
+            'g' -> 1
+            'r' -> 2
+            'y' -> 3
+            's' -> 4
+            else -> 0
+        }
+        goalData.add(Triple(tx, ty, robotNumber))
+    }
+    
+    if (robotPositions.isEmpty()) {
+        println("[DESERIALIZE] No robots found in save data")
+        return null
+    }
+    
+    // Create board
+    val newBoard = Board.createBoardFreestyle(null, width, height, robotPositions.size)
+    if (newBoard == null) {
+        println("[DESERIALIZE] Failed to create board")
+        return null
+    }
+    
+    // Set robot positions
+    for (i in robotPositions.indices) {
+        newBoard.robotPositions[i] = robotPositions[i]
+    }
+    
+    // Set goals
+    for ((tx, ty, robotNumber) in goalData) {
+        newBoard.addGoal(ty * width + tx, robotNumber, robotNumber)
+    }
+    newBoard.setGoalRandom()
+    
+    println("[DESERIALIZE] Board created: ${newBoard.width}x${newBoard.height}, robots: ${newBoard.robotPositions.joinToString(",")}, goals: ${newBoard.goals.size}")
+    
+    return newBoard
+}
+
 @Composable
 fun SaveLoadScreen(
     boardToSave: Board? = null,
@@ -899,21 +1050,12 @@ fun SaveLoadScreen(
                     isEmpty = isEmpty,
                     onClick = {
                         if (selectedTab == 0 && boardToSave != null) {
-                            // Save game to slot
+                            // Save game to slot using Main Game format
                             println("[SAVE_LOAD_SCREEN] Saving game to slot $slotNumber")
                             val fileName = "saves/save_$slotNumber.dat"
                             
-                            // Serialize board to save data format
-                            val saveData = buildString {
-                                appendLine("width:${boardToSave.width}")
-                                appendLine("height:${boardToSave.height}")
-                                appendLine("robots:${boardToSave.robotPositions.joinToString(",")}")
-                                for (goal in boardToSave.goals) {
-                                    appendLine("goal:${goal.position},${goal.robotNumber}")
-                                }
-                                appendLine("isLevelGame:$isLevelGame")
-                                appendLine("timestamp:${System.currentTimeMillis()}")
-                            }
+                            // Serialize board to Main Game format
+                            val saveData = serializeBoardToMainGameFormat(boardToSave, isLevelGame)
                             
                             println("[SAVE_LOAD_SCREEN] Save data: $saveData")
                             val result = storage.writeFile(fileName, saveData)
@@ -927,40 +1069,17 @@ fun SaveLoadScreen(
                                 println("[SAVE_LOAD_SCREEN] Game saved to slot $slotNumber")
                             }
                         } else if (!isEmpty && selectedTab == 1) {
-                            // Load game from slot
+                            // Load game from slot using Main Game format
                             println("[SAVE_LOAD_SCREEN] Loading game from slot $slotNumber")
                             val fileName = "saves/save_$slotNumber.dat"
                             val saveData = storage.readFile(fileName)
                             println("[SAVE_LOAD_SCREEN] Save data: $saveData")
-                            val lines = saveData.lines()
                             
-                            var width = 0
-                            var height = 0
-                            var robots = ""
+                            val loadedBoard = deserializeBoardFromMainGameFormat(saveData)
                             
-                            for (line in lines) {
-                                when {
-                                    line.startsWith("width:") -> width = line.substringAfter("width:").toInt()
-                                    line.startsWith("height:") -> height = line.substringAfter("height:").toInt()
-                                    line.startsWith("robots:") -> robots = line.substringAfter("robots:")
-                                }
-                            }
-                            
-                            println("[SAVE_LOAD_SCREEN] Parsed: width=$width, height=$height, robots=$robots")
-                            
-                            // Create board from save data
-                            val robotPositions = robots.split(",").map { it.toInt() }
-                            val numRobots = robotPositions.size
-                            val newBoard = Board.createBoardFreestyle(null, width, height, numRobots)
-                            
-                            if (newBoard != null) {
-                                // Set robot positions
-                                for (i in robotPositions.indices) {
-                                    newBoard.robotPositions[i] = robotPositions[i]
-                                }
-                                
-                                println("[SAVE_LOAD_SCREEN] Board created successfully: ${newBoard.width}x${newBoard.height}")
-                                onLoadGame(newBoard)
+                            if (loadedBoard != null) {
+                                println("[SAVE_LOAD_SCREEN] Board created successfully: ${loadedBoard.width}x${loadedBoard.height}")
+                                onLoadGame(loadedBoard)
                             }
                         }
                     }
