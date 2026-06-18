@@ -136,6 +136,9 @@ fun App() {
                                     // Fallback to standard random board if MapGenerator fails
                                     Board.createBoardRandom(4)
                                 }
+                            },
+                            onSaveLoad = {
+                                currentScreen = Screen.SaveLoad
                             }
                         )
                     }
@@ -187,6 +190,8 @@ fun App() {
                 }
                 Screen.SaveLoad -> {
                     SaveLoadScreen(
+                        boardToSave = board,
+                        isLevelGame = isLevelGame,
                         onBack = {
                             currentScreen = Screen.MainMenu
                         },
@@ -803,6 +808,8 @@ fun CreditsScreen(
 
 @Composable
 fun SaveLoadScreen(
+    boardToSave: Board? = null,
+    isLevelGame: Boolean = false,
     onBack: () -> Unit = {},
     onLoadGame: (Board) -> Unit = {}
 ) {
@@ -891,7 +898,35 @@ fun SaveLoadScreen(
                     slotNumber = slotNumber,
                     isEmpty = isEmpty,
                     onClick = {
-                        if (!isEmpty && selectedTab == 1) {
+                        if (selectedTab == 0 && boardToSave != null) {
+                            // Save game to slot
+                            println("[SAVE_LOAD_SCREEN] Saving game to slot $slotNumber")
+                            val fileName = "saves/save_$slotNumber.dat"
+                            
+                            // Serialize board to save data format
+                            val saveData = buildString {
+                                appendLine("width:${boardToSave.width}")
+                                appendLine("height:${boardToSave.height}")
+                                appendLine("robots:${boardToSave.robotPositions.joinToString(",")}")
+                                for (goal in boardToSave.goals) {
+                                    appendLine("goal:${goal.position},${goal.robotNumber}")
+                                }
+                                appendLine("isLevelGame:$isLevelGame")
+                                appendLine("timestamp:${System.currentTimeMillis()}")
+                            }
+                            
+                            println("[SAVE_LOAD_SCREEN] Save data: $saveData")
+                            val result = storage.writeFile(fileName, saveData)
+                            println("[SAVE_LOAD_SCREEN] Write result: $result")
+                            
+                            if (result) {
+                                // Update slot state
+                                val newSlotStates = slotStates.toMutableList()
+                                newSlotStates[slotIndex] = true
+                                slotStates = newSlotStates
+                                println("[SAVE_LOAD_SCREEN] Game saved to slot $slotNumber")
+                            }
+                        } else if (!isEmpty && selectedTab == 1) {
                             // Load game from slot
                             println("[SAVE_LOAD_SCREEN] Loading game from slot $slotNumber")
                             val fileName = "saves/save_$slotNumber.dat"

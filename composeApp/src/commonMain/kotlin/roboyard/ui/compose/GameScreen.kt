@@ -156,7 +156,8 @@ fun GameScreen(
     isLevelGame: Boolean = false,
     levelId: Int = 1,
     onBack: () -> Unit = {},
-    onNewGame: () -> Unit = {}
+    onNewGame: () -> Unit = {},
+    onSaveLoad: () -> Unit = {}
 ) {
     val storage = remember { getPlatformStorage() }
     val levelCompletionManager = remember { roboyard.logic.managers.LevelCompletionManager.getInstance() }
@@ -849,12 +850,8 @@ fun GameScreen(
                     text = "Save Map",
                     color = FancyButtonColor.RED,
                     onClick = {
-                        // Save current board state to slot 1
-                        if (saveGame(1)) {
-                            hintMessage = "Game saved to slot 1!"
-                        } else {
-                            hintMessage = "Save failed"
-                        }
+                        // Navigate to SaveLoadScreen to select save slot
+                        onSaveLoad()
                     },
                     modifier = Modifier.weight(1f).padding(end = 3.dp)
                 )
