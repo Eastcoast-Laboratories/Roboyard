@@ -1095,6 +1095,17 @@ private fun getHistoryEntries(storage: PlatformStorage): List<Pair<Int, String>>
     return entries
 }
 
+/**
+ * Validate that save file contains targets
+ */
+private fun validateSaveContainsTargets(saveData: String, fileName: String): Boolean {
+    val hasTargets = saveData.contains("t") || saveData.contains("3:")
+    if (!hasTargets) {
+        println("[SAVE_VERIFICATION] Save file $fileName does not contain targets")
+    }
+    return hasTargets
+}
+
 @Composable
 fun HistoryItem(
     historyIndex: Int,
@@ -1263,11 +1274,18 @@ fun SaveLoadScreen(
                                 println("[SAVE_LOAD_SCREEN] Write result: $result")
                                 
                                 if (result) {
-                                    // Update slot state
-                                    val newSlotStates = slotStates.toMutableList()
-                                    newSlotStates[slotIndex] = true
-                                    slotStates = newSlotStates
-                                    println("[SAVE_LOAD_SCREEN] Game saved to slot $slotNumber")
+                                    // Verify save file contains targets
+                                    val savedContent = storage.readFile(fileName)
+                                    if (!validateSaveContainsTargets(savedContent, fileName)) {
+                                        storage.writeFile(fileName, "") // Delete invalid save
+                                        println("[SAVE_LOAD_SCREEN] Save file validation failed: No targets found")
+                                    } else {
+                                        // Update slot state
+                                        val newSlotStates = slotStates.toMutableList()
+                                        newSlotStates[slotIndex] = true
+                                        slotStates = newSlotStates
+                                        println("[SAVE_LOAD_SCREEN] Game saved to slot $slotNumber")
+                                    }
                                 }
                             } else if (!isEmpty && selectedTab == 1) {
                                 // Load game from slot using Main Game format
