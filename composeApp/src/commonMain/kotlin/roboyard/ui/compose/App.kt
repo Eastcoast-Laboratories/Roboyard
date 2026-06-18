@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import roboyard.logic.core.LevelLoader
 import roboyard.logic.core.Preferences
+import roboyard.logic.storage.PlatformStorage
 import roboyard.logic.storage.getPlatformStorage
 import roboyard.ui.graphics.MinimapGenerator
 import androidx.compose.ui.layout.ContentScale
@@ -1043,6 +1044,85 @@ private fun deserializeBoardFromMainGameFormat(saveData: String): Board? {
     return newBoard
 }
 
+/**
+ * Save a board to history using Main Game format
+ */
+private fun saveToHistory(board: Board, storage: PlatformStorage): Boolean {
+    try {
+        // Get next available history index
+        val historyIndex = getNextHistoryIndex(storage)
+        val historyFileName = "history_$historyIndex.txt"
+        
+        // Serialize board to Main Game format
+        val saveData = serializeBoardToMainGameFormat(board, false)
+        
+        // Write to history file
+        val result = storage.writeFile(historyFileName, saveData)
+        
+        if (result) {
+            println("[HISTORY] Saved to history: $historyFileName")
+        }
+        
+        return result
+    } catch (e: Exception) {
+        println("[HISTORY] Error saving to history: ${e.message}")
+        return false
+    }
+}
+
+/**
+ * Get the next available history index
+ */
+private fun getNextHistoryIndex(storage: PlatformStorage): Int {
+    var index = 1
+    while (storage.fileExists("history_$index.txt")) {
+        index++
+    }
+    return index
+}
+
+/**
+ * Get all history entries
+ */
+private fun getHistoryEntries(storage: PlatformStorage): List<Pair<Int, String>> {
+    val entries = mutableListOf<Pair<Int, String>>()
+    var index = 1
+    while (storage.fileExists("history_$index.txt")) {
+        entries.add(Pair(index, "history_$index.txt"))
+        index++
+    }
+    return entries
+}
+
+@Composable
+fun HistoryItem(
+    historyIndex: Int,
+    fileName: String,
+    onClick: () -> Unit = {}
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.DarkGray, RoundedCornerShape(8.dp))
+            .clickable { onClick() }
+            .padding(16.dp)
+    ) {
+        Column {
+            Text(
+                text = "History #$historyIndex",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = fileName,
+                color = Color.LightGray,
+                fontSize = 14.sp
+            )
+        }
+    }
+}
+
 @Composable
 fun SaveLoadScreen(
     boardToSave: Board? = null,
@@ -1057,6 +1137,7 @@ fun SaveLoadScreen(
     val storage = remember { getPlatformStorage() }
     var hasSavedGames by remember { mutableStateOf(false) }
     var slotStates by remember { mutableStateOf(List(10) { false }) }
+    var historyEntries by remember { mutableStateOf<List<Pair<Int, String>>>(emptyList()) }
     
     LaunchedEffect(Unit) {
         hasSavedGames = storage.hasSavedGames()
@@ -1070,6 +1151,10 @@ fun SaveLoadScreen(
             println("[SAVE_LOAD_SCREEN] Slot $i ($fileName): exists=$exists")
         }
         slotStates = newSlotStates
+        
+        // Load history entries
+        historyEntries = getHistoryEntries(storage)
+        println("[SAVE_LOAD_SCREEN] History entries: ${historyEntries.size}")
     }
 
     Column(
@@ -1128,49 +1213,79 @@ fun SaveLoadScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(top = 8.dp)
         ) {
-            repeat(10) { slotIndex ->
-                val slotNumber = slotIndex + 1
-                val isEmpty = !slotStates[slotIndex]
-                SaveSlotItem(
-                    slotNumber = slotNumber,
-                    isEmpty = isEmpty,
-                    onClick = {
-                        if (selectedTab == 0 && boardToSave != null) {
-                            // Save game to slot using Main Game format
-                            println("[SAVE_LOAD_SCREEN] Saving game to slot $slotNumber")
-                            val fileName = "saves/save_$slotNumber.dat"
-                            
-                            // Serialize board to Main Game format
-                            val saveData = serializeBoardToMainGameFormat(boardToSave, isLevelGame)
-                            
-                            println("[SAVE_LOAD_SCREEN] Save data: $saveData")
-                            val result = storage.writeFile(fileName, saveData)
-                            println("[SAVE_LOAD_SCREEN] Write result: $result")
-                            
-                            if (result) {
-                                // Update slot state
-                                val newSlotStates = slotStates.toMutableList()
-                                newSlotStates[slotIndex] = true
-                                slotStates = newSlotStates
-                                println("[SAVE_LOAD_SCREEN] Game saved to slot $slotNumber")
+            if (selectedTab == 2) {
+                // History tab
+                if (historyEntries.isEmpty()) {
+                    Text(
+                        text = "No history entries yet",
+                        color = Color.Gray,
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                } else {
+                    historyEntries.forEach { (index, fileName) ->
+                        HistoryItem(
+                            historyIndex = index,
+                            fileName = fileName,
+                            onClick = {
+                                // Load history entry
+                                println("[SAVE_LOAD_SCREEN] Loading history entry: $fileName")
+                                val saveData = storage.readFile(fileName)
+                                val loadedBoard = deserializeBoardFromMainGameFormat(saveData)
+                                if (loadedBoard != null) {
+                                    onLoadGame(loadedBoard)
+                                }
                             }
-                        } else if (!isEmpty && selectedTab == 1) {
-                            // Load game from slot using Main Game format
-                            println("[SAVE_LOAD_SCREEN] Loading game from slot $slotNumber")
-                            val fileName = "saves/save_$slotNumber.dat"
-                            val saveData = storage.readFile(fileName)
-                            println("[SAVE_LOAD_SCREEN] Save data: $saveData")
-                            
-                            val loadedBoard = deserializeBoardFromMainGameFormat(saveData)
-                            
-                            if (loadedBoard != null) {
-                                println("[SAVE_LOAD_SCREEN] Board created successfully: ${loadedBoard.width}x${loadedBoard.height}")
-                                onLoadGame(loadedBoard)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
+            } else {
+                // Save/Load tabs
+                repeat(10) { slotIndex ->
+                    val slotNumber = slotIndex + 1
+                    val isEmpty = !slotStates[slotIndex]
+                    SaveSlotItem(
+                        slotNumber = slotNumber,
+                        isEmpty = isEmpty,
+                        onClick = {
+                            if (selectedTab == 0 && boardToSave != null) {
+                                // Save game to slot using Main Game format
+                                println("[SAVE_LOAD_SCREEN] Saving game to slot $slotNumber")
+                                val fileName = "saves/save_$slotNumber.dat"
+                                
+                                // Serialize board to Main Game format
+                                val saveData = serializeBoardToMainGameFormat(boardToSave, isLevelGame)
+                                
+                                println("[SAVE_LOAD_SCREEN] Save data: $saveData")
+                                val result = storage.writeFile(fileName, saveData)
+                                println("[SAVE_LOAD_SCREEN] Write result: $result")
+                                
+                                if (result) {
+                                    // Update slot state
+                                    val newSlotStates = slotStates.toMutableList()
+                                    newSlotStates[slotIndex] = true
+                                    slotStates = newSlotStates
+                                    println("[SAVE_LOAD_SCREEN] Game saved to slot $slotNumber")
+                                }
+                            } else if (!isEmpty && selectedTab == 1) {
+                                // Load game from slot using Main Game format
+                                println("[SAVE_LOAD_SCREEN] Loading game from slot $slotNumber")
+                                val fileName = "saves/save_$slotNumber.dat"
+                                val saveData = storage.readFile(fileName)
+                                println("[SAVE_LOAD_SCREEN] Save data: $saveData")
+                                
+                                val loadedBoard = deserializeBoardFromMainGameFormat(saveData)
+                                
+                                if (loadedBoard != null) {
+                                    println("[SAVE_LOAD_SCREEN] Board created successfully: ${loadedBoard.width}x${loadedBoard.height}")
+                                    onLoadGame(loadedBoard)
+                                }
                             }
                         }
-                    }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
             }
         }
 
