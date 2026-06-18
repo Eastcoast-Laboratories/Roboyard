@@ -808,6 +808,21 @@ fun SaveLoadScreen(
 ) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Save", "Load", "History")
+    
+    // Check for saved games
+    val storage = remember { getPlatformStorage() }
+    var hasSavedGames by remember { mutableStateOf(false) }
+    
+    LaunchedEffect(Unit) {
+        hasSavedGames = storage.hasSavedGames()
+        println("[SAVE_LOAD_SCREEN] hasSavedGames: $hasSavedGames")
+        // Check each slot
+        for (i in 1..10) {
+            val fileName = "saves/save_$i.dat"
+            val exists = storage.fileExists(fileName)
+            println("[SAVE_LOAD_SCREEN] Slot $i ($fileName): exists=$exists")
+        }
+    }
 
     Column(
         modifier = Modifier

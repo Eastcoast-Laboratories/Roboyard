@@ -275,11 +275,13 @@ fun GameScreen(
         try {
             val storage = Preferences.storageProvider?.invoke()
             if (storage == null) {
+                println("[SAVE_GAME] ERROR: storage is null")
                 return false
             }
             
             // Save slot file name (same as main game)
             val saveFileName = "saves/save_$slotId.dat"
+            println("[SAVE_GAME] Attempting to save to: $saveFileName")
             
             // Serialize board to save data format
             val saveData = buildString {
@@ -295,8 +297,14 @@ fun GameScreen(
                 appendLine("gameWon:$gameWon")
             }
             
-            return storage.writeFile(saveFileName, saveData)
+            println("[SAVE_GAME] Save data: $saveData")
+            val result = storage.writeFile(saveFileName, saveData)
+            println("[SAVE_GAME] Write result: $result")
+            println("[SAVE_GAME] File exists after write: ${storage.fileExists(saveFileName)}")
+            return result
         } catch (e: Exception) {
+            println("[SAVE_GAME] ERROR: ${e.message}")
+            e.printStackTrace()
             return false
         }
     }
@@ -306,18 +314,24 @@ fun GameScreen(
         try {
             val storage = Preferences.storageProvider?.invoke()
             if (storage == null) {
+                println("[LOAD_GAME] ERROR: storage is null")
                 return false
             }
             
             // Save slot file name (same as main game)
             val saveFileName = "saves/save_$slotId.dat"
+            println("[LOAD_GAME] Attempting to load from: $saveFileName")
             
             if (!storage.fileExists(saveFileName)) {
+                println("[LOAD_GAME] ERROR: File does not exist: $saveFileName")
                 return false
             }
             
+            println("[LOAD_GAME] File exists, reading...")
             val saveData = storage.readFile(saveFileName)
+            println("[LOAD_GAME] Save data: $saveData")
             val lines = saveData.lines()
+            println("[LOAD_GAME] Number of lines: ${lines.size}")
             
             var width = 0
             var height = 0
@@ -327,6 +341,7 @@ fun GameScreen(
             var gameWon = false
             
             for (line in lines) {
+                println("[LOAD_GAME] Processing line: $line")
                 when {
                     line.startsWith("width:") -> width = line.substringAfter("width:").toInt()
                     line.startsWith("height:") -> height = line.substringAfter("height:").toInt()
@@ -337,12 +352,16 @@ fun GameScreen(
                 }
             }
             
+            println("[LOAD_GAME] Parsed: width=$width, height=$height, robots=$robots, moveCount=$moveCount, isLevelGame=$isLevelGame, gameWon=$gameWon")
+            
             // Reconstruct board from save data using createBoardFreestyle
             val robotPositions = robots.split(",").map { it.toInt() }
             val numRobots = robotPositions.size
+            println("[LOAD_GAME] Creating board with $numRobots robots")
             val newBoard = Board.createBoardFreestyle(null, width, height, numRobots)
             
             if (newBoard == null) {
+                println("[LOAD_GAME] ERROR: Board creation failed")
                 return false
             }
             
@@ -351,9 +370,12 @@ fun GameScreen(
                 newBoard.robotPositions[i] = robotPositions[i]
             }
             
+            println("[LOAD_GAME] Board created successfully: ${newBoard.width}x${newBoard.height}")
             currentBoard = newBoard
             return true
         } catch (e: Exception) {
+            println("[LOAD_GAME] ERROR: ${e.message}")
+            e.printStackTrace()
             return false
         }
     }
