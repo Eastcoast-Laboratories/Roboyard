@@ -812,16 +812,20 @@ fun SaveLoadScreen(
     // Check for saved games
     val storage = remember { getPlatformStorage() }
     var hasSavedGames by remember { mutableStateOf(false) }
+    var slotStates by remember { mutableStateOf(List(10) { false }) }
     
     LaunchedEffect(Unit) {
         hasSavedGames = storage.hasSavedGames()
         println("[SAVE_LOAD_SCREEN] hasSavedGames: $hasSavedGames")
         // Check each slot
+        val newSlotStates = mutableListOf<Boolean>()
         for (i in 1..10) {
             val fileName = "saves/save_$i.dat"
             val exists = storage.fileExists(fileName)
+            newSlotStates.add(exists)
             println("[SAVE_LOAD_SCREEN] Slot $i ($fileName): exists=$exists")
         }
+        slotStates = newSlotStates
     }
 
     Column(
@@ -881,10 +885,50 @@ fun SaveLoadScreen(
                 .padding(top = 8.dp)
         ) {
             repeat(10) { slotIndex ->
+                val slotNumber = slotIndex + 1
+                val isEmpty = !slotStates[slotIndex]
                 SaveSlotItem(
-                    slotNumber = slotIndex + 1,
-                    isEmpty = true,
-                    onClick = { }
+                    slotNumber = slotNumber,
+                    isEmpty = isEmpty,
+                    onClick = {
+                        if (!isEmpty && selectedTab == 1) {
+                            // Load game from slot
+                            println("[SAVE_LOAD_SCREEN] Loading game from slot $slotNumber")
+                            val fileName = "saves/save_$slotNumber.dat"
+                            val saveData = storage.readFile(fileName)
+                            println("[SAVE_LOAD_SCREEN] Save data: $saveData")
+                            val lines = saveData.lines()
+                            
+                            var width = 0
+                            var height = 0
+                            var robots = ""
+                            
+                            for (line in lines) {
+                                when {
+                                    line.startsWith("width:") -> width = line.substringAfter("width:").toInt()
+                                    line.startsWith("height:") -> height = line.substringAfter("height:").toInt()
+                                    line.startsWith("robots:") -> robots = line.substringAfter("robots:")
+                                }
+                            }
+                            
+                            println("[SAVE_LOAD_SCREEN] Parsed: width=$width, height=$height, robots=$robots")
+                            
+                            // Create board from save data
+                            val robotPositions = robots.split(",").map { it.toInt() }
+                            val numRobots = robotPositions.size
+                            val newBoard = Board.createBoardFreestyle(null, width, height, numRobots)
+                            
+                            if (newBoard != null) {
+                                // Set robot positions
+                                for (i in robotPositions.indices) {
+                                    newBoard.robotPositions[i] = robotPositions[i]
+                                }
+                                
+                                println("[SAVE_LOAD_SCREEN] Board created successfully: ${newBoard.width}x${newBoard.height}")
+                                onLoadGame(newBoard)
+                            }
+                        }
+                    }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
