@@ -812,17 +812,20 @@ fun CreditsScreen(
 private fun serializeBoardToMainGameFormat(board: Board, isLevelGame: Boolean): String {
     val sb = StringBuilder()
     
-    // Generate the metadata section
+    // Generate the metadata section with additional tags
     sb.append("#MAPNAME:Random")
         .append(";TIME:0")
         .append(";MOVES:0")
+        .append(";DIFFICULTY:1") // Default difficulty
+        .append(";SIZE:").append(board.width).append(",").append(board.height)
+        .append(";SOLVED:false")
         .append("\n")
     
     // Add board dimensions
     sb.append("WIDTH:").append(board.width).append(";\n")
     sb.append("HEIGHT:").append(board.height).append(";\n")
     
-    // Generate the board representation (walls excluded)
+    // Generate the board representation (walls excluded - they go in WALLS section)
     for (y in 0 until board.height) {
         for (x in 0 until board.width) {
             if (x > 0) {
@@ -866,6 +869,46 @@ private fun serializeBoardToMainGameFormat(board: Board, isLevelGame: Boolean): 
         sb.append("t").append(colorChar).append(x).append(",").append(y).append(";")
     }
     
+    sb.append("\n")
+    
+    // Save walls in compact format: hX,Y; and vX,Y;
+    // Horizontal walls (y goes to height to include bottom boundary)
+    for (y in 0..board.height) {
+        for (x in 0 until board.width) {
+            val position = y * board.width + x
+            if (board.isWall(position, 0)) { // NORTH wall = horizontal
+                sb.append("h").append(x).append(",").append(y).append(";")
+            }
+        }
+    }
+    // Vertical walls (x goes to width to include right boundary)
+    for (y in 0 until board.height) {
+        for (x in 0..board.width) {
+            val position = y * board.width + x
+            if (board.isWall(position, 3)) { // WEST wall = vertical
+                sb.append("v").append(x).append(",").append(y).append(";")
+            }
+        }
+    }
+    
+    sb.append("\n")
+    
+    // Save robots in compact format: rcolorX,Y; (e.g., rr1,5;)
+    for (i in board.robotPositions.indices) {
+        val position = board.robotPositions[i]
+        val x = position % board.width
+        val y = position / board.width
+        val colorChar = when (i) {
+            0 -> 'b' // blue
+            1 -> 'g' // green
+            2 -> 'r' // red (pink)
+            3 -> 'y' // yellow
+            4 -> 's' // silver
+            else -> 'm' // multi
+        }
+        sb.append("r").append(colorChar).append(x).append(",").append(y).append(";")
+    }
+    
     return sb.toString()
 }
 
@@ -878,6 +921,8 @@ private fun deserializeBoardFromMainGameFormat(saveData: String): Board? {
     var height = 0
     var boardData = mutableListOf<String>()
     var targetsData = ""
+    var wallsData = ""
+    var robotsData = ""
     
     for (line in lines) {
         when {
@@ -885,6 +930,8 @@ private fun deserializeBoardFromMainGameFormat(saveData: String): Board? {
             line.startsWith("HEIGHT:") -> height = line.substringAfter("HEIGHT:").substringBefore(";").toInt()
             line.startsWith("#") -> { /* Skip metadata */ }
             line.startsWith("t") -> targetsData += line
+            line.startsWith("h") || line.startsWith("v") -> wallsData += line
+            line.startsWith("r") -> robotsData += line
             else -> boardData.add(line)
         }
     }
@@ -894,28 +941,51 @@ private fun deserializeBoardFromMainGameFormat(saveData: String): Board? {
         return null
     }
     
-    // Parse board data to find robots and targets
+    // Parse robots from ROBOTS section (preferred) or from board data (fallback)
     val robotPositions = mutableListOf<Int>()
-    val goalData = mutableListOf<Triple<Int, Int, Int>>() // x, y, robotNumber
+    val robotColors = mutableListOf<Int>()
     
-    for (y in 0 until height) {
-        if (y >= boardData.size) break
-        val row = boardData[y].split(",")
-        for (x in 0 until width) {
-            if (x >= row.size) break
-            val cell = row[x]
-            when {
-                cell.startsWith("4") -> { // TYPE_ROBOT
-                    robotPositions.add(y * width + x)
+    if (robotsData.isNotEmpty()) {
+        // Parse robots from ROBOTS section: rcolorX,Y;
+        val robotPattern = Regex("r([a-z])(\\d+),(\\d+);")
+        robotPattern.findAll(robotsData).forEach { match ->
+            val colorChar = match.groupValues[1][0]
+            val rx = match.groupValues[2].toInt()
+            val ry = match.groupValues[3].toInt()
+            val robotNumber = when (colorChar) {
+                'b' -> 0
+                'g' -> 1
+                'r' -> 2
+                'y' -> 3
+                's' -> 4
+                else -> 0
+            }
+            robotPositions.add(ry * width + rx)
+            robotColors.add(robotNumber)
+        }
+    } else {
+        // Fallback: parse robots from board data
+        for (y in 0 until height) {
+            if (y >= boardData.size) break
+            val row = boardData[y].split(",")
+            for (x in 0 until width) {
+                if (x >= row.size) break
+                val cell = row[x]
+                when {
+                    cell.startsWith("4") -> { // TYPE_ROBOT
+                        robotPositions.add(y * width + x)
+                        robotColors.add(0) // Default color
+                    }
                 }
             }
         }
     }
     
     // Parse targets
+    val goalData = mutableListOf<Triple<Int, Int, Int>>() // x, y, robotNumber
     val targetPattern = Regex("t([a-z])(\\d+),(\\d+);")
     targetPattern.findAll(targetsData).forEach { match ->
-        val colorChar = match.groupValues[1][0] // Get first character
+        val colorChar = match.groupValues[1][0]
         val tx = match.groupValues[2].toInt()
         val ty = match.groupValues[3].toInt()
         val robotNumber = when (colorChar) {
@@ -951,6 +1021,22 @@ private fun deserializeBoardFromMainGameFormat(saveData: String): Board? {
         newBoard.addGoal(ty * width + tx, robotNumber, robotNumber)
     }
     newBoard.setGoalRandom()
+    
+    // Parse and set walls
+    val hWallPattern = Regex("h(\\d+),(\\d+);")
+    val vWallPattern = Regex("v(\\d+),(\\d+);")
+    
+    hWallPattern.findAll(wallsData).forEach { match ->
+        val wx = match.groupValues[1].toInt()
+        val wy = match.groupValues[2].toInt()
+        newBoard.setWall(wx, wy, 0, true) // Set NORTH wall
+    }
+    
+    vWallPattern.findAll(wallsData).forEach { match ->
+        val wx = match.groupValues[1].toInt()
+        val wy = match.groupValues[2].toInt()
+        newBoard.setWall(wx, wy, 3, true) // Set WEST wall
+    }
     
     println("[DESERIALIZE] Board created: ${newBoard.width}x${newBoard.height}, robots: ${newBoard.robotPositions.joinToString(",")}, goals: ${newBoard.goals.size}")
     
