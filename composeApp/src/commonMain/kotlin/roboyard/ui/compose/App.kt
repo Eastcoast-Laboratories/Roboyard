@@ -1,6 +1,7 @@
 package roboyard.ui.compose
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -48,6 +49,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import roboyard.logic.core.LevelLoader
+import roboyard.logic.core.Preferences
+import roboyard.logic.storage.getPlatformStorage
+import roboyard.ui.graphics.MinimapGenerator
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -55,9 +60,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import driftingdroids.model.Board
-import roboyard.logic.core.LevelLoader
 import roboyard.logic.core.GameLogic
-import roboyard.logic.core.Preferences
 import roboyard.logic.core.MapGenerator
 import org.jetbrains.compose.resources.imageResource
 import kotlinx.coroutines.Dispatchers
@@ -532,6 +535,19 @@ fun LevelItem(
     val backgroundColor = if (isUnlocked) Color(0xFF2C2C2C) else Color(0xFF1A1A1A)
     val textColor = if (isUnlocked) Color.White else Color.Gray
     
+    // Load level board for minimap generation
+    var board by remember { mutableStateOf<Board?>(null) }
+    
+    LaunchedEffect(levelId) {
+        if (isUnlocked && levelId < 141) {
+            try {
+                board = LevelLoader.loadLevel(levelId)
+            } catch (e: Exception) {
+                // Failed to load level
+            }
+        }
+    }
+    
     Box(
         modifier = Modifier
             .padding(4.dp)
@@ -543,12 +559,31 @@ fun LevelItem(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = levelId.toString(),
-                color = textColor,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
+            if (board != null && isUnlocked) {
+                // Show minimap
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .padding(4.dp)
+                ) {
+                    MinimapGenerator.drawMinimap(this, board, size.width, size.height)
+                }
+            } else if (!isUnlocked) {
+                Text(
+                    text = "🔒",
+                    color = Color.Gray,
+                    fontSize = 12.sp
+                )
+            } else {
+                Text(
+                    text = levelId.toString(),
+                    color = textColor,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            
             if (stars > 0 && isUnlocked) {
                 Row {
                     repeat(stars) {
@@ -559,12 +594,6 @@ fun LevelItem(
                         )
                     }
                 }
-            } else if (!isUnlocked) {
-                Text(
-                    text = "🔒",
-                    color = Color.Gray,
-                    fontSize = 12.sp
-                )
             }
         }
     }
