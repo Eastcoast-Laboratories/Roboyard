@@ -179,9 +179,145 @@ fun GameScreen(
     var hintsUsed by remember(board) { mutableIntStateOf(0) }
     var regenerationCount by remember(board) { mutableIntStateOf(0) }
     var allowRegeneration by remember(board) { mutableStateOf(true) }
+    var isHistorySaved by remember(board) { mutableStateOf(false) }
+    var gameStartTime by remember(board) { mutableLongStateOf(System.currentTimeMillis()) }
     
     // Maximum auto-regeneration attempts (same as in main game)
     val MAX_AUTO_REGENERATIONS = 999
+    
+    // History save threshold (same as in main game)
+    val HISTORY_SAVE_THRESHOLD = 30 // seconds
+
+    // Get next available history index (simplified version)
+    fun getNextHistoryIndex(): Int {
+        val storage = Preferences.storageProvider?.invoke() ?: return 0
+        var maxIndex = 0
+        for (i in 0..1000) {
+            if (storage.fileExists("history_$i.txt")) {
+                maxIndex = i
+            }
+        }
+        return maxIndex + 1
+    }
+
+    // Save to history function (simplified version for ComposeApp)
+    fun saveToHistory() {
+        try {
+            val storage = Preferences.storageProvider?.invoke()
+            if (storage == null) {
+                return
+            }
+            
+            // Get next available history index
+            val historyIndex = getNextHistoryIndex()
+            val historyFileName = "history_$historyIndex.txt"
+            
+            // Serialize board to save data format
+            val saveData = buildString {
+                appendLine("width:${currentBoard.width}")
+                appendLine("height:${currentBoard.height}")
+                appendLine("robots:${currentBoard.robotPositions.joinToString(",")}")
+                for (goal in currentBoard.goals) {
+                    appendLine("goal:${goal.position},${goal.robotNumber}")
+                }
+                appendLine("moveCount:$moveCount")
+                appendLine("isLevelGame:$isLevelGame")
+                appendLine("timestamp:${System.currentTimeMillis()}")
+            }
+            
+            storage.writeFile(historyFileName, saveData)
+        } catch (e: Exception) {
+            // Error saving to history
+        }
+    }
+
+    // Save game to slot function (same as main game)
+    fun saveGame(slotId: Int): Boolean {
+        try {
+            val storage = Preferences.storageProvider?.invoke()
+            if (storage == null) {
+                return false
+            }
+            
+            // Save slot file name (same as main game)
+            val saveFileName = "save_$slotId.dat"
+            
+            // Serialize board to save data format
+            val saveData = buildString {
+                appendLine("width:${currentBoard.width}")
+                appendLine("height:${currentBoard.height}")
+                appendLine("robots:${currentBoard.robotPositions.joinToString(",")}")
+                for (goal in currentBoard.goals) {
+                    appendLine("goal:${goal.position},${goal.robotNumber}")
+                }
+                appendLine("moveCount:$moveCount")
+                appendLine("isLevelGame:$isLevelGame")
+                appendLine("timestamp:${System.currentTimeMillis()}")
+                appendLine("gameWon:$gameWon")
+            }
+            
+            return storage.writeFile(saveFileName, saveData)
+        } catch (e: Exception) {
+            return false
+        }
+    }
+
+    // Load game from slot function (same as main game)
+    fun loadGame(slotId: Int): Boolean {
+        try {
+            val storage = Preferences.storageProvider?.invoke()
+            if (storage == null) {
+                return false
+            }
+            
+            // Save slot file name (same as main game)
+            val saveFileName = "save_$slotId.dat"
+            
+            if (!storage.fileExists(saveFileName)) {
+                return false
+            }
+            
+            val saveData = storage.readFile(saveFileName)
+            val lines = saveData.lines()
+            
+            var width = 0
+            var height = 0
+            var robots = ""
+            var moveCount = 0
+            var isLevelGame = false
+            var gameWon = false
+            
+            for (line in lines) {
+                when {
+                    line.startsWith("width:") -> width = line.substringAfter("width:").toInt()
+                    line.startsWith("height:") -> height = line.substringAfter("height:").toInt()
+                    line.startsWith("robots:") -> robots = line.substringAfter("robots:")
+                    line.startsWith("moveCount:") -> moveCount = line.substringAfter("moveCount:").toInt()
+                    line.startsWith("isLevelGame:") -> isLevelGame = line.substringAfter("isLevelGame:").toBoolean()
+                    line.startsWith("gameWon:") -> gameWon = line.substringAfter("gameWon:").toBoolean()
+                }
+            }
+            
+            // Reconstruct board from save data using createBoardFreestyle
+            val robotPositions = robots.split(",").map { it.toInt() }
+            val numRobots = robotPositions.size
+            val newBoard = Board.createBoardFreestyle(null, width, height, numRobots)
+            
+            if (newBoard == null) {
+                return false
+            }
+            
+            // Set robot positions
+            for (i in robotPositions.indices) {
+                newBoard.robotPositions[i] = robotPositions[i]
+            }
+            
+            currentBoard = newBoard
+            return true
+        } catch (e: Exception) {
+            return false
+        }
+    }
 
     // Timer effect - runs every second when timer is enabled
     LaunchedEffect(timerRunning) {
@@ -190,6 +326,15 @@ fun GameScreen(
                 delay(1000)
                 if (timerRunning) {
                     elapsedTime += 1000
+                    
+                    // Check for history save threshold (same as main game)
+                    if (!isHistorySaved && !isLevelGame) {
+                        val elapsedSeconds = (elapsedTime / 1000).toInt()
+                        if (elapsedSeconds >= HISTORY_SAVE_THRESHOLD) {
+                            isHistorySaved = true
+                            saveToHistory()
+                        }
+                    }
                 }
             }
         }
@@ -292,8 +437,24 @@ fun GameScreen(
                         val distance = kotlin.math.abs((newPos % w) - (oldPos % w)) +
                             kotlin.math.abs((newPos / w) - (oldPos / w))
                         currentBoard = newBoard
+                        
+                        // Check if this is the first move (same as main game)
+                        val wasFirstMove = (moveCount == 0)
+                        
                         moveCount++
                         squaresMoved += distance
+                        
+                        // Save history immediately on first move (same as main game)
+                        if (wasFirstMove && !isHistorySaved && !isLevelGame) {
+                            isHistorySaved = true
+                            Thread {
+                                try {
+                                    saveToHistory()
+                                } catch (e: Exception) {
+                                    // Error saving history on first move
+                                }
+                            }.start()
+                        }
                         
                         // Check if player followed the current hint
                         if (hintMessage != null && robotIndex == currentHintRobot && direction == currentHintDirection) {
