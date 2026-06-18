@@ -515,7 +515,7 @@ fun LevelSelectionScreen(
                             (roboyard.logic.core.Constants.STARS_PER_LEVEL * (levelId - 1) <= totalStars)
                     LevelItem(
                         levelId = levelId,
-                        stars = levelData?.starCount ?: 0,
+                        stars = levelData?.getCompletionStars() ?: 0,
                         isUnlocked = isUnlocked,
                         onClick = { if (isUnlocked) onLevelSelected(levelId) }
                     )
