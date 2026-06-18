@@ -4,7 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
-import java.util.Base64
+import android.util.Base64
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -1117,7 +1117,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
             if (!enhancedSaveData.toString().contains("MAP_SIG:")) {
                 val mapSig = gameState.generateMapSignature()
                 if (mapSig != null && !mapSig.isEmpty()) {
-                    val encoded = Base64.getEncoder().encodeToString(mapSig.toByteArray(StandardCharsets.UTF_8))
+                    val encoded = Base64.encodeToString(mapSig.toByteArray(StandardCharsets.UTF_8), Base64.NO_WRAP)
                     val sigTag = "MAP_SIG:" + encoded + ";"
                     val insertPos = enhancedSaveData.indexOf(";", 0) + 1
                     enhancedSaveData.insert(insertPos, sigTag)
@@ -2610,7 +2610,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
          * @param difficulty New difficulty level
          */
         set(difficulty) {
-            Preferences.difficulty = difficulty
+            Preferences.setDifficulty(difficulty)
         }
 
     /**

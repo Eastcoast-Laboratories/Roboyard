@@ -8,7 +8,7 @@ class LevelCompletionData(
  val levelId: Int,
  val moves: Int,
  val timeMillis: Long,
- val stars: Int,
+ val starCount: Int,
  val difficulty: Int
 ) {
 
@@ -28,7 +28,9 @@ class LevelCompletionData(
 
     fun isCompleted(): Boolean = completed
 
-    fun getCompletionStars(): Int = starsInternal
+    fun getStars(): Int = if (starsInternal != 0) starsInternal else starCount
+
+    fun getCompletionStars(): Int = getStars()
 
     fun setCompleted(completed: Boolean) {
         this.completed = completed
@@ -39,7 +41,7 @@ class LevelCompletionData(
     }
 
     override fun toString(): String {
-        return "LevelCompletionData(levelId=$levelId, moves=$moves, timeMillis=$timeMillis, stars=$starsInternal, difficulty=$difficulty, isCompleted=$completed)"
+        return "LevelCompletionData(levelId=$levelId, moves=$moves, timeMillis=$timeMillis, stars=${getStars()}, difficulty=$difficulty, isCompleted=$completed)"
     }
 
     companion object {

@@ -209,6 +209,26 @@ fun GameScreen(
         }
     }
 
+    // Start solver automatically when game starts (to calculate optimal moves)
+    LaunchedEffect(board) {
+        if (solution == null && !isSolverRunning) {
+            isSolverRunning = true
+            Thread {
+                try {
+                    val solver = driftingdroids.model.SolverIDDFS(currentBoard)
+                    val solutions = solver.execute()
+                    if (solutions.isNotEmpty() && solutions[0].size() > 0) {
+                        solution = solutions[0]
+                    }
+                } catch (e: Exception) {
+                    // Solver error - ignore, hints will still work
+                } finally {
+                    isSolverRunning = false
+                }
+            }.start()
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
@@ -462,7 +482,7 @@ fun GameScreen(
         }
 
         // Hint container (visible when hint is active)
-        if (hintMessage != null) {
+        if (hintMessage != null || solution != null) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -486,6 +506,15 @@ fun GameScreen(
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
                 )
+                // Optimal moves button (shows when solution is available)
+                if (solution != null) {
+                    FancyButton(
+                        text = solution!!.size().toString(),
+                        color = FancyButtonColor.HINT,
+                        onClick = { },
+                        modifier = Modifier.height(32.dp).width(48.dp)
+                    )
+                }
                 // Next hint button
                 FancyButton(
                     text = "▸",
