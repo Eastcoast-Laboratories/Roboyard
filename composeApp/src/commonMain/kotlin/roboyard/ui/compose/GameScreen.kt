@@ -168,6 +168,96 @@ fun GameScreen(
     val startBoard = remember(board) { Board.Companion.createClone(board).also { it.setRobots(board.robotPositions.copyOf()) } }
     var hintMessage by remember(board) { mutableStateOf<String?>(null) }
     var gameWon by remember(board) { mutableStateOf(false) }
+    var maxHintUsed by remember(board) { mutableIntStateOf(-1) } // Track max hint used this session
+    
+    // Autosave functionality
+    LaunchedEffect(moveCount, gameWon) {
+        // Autosave after every move or when game is won
+        if (moveCount > 0 || gameWon) {
+            val storage = getPlatformStorage()
+            val saveData = buildString {
+                appendLine("#MAPNAME:Random")
+                appendLine(";TIME:0")
+                appendLine(";MOVES:$moveCount")
+                appendLine(";DIFFICULTY:1")
+                appendLine(";SIZE:${currentBoard.width},${currentBoard.height}")
+                appendLine(";SOLVED:$gameWon")
+                appendLine(";MAX_HINT_USED:$maxHintUsed")
+                appendLine("WIDTH:${currentBoard.width};")
+                appendLine("HEIGHT:${currentBoard.height};")
+                
+                // Board data
+                for (y in 0 until currentBoard.height) {
+                    for (x in 0 until currentBoard.width) {
+                        if (x > 0) append(",")
+                        val position = y * currentBoard.width + x
+                        val hasRobot = currentBoard.robotPositions.contains(position)
+                        val goal = currentBoard.goals.find { it.position == position }
+                        when {
+                            hasRobot -> append(4)
+                            goal != null -> append(3).append(":").append(goal.robotNumber)
+                            else -> append(0)
+                        }
+                    }
+                    appendLine()
+                }
+                
+                // Targets
+                for (goal in currentBoard.goals) {
+                    val x = goal.position % currentBoard.width
+                    val y = goal.position / currentBoard.width
+                    val colorChar = when (goal.robotNumber) {
+                        0 -> 'b'
+                        1 -> 'g'
+                        2 -> 'r'
+                        3 -> 'y'
+                        4 -> 's'
+                        else -> 'm'
+                    }
+                    append("t").append(colorChar).append(x).append(",").append(y).append(";")
+                }
+                appendLine()
+                
+                // Walls
+                for (y in 0..currentBoard.height) {
+                    for (x in 0 until currentBoard.width) {
+                        val position = y * currentBoard.width + x
+                        if (currentBoard.isWall(position, 0)) {
+                            append("h").append(x).append(",").append(y).append(";")
+                        }
+                    }
+                }
+                for (y in 0 until currentBoard.height) {
+                    for (x in 0..currentBoard.width) {
+                        val position = y * currentBoard.width + x
+                        if (currentBoard.isWall(position, 3)) {
+                            append("v").append(x).append(",").append(y).append(";")
+                        }
+                    }
+                }
+                appendLine()
+                
+                // Robots
+                for (i in currentBoard.robotPositions.indices) {
+                    val position = currentBoard.robotPositions[i]
+                    val x = position % currentBoard.width
+                    val y = position / currentBoard.width
+                    val colorChar = when (i) {
+                        0 -> 'b'
+                        1 -> 'g'
+                        2 -> 'r'
+                        3 -> 'y'
+                        4 -> 's'
+                        else -> 'm'
+                    }
+                    append("r").append(colorChar).append(x).append(",").append(y).append(";")
+                }
+            }
+            
+            storage.writeFile("saves/save_0.dat", saveData)
+            println("[AUTOSAVE] Autosaved to slot 0")
+        }
+    }
     var solution by remember(board) { mutableStateOf<driftingdroids.model.Solution?>(null) }
     var currentHintStep by remember(board) { mutableIntStateOf(0) }
     var currentHintRobot by remember(board) { mutableIntStateOf(-1) }
