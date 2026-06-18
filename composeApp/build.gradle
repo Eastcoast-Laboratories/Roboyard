@@ -53,6 +53,11 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.9.0"
             }
         }
+        desktopTest {
+            dependencies {
+                implementation kotlin("test")
+            }
+        }
     }
 }
 
