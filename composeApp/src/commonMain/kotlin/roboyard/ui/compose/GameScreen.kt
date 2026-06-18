@@ -284,6 +284,12 @@ fun GameScreen(
                             // Note: Sound playback is platform-specific and will be implemented separately
                             val optimalMoves = solution?.size() ?: 0
                             val stars = calculateStars(moveCount, optimalMoves, hintsUsed)
+                            
+                            // Save level completion data if this is a level game
+                            if (isLevelGame) {
+                                roboyard.logic.core.saveLevelCompletion(levelCompletionManager, levelId, moveCount, hintsUsed, optimalMoves, stars, squaresMoved, elapsedTime)
+                            }
+                            
                             val completionMessage = handleGameWin(moveCount, isLevelGame = isLevelGame, optimalMoves = optimalMoves, stars = stars)
                             hintMessage = completionMessage
                         }
