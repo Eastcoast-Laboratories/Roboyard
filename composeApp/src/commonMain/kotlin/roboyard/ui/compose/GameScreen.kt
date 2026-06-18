@@ -215,10 +215,39 @@ fun GameScreen(
             isSolverRunning = true
             Thread {
                 try {
-                    val solver = driftingdroids.model.SolverIDDFS(currentBoard)
-                    val solutions = solver.execute()
-                    if (solutions.isNotEmpty() && solutions[0].size() > 0) {
+                    var currentRegenerationCount = 0
+                    val minRequiredMoves = Preferences.minSolutionMoves
+                    val maxRequiredMoves = Preferences.maxSolutionMoves
+
+                    while (currentRegenerationCount <= MAX_AUTO_REGENERATIONS && allowRegeneration) {
+                        val solver = driftingdroids.model.SolverIDDFS(currentBoard)
+                        val solutions = solver.execute()
+
+                        if (solutions.isEmpty() || solutions[0].size() <= 0) {
+                            // No solution found - regenerate map
+                            currentRegenerationCount++
+                            if (currentRegenerationCount <= MAX_AUTO_REGENERATIONS) {
+                                onNewGame()
+                                return@Thread
+                            }
+                            break
+                        }
+
+                        val moveCount = solutions[0].size()
+
+                        // Check if solution is too easy or too hard
+                        if (moveCount < minRequiredMoves || moveCount > maxRequiredMoves) {
+                            currentRegenerationCount++
+                            if (currentRegenerationCount <= MAX_AUTO_REGENERATIONS) {
+                                onNewGame()
+                                return@Thread
+                            }
+                            break
+                        }
+
+                        // Map is valid - accept it
                         solution = solutions[0]
+                        break
                     }
                 } catch (e: Exception) {
                     // Solver error - ignore, hints will still work
@@ -609,24 +638,6 @@ fun GameScreen(
                                     val solver = driftingdroids.model.SolverIDDFS(currentBoard)
                                     val solutions = solver.execute()
                                     if (solutions.isNotEmpty() && solutions[0].size() > 0) {
-                                        val moveCount = solutions[0].size()
-                                        val minRequiredMoves = Preferences.minSolutionMoves
-                                        val maxRequiredMoves = Preferences.maxSolutionMoves
-                                        
-                                        // Check if solution is too easy or too hard (regeneration logic)
-                                        if (allowRegeneration && regenerationCount < MAX_AUTO_REGENERATIONS) {
-                                            val isTooEasy = moveCount < minRequiredMoves
-                                            val isTooHard = moveCount > maxRequiredMoves
-                                            
-                                            if (isTooEasy || isTooHard) {
-                                                // Regenerate map
-                                                regenerationCount++
-                                                // Trigger new game generation
-                                                onNewGame()
-                                                return@Thread
-                                            }
-                                        }
-                                        
                                         solution = solutions[0]
                                         currentHintStep = 0
                                         val firstMove = solution!!.getNextMove()
@@ -653,12 +664,6 @@ fun GameScreen(
                                             hintMessage = "Already at goal!"
                                         }
                                     } else {
-                                        // No solution found - regenerate map
-                                        if (allowRegeneration && regenerationCount < MAX_AUTO_REGENERATIONS) {
-                                            regenerationCount++
-                                            onNewGame()
-                                            return@Thread
-                                        }
                                         hintMessage = "No solution found"
                                     }
                                 } catch (e: Exception) {
