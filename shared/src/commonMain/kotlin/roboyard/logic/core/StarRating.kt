@@ -3,45 +3,33 @@ package roboyard.logic.core
 import roboyard.logic.managers.LevelCompletionManager
 
 /**
- * Calculate star rating based on player performance (same as in main game)
- * 
- * Star allocation rules:
- * - 4 stars: Hyper-optimal solution (better than solver's optimal solution)
- * - 3 stars: Optimal solution (same as solver) with no hints
- * - 2 stars: One move more than optimal with no hints, OR optimal with one hint
- * - 1 star: Optimal solution with two hints, OR two moves more than optimal with no hints
- * - 0 stars: All other cases
- * 
+ * Calculate star rating based on player performance
+ *
+ * Star allocation rules (from HOW-TO-PLAY.md):
+ * - 3 stars: Complete the level in optimal moves
+ * - 2 stars: Complete the level within optimal moves + 1
+ * - 1 star: Complete the level (any number of moves)
+ *
  * @param playerMoves  Number of moves used by player
  * @param optimalMoves Optimal number of moves from solver
- * @param hintsUsed    Number of hints used
- * @return Number of stars earned (0-4)
+ * @param hintsUsed    Number of hints used (not used in current logic)
+ * @return Number of stars earned (1-3)
  */
 fun calculateStars(playerMoves: Int, optimalMoves: Int, hintsUsed: Int): Int {
     if (optimalMoves <= 0) {
-        return 0 // No optimal solution available
+        return 1 // No optimal solution available, but level completed
     }
 
     // Calculate stars based on the rules
-    if (playerMoves < optimalMoves) {
-        // hyper-Optimal solution (better than solver's solution)
-        return 4
-    } else if (playerMoves == optimalMoves && hintsUsed == 0) {
-        // Optimal solution (or better) and no hints
+    if (playerMoves == optimalMoves) {
+        // Optimal solution
         return 3
-    } else if ((playerMoves == optimalMoves + 1 && hintsUsed == 0) ||
-        (playerMoves == optimalMoves && hintsUsed == 1)
-    ) {
-        // One move more than optimal with no hints OR optimal with one hint
+    } else if (playerMoves <= optimalMoves + 1) {
+        // Within optimal moves + 1
         return 2
-    } else if ((playerMoves == optimalMoves && hintsUsed == 2) ||
-        (playerMoves == optimalMoves + 2 && hintsUsed == 0)
-    ) {
-        // Optimal with two hints OR two moves more than optimal with no hints
-        return 1
     } else {
-        // All other cases
-        return 0
+        // Any number of moves (level completed)
+        return 1
     }
 }
 
