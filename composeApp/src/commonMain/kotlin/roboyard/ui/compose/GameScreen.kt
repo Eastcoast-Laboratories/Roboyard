@@ -182,6 +182,12 @@ fun GameScreen(
     var isHistorySaved by remember(board) { mutableStateOf(false) }
     var gameStartTime by remember(board) { mutableLongStateOf(System.currentTimeMillis()) }
     
+    // Reset history tracking when board changes (new game started)
+    LaunchedEffect(board) {
+        isHistorySaved = false
+        gameStartTime = System.currentTimeMillis()
+    }
+    
     // Maximum auto-regeneration attempts (same as in main game)
     val MAX_AUTO_REGENERATIONS = 999
     
