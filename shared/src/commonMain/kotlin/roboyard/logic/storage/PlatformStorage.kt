@@ -23,6 +23,7 @@ interface PlatformStorage {
     fun fileExists(fileName: String): Boolean
     fun deleteFile(fileName: String): Boolean
     fun getFilePath(fileName: String): String
+    fun hasSavedGames(): Boolean
 
     // Bitmap operations (may be no-op on some platforms)
     fun readBitmap(fileName: String): Any?

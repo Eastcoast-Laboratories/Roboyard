@@ -228,6 +228,14 @@ fun MainMenuScreen(
     onSaveLoad: () -> Unit = {},
     onAchievements: () -> Unit = {}
 ) {
+    var hasSavedGames by remember { mutableStateOf(false) }
+
+    // Check if there are saved games (same logic as main game)
+    LaunchedEffect(Unit) {
+        val storage = getPlatformStorage()
+        hasSavedGames = storage.hasSavedGames()
+    }
+
     val barBrush = Brush.linearGradient(
         colors = listOf(Color(0xCC000000), Color(0xCC000000)),
         start = Offset(0f, 0f),
@@ -316,13 +324,16 @@ fun MainMenuScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    // Load Game button - hidden (visibility gone in fragment-app)
-                    // FancyButton(
-                    //     text = "Load Game",
-                    //     color = FancyButtonColor.RED,
-                    //     onClick = onSaveLoad,
-                    //     modifier = Modifier.fillMaxWidth()
-                    // )
+                    // Load Game button - only visible if there are saved games
+                    if (hasSavedGames) {
+                        FancyButton(
+                            text = "Load Game",
+                            color = FancyButtonColor.RED,
+                            onClick = onSaveLoad,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
                 }
             }
 

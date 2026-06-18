@@ -92,6 +92,11 @@ class DesktopStorage : PlatformStorage {
         return File(appDir, fileName).absolutePath
     }
 
+    override fun hasSavedGames(): Boolean {
+        val savesDir = File(appDir, "saves")
+        return savesDir.exists() && savesDir.listFiles()?.isNotEmpty() == true
+    }
+
     override fun readBitmap(fileName: String): Any? {
         // Desktop doesn't need bitmap operations for now
         return null

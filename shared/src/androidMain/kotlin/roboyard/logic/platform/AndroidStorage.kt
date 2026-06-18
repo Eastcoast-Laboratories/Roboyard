@@ -85,6 +85,10 @@ class AndroidStorage(private val context: Context) : PlatformStorage {
         return File(appDir, fileName).absolutePath
     }
 
+    override fun hasSavedGames(): Boolean {
+        return appDir.exists() && appDir.listFiles()?.isNotEmpty() == true
+    }
+
     override fun readBitmap(fileName: String): Any? {
         // Android-specific bitmap loading would go here
         return null
