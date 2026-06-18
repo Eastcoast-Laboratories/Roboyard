@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.sp
 import kotlin.math.min
 import kotlin.math.roundToInt
 import driftingdroids.model.Board
+import driftingdroids.model.isTrivialPuzzle
 import roboyard.logic.core.LevelLoader
 import roboyard.logic.core.LevelFormatParser
 import roboyard.logic.core.ComposeGameState
@@ -446,6 +447,17 @@ fun GameScreen(
                         }
 
                         val moveCount = solutions[0].size()
+
+                        // Quick check for trivial puzzles (1 move or already solved) before difficulty validation
+                        if (currentBoard.isTrivialPuzzle()) {
+                            println("[TRIVIAL_CHECK] Detected trivial puzzle, regenerating without running solver")
+                            currentRegenerationCount++
+                            if (currentRegenerationCount <= MAX_AUTO_REGENERATIONS) {
+                                onNewGame()
+                                return@Thread
+                            }
+                            break
+                        }
 
                         // Check if solution is too easy or too hard
                         if (moveCount < minRequiredMoves || moveCount > maxRequiredMoves) {
@@ -853,6 +865,8 @@ fun GameScreen(
                             }
                             storage.putString("saved_game", saveData)
                             hintMessage = "Game saved!"
+                            println("[SAVE_GAME] game saved but not really ;) ")
+            
                         } else {
                             hintMessage = "Save failed: no storage"
                         }

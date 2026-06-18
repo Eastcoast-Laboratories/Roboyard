@@ -20,6 +20,78 @@ import roboyard.logic.core.Constants
 import kotlin.math.min
 
 /**
+ * Quick check if puzzle is trivial (already solved or only 1 move needed)
+ * This prevents occasionally OutOfMemoryError in solver for very simple puzzles
+ * this is a duplicate of isSolution01() but that function did not always work
+ */
+fun Board.isTrivialPuzzle(): Boolean {
+    // Check if puzzle is already solved (any robot on its target)
+    for (i in robotPositions.indices) {
+        val robotPos = robotPositions[i]
+        val robotX = robotPos % width
+        val robotY = robotPos / width
+        
+        for (goal in goals) {
+            if (goal.robotNumber == i && goal.x == robotX && goal.y == robotY) {
+                return true
+            }
+        }
+    }
+
+    // Check if any robot can reach its target in one move
+    // This is a quick heuristic check - not perfect but catches most trivial cases
+    for (i in robotPositions.indices) {
+        val robotPos = robotPositions[i]
+        val robotX = robotPos % width
+        val robotY = robotPos / width
+
+        // Find matching target
+        for (goal in goals) {
+            if (goal.robotNumber != i) continue
+
+            val targetX = goal.x
+            val targetY = goal.y
+
+            // Check if robot can reach target in one move (same row or column)
+            if (robotX == targetX || robotY == targetY) {
+                // Check if path is clear (no walls blocking)
+                var pathClear = true
+
+                if (robotX == targetX) {
+                    // Vertical movement
+                    val startY = kotlin.math.min(robotY, targetY)
+                    val endY = kotlin.math.max(robotY, targetY)
+                    for (y in startY..endY) {
+                        // Check for horizontal walls blocking vertical movement
+                        if (y > startY && isWall(robotX + y * width, Constants.NORTH)) {
+                            pathClear = false
+                            break
+                        }
+                    }
+                } else {
+                    // Horizontal movement
+                    val startX = kotlin.math.min(robotX, targetX)
+                    val endX = kotlin.math.max(robotX, targetX)
+                    for (x in startX..endX) {
+                        // Check for vertical walls blocking horizontal movement
+                        if (x > startX && isWall(x + robotY * width, Constants.WEST)) {
+                            pathClear = false
+                            break
+                        }
+                    }
+                }
+
+                if (pathClear) {
+                    return true
+                }
+            }
+        }
+    }
+
+    return false
+}
+
+/**
  * Board class represents the game board state including walls, robots, and goals.
  * Handles board creation, modification, and game state management.
  */
