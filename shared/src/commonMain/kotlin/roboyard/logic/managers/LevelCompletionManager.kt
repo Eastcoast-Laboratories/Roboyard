@@ -40,8 +40,8 @@ class LevelCompletionManager private constructor() {
             val existingData = completionDataMap.get(levelId) ?: return
 
             // Only update stars if new value is greater
-            val starsImproved = data.starCount > existingData.starCount
-            val starsAtLeastSame = data.starCount >= existingData.starCount
+            val starsImproved = data.getCompletionStars() > existingData.getCompletionStars()
+            val starsAtLeastSame = data.getCompletionStars() >= existingData.getCompletionStars()
 
             // Always update hints shown (relevant for achievement tracking)
             existingData.hintsShown = data.hintsShown
@@ -52,31 +52,30 @@ class LevelCompletionManager private constructor() {
 
             if (starsImproved) {
                 // If stars have improved, update stars and related metrics
-                existingData.setStars(data.starCount)
+                existingData.setStars(data.getCompletionStars())
                 existingData.movesNeeded = data.movesNeeded
                 existingData.timeNeeded = data.timeNeeded
                 existingData.robotsUsed = data.robotsUsed
                 existingData.squaresSurpassed = data.squaresSurpassed
             }
 
-            // Only update robotsUsed if stars are at least the same
-            if (data.isCompleted && starsAtLeastSame) {
+            if (data.isCompleted() && starsAtLeastSame) {
                 existingData.setCompleted(true)
                 existingData.robotsUsed = data.robotsUsed
             }
 
             // Always update moves if it's lower (better) than existing value
-            if (data.isCompleted && (existingData.movesNeeded == 0 || data.movesNeeded < existingData.movesNeeded)) {
+            if (data.isCompleted() && (existingData.movesNeeded == 0 || data.movesNeeded < existingData.movesNeeded)) {
                 existingData.movesNeeded = data.movesNeeded
             }
 
             // Always update time if it's lower (faster) than existing value
-            if (data.isCompleted && (existingData.timeNeeded == 0L || data.timeNeeded < existingData.timeNeeded)) {
+            if (data.isCompleted() && (existingData.timeNeeded == 0L || data.timeNeeded < existingData.timeNeeded)) {
                 existingData.timeNeeded = data.timeNeeded
             }
 
             // Always update squares if it's more (better) than existing value
-            if (data.isCompleted && data.squaresSurpassed > existingData.squaresSurpassed) {
+            if (data.isCompleted() && data.squaresSurpassed > existingData.squaresSurpassed) {
                 existingData.squaresSurpassed = data.squaresSurpassed
             }
 
@@ -98,7 +97,7 @@ class LevelCompletionManager private constructor() {
      */
     fun isLevelCompleted(levelId: Int): Boolean {
         val data = getLevelCompletionData(levelId)
-        return data?.isCompleted ?: false
+        return data?.isCompleted() ?: false
     }
 
     val totalStars: Int
@@ -109,8 +108,8 @@ class LevelCompletionManager private constructor() {
         get() {
             var totalStars = 0
             for (data in completionDataMap.values) {
-                if (data.isCompleted) {
-                    totalStars += data.starCount
+                if (data.isCompleted()) {
+                    totalStars += data.getCompletionStars()
                 }
             }
             return totalStars
@@ -216,8 +215,8 @@ class LevelCompletionManager private constructor() {
         val sb = StringBuilder()
         for ((levelId, data) in completionDataMap) {
             sb.append("$levelId:")
-            sb.append("${data.isCompleted},")
-            sb.append("${data.starCount},")
+            sb.append("${data.isCompleted()},")
+            sb.append("${data.getCompletionStars()},")
             sb.append("${data.movesNeeded},")
             sb.append("${data.timeNeeded},")
             sb.append("${data.robotsUsed},")

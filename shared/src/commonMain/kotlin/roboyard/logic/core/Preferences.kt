@@ -81,63 +81,44 @@ object Preferences {
 
     var robotCount: Int = 0
         private set
-
     var targetColors: Int = 0
         private set
-
     var soundEnabled: Boolean = false
         private set
-
     var difficulty: Int = 0
         private set
-
     var boardSizeWidth: Int = 0
         private set
-
     var boardSizeHeight: Int = 0
         private set
-
     var generateNewMapEachTime: Boolean = false
         private set
-
     var accessibilityMode: Boolean = false
         private set
-
     var appLanguage: String? = null
         private set
-
     var talkbackLanguage: String? = null
         private set
-
     var gameMode: Int = 0
         private set
-
     var fullscreenEnabled: Boolean = false
         private set
-
     var minSolutionMoves: Int = 0
         private set
-
     var maxSolutionMoves: Int = 0
         private set
-
     var allowMulticolorTarget: Boolean = false
         private set
-
     var highContrastMode: Boolean = false
         private set
-
     var backgroundSoundVolume: Int = 0
         private set
-
     var liveMoveCounterEnabled: Boolean = false
         private set
     var hintAutoMoveEnabled: Boolean = false
         private set
-
     var hintAutoMoveMode: Int = 0
         private set
-
     var soundEffectsVolume: Int = 0
         private set
 
@@ -499,10 +480,10 @@ object Preferences {
      * @param count Number of robots
      */
 
-    fun setRobotCount(count: Int) {
+    fun updateRobotCount(count: Int) {
         // Ensure preferences are initialized
         if (storage == null) {
-            log.w("[PREFERENCES] Storage is null in setRobotCount, attempting to initialize")
+            log.w("[PREFERENCES] Storage is null in updateRobotCount, attempting to initialize")
             val provided = storageProvider?.invoke()
             if (provided != null) {
                 initialize(provided)
@@ -532,15 +513,17 @@ object Preferences {
         log.d("[PREFERENCES] Robot count set to %d", validCount)
     }
 
+    fun setRobotCount(count: Int) = updateRobotCount(count)
+
     /**
      * Set the target colors count and save to preferences
      * @param count Number of target colors
      */
 
-    fun setTargetColors(count: Int) {
+    fun updateTargetColors(count: Int) {
         // Ensure preferences are initialized
         if (storage == null) {
-            log.w("[PREFERENCES] Storage is null in setTargetColors, attempting to initialize")
+            log.w("[PREFERENCES] Storage is null in updateTargetColors, attempting to initialize")
             val provided = storageProvider?.invoke()
             if (provided != null) {
                 initialize(provided)
@@ -570,15 +553,17 @@ object Preferences {
         log.d("[PREFERENCES] Target colors set to %d", validCount)
     }
 
+    fun setTargetColors(count: Int) = updateTargetColors(count)
+
     /**
      * Set the sound enabled state and save to preferences
      * @param enabled True to enable sound, false to disable
      */
 
-    fun setSoundEnabled(enabled: Boolean) {
+    fun updateSoundEnabled(enabled: Boolean) {
         // Ensure preferences are initialized
         if (storage == null) {
-            log.w("[PREFERENCES] Storage is null in setSoundEnabled, attempting to initialize")
+            log.w("[PREFERENCES] Storage is null in updateSoundEnabled, attempting to initialize")
             val provided = storageProvider?.invoke()
             if (provided != null) {
                 initialize(provided)
@@ -604,14 +589,16 @@ object Preferences {
         log.d("[PREFERENCES] Sound enabled set to %s", enabled)
     }
 
+    fun setSoundEnabled(enabled: Boolean) = updateSoundEnabled(enabled)
+
     /**
      * Set the background sound volume and save to preferences
      * @param volume Volume level 0-100 (0 = off)
      */
 
-    fun setBackgroundSoundVolume(volume: Int) {
+    fun updateBackgroundSoundVolume(volume: Int) {
         if (storage == null) {
-            log.w("[PREFERENCES] SharedPreferences is null in setBackgroundSoundVolume, attempting to initialize")
+            log.w("[PREFERENCES] SharedPreferences is null in updateBackgroundSoundVolume, attempting to initialize")
             val provided = storageProvider?.invoke()
             if (provided != null) {
                 initialize(provided)
@@ -630,14 +617,16 @@ object Preferences {
         log.d("[PREFERENCES] Background sound volume set to %d", volume)
     }
 
+    fun setBackgroundSoundVolume(volume: Int) = updateBackgroundSoundVolume(volume)
+
     /**
      * Set the live move counter enabled state and save to preferences
      * @param enabled True to enable live move counter, false to disable
      */
 
-    fun setLiveMoveCounterEnabled(enabled: Boolean) {
+    fun updateLiveMoveCounterEnabled(enabled: Boolean) {
         if (storage == null) {
-            log.w("[PREFERENCES] SharedPreferences is null in setLiveMoveCounterEnabled, attempting to initialize")
+            log.w("[PREFERENCES] SharedPreferences is null in updateLiveMoveCounterEnabled, attempting to initialize")
             val provided = storageProvider?.invoke()
             if (provided != null) {
                 initialize(provided)
@@ -655,14 +644,16 @@ object Preferences {
         log.d("[PREFERENCES] Live move counter enabled set to %s", enabled)
     }
 
+    fun setLiveMoveCounterEnabled(enabled: Boolean) = updateLiveMoveCounterEnabled(enabled)
+
     /**
      * Set the hint auto-move mode and save to preferences
      * @param mode 0=Manual, 1=Full-Auto, 2=Semi-Auto (move on next-hint button)
      */
 
-    fun setHintAutoMoveMode(mode: Int) {
+    fun updateHintAutoMoveMode(mode: Int) {
         if (storage == null) {
-            log.w("[PREFERENCES] SharedPreferences is null in setHintAutoMoveMode, attempting to initialize")
+            log.w("[PREFERENCES] SharedPreferences is null in updateHintAutoMoveMode, attempting to initialize")
             val provided = storageProvider?.invoke()
             if (provided != null) {
                 initialize(provided)
@@ -681,14 +672,16 @@ object Preferences {
         log.d("[PREFERENCES] Hint auto-move mode set to %d", mode)
     }
 
+    fun setHintAutoMoveMode(mode: Int) = updateHintAutoMoveMode(mode)
+
     /**
      * Set the sound effects volume and save to preferences
      * @param volume Volume level 0-100
      */
 
-    fun setSoundEffectsVolume(volume: Int) {
+    fun updateSoundEffectsVolume(volume: Int) {
         if (storage == null) {
-            log.w("[PREFERENCES] SharedPreferences is null in setSoundEffectsVolume, attempting to initialize")
+            log.w("[PREFERENCES] SharedPreferences is null in updateSoundEffectsVolume, attempting to initialize")
             val provided = storageProvider?.invoke()
             if (provided != null) {
                 initialize(provided)
@@ -707,15 +700,17 @@ object Preferences {
         log.d("[PREFERENCES] Sound effects volume set to %d", volume)
     }
 
+    fun setSoundEffectsVolume(volume: Int) = updateSoundEffectsVolume(volume)
+
     /**
      * Set the difficulty level and save to preferences
      * @param difficultyLevel Difficulty level (0-3)
      */
 
-    fun setDifficulty(difficultyLevel: Int) {
+    fun updateDifficulty(difficultyLevel: Int) {
         // Ensure preferences are initialized
         if (storage == null) {
-            log.w("[PREFERENCES] SharedPreferences is null in setDifficulty, attempting to initialize")
+            log.w("[PREFERENCES] SharedPreferences is null in updateDifficulty, attempting to initialize")
             val provided = storageProvider?.invoke()
             if (provided != null) {
                 initialize(provided)
@@ -751,16 +746,18 @@ object Preferences {
         log.d("[PREFERENCES] Difficulty set to %d", validDifficulty)
     }
 
+    fun setDifficulty(difficultyLevel: Int) = updateDifficulty(difficultyLevel)
+
     /**
      * Set the board size and save to preferences
      * @param width Board width
      * @param height Board height
      */
 
-    fun setBoardSize(width: Int, height: Int) {
+    fun updateBoardSize(width: Int, height: Int) {
         // Ensure preferences are initialized
         if (storage == null) {
-            log.w("[PREFERENCES] SharedPreferences is null in setBoardSize, attempting to initialize")
+            log.w("[PREFERENCES] SharedPreferences is null in updateBoardSize, attempting to initialize")
             val provided = storageProvider?.invoke()
             if (provided != null) {
                 initialize(provided)
@@ -802,12 +799,14 @@ object Preferences {
         log.d("[PREFERENCES] Board size set to %dx%d", validWidth, validHeight)
     }
 
+    fun setBoardSize(width: Int, height: Int) = updateBoardSize(width, height)
+
     /**
      * Set whether to generate a new map each time
      * @param generateNewMapEachTime Whether to generate a new map each time
      */
 
-    fun setGenerateNewMapEachTime(generateNewMapEachTime: Boolean) {
+    fun updateGenerateNewMapEachTime(generateNewMapEachTime: Boolean) {
         if (storage == null) {
             log.e("[PREFERENCES] Cannot save preference: SharedPreferences not initialized")
             return
@@ -822,14 +821,16 @@ object Preferences {
         log.d("[PREFERENCES] Generate new map set to %s", generateNewMapEachTime)
     }
 
+    fun setGenerateNewMapEachTime(generateNewMapEachTime: Boolean) = updateGenerateNewMapEachTime(generateNewMapEachTime)
+
     /**
      * Set whether to generate a new map each time and save to preferences
      * @param generateNewMapEachTime Whether to generate a new map each time
      */
-    fun setgenerateNewMapEachTime(generateNewMapEachTime: Boolean) {
+    fun updateGenerateNewMapEachTimeCompatibility(generateNewMapEachTime: Boolean) {
         // Ensure preferences are initialized
         if (storage == null) {
-            log.w("[PREFERENCES] SharedPreferences is null in setgenerateNewMapEachTime, attempting to initialize")
+            log.w("[PREFERENCES] SharedPreferences is null in updateGenerateNewMapEachTimeCompatibility, attempting to initialize")
             val provided = storageProvider?.invoke()
             if (provided != null) {
                 initialize(provided)
@@ -860,10 +861,10 @@ object Preferences {
      * @param enabled True if accessibility mode is enabled, false otherwise
      */
 
-    fun setAccessibilityMode(enabled: Boolean) {
+    fun updateAccessibilityMode(enabled: Boolean) {
         // Ensure preferences are initialized
         if (storage == null) {
-            log.w("[PREFERENCES] SharedPreferences is null in setAccessibilityMode, attempting to initialize")
+            log.w("[PREFERENCES] SharedPreferences is null in updateAccessibilityMode, attempting to initialize")
             val provided = storageProvider?.invoke()
             if (provided != null) {
                 initialize(provided)
@@ -911,15 +912,17 @@ object Preferences {
         log.d("[PREFERENCES] Accessibility mode set to %s", enabled)
     }
 
+    fun setAccessibilityMode(enabled: Boolean) = updateAccessibilityMode(enabled)
+
     /**
      * Set the app language and save to preferences
      * @param language App language
      */
 
-    fun setAppLanguage(language: String?) {
+    fun updateAppLanguage(language: String?) {
         // Ensure preferences are initialized
         if (storage == null) {
-            log.w("[PREFERENCES] SharedPreferences is null in setAppLanguage, attempting to initialize")
+            log.w("[PREFERENCES] SharedPreferences is null in updateAppLanguage, attempting to initialize")
             val provided = storageProvider?.invoke()
             if (provided != null) {
                 initialize(provided)
@@ -947,15 +950,17 @@ object Preferences {
         log.d("[PREFERENCES] App language set to %s", language)
     }
 
+    fun setAppLanguage(language: String?) = updateAppLanguage(language)
+
     /**
      * Set the talkback language and save to preferences
      * @param language Talkback language
      */
 
-    fun setTalkbackLanguage(language: String?) {
+    fun updateTalkbackLanguage(language: String?) {
         // Ensure preferences are initialized
         if (storage == null) {
-            log.w("[PREFERENCES] SharedPreferences is null in setTalkbackLanguage, attempting to initialize")
+            log.w("[PREFERENCES] SharedPreferences is null in updateTalkbackLanguage, attempting to initialize")
             val provided = storageProvider?.invoke()
             if (provided != null) {
                 initialize(provided)
@@ -983,15 +988,17 @@ object Preferences {
         log.d("[PREFERENCES] Talkback language set to %s", language)
     }
 
+    fun setTalkbackLanguage(language: String?) = updateTalkbackLanguage(language)
+
     /**
      * Set the game mode and save to preferences
      * @param gameMode Game mode
      */
 
-    fun setGameMode(gameMode: Int) {
+    fun updateGameMode(gameMode: Int) {
         // Ensure preferences are initialized
         if (storage == null) {
-            log.w("[PREFERENCES] SharedPreferences is null in setGameMode, attempting to initialize")
+            log.w("[PREFERENCES] SharedPreferences is null in updateGameMode, attempting to initialize")
             val provided = storageProvider?.invoke()
             if (provided != null) {
                 initialize(provided)
@@ -1017,15 +1024,17 @@ object Preferences {
         log.d("[PREFERENCES] Game mode set to %d", gameMode)
     }
 
+    fun setGameMode(gameMode: Int) = updateGameMode(gameMode)
+
     /**
      * Set whether fullscreen mode is enabled and save to preferences
      * @param enabled True if fullscreen mode is enabled, false otherwise
      */
 
-    fun setFullscreenEnabled(enabled: Boolean) {
+    fun updateFullscreenEnabled(enabled: Boolean) {
         // Ensure preferences are initialized
         if (storage == null) {
-            log.w("[PREFERENCES] SharedPreferences is null in setFullscreenEnabled, attempting to initialize")
+            log.w("[PREFERENCES] SharedPreferences is null in updateFullscreenEnabled, attempting to initialize")
             val provided = storageProvider?.invoke()
             if (provided != null) {
                 initialize(provided)
@@ -1051,6 +1060,8 @@ object Preferences {
         log.d("[PREFERENCES] Fullscreen enabled set to %s", enabled)
     }
 
+    fun setFullscreenEnabled(enabled: Boolean) = updateFullscreenEnabled(enabled)
+
     /**
      * Reload all preference values from disk
      * Call this if preferences might have been changed by another component
@@ -1066,9 +1077,9 @@ object Preferences {
      * @param moves Minimum number of moves required for a solution
      */
 
-    fun setMinSolutionMoves(moves: Int) {
+    fun updateMinSolutionMoves(moves: Int) {
         if (storage == null) {
-            log.w("[PREFERENCES] SharedPreferences is null in setMinSolutionMoves, attempting to initialize")
+            log.w("[PREFERENCES] SharedPreferences is null in updateMinSolutionMoves, attempting to initialize")
             val provided = storageProvider?.invoke()
             if (provided != null) {
                 initialize(provided)
@@ -1086,14 +1097,16 @@ object Preferences {
         log.d("[PREFERENCES] Min solution moves set to %d", moves)
     }
 
+    fun setMinSolutionMoves(moves: Int) = updateMinSolutionMoves(moves)
+
     /**
      * Set the maximum solution moves and save to preferences
      * @param moves Maximum number of moves required for a solution
      */
 
-    fun setMaxSolutionMoves(moves: Int) {
+    fun updateMaxSolutionMoves(moves: Int) {
         if (storage == null) {
-            log.w("[PREFERENCES] SharedPreferences is null in setMaxSolutionMoves, attempting to initialize")
+            log.w("[PREFERENCES] SharedPreferences is null in updateMaxSolutionMoves, attempting to initialize")
             val provided = storageProvider?.invoke()
             if (provided != null) {
                 initialize(provided)
@@ -1111,14 +1124,16 @@ object Preferences {
         log.d("[PREFERENCES] Max solution moves set to %d", moves)
     }
 
+    fun setMaxSolutionMoves(moves: Int) = updateMaxSolutionMoves(moves)
+
     /**
      * Set whether multicolor targets are allowed and save to preferences
      * @param allowed True to allow multicolor targets, false to disallow
      */
 
-    fun setAllowMulticolorTarget(allowed: Boolean) {
+    fun updateAllowMulticolorTarget(allowed: Boolean) {
         if (storage == null) {
-            log.w("[PREFERENCES] SharedPreferences is null in setAllowMulticolorTarget, attempting to initialize")
+            log.w("[PREFERENCES] SharedPreferences is null in updateAllowMulticolorTarget, attempting to initialize")
             val provided = storageProvider?.invoke()
             if (provided != null) {
                 initialize(provided)
@@ -1136,14 +1151,16 @@ object Preferences {
         log.d("[PREFERENCES] Allow multicolor target set to %b", allowed)
     }
 
+    fun setAllowMulticolorTarget(allowed: Boolean) = updateAllowMulticolorTarget(allowed)
+
     /**
      * Set high contrast mode and save to preferences
      * @param enabled True to enable high contrast mode, false to disable
      */
 
-    fun setHighContrastMode(enabled: Boolean) {
+    fun updateHighContrastMode(enabled: Boolean) {
         if (storage == null) {
-            log.w("[PREFERENCES] SharedPreferences is null in setHighContrastMode, attempting to initialize")
+            log.w("[PREFERENCES] SharedPreferences is null in updateHighContrastMode, attempting to initialize")
             val provided = storageProvider?.invoke()
             if (provided != null) {
                 initialize(provided)
@@ -1160,6 +1177,8 @@ object Preferences {
         notifyPreferencesChanged()
         log.d("[PREFERENCES] High contrast mode set to %b", enabled)
     }
+
+    fun setHighContrastMode(enabled: Boolean) = updateHighContrastMode(enabled)
 
     /**
      * Convert linear slider value (0-100) to logarithmic volume (0.0-1.0).

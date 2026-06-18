@@ -193,7 +193,6 @@ class GameState(
      * @param difficulty The difficulty level (Constants.DIFFICULTY_*)
      */
     // Difficulty level when the game was created (for savegame restoration)
-    @JvmField
     var difficulty: Int = Constants.DIFFICULTY_BEGINNER
 
     /**

@@ -12,30 +12,34 @@ class LevelCompletionData(
  val difficulty: Int
 ) {
 
- var isCompleted: Boolean = false
-        private set
- var hintsShown: Int = 0
- var timeNeeded: Long = 0
- var movesNeeded: Int = 0
- var robotsUsed: Int = 0
- var squaresSurpassed: Int = 0
- var optimalMoves: Int = 0
- var starCount: Int = 0
-        private set
+    private var completed: Boolean = false
+    
+    var hintsShown: Int = 0
+    var timeNeeded: Long = 0
+    var movesNeeded: Int = 0
+    var robotsUsed: Int = 0
+    var squaresSurpassed: Int = 0
+    var optimalMoves: Int = 0
+    
+    private var starsInternal: Int = 0
 
     // Secondary constructor for int-only calls
     constructor(levelId: Int) : this(levelId, 0, 0, 0, 0)
 
+    fun isCompleted(): Boolean = completed
+
+    fun getCompletionStars(): Int = starsInternal
+
     fun setCompleted(completed: Boolean) {
-        this.isCompleted = completed
+        this.completed = completed
     }
 
     fun setStars(stars: Int) {
-        this.starCount = stars.coerceIn(0, 4) // Allow up to 4 stars (hyper-optimal)
+        this.starsInternal = stars.coerceIn(0, 4) // Allow up to 4 stars (hyper-optimal)
     }
 
     override fun toString(): String {
-        return "LevelCompletionData(levelId=$levelId, moves=$moves, timeMillis=$timeMillis, stars=$starCount, difficulty=$difficulty, isCompleted=$isCompleted)"
+        return "LevelCompletionData(levelId=$levelId, moves=$moves, timeMillis=$timeMillis, stars=$starsInternal, difficulty=$difficulty, isCompleted=$completed)"
     }
 
     companion object {
