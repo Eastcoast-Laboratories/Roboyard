@@ -328,7 +328,7 @@ fun GameScreen(
                     elapsedTime += 1000
                     
                     // Check for history save threshold (same as main game)
-                    if (!isHistorySaved && !isLevelGame) {
+                    if (!isHistorySaved) {
                         val elapsedSeconds = (elapsedTime / 1000).toInt()
                         if (elapsedSeconds >= HISTORY_SAVE_THRESHOLD) {
                             isHistorySaved = true
@@ -445,7 +445,7 @@ fun GameScreen(
                         squaresMoved += distance
                         
                         // Save history immediately on first move (same as main game)
-                        if (wasFirstMove && !isHistorySaved && !isLevelGame) {
+                        if (wasFirstMove && !isHistorySaved) {
                             isHistorySaved = true
                             Thread {
                                 try {
