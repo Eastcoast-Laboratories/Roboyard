@@ -212,7 +212,26 @@ fun GameScreen(
             val historyIndex = getNextHistoryIndex()
             val historyFileName = "history_$historyIndex.txt"
             
-            // Serialize board to save data format
+            // Generate map name (same as main game)
+            val mapName = if (isLevelGame) {
+                "Level $levelId"
+            } else {
+                "Random Map #$historyIndex"
+            }
+            
+            // Generate board size string (same as main game)
+            val boardSize = "${currentBoard.width}x${currentBoard.height}"
+            
+            // Get optimal moves from solution if available (same as main game)
+            val optimalMovesCount = solution?.size() ?: 0
+            
+            // Calculate total play time (same as main game)
+            val totalPlayTime = (elapsedTime / 1000).toInt()
+            
+            // Only save actual move count if game is completed (same as main game)
+            val actualMoveCount = if (gameWon) moveCount else 0
+            
+            // Serialize board to save data format with metadata (same as main game)
             val saveData = buildString {
                 appendLine("width:${currentBoard.width}")
                 appendLine("height:${currentBoard.height}")
@@ -222,12 +241,27 @@ fun GameScreen(
                 }
                 appendLine("moveCount:$moveCount")
                 appendLine("isLevelGame:$isLevelGame")
-                appendLine("timestamp:${System.currentTimeMillis()}")
+                appendLine("timestamp:$gameStartTime")
+                appendLine("mapName:$mapName")
+                appendLine("boardSize:$boardSize")
+                appendLine("optimalMoves:$optimalMovesCount")
+                appendLine("totalPlayTime:$totalPlayTime")
+                appendLine("actualMoveCount:$actualMoveCount")
             }
             
             storage.writeFile(historyFileName, saveData)
         } catch (e: Exception) {
             // Error saving to history
+        }
+    }
+
+    // Save to history immediately, bypassing the time threshold (same as main game)
+    // Called when a hint is shown, live move counter is activated, or map is completed
+    fun saveToHistoryNow(reason: String) {
+        if (!isHistorySaved) {
+            // Immediate save triggered by: reason
+            saveToHistory()
+            isHistorySaved = true
         }
     }
 
@@ -461,6 +495,8 @@ fun GameScreen(
                             // Player followed the hint, show next hint automatically
                             val nextMove = solution?.getNextMove()
                             if (nextMove != null) {
+                                // Save to history immediately when a hint is shown (same as main game)
+                                saveToHistoryNow("hint_shown_$currentHintStep")
                                 val directionName = when (nextMove.direction) {
                                     Board.NORTH -> "North"
                                     Board.SOUTH -> "South"
@@ -490,6 +526,8 @@ fun GameScreen(
                         // [GAME_WIN] Check if the goal robot reached its target
                         if (newBoard.goals.isNotEmpty() && isSolved(newBoard)) {
                             gameWon = true
+                            // Save to history immediately on completion (same as main game)
+                            saveToHistoryNow("completed")
                             // Play win sound and show completion message
                             // Note: Sound playback is platform-specific and will be implemented separately
                             val optimalMoves = solution?.size() ?: 0
