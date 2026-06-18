@@ -849,26 +849,11 @@ fun GameScreen(
                     text = "Save Map",
                     color = FancyButtonColor.RED,
                     onClick = {
-                        // Save current board state to storage
-                        val storage = Preferences.storageProvider?.invoke()
-                        if (storage != null) {
-                            val saveData = buildString {
-                                appendLine("width:${board.width}")
-                                appendLine("height:${board.height}")
-                                appendLine("moveCount:$moveCount")
-                                appendLine("squaresMoved:$squaresMoved")
-                                appendLine("robots:${board.robotPositions.joinToString(",")}")
-                                // Save goals
-                                for (goal in board.goals) {
-                                    appendLine("goal:${goal.position},${goal.robotNumber}")
-                                }
-                            }
-                            storage.putString("saved_game", saveData)
-                            hintMessage = "Game saved!"
-                            println("[SAVE_GAME] game saved but not really ;) ")
-            
+                        // Save current board state to slot 1
+                        if (saveGame(1)) {
+                            hintMessage = "Game saved to slot 1!"
                         } else {
-                            hintMessage = "Save failed: no storage"
+                            hintMessage = "Save failed"
                         }
                     },
                     modifier = Modifier.weight(1f).padding(end = 3.dp)
