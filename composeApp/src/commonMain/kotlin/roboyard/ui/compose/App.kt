@@ -881,8 +881,10 @@ private fun serializeBoardToMainGameFormat(board: Board, isLevelGame: Boolean): 
     // Horizontal walls (y goes to height to include bottom boundary)
     for (y in 0..board.height) {
         for (x in 0 until board.width) {
-            val position = y * board.width + x
-            if (board.isWall(position, 0)) { // NORTH wall = horizontal
+            // Check horizontal wall at position (x, y) - this is the wall between (x, y) and (x, y+1)
+            // For the bottom boundary (y = height), we need to check if there's a wall at the bottom of the last row
+            val position = if (y < board.height) y * board.width + x else (board.height - 1) * board.width + x
+            if (y < board.height && board.isWall(position, 0)) { // NORTH wall = horizontal
                 sb.append("h").append(x).append(",").append(y).append(";")
             }
         }
@@ -890,8 +892,10 @@ private fun serializeBoardToMainGameFormat(board: Board, isLevelGame: Boolean): 
     // Vertical walls (x goes to width to include right boundary)
     for (y in 0 until board.height) {
         for (x in 0..board.width) {
-            val position = y * board.width + x
-            if (board.isWall(position, 3)) { // WEST wall = vertical
+            // Check vertical wall at position (x, y) - this is the wall between (x, y) and (x+1, y)
+            // For the right boundary (x = width), we need to check if there's a wall at the right of the last column
+            val position = if (x < board.width) y * board.width + x else y * board.width + (board.width - 1)
+            if (x < board.width && board.isWall(position, 3)) { // WEST wall = vertical
                 sb.append("v").append(x).append(",").append(y).append(";")
             }
         }

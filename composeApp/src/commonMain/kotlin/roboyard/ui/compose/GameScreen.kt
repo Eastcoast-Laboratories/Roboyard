@@ -221,16 +221,16 @@ fun GameScreen(
                 // Walls
                 for (y in 0..currentBoard.height) {
                     for (x in 0 until currentBoard.width) {
-                        val position = y * currentBoard.width + x
-                        if (currentBoard.isWall(position, 0)) {
+                        val position = if (y < currentBoard.height) y * currentBoard.width + x else (currentBoard.height - 1) * currentBoard.width + x
+                        if (y < currentBoard.height && currentBoard.isWall(position, 0)) {
                             append("h").append(x).append(",").append(y).append(";")
                         }
                     }
                 }
                 for (y in 0 until currentBoard.height) {
                     for (x in 0..currentBoard.width) {
-                        val position = y * currentBoard.width + x
-                        if (currentBoard.isWall(position, 3)) {
+                        val position = if (x < currentBoard.width) y * currentBoard.width + x else y * currentBoard.width + (currentBoard.width - 1)
+                        if (x < currentBoard.width && currentBoard.isWall(position, 3)) {
                             append("v").append(x).append(",").append(y).append(";")
                         }
                     }
