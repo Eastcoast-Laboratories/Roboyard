@@ -820,6 +820,7 @@ private fun serializeBoardToMainGameFormat(board: Board, isLevelGame: Boolean): 
         .append(";DIFFICULTY:1") // Default difficulty
         .append(";SIZE:").append(board.width).append(",").append(board.height)
         .append(";SOLVED:false")
+        .append(";MAX_HINT_USED:-1") // No hints used by default
         .append("\n")
     
     // Add board dimensions
