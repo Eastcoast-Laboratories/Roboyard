@@ -3458,7 +3458,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                     if (isTooEasy) {
                         // Regenerate if puzzle is too easy (map rejected/discarded)
                         d(
-                            "[SOLUTION_SOLVER][MOVES] Solution has only %d moves (minimum required: %d), regenerating (attempt %d/%d)",
+                            "[MAP_VALIDATION][DISCARD] Map discarded: too easy (%d moves < %d minimum), regenerating (attempt %d/%d)",
                             moveCount,
                             minRequiredMoves,
                             regenerationCount + 1,
@@ -3482,8 +3482,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                     } else if (isTooHard) {
                         // Regenerate if puzzle is too hard for current difficulty mode (map rejected/discarded)
                         w(
-                            "[SOLUTION_SOLVER][MOVES] %s mode - Solution has %d moves (maximum allowed: %d), regenerating (attempt %d/%d)",
-                            this.localizedDifficultyString,
+                            "[MAP_VALIDATION][DISCARD] Map discarded: too hard (%d moves > %d maximum), regenerating (attempt %d/%d)",
                             moveCount,
                             maxRequiredMoves,
                             regenerationCount + 1,
@@ -3507,19 +3506,19 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                 }
             } else if (regenerationCount >= Companion.MAX_AUTO_REGENERATIONS) {
                 d(
-                    "[SOLUTION_SOLVER][MOVES] Reached maximum regeneration attempts (%d). Accepting current game.",
+                    "[MAP_VALIDATION][ACCEPT] Map accepted: reached maximum regeneration attempts (%d), accepting current game",
                     Companion.MAX_AUTO_REGENERATIONS
                 )
                 regenerationCount = 0 // Reset for next time
             } else if (!allowRegeneration) {
-                d("[SOLUTION_SOLVER][MOVES] Regeneration disabled (user left game screen), accepting current solution")
+                d("[MAP_VALIDATION][ACCEPT] Map accepted: regeneration disabled (user left game screen), accepting current solution")
             }
         } else {
             // moveCount==0: solver hit memory/depth limit or puzzle is unsolvable.
             // Try a new map if regeneration is allowed; otherwise accept as-is.
             if (!isLevelMode && !isLoadedFromSave && allowRegeneration && regenerationCount < Companion.MAX_AUTO_REGENERATIONS) {
                 d(
-                    "[SOLUTION_SOLVER][MOVES] No solution found (memory/depth limit), trying new map (regen %d/%d)",
+                    "[MAP_VALIDATION][DISCARD] Map discarded: no solution found (memory/depth limit), trying new map (regen %d/%d)",
                     regenerationCount + 1, Companion.MAX_AUTO_REGENERATIONS
                 )
                 regenerationCount++
@@ -4010,16 +4009,16 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                 if (moveCount < requiredMoves && attemptCount < MAX_ATTEMPTS) {
                     // Puzzle too easy, generate a new one
                     d(
-                        "[DifficultyValidationCallback]: Puzzle too easy (%d moves), generating new one",
-                        moveCount
+                        "[MAP_VALIDATION][DISCARD] Map discarded: too easy (%d moves < %d required), generating new one (attempt %d/%d)",
+                        moveCount, requiredMoves, attemptCount, MAX_ATTEMPTS
                     )
                     createValidGame(width, height)
                     return
                 } else if (moveCount > maxMoves && attemptCount < MAX_ATTEMPTS) {
                     // Puzzle too hard, generate a new one
                     d(
-                        "[DifficultyValidationCallback]: Puzzle too hard (%d moves), generating new one",
-                        moveCount
+                        "[MAP_VALIDATION][DISCARD] Map discarded: too hard (%d moves > %d max), generating new one (attempt %d/%d)",
+                        moveCount, maxMoves, attemptCount, MAX_ATTEMPTS
                     )
                     createValidGame(width, height)
                     return
