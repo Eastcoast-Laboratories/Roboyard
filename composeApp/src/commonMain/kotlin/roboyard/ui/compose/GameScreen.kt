@@ -154,6 +154,7 @@ fun handleGameWin(
 fun GameScreen(
     board: Board,
     isLevelGame: Boolean = false,
+    isLoadedGame: Boolean = false,
     levelId: Int = 1,
     onBack: () -> Unit = {},
     onNewGame: () -> Unit = {},
@@ -521,7 +522,7 @@ fun GameScreen(
                     val maxRequiredMoves = Preferences.maxSolutionMoves
 
                     // Only validate difficulty for random games (not level games or loaded games)
-                    val shouldValidateDifficulty = !isLevelGame
+                    val shouldValidateDifficulty = !isLevelGame && !isLoadedGame
 
                     while (currentRegenerationCount <= MAX_AUTO_REGENERATIONS && allowRegeneration && shouldValidateDifficulty) {
                         val solver = driftingdroids.model.SolverIDDFS(currentBoard)

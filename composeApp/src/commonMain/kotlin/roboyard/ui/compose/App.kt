@@ -76,6 +76,7 @@ fun App() {
     var board by remember { mutableStateOf<Board?>(null) }
     var selectedLevelId by remember { mutableStateOf(1) }
     var isLevelGame by remember { mutableStateOf(false) }
+    var isLoadedGame by remember { mutableStateOf(false) }
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
@@ -94,6 +95,7 @@ fun App() {
                             Board.createBoardRandom(4)
                         }
                         isLevelGame = false
+                        isLoadedGame = false // Not a loaded game
                         currentScreen = Screen.Game
                     },
                     onLevelSelection = {
@@ -120,10 +122,12 @@ fun App() {
                         GameScreen(
                             board = currentBoard,
                             isLevelGame = isLevelGame,
+                            isLoadedGame = isLoadedGame,
                             levelId = selectedLevelId,
                             onBack = {
                                 currentScreen = Screen.MainMenu
                                 board = null
+                                isLoadedGame = false
                             },
                             onNewGame = {
                                 // Use MapGenerator to generate random game map (same as fragment-app)
@@ -137,6 +141,7 @@ fun App() {
                                     // Fallback to standard random board if MapGenerator fails
                                     Board.createBoardRandom(4)
                                 }
+                                isLoadedGame = false // Not a loaded game
                             },
                             onSaveLoad = {
                                 currentScreen = Screen.SaveLoad
@@ -199,6 +204,7 @@ fun App() {
                         onLoadGame = { loadedBoard ->
                             board = loadedBoard
                             isLevelGame = false // Default to false for loaded games
+                            isLoadedGame = true // Mark as loaded game
                             currentScreen = Screen.Game
                         }
                     )
