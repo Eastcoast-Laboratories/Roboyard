@@ -813,6 +813,9 @@ fun CreditsScreen(
 private fun serializeBoardToMainGameFormat(board: Board, isLevelGame: Boolean): String {
     val sb = StringBuilder()
     
+    // Generate map signature for unique map tracking
+    val mapSig = generateMapSignature(board)
+    
     // Generate the metadata section with additional tags
     sb.append("#MAPNAME:Random")
         .append(";TIME:0")
@@ -821,6 +824,7 @@ private fun serializeBoardToMainGameFormat(board: Board, isLevelGame: Boolean): 
         .append(";SIZE:").append(board.width).append(",").append(board.height)
         .append(";SOLVED:false")
         .append(";MAX_HINT_USED:-1") // No hints used by default
+        .append(";MAP_SIG:").append(mapSig)
         .append("\n")
     
     // Add board dimensions
@@ -911,6 +915,23 @@ private fun serializeBoardToMainGameFormat(board: Board, isLevelGame: Boolean): 
         sb.append("r").append(colorChar).append(x).append(",").append(y).append(";")
     }
     
+    return sb.toString()
+}
+
+/**
+ * Generate a unique map signature for history lookup
+ */
+private fun generateMapSignature(board: Board): String {
+    val sb = StringBuilder()
+    sb.append(board.width).append("x").append(board.height)
+    sb.append(":")
+    for (robotPos in board.robotPositions) {
+        sb.append(robotPos).append(",")
+    }
+    sb.append(":")
+    for (goal in board.goals) {
+        sb.append(goal.position).append(",").append(goal.robotNumber).append(";")
+    }
     return sb.toString()
 }
 
