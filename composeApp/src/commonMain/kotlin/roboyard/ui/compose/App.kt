@@ -63,6 +63,9 @@ import driftingdroids.model.Board
 import roboyard.logic.core.GameLogic
 import roboyard.logic.core.MapGenerator
 import org.jetbrains.compose.resources.imageResource
+import org.jetbrains.compose.resources.painterResource
+import roboyard.composeapp.generated.resources.Res
+import roboyard.composeapp.generated.resources.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -243,11 +246,12 @@ fun MainMenuScreen(
     )
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Background color (placeholder for background image)
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFF1a1a1a))
+        // Background image (same as main game)
+        Image(
+            painter = painterResource(Res.drawable.title_bg_optimized),
+            contentDescription = "Background image",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
         )
 
         Column(
@@ -324,16 +328,14 @@ fun MainMenuScreen(
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    // Load Game button - only visible if there are saved games
-                    if (hasSavedGames) {
-                        FancyButton(
-                            text = "Load Game",
-                            color = FancyButtonColor.RED,
-                            onClick = onSaveLoad,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
+                    // Load Game button - always visible (same as main game)
+                    FancyButton(
+                        text = "Load Game",
+                        color = FancyButtonColor.RED,
+                        onClick = onSaveLoad,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
 
