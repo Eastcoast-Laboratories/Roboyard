@@ -104,13 +104,13 @@ public class RoboyardApplication extends Application implements Application.Acti
 
         // Set up storage provider for Preferences
         PlatformStorage storage = AndroidStorage.getInstance(appContext);
-        Preferences.storageProvider = () -> storage;
+        Preferences.INSTANCE.setStorageProvider(() -> storage);
 
         // Check if accessibility is active
         boolean isAccessibilityActive = AccessibilityUtil.isScreenReaderActive(appContext);
 
         // Initialize the Preferences system at app startup
-        Preferences.initialize(storage, isAccessibilityActive);
+        Preferences.INSTANCE.initialize(storage, isAccessibilityActive);
         Timber.d("Preferences initialized");
         
         // Set app language to match device locale on first launch
@@ -201,11 +201,11 @@ public class RoboyardApplication extends Application implements Application.Acti
             languageCode.equals("ko")) {
             
             // Update the app language preference
-            Preferences.appLanguage = languageCode;
+            Preferences.INSTANCE.setAppLanguage(languageCode);
             Timber.d("[LOCALE] Setting initial app language to match device: %s", languageCode);
         } else {
             // Default to English if language is not supported
-            Preferences.appLanguage = "en";
+            Preferences.INSTANCE.setAppLanguage("en");
             Timber.d("[LOCALE] Device language not supported, defaulting to English");
         }
     }

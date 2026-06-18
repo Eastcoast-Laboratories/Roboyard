@@ -219,7 +219,10 @@ fun GameScreen(
                     val minRequiredMoves = Preferences.minSolutionMoves
                     val maxRequiredMoves = Preferences.maxSolutionMoves
 
-                    while (currentRegenerationCount <= MAX_AUTO_REGENERATIONS && allowRegeneration) {
+                    // Only validate difficulty for random games (not level games or loaded games)
+                    val shouldValidateDifficulty = !isLevelGame
+
+                    while (currentRegenerationCount <= MAX_AUTO_REGENERATIONS && allowRegeneration && shouldValidateDifficulty) {
                         val solver = driftingdroids.model.SolverIDDFS(currentBoard)
                         val solutions = solver.execute()
 
@@ -248,6 +251,15 @@ fun GameScreen(
                         // Map is valid - accept it
                         solution = solutions[0]
                         break
+                    }
+
+                    // For level games or loaded games, just accept the solution without validation
+                    if (!shouldValidateDifficulty && solution == null) {
+                        val solver = driftingdroids.model.SolverIDDFS(currentBoard)
+                        val solutions = solver.execute()
+                        if (solutions.isNotEmpty() && solutions[0].size() > 0) {
+                            solution = solutions[0]
+                        }
                     }
                 } catch (e: Exception) {
                     // Solver error - ignore, hints will still work

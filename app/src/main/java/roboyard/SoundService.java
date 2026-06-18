@@ -84,7 +84,7 @@ public class SoundService extends Service {
         }
 
         // Convert linear slider (0-100) to logarithmic volume (0.0-1.0)
-        float logVolume = roboyard.logic.core.Preferences.getLogarithmicVolume(volumePercent);
+        float logVolume = roboyard.logic.core.Preferences.INSTANCE.getLogarithmicVolume(volumePercent);
         player.setVolume(logVolume, logVolume);
         Timber.d("[SOUND_SERVICE] Volume set - slider: %d%%, logarithmic: %.2f", volumePercent, logVolume);
 

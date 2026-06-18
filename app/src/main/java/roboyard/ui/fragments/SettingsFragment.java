@@ -2415,7 +2415,7 @@ public class SettingsFragment extends Fragment {
             sfxPreviewPlayer = android.media.MediaPlayer.create(requireContext(), R.raw.robot_hit_robot);
             if (sfxPreviewPlayer != null) {
                 // Convert linear slider (0-100) to logarithmic volume (0.0-1.0)
-                float logVolume = roboyard.logic.core.Preferences.getLogarithmicVolume(volumePercent);
+                float logVolume = roboyard.logic.core.Preferences.INSTANCE.getLogarithmicVolume(volumePercent);
                 sfxPreviewPlayer.setVolume(logVolume, logVolume);
                 sfxPreviewPlayer.setOnCompletionListener(mp -> {
                     mp.release();
