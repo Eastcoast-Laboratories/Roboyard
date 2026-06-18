@@ -181,11 +181,13 @@ fun GameScreen(
     var allowRegeneration by remember(board) { mutableStateOf(true) }
     var isHistorySaved by remember(board) { mutableStateOf(false) }
     var gameStartTime by remember(board) { mutableLongStateOf(System.currentTimeMillis()) }
+    var totalPlayTime by remember(board) { mutableIntStateOf(0) }
     
     // Reset history tracking when board changes (new game started)
     LaunchedEffect(board) {
         isHistorySaved = false
         gameStartTime = System.currentTimeMillis()
+        totalPlayTime = 0
     }
     
     // Maximum auto-regeneration attempts (same as in main game)
@@ -230,9 +232,6 @@ fun GameScreen(
             
             // Get optimal moves from solution if available (same as main game)
             val optimalMovesCount = solution?.size() ?: 0
-            
-            // Calculate total play time (same as main game)
-            val totalPlayTime = (elapsedTime / 1000).toInt()
             
             // Only save actual move count if game is completed (same as main game)
             val actualMoveCount = if (gameWon) moveCount else 0
@@ -367,10 +366,13 @@ fun GameScreen(
                 if (timerRunning) {
                     elapsedTime += 1000
                     
+                    // Update totalPlayTime (same as main game)
+                    val elapsedSeconds = ((System.currentTimeMillis() - gameStartTime) / 1000).toInt()
+                    totalPlayTime = elapsedSeconds
+                    
                     // Check for history save threshold (same as main game)
                     if (!isHistorySaved) {
-                        val elapsedSeconds = (elapsedTime / 1000).toInt()
-                        if (elapsedSeconds >= HISTORY_SAVE_THRESHOLD) {
+                        if (totalPlayTime >= HISTORY_SAVE_THRESHOLD) {
                             isHistorySaved = true
                             saveToHistory()
                         }
