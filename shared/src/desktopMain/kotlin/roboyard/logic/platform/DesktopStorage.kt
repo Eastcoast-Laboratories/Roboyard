@@ -73,6 +73,8 @@ class DesktopStorage : PlatformStorage {
     override fun writeFile(fileName: String, content: String): Boolean {
         return try {
             val file = File(appDir, fileName)
+            // Create parent directories if they don't exist
+            file.parentFile?.mkdirs()
             file.writeText(content)
             true
         } catch (e: Exception) {

@@ -279,7 +279,7 @@ fun GameScreen(
             }
             
             // Save slot file name (same as main game)
-            val saveFileName = "save_$slotId.dat"
+            val saveFileName = "saves/save_$slotId.dat"
             
             // Serialize board to save data format
             val saveData = buildString {
@@ -310,7 +310,7 @@ fun GameScreen(
             }
             
             // Save slot file name (same as main game)
-            val saveFileName = "save_$slotId.dat"
+            val saveFileName = "saves/save_$slotId.dat"
             
             if (!storage.fileExists(saveFileName)) {
                 return false
