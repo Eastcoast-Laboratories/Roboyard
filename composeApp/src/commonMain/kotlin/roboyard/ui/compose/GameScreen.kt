@@ -223,7 +223,7 @@ fun GameScreen(
                 for (y in 0..currentBoard.height) {
                     for (x in 0 until currentBoard.width) {
                         val position = if (y < currentBoard.height) y * currentBoard.width + x else (currentBoard.height - 1) * currentBoard.width + x
-                        if (y < currentBoard.height && currentBoard.isWall(position, 0)) {
+                        if (y < currentBoard.height && currentBoard.isWall(position, 2)) {
                             append("h").append(x).append(",").append(y).append(";")
                         }
                     }
@@ -231,7 +231,7 @@ fun GameScreen(
                 for (y in 0 until currentBoard.height) {
                     for (x in 0..currentBoard.width) {
                         val position = if (x < currentBoard.width) y * currentBoard.width + x else y * currentBoard.width + (currentBoard.width - 1)
-                        if (x < currentBoard.width && currentBoard.isWall(position, 3)) {
+                        if (x < currentBoard.width && currentBoard.isWall(position, 1)) {
                             append("v").append(x).append(",").append(y).append(";")
                         }
                     }
@@ -1584,47 +1584,47 @@ fun BoardCanvas(
                 val position = x + y * board.width
                 val cellX = offsetX + x * cellSize
                 val cellY = offsetY + y * cellSize
-                // NORTH (horizontal wall at top edge of cell x,y)
-                if (board.walls[0][position]) {
+                // SOUTH (horizontal wall at bottom edge of cell x,y)
+                if (board.walls[2][position]) {
                     val isCenter = (y == cWallY + 1 && (x == cWallX || x == cWallX + 1))
                     if (!isCenter) {
                         drawImageScaled(
                             wallH,
                             cellX - wallOffset,
-                            cellY - wallThickness / 2,
+                            cellY + cellSize - wallThickness / 2,
                             cellSize + 2 * wallOffset,
                             wallThickness
                         )
                     }
                 }
-                // WEST (vertical wall at left edge of cell x,y)
-                if (board.walls[3][position]) {
+                // EAST (vertical wall at right edge of cell x,y)
+                if (board.walls[1][position]) {
                     val isCenter = (x == cWallX + 1 && (y == cWallY || y == cWallY + 1))
                     if (!isCenter) {
                         drawImageScaled(
                             wallV,
-                            cellX - wallThickness / 2,
+                            cellX + cellSize - wallThickness / 2,
                             cellY - wallOffset,
                             wallThickness,
                             cellSize + 2 * wallOffset
                         )
                     }
                 }
-                // outer SOUTH
-                if (y == board.height - 1 && board.walls[2][position]) {
+                // outer NORTH
+                if (y == 0 && board.walls[0][position]) {
                     drawImageScaled(
                         wallH,
                         cellX - wallOffset,
-                        cellY + cellSize - wallThickness / 2,
+                        cellY - wallThickness / 2,
                         cellSize + 2 * wallOffset,
                         wallThickness
                     )
                 }
-                // outer EAST
-                if (x == board.width - 1 && board.walls[1][position]) {
+                // outer WEST
+                if (x == 0 && board.walls[3][position]) {
                     drawImageScaled(
                         wallV,
-                        cellX + cellSize - wallThickness / 2,
+                        cellX - wallThickness / 2,
                         cellY - wallOffset,
                         wallThickness,
                         cellSize + 2 * wallOffset
