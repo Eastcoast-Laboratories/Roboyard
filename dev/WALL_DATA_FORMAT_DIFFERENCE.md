@@ -34,6 +34,18 @@ Walls are bound to cells - each cell can have walls in 4 directions.
 
 **ComposeApp:** Walls are properties of cells (hasWall in direction X).
 
+## Advantage by the new format
+
+The ComposeApp format has an advantage: it allows for the implementation of semipermeable walls as a new game element.
+
+Since walls are stored as properties of cells with specific directions, we can easily add:
+- Walls that allow robots to pass in one direction but not the other
+- Walls that allow specific robot colors to pass but not others
+- Walls that disappear after being hit by a robot
+- Other advanced wall behaviors
+
+This would be more difficult with the Main Game format where walls are independent objects, as it would require additional metadata to be attached to each wall object.
+
 ## Serialization Format
 
 The Main Game serializes walls in the format:
