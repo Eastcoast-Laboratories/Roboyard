@@ -170,15 +170,37 @@ fun GameScreen(
     var hintMessage by remember(board) { mutableStateOf<String?>(null) }
     var gameWon by remember(board) { mutableStateOf(false) }
     var maxHintUsed by remember(board) { mutableIntStateOf(-1) } // Track max hint used this session
+    var isHistorySaved by remember(board) { mutableStateOf(false) }
+    var gameStartTime by remember(board) { mutableLongStateOf(System.currentTimeMillis()) }
+    var totalPlayTime by remember(board) { mutableIntStateOf(0) }
+    var lastAutosaveTime by remember(board) { mutableLongStateOf(0L) }
+    var autosaveRunning by remember(board) { mutableStateOf(false) }
+    
+    // Autosave interval (same as in main game)
+    val AUTOSAVE_INTERVAL_MS = 60 * 1000 // 60 seconds
     
     // Autosave functionality
     LaunchedEffect(moveCount, gameWon) {
-        // Autosave after every move or when game is won
-        if (moveCount > 0 || gameWon) {
+        // Start autosave when game starts (after first move)
+        if (moveCount > 0 && !autosaveRunning && !gameWon) {
+            autosaveRunning = true
+            lastAutosaveTime = System.currentTimeMillis()
+        }
+        
+        // Stop autosave when game is won
+        if (gameWon) {
+            autosaveRunning = false
+        }
+    }
+    
+    // Autosave function
+    fun autosaveGame() {
+        // Only autosave if game is in progress, not solved, and NOT a level game
+        if (!gameWon && !isLevelGame) {
             val storage = getPlatformStorage()
             val saveData = buildString {
                 appendLine("#MAPNAME:Random")
-                appendLine(";TIME:0")
+                appendLine(";TIME:$totalPlayTime")
                 appendLine(";MOVES:$moveCount")
                 appendLine(";DIFFICULTY:1")
                 appendLine(";SIZE:${currentBoard.width},${currentBoard.height}")
@@ -256,7 +278,24 @@ fun GameScreen(
             }
             
             storage.writeFile("saves/save_0.dat", saveData)
-            println("[AUTOSAVE] Autosaved to slot 0")
+            println("[AUTOSAVE] Autosaved to slot 0 after ${AUTOSAVE_INTERVAL_MS / 1000} seconds")
+        }
+    }
+    
+    // Autosave timer effect - runs every second when autosave is enabled
+    LaunchedEffect(autosaveRunning) {
+        if (autosaveRunning) {
+            while (autosaveRunning) {
+                delay(1000)
+                if (autosaveRunning) {
+                    val currentTime = System.currentTimeMillis()
+                    // Check if we should perform autosave
+                    if (currentTime - lastAutosaveTime >= AUTOSAVE_INTERVAL_MS) {
+                        autosaveGame()
+                        lastAutosaveTime = currentTime
+                    }
+                }
+            }
         }
     }
     var solution by remember(board) { mutableStateOf<driftingdroids.model.Solution?>(null) }
@@ -272,9 +311,6 @@ fun GameScreen(
     var hintsUsed by remember(board) { mutableIntStateOf(0) }
     var regenerationCount by remember(board) { mutableIntStateOf(0) }
     var allowRegeneration by remember(board) { mutableStateOf(true) }
-    var isHistorySaved by remember(board) { mutableStateOf(false) }
-    var gameStartTime by remember(board) { mutableLongStateOf(System.currentTimeMillis()) }
-    var totalPlayTime by remember(board) { mutableIntStateOf(0) }
     
     // Reset history tracking when board changes (new game started)
     LaunchedEffect(board) {
@@ -301,17 +337,21 @@ fun GameScreen(
         return maxIndex + 1
     }
 
-    // Save to history function (simplified version for ComposeApp)
+    // Save to history function using GameHistoryManager
     fun saveToHistory() {
         try {
             val storage = Preferences.storageProvider?.invoke()
             if (storage == null) {
+                println("[HISTORY] No storage available")
                 return
             }
             
+            // Initialize GameHistoryManager
+            roboyard.logic.managers.GameHistoryManager.initialize(storage)
+            
             // Get next available history index
-            val historyIndex = getNextHistoryIndex()
-            val historyFileName = "history_$historyIndex.txt"
+            val historyIndex = roboyard.logic.managers.GameHistoryManager.getNextHistoryIndex(storage)
+            val historyFileName = roboyard.logic.managers.GameHistoryManager.indexToPath(historyIndex)
             
             // Generate map name (same as main game)
             val mapName = if (isLevelGame) {
@@ -320,36 +360,62 @@ fun GameScreen(
                 "Random Map #$historyIndex"
             }
             
-            // Generate board size string (same as main game)
-            val boardSize = "${currentBoard.width}x${currentBoard.height}"
+            // Serialize board to Main Game format
+            val saveData = serializeBoardToMainGameFormat(currentBoard, isLevelGame)
             
-            // Get optimal moves from solution if available (same as main game)
-            val optimalMovesCount = solution?.size() ?: 0
+            // Write to history file
+            val result = storage.writeFile(historyFileName, saveData)
             
-            // Only save actual move count if game is completed (same as main game)
-            val actualMoveCount = if (gameWon) moveCount else 0
-            
-            // Serialize board to save data format with metadata (same as main game)
-            val saveData = buildString {
-                appendLine("width:${currentBoard.width}")
-                appendLine("height:${currentBoard.height}")
-                appendLine("robots:${currentBoard.robotPositions.joinToString(",")}")
-                for (goal in currentBoard.goals) {
-                    appendLine("goal:${goal.position},${goal.robotNumber}")
+            if (result) {
+                println("[HISTORY] Saved game to history: $historyFileName")
+                
+                // Create GameHistoryEntry
+                val entry = roboyard.logic.core.GameHistoryEntry(
+                    historyFileName,
+                    mapName,
+                    gameStartTime,
+                    totalPlayTime,
+                    if (gameWon) moveCount else 0,
+                    solution?.size() ?: 0,
+                    "${currentBoard.width}x${currentBoard.height}",
+                    null
+                )
+                
+                // Set difficulty
+                entry.difficulty = 1 // Default to beginner for now
+                
+                // Set map signatures for unique map tracking
+                entry.wallSignature = roboyard.ui.compose.generateWallSignature(currentBoard)
+                entry.positionSignature = roboyard.ui.compose.generatePositionSignature(currentBoard)
+                entry.mapSignature = roboyard.ui.compose.generateMapSignature(currentBoard)
+                
+                // Set hint tracking
+                entry.maxHintUsed = maxHintUsed
+                entry.setSolvedWithoutHints(maxHintUsed < 0)
+                if (maxHintUsed >= 0) {
+                    entry.markEverUsedHints()
                 }
-                appendLine("moveCount:$moveCount")
-                appendLine("isLevelGame:$isLevelGame")
-                appendLine("timestamp:$gameStartTime")
-                appendLine("mapName:$mapName")
-                appendLine("boardSize:$boardSize")
-                appendLine("optimalMoves:$optimalMovesCount")
-                appendLine("totalPlayTime:$totalPlayTime")
-                appendLine("actualMoveCount:$actualMoveCount")
+                
+                // If completed without hints, record the timestamp
+                if (maxHintUsed < 0 && gameWon) {
+                    val optMoves = solution?.size() ?: 0
+                    val isOptimal = optMoves > 0 && moveCount == optMoves
+                    entry.recordSolvedWithoutHints(isOptimal)
+                }
+                
+                // Add to history manager
+                val added = roboyard.logic.managers.GameHistoryManager.addHistoryEntry(storage, entry)
+                if (added) {
+                    println("[HISTORY] Added history entry to index: $mapName")
+                } else {
+                    println("[HISTORY] Failed to add history entry to index")
+                }
+            } else {
+                println("[HISTORY] Failed to save game to history: $historyFileName")
             }
-            
-            storage.writeFile(historyFileName, saveData)
         } catch (e: Exception) {
-            // Error saving to history
+            println("[HISTORY] Error saving to history: ${e.message}")
+            e.printStackTrace()
         }
     }
 

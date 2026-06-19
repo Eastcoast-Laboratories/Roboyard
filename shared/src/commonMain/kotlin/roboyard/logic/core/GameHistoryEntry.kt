@@ -73,7 +73,7 @@ class GameHistoryEntry(
 
     fun recordCompletion(time: Int, moves: Int, stars: Int): Boolean {
         completionCount++
-        lastCompletionTimestamp = TODO("platform-specific time")
+        lastCompletionTimestamp = System.currentTimeMillis()
         playDuration += time
         var newRecord = false
         if (movesMade == 0 || moves < movesMade) {
@@ -106,8 +106,8 @@ class GameHistoryEntry(
     }
     fun recordSolvedWithoutHints(optimal: Boolean) {
         solvedWithoutHints = true
-        lastSolvedWithoutHints = TODO("platform-specific time")
-        if (optimal) lastPerfectlySolvedWithoutHints = TODO("platform-specific time")
+        lastSolvedWithoutHints = System.currentTimeMillis()
+        if (optimal) lastPerfectlySolvedWithoutHints = System.currentTimeMillis()
     }
     fun markEverUsedHints() { everUsedHints = true }
     fun isEverUsedHints(): Boolean = everUsedHints

@@ -814,9 +814,102 @@ fun CreditsScreen(
 }
 
 /**
+ * Generate a unique signature for the wall layout only.
+ * Used for achievements that track same walls with different robot positions.
+ * Format matches level file format: 12x14;mh1,0;mh1,3;...mv9,6;
+ */
+fun generateWallSignature(board: Board): String {
+    val sb = StringBuilder()
+    sb.append(board.width).append("x").append(board.height).append(";")
+
+    // Collect all walls in sorted order
+    val walls = mutableListOf<String>()
+    for (y in 0 until board.height) {
+        for (x in 0 until board.width) {
+            val position = y * board.width + x
+            // Check for horizontal (SOUTH) walls
+            if (board.isWall(position, 2)) {
+                walls.add("mh$x,$y")
+            }
+            // Check for vertical (EAST) walls
+            if (board.isWall(position, 1)) {
+                walls.add("mv$x,$y")
+            }
+        }
+    }
+    walls.sort()
+    for (wall in walls) {
+        sb.append(wall).append(";")
+    }
+    return sb.toString()
+}
+
+/**
+ * Generate a unique signature for robot and target positions only.
+ * Used for achievements that track same positions with different wall layouts.
+ * Format: 12x14;Rb3,4;Rg7,8;...Tb2,5;Tg9,10;...
+ */
+fun generatePositionSignature(board: Board): String {
+    val sb = StringBuilder()
+    sb.append(board.width).append("x").append(board.height).append(";")
+
+    // Collect all robots in sorted order
+    val robots = mutableListOf<String>()
+    for (i in board.robotPositions.indices) {
+        val position = board.robotPositions[i]
+        val x = position % board.width
+        val y = position / board.width
+        val colorChar = when (i) {
+            0 -> 'b'
+            1 -> 'g'
+            2 -> 'r'
+            3 -> 'y'
+            4 -> 's'
+            else -> 'm'
+        }
+        robots.add("R${colorChar}$x,$y")
+    }
+    robots.sort()
+    for (robot in robots) {
+        sb.append(robot).append(";")
+    }
+
+    // Collect all targets in sorted order
+    val targets = mutableListOf<String>()
+    for (goal in board.goals) {
+        val x = goal.position % board.width
+        val y = goal.position / board.width
+        val colorChar = when (goal.robotNumber) {
+            0 -> 'b'
+            1 -> 'g'
+            2 -> 'r'
+            3 -> 'y'
+            4 -> 's'
+            else -> 'm'
+        }
+        targets.add("T${colorChar}$x,$y")
+    }
+    targets.sort()
+    for (target in targets) {
+        sb.append(target).append(";")
+    }
+
+    return sb.toString()
+}
+
+/**
+ * Generate a complete unique signature for the entire map.
+ * Combines wall signature and position signature.
+ * Two maps with identical signatures are considered the same map.
+ */
+fun generateMapSignature(board: Board): String {
+    return generateWallSignature(board) + "||" + generatePositionSignature(board)
+}
+
+/**
  * Serialize a Board to Main Game format for save/load compatibility
  */
-private fun serializeBoardToMainGameFormat(board: Board, isLevelGame: Boolean): String {
+fun serializeBoardToMainGameFormat(board: Board, isLevelGame: Boolean): String {
     val sb = StringBuilder()
     
     // Generate map signature for unique map tracking
@@ -925,23 +1018,6 @@ private fun serializeBoardToMainGameFormat(board: Board, isLevelGame: Boolean): 
         sb.append("r").append(colorChar).append(x).append(",").append(y).append(";")
     }
     
-    return sb.toString()
-}
-
-/**
- * Generate a unique map signature for history lookup
- */
-private fun generateMapSignature(board: Board): String {
-    val sb = StringBuilder()
-    sb.append(board.width).append("x").append(board.height)
-    sb.append(":")
-    for (robotPos in board.robotPositions) {
-        sb.append(robotPos).append(",")
-    }
-    sb.append(":")
-    for (goal in board.goals) {
-        sb.append(goal.position).append(",").append(goal.robotNumber).append(";")
-    }
     return sb.toString()
 }
 
@@ -1126,16 +1202,32 @@ private fun getNextHistoryIndex(storage: PlatformStorage): Int {
 }
 
 /**
- * Get all history entries
+ * Get all history entries including autosave, in reverse order (newest first)
+ * Uses GameHistoryManager for history entries
+ * Returns list of Triple with (index, fileName, entry)
  */
-private fun getHistoryEntries(storage: PlatformStorage): List<Pair<Int, String>> {
-    val entries = mutableListOf<Pair<Int, String>>()
-    var index = 1
-    while (storage.fileExists("history_$index.txt")) {
-        entries.add(Pair(index, "history_$index.txt"))
-        index++
+private fun getHistoryEntries(storage: PlatformStorage): List<Triple<Int, String, roboyard.logic.core.GameHistoryEntry?>> {
+    val entries = mutableListOf<Triple<Int, String, roboyard.logic.core.GameHistoryEntry?>>()
+    
+    // Add autosave entry first (index 0, no GameHistoryEntry)
+    if (storage.fileExists("saves/save_0.dat")) {
+        entries.add(Triple(0, "saves/save_0.dat", null))
     }
-    return entries
+    
+    // Add history entries using GameHistoryManager
+    try {
+        roboyard.logic.managers.GameHistoryManager.initialize(storage)
+        val historyEntries = roboyard.logic.managers.GameHistoryManager.getHistoryEntries(storage)
+        for (entry in historyEntries) {
+            val index = entry.getHistoryIndex()
+            entries.add(Triple(index, entry.getMapPath(), entry))
+        }
+    } catch (e: Exception) {
+        println("[SAVE_LOAD_SCREEN] Error loading history entries: ${e.message}")
+    }
+    
+    // Reverse to show newest first
+    return entries.reversed()
 }
 
 /**
@@ -1153,8 +1245,29 @@ private fun validateSaveContainsTargets(saveData: String, fileName: String): Boo
 fun HistoryItem(
     historyIndex: Int,
     fileName: String,
+    mapName: String = "",
+    moves: Int = 0,
+    time: Int = 0,
+    stars: Int = 0,
+    hintsUsed: Boolean = false,
     onClick: () -> Unit = {}
 ) {
+    val displayName = if (historyIndex == 0) {
+        "Autosave"
+    } else {
+        mapName.ifEmpty { "History #$historyIndex" }
+    }
+    
+    val timeStr = if (time > 0) {
+        val minutes = time / 60
+        val seconds = time % 60
+        String.format("%d:%02d", minutes, seconds)
+    } else {
+        "--:--"
+    }
+    
+    val hintsIndicator = if (hintsUsed) " (H)" else ""
+    
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -1163,17 +1276,44 @@ fun HistoryItem(
             .padding(16.dp)
     ) {
         Column {
-            Text(
-                text = "History #$historyIndex",
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = displayName,
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                if (stars > 0) {
+                    Text(
+                        text = "★".repeat(stars),
+                        color = Color.Yellow,
+                        fontSize = 16.sp
+                    )
+                }
+            }
             Text(
                 text = fileName,
                 color = Color.LightGray,
-                fontSize = 14.sp
+                fontSize = 12.sp
             )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Moves: $moves",
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
+                Text(
+                    text = "Time: $timeStr$hintsIndicator",
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
+            }
         }
     }
 }
@@ -1192,7 +1332,7 @@ fun SaveLoadScreen(
     val storage = remember { getPlatformStorage() }
     var hasSavedGames by remember { mutableStateOf(false) }
     var slotStates by remember { mutableStateOf(List(10) { false }) }
-    var historyEntries by remember { mutableStateOf<List<Pair<Int, String>>>(emptyList()) }
+    var historyEntries by remember { mutableStateOf<List<Triple<Int, String, roboyard.logic.core.GameHistoryEntry?>>>(emptyList()) }
     
     LaunchedEffect(Unit) {
         hasSavedGames = storage.hasSavedGames()
@@ -1278,10 +1418,15 @@ fun SaveLoadScreen(
                         modifier = Modifier.padding(16.dp)
                     )
                 } else {
-                    historyEntries.forEach { (index, fileName) ->
+                    historyEntries.forEach { (index, fileName, entry) ->
                         HistoryItem(
                             historyIndex = index,
                             fileName = fileName,
+                            mapName = entry?.mapName ?: "",
+                            moves = entry?.movesMade ?: 0,
+                            time = entry?.playDuration ?: 0,
+                            stars = entry?.starsEarned ?: 0,
+                            hintsUsed = entry?.isEverUsedHints() ?: false,
                             onClick = {
                                 // Load history entry
                                 println("[SAVE_LOAD_SCREEN] Loading history entry: $fileName")
