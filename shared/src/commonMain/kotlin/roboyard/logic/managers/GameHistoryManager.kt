@@ -335,6 +335,26 @@ object GameHistoryManager {
     }
 
     /**
+     * Find a history entry by map signature
+     * @param storage The platform storage
+     * @param mapSignature The map signature to search for
+     * @return The history entry if found, null otherwise
+     */
+    fun findByMapSignature(storage: PlatformStorage, mapSignature: String?): GameHistoryEntry? {
+        if (mapSignature == null || mapSignature.isEmpty()) {
+            return null
+        }
+        
+        val entries = getHistoryEntries(storage)
+        for (entry in entries) {
+            if (entry.mapSignature == mapSignature) {
+                return entry
+            }
+        }
+        return null
+    }
+
+    /**
      * Convert a history index to a file path
      */
     fun indexToPath(index: Int): String {
@@ -430,22 +450,6 @@ object GameHistoryManager {
         // An entry is created on the first move (before completion), so we check
         // completionCount == 0 to distinguish "started but not yet completed" from "already completed before".
         return existing == null || existing.completionCount == 0
-    }
-
-    /**
-     * Find a history entry by its map signature.
-     * @param storage The platform storage
-     * @param mapSignature The unique map signature to find
-     * @return The matching entry, or null if not found
-     */
-    fun findByMapSignature(storage: PlatformStorage, mapSignature: String?): GameHistoryEntry? {
-        val entries = getHistoryEntries(storage)
-        for (entry in entries) {
-            if (entry.mapSignature == mapSignature) {
-                return entry
-            }
-        }
-        return null
     }
 
     /**
