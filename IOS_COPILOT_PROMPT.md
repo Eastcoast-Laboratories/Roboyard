@@ -81,3 +81,20 @@ Create an iOS app that looks and behaves exactly like the Android Roboyard puzzl
 - `/app/src/main/java/roboyard/logic/solver/` - AI solver
 - `/app/src/main/assets/Maps/` - Level data
 - `/docs/ARCHITECTURE.md` - Architecture
+
+## Testing: Clearing History and Savegames
+
+To clear all history entries and savegames for testing purposes:
+
+```bash
+# Remove all history files
+rm -f ~/.roboyard/history_*.txt
+
+# Remove all savegame files
+rm -f ~/.roboyard/saves/save_*.dat
+
+# Remove history index
+rm -f ~/.roboyard/history_index.json
+```
+
+This is useful when testing the history and autosave functionality to ensure a clean state.
