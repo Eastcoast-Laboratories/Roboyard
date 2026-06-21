@@ -21,6 +21,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -49,6 +53,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import roboyard.logic.core.LevelLoader
 import roboyard.logic.core.Preferences
 import roboyard.logic.storage.PlatformStorage
@@ -330,7 +337,7 @@ fun MainMenuScreen(
                         text = "New Random Game",
                         color = FancyButtonColor.GREEN,
                         onClick = onNewRandomGame,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().semantics { testTag = "newRandomGameButton" }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     FancyButton(
@@ -345,7 +352,7 @@ fun MainMenuScreen(
                         text = "Load Game",
                         color = FancyButtonColor.RED,
                         onClick = onSaveLoad,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().semantics { testTag = "loadGameButton" }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -1250,7 +1257,8 @@ fun HistoryItem(
     time: Int = 0,
     stars: Int = 0,
     hintsUsed: Boolean = false,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    onInfoClick: () -> Unit = {}
 ) {
     val displayName = if (historyIndex == 0) {
         "Autosave"
@@ -1284,13 +1292,26 @@ fun HistoryItem(
                     text = displayName,
                     color = Color.White,
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
                 )
                 if (stars > 0) {
                     Text(
                         text = "★".repeat(stars),
                         color = Color.Yellow,
                         fontSize = 16.sp
+                    )
+                }
+                Button(
+                    onClick = onInfoClick,
+                    modifier = Modifier.size(32.dp).padding(start = 8.dp).semantics { testTag = "infoButton_$historyIndex" },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF404040))
+                ) {
+                    Text(
+                        text = "i",
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
@@ -1327,6 +1348,8 @@ fun SaveLoadScreen(
 ) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Save", "Load", "History")
+    var showInfoDialog by remember { mutableStateOf(false) }
+    var selectedEntry by remember { mutableStateOf<roboyard.logic.core.GameHistoryEntry?>(null) }
     
     // Check for saved games
     val storage = remember { getPlatformStorage() }
@@ -1395,7 +1418,7 @@ fun SaveLoadScreen(
                     text = tab,
                     color = if (selectedTab == index) FancyButtonColor.BLUE else FancyButtonColor.GRAY,
                     onClick = { selectedTab = index },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).semantics { testTag = "tab_$index" }
                 )
             }
         }
@@ -1435,6 +1458,10 @@ fun SaveLoadScreen(
                                 if (loadedBoard != null) {
                                     onLoadGame(loadedBoard)
                                 }
+                            },
+                            onInfoClick = {
+                                selectedEntry = entry
+                                showInfoDialog = true
                             }
                         )
                         Spacer(modifier = Modifier.height(8.dp))
@@ -1502,6 +1529,14 @@ fun SaveLoadScreen(
             color = FancyButtonColor.GRAY,
             onClick = onBack,
             modifier = Modifier.fillMaxWidth()
+        )
+    }
+
+    // Info dialog
+    if (showInfoDialog && selectedEntry != null) {
+        HistoryInfoDialog(
+            entry = selectedEntry!!,
+            onDismiss = { showInfoDialog = false }
         )
     }
 }
@@ -2016,11 +2051,131 @@ fun AchievementItem(
                 modifier = Modifier.padding(top = 4.dp)
             )
             Text(
-                text = progress,
-                color = Color(0xFF9E9E9E),
-                fontSize = 12.sp,
+                text = "",
+                color = Color(0xFF616161),
+                fontSize = 14.sp,
                 modifier = Modifier.padding(top = 4.dp)
             )
         }
     }
+}
+
+@Composable
+fun HistoryInfoDialog(
+    entry: roboyard.logic.core.GameHistoryEntry,
+    onDismiss: () -> Unit
+) {
+    val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault())
+    
+    val message = buildString {
+        append("Completions: ${entry.completionCount}\n")
+        append("First started: ${sdf.format(Date(entry.timestamp))}\n")
+        if (entry.lastCompletionTimestamp > 0) {
+            append("Last played: ${sdf.format(Date(entry.lastCompletionTimestamp))}\n")
+        }
+        
+        val timestamps = entry.getCompletionTimestamps()
+        if (timestamps != null && timestamps.size > 1) {
+            val isLevelGame = entry.mapName?.startsWith("Level ") == true
+            val completionStars = entry.getCompletionStars()
+            val completionMoves = entry.getCompletionMoves()
+            
+            append("\nAll completions:\n")
+            for (i in timestamps.indices) {
+                append("  ${i + 1}. ${sdf.format(Date(timestamps[i]))}")
+                if (isLevelGame) {
+                    val stars = if (completionStars != null && i < completionStars.size) {
+                        completionStars[i]
+                    } else {
+                        entry.starsEarned
+                    }
+                    val moves = if (completionMoves != null && i < completionMoves.size) {
+                        completionMoves[i]
+                    } else {
+                        entry.movesMade
+                    }
+                    if (stars == 0) {
+                        append(" ✓")
+                    } else {
+                        repeat(stars) { append("★") }
+                    }
+                    append(" - $moves")
+                } else {
+                    val moves = if (completionMoves != null && i < completionMoves.size) {
+                        completionMoves[i]
+                    } else {
+                        entry.movesMade
+                    }
+                    append(" - $moves")
+                }
+                append("\n")
+            }
+        }
+        
+        append("\nBest time: ")
+        if (entry.bestTime > 0) {
+            append("${entry.bestTime / 60}m ${entry.bestTime % 60}s")
+        } else {
+            append("—")
+        }
+        append("\n")
+        
+        append("Best moves: ")
+        append(if (entry.bestMoves > 0) entry.bestMoves else "—")
+        append("\n")
+        
+        append("Optimal moves: ")
+        if (entry.optimalMoves > 0) {
+            append(entry.optimalMoves)
+            if (entry.bestMoves > 0 && entry.bestMoves == entry.optimalMoves) {
+                append(" ✓ (Perfect)")
+            } else if (entry.bestMoves > 0) {
+                append(" (+${entry.bestMoves - entry.optimalMoves} extra moves)")
+            }
+        } else {
+            append("—")
+        }
+        append("\n")
+        
+        append("\nHint usage (last): ")
+        val maxHint = entry.maxHintUsed
+        when {
+            maxHint < 0 -> append("No hints used")
+            maxHint == 0 -> append("Pre-hint viewed")
+            else -> append("Up to hint ${maxHint + 1}")
+        }
+        append("\n")
+        
+        append("Hints ever used: ")
+        append(if (entry.isEverUsedHints()) "Yes" else "No")
+        append("\n")
+        
+        append("Qualifies for no-hints achievement: ")
+        append(if (entry.qualifiesForNoHintsAchievement()) "Yes" else "No")
+        append("\n")
+        
+        append("Qualifies for perfect no-hints achievement: ")
+        append(if (entry.qualifiesForPerfectNoHintsAchievement()) "Yes" else "No")
+        append("\n")
+        
+        append("Last solved without hints: ")
+        val lastNoHints = entry.lastSolvedWithoutHints
+        append(if (lastNoHints > 0) sdf.format(Date(lastNoHints)) else "—")
+        append("\n")
+        
+        append("Last perfectly solved without hints: ")
+        val lastPerfect = entry.lastPerfectlySolvedWithoutHints
+        append(if (lastPerfect > 0) sdf.format(Date(lastPerfect)) else "—")
+    }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(entry.mapName ?: "Unknown Map") },
+        text = { Text(message, fontSize = 12.sp) },
+        confirmButton = {
+            Button(onClick = onDismiss) {
+                Text("OK")
+            }
+        }
+    )
 }

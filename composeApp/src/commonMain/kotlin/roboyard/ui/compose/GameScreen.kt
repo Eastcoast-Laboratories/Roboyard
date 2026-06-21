@@ -1,6 +1,8 @@
 package roboyard.ui.compose
 
+import roboyard.logic.core.calculateStars
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.AlertDialog
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -169,6 +171,7 @@ fun GameScreen(
     val startBoard = remember(board) { Board.Companion.createClone(board).also { it.setRobots(board.robotPositions.copyOf()) } }
     var hintMessage by remember(board) { mutableStateOf<String?>(null) }
     var gameWon by remember(board) { mutableStateOf(false) }
+    var showCompletionDialog by remember(board) { mutableStateOf(false) }
     var maxHintUsed by remember(board) { mutableIntStateOf(-1) } // Track max hint used this session
     var isHistorySaved by remember(board) { mutableStateOf(false) }
     var gameStartTime by remember(board) { mutableLongStateOf(System.currentTimeMillis()) }
@@ -349,15 +352,38 @@ fun GameScreen(
             // Initialize GameHistoryManager
             roboyard.logic.managers.GameHistoryManager.initialize(storage)
             
-            // Get next available history index
-            val historyIndex = roboyard.logic.managers.GameHistoryManager.getNextHistoryIndex(storage)
-            val historyFileName = roboyard.logic.managers.GameHistoryManager.indexToPath(historyIndex)
+            // Generate map signatures for matching
+            val wallSig = roboyard.ui.compose.generateWallSignature(currentBoard)
+            val posSig = roboyard.ui.compose.generatePositionSignature(currentBoard)
+            val mapSig = roboyard.ui.compose.generateMapSignature(currentBoard)
             
-            // Generate map name (same as main game)
-            val mapName = if (isLevelGame) {
-                "Level $levelId"
+            println("[HISTORY] saveToHistory: wallSig=$wallSig")
+            println("[HISTORY] saveToHistory: posSig=$posSig")
+            println("[HISTORY] saveToHistory: mapSig=$mapSig")
+            
+            // Check if map already exists in history
+            val existingEntry = roboyard.logic.managers.GameHistoryManager.findByMapSignature(storage, mapSig)
+            
+            val historyFileName: String
+            val mapName: String
+            
+            if (existingEntry != null) {
+                // Map already exists - use existing file
+                historyFileName = existingEntry.getMapPath()
+                mapName = existingEntry.mapName ?: "Unknown Map"
+                println("[HISTORY] Map already exists in history, updating existing entry: $mapName")
             } else {
-                "Random Map #$historyIndex"
+                // New map - get next available history index
+                val historyIndex = roboyard.logic.managers.GameHistoryManager.getNextHistoryIndex(storage)
+                historyFileName = roboyard.logic.managers.GameHistoryManager.indexToPath(historyIndex)
+                
+                // Generate map name (same as main game)
+                mapName = if (isLevelGame) {
+                    "Level $levelId"
+                } else {
+                    "Random Map #$historyIndex"
+                }
+                println("[HISTORY] New map, creating history entry: $mapName")
             }
             
             // Serialize board to Main Game format
@@ -369,46 +395,114 @@ fun GameScreen(
             if (result) {
                 println("[HISTORY] Saved game to history: $historyFileName")
                 
-                // Create GameHistoryEntry
-                val entry = roboyard.logic.core.GameHistoryEntry(
-                    historyFileName,
-                    mapName,
-                    gameStartTime,
-                    totalPlayTime,
-                    if (gameWon) moveCount else 0,
-                    solution?.size() ?: 0,
-                    "${currentBoard.width}x${currentBoard.height}",
-                    null
-                )
+                // Create or update history entry
+                val entry: roboyard.logic.core.GameHistoryEntry
+                val actualMoveCount = if (gameWon) moveCount else 0
+                val optMoves = solution?.size() ?: 0
                 
-                // Set difficulty
-                entry.difficulty = 1 // Default to beginner for now
-                
-                // Set map signatures for unique map tracking
-                entry.wallSignature = roboyard.ui.compose.generateWallSignature(currentBoard)
-                entry.positionSignature = roboyard.ui.compose.generatePositionSignature(currentBoard)
-                entry.mapSignature = roboyard.ui.compose.generateMapSignature(currentBoard)
-                
-                // Set hint tracking
-                entry.maxHintUsed = maxHintUsed
-                entry.setSolvedWithoutHints(maxHintUsed < 0)
-                if (maxHintUsed >= 0) {
-                    entry.markEverUsedHints()
-                }
-                
-                // If completed without hints, record the timestamp
-                if (maxHintUsed < 0 && gameWon) {
-                    val optMoves = solution?.size() ?: 0
-                    val isOptimal = optMoves > 0 && moveCount == optMoves
-                    entry.recordSolvedWithoutHints(isOptimal)
-                }
-                
-                // Add to history manager
-                val added = roboyard.logic.managers.GameHistoryManager.addHistoryEntry(storage, entry)
-                if (added) {
-                    println("[HISTORY] Added history entry to index: $mapName")
+                if (existingEntry != null) {
+                    // Update existing entry
+                    entry = existingEntry
+                    
+                    // Update completion data if game is complete
+                    if (gameWon) {
+                        // Calculate stars for this completion using StarRating.kt (DRY)
+                        val currentAttemptStars = calculateStars(actualMoveCount, optMoves, maxHintUsed)
+                        
+                        // For beginner levels (1-10), always earn at least 1 star
+                        val finalStars = if (currentAttemptStars < 1 && isLevelGame && levelId <= 10) {
+                            1
+                        } else {
+                            currentAttemptStars
+                        }
+                        
+                        println("[HISTORY] Calculated stars: $finalStars (moves=$actualMoveCount, optimal=$optMoves, hints=$maxHintUsed)")
+                        
+                        entry.recordCompletion(
+                            ((System.currentTimeMillis() - gameStartTime) / 1000).toInt(),
+                            actualMoveCount,
+                            finalStars
+                        )
+                        
+                        // If completed without hints, record the no-hints timestamp
+                        if (maxHintUsed < 0 && actualMoveCount > 0) {
+                            val isOptimal = optMoves > 0 && actualMoveCount == optMoves
+                            entry.recordSolvedWithoutHints(isOptimal)
+                        }
+                    }
+                    
+                    // Update hint tracking
+                    if (maxHintUsed >= 0) {
+                        entry.recordHintUsed(maxHintUsed)
+                        entry.markEverUsedHints()
+                    }
+                    
+                    println("[HISTORY] Updated existing history entry: $mapName")
                 } else {
-                    println("[HISTORY] Failed to add history entry to index")
+                    // Create new entry
+                    entry = roboyard.logic.core.GameHistoryEntry(
+                        historyFileName,
+                        mapName,
+                        System.currentTimeMillis(),
+                        totalPlayTime,
+                        actualMoveCount,
+                        optMoves,
+                        "${currentBoard.width}x${currentBoard.height}",
+                        null
+                    )
+                    
+                    // Set difficulty
+                    entry.difficulty = 1 // Default to beginner for now
+                    
+                    // Set map signatures for unique map tracking
+                    entry.wallSignature = wallSig
+                    entry.positionSignature = posSig
+                    entry.mapSignature = mapSig
+                    
+                    // Set hint tracking
+                    entry.maxHintUsed = maxHintUsed
+                    entry.setSolvedWithoutHints(maxHintUsed < 0)
+                    if (maxHintUsed >= 0) {
+                        entry.markEverUsedHints()
+                    }
+                    
+                    // If game is complete, calculate and record stars
+                    if (gameWon) {
+                        // Calculate stars for this completion using StarRating.kt (DRY)
+                        val currentAttemptStars = calculateStars(actualMoveCount, optMoves, maxHintUsed)
+                        
+                        // For beginner levels (1-10), always earn at least 1 star
+                        val finalStars = if (currentAttemptStars < 1 && isLevelGame && levelId <= 10) {
+                            1
+                        } else {
+                            currentAttemptStars
+                        }
+                        
+                        println("[HISTORY] Calculated stars for new entry: $finalStars (moves=$actualMoveCount, optimal=$optMoves, hints=$maxHintUsed)")
+                        
+                        entry.recordCompletion(
+                            ((System.currentTimeMillis() - gameStartTime) / 1000).toInt(),
+                            actualMoveCount,
+                            finalStars
+                        )
+                        
+                        // If completed without hints, record the timestamp
+                        if (maxHintUsed < 0 && actualMoveCount > 0) {
+                            val isOptimal = optMoves > 0 && actualMoveCount == optMoves
+                            entry.recordSolvedWithoutHints(isOptimal)
+                        }
+                    }
+                    
+                    println("[HISTORY] Created new history entry: $mapName")
+                }
+                
+                // Save the entry directly using addHistoryEntry (handles both new and updated entries)
+                // This ensures recordCompletion changes are persisted
+                val saved = roboyard.logic.managers.GameHistoryManager.addHistoryEntry(storage, entry)
+                if (saved) {
+                    println("[HISTORY] Saved history entry: ${entry.mapName}")
+                } else {
+                    println("[HISTORY] Failed to save history entry")
                 }
             } else {
                 println("[HISTORY] Failed to save game to history: $historyFileName")
@@ -419,13 +513,109 @@ fun GameScreen(
         }
     }
 
+    /**
+     * Update hint tracking in the existing history entry for the current map.
+     * Called when hint status changes after the initial history save.
+     * Also updates move count if game is completed after hints were shown.
+     */
+    fun updateHintTrackingInHistory() {
+        try {
+            val storage = Preferences.storageProvider?.invoke()
+            if (storage == null) {
+                println("[HISTORY] No storage available for updateHintTrackingInHistory")
+                return
+            }
+
+            // Generate map signature
+            val mapSig = roboyard.ui.compose.generateMapSignature(currentBoard)
+            println("[HISTORY] updateHintTrackingInHistory: mapSig=$mapSig, isComplete=$gameWon")
+
+            if (mapSig.isEmpty()) {
+                println("[HISTORY] Map signature is empty, cannot update hint tracking")
+                return
+            }
+
+            // Load the full list once - we will modify it in-place and save it back
+            val allEntries = roboyard.logic.managers.GameHistoryManager.getHistoryEntries(storage)
+            var existing: roboyard.logic.core.GameHistoryEntry? = null
+            for (e in allEntries) {
+                if (mapSig == e.mapSignature) {
+                    existing = e
+                    break
+                }
+            }
+
+            if (existing == null) {
+                println("[HISTORY] updateHintTracking: Map signature not found in history: $mapSig")
+                return
+            }
+
+            println("[HISTORY] Found existing entry: ${existing.mapName}")
+
+            // Update hint tracking if hints were used
+            if (!existing.hasUsedHints() && maxHintUsed >= 0) {
+                existing.recordHintUsed(maxHintUsed)
+                println("[HISTORY] Updated hint tracking in existing entry: maxHintUsed=$maxHintUsed")
+            }
+
+            // Update completion data if game is complete
+            if (gameWon) {
+                val actualMoveCount = moveCount
+                val optMoves = solution?.size() ?: 0
+                
+                // Calculate stars for this completion
+                val currentAttemptStars = if (optMoves > 0) {
+                    when {
+                        actualMoveCount <= optMoves -> 3
+                        actualMoveCount <= optMoves * 2 -> 2
+                        else -> 1
+                    }
+                } else {
+                    1
+                }
+
+                existing.recordCompletion(
+                    ((System.currentTimeMillis() - gameStartTime) / 1000).toInt(),
+                    actualMoveCount,
+                    currentAttemptStars
+                )
+                println("[HISTORY] Updated completion: moves=$actualMoveCount, stars=$currentAttemptStars")
+
+                // If completed without hints, record the no-hints timestamp
+                if (maxHintUsed < 0 && actualMoveCount > 0) {
+                    val isOptimal = optMoves > 0 && actualMoveCount == optMoves
+                    existing.recordSolvedWithoutHints(isOptimal)
+                    println("[HISTORY] recordSolvedWithoutHints: isOptimal=$isOptimal, moves=$actualMoveCount, optimal=$optMoves")
+                }
+            }
+
+            // Mark everUsedHints if hints were used
+            if (maxHintUsed >= 0) {
+                existing.markEverUsedHints()
+            }
+
+            // Save the same list we modified (not a freshly-read copy from disk)
+            roboyard.logic.managers.GameHistoryManager.saveHistoryIndex(storage, allEntries)
+            println("[HISTORY] Saved updated history entry: completionCount=${existing.completionCount}, maxHintUsed=${existing.maxHintUsed}, everUsedHints=${existing.isEverUsedHints()}")
+        } catch (e: Exception) {
+            println("[HISTORY] Error updating hint tracking: ${e.message}")
+            e.printStackTrace()
+        }
+    }
+
     // Save to history immediately, bypassing the time threshold (same as main game)
     // Called when a hint is shown, live move counter is activated, or map is completed
     fun saveToHistoryNow(reason: String) {
+        println("[HISTORY] saveToHistoryNow called: reason=$reason, isHistorySaved=$isHistorySaved, maxHintUsed=$maxHintUsed")
         if (!isHistorySaved) {
             // Immediate save triggered by: reason
+            println("[HISTORY] First save triggered by: $reason")
             saveToHistory()
             isHistorySaved = true
+        } else {
+            // Already saved - just update hint tracking in existing entry
+            println("[HISTORY] Already saved, updating hint tracking for: $reason")
+            updateHintTrackingInHistory()
         }
     }
 
@@ -570,10 +760,11 @@ fun GameScreen(
         }
     }
 
-    // Stop timer when game is won
+    // Stop timer when game is won and show completion dialog
     LaunchedEffect(gameWon) {
         if (gameWon) {
             timerRunning = false
+            showCompletionDialog = true
         }
     }
 
@@ -695,6 +886,10 @@ fun GameScreen(
                             // Player followed the hint, show next hint automatically
                             val nextMove = solution?.getNextMove()
                             if (nextMove != null) {
+                                // Update maxHintUsed when hint is shown
+                                maxHintUsed = maxOf(maxHintUsed, currentHintStep)
+                                hintsUsed++
+                                
                                 // Save to history immediately when a hint is shown (same as main game)
                                 saveToHistoryNow("hint_shown_$currentHintStep")
                                 val directionName = when (nextMove.direction) {
@@ -970,7 +1165,7 @@ fun GameScreen(
             moveCount = moveCount,
             squaresMoved = squaresMoved,
             difficulty = "Beginner",
-            timer = "00:00",
+            timer = formatElapsedTime(elapsedTime),
             hintMessage = hintMessage
         )
 
@@ -1016,13 +1211,16 @@ fun GameScreen(
                     text = if (isSolverRunning) "Calculating..." else "💡Hint",
                     color = FancyButtonColor.HINT,
                     onClick = {
+                        println("[HINT] Hint button clicked, isSolverRunning=$isSolverRunning, solution=${solution}")
                         if (isSolverRunning) {
                             // Cancel solver (not implemented for now)
+                            println("[HINT] Solver already running, returning")
                             return@FancyButton
                         }
 
                         if (solution == null) {
                             // Calculate solution using SolverIDDFS
+                            println("[HINT] Solution is null, starting solver")
                             isSolverRunning = true
                             hintMessage = "Calculating solution..."
 
@@ -1036,6 +1234,15 @@ fun GameScreen(
                                         currentHintStep = 0
                                         val firstMove = solution!!.getNextMove()
                                         if (firstMove != null) {
+                                            println("[HINT] First hint found, currentHintStep=$currentHintStep")
+                                            // Update maxHintUsed when first hint is shown
+                                            maxHintUsed = maxOf(maxHintUsed, currentHintStep)
+                                            hintsUsed++
+                                            
+                                            // Save to history immediately when hint is shown
+                                            println("[HINT] Calling saveToHistoryNow for first hint")
+                                            saveToHistoryNow("hint_shown_$currentHintStep")
+                                            
                                             val directionName = when (firstMove.direction) {
                                                 Board.NORTH -> "North"
                                                 Board.SOUTH -> "South"
@@ -1068,8 +1275,17 @@ fun GameScreen(
                             }.start()
                         } else {
                             // Show next hint
+                            println("[HINT] Solution already exists, showing next hint")
                             val nextMove = solution!!.getNextMove()
                             if (nextMove != null) {
+                                // Update maxHintUsed when hint is shown
+                                maxHintUsed = maxOf(maxHintUsed, currentHintStep)
+                                hintsUsed++
+                                
+                                // Save to history immediately when a hint is shown
+                                println("[HINT] Calling saveToHistoryNow for next hint")
+                                saveToHistoryNow("hint_shown_$currentHintStep")
+                                
                                 val directionName = when (nextMove.direction) {
                                     Board.NORTH -> "North"
                                     Board.SOUTH -> "South"
@@ -1196,6 +1412,84 @@ fun GameScreen(
             }
         }
     }
+
+    // Completion dialog with retry button
+    if (showCompletionDialog) {
+        val optimalMoves = solution?.size() ?: 0
+        val stars = calculateStars(moveCount, optimalMoves, maxHintUsed)
+        val finalStars = if (stars < 1 && isLevelGame && levelId <= 10) {
+            1
+        } else {
+            stars
+        }
+
+        val title = if (isLevelGame) {
+            "Level Complete"
+        } else {
+            "Random Game Complete"
+        }
+
+        val message = buildString {
+            if (isLevelGame) {
+                append("Level $levelId completed in $moveCount moves.\n")
+                append("Stars: ")
+                repeat(finalStars) { append("★ ") }
+                if (finalStars == 0) append("✓")
+            } else {
+                append("Completed in $moveCount moves.\n")
+                if (moveCount == optimalMoves && optimalMoves > 0) {
+                    append("Perfect Solution!")
+                } else if (optimalMoves > 0) {
+                    append("Optimal: $optimalMoves moves")
+                }
+            }
+        }
+
+        val nextButtonText = if (isLevelGame) {
+            "Next Level"
+        } else {
+            "New Random Game"
+        }
+
+        AlertDialog(
+            onDismissRequest = { showCompletionDialog = false },
+            title = { Text(title) },
+            text = { Text(message) },
+            confirmButton = {
+                Button(onClick = {
+                    showCompletionDialog = false
+                    // Navigate to next level or new random game
+                    // This will be handled by the parent component
+                }) {
+                    Text(nextButtonText)
+                }
+            },
+            dismissButton = {
+                Button(onClick = {
+                    showCompletionDialog = false
+                    // Retry current game - reset board to start state
+                    currentBoard = Board.Companion.createClone(startBoard)
+                    moveCount = 0
+                    squaresMoved = 0
+                    gameWon = false
+                    timerRunning = false
+                    elapsedTime = 0L
+                    hintMessage = null
+                    maxHintUsed = -1
+                    hintsUsed = 0
+                    currentHintStep = 0
+                    solution = null
+                    isSolverRunning = false
+                    boardHistory.clear()
+                    gameStartTime = System.currentTimeMillis()
+                    totalPlayTime = 0
+                    isHistorySaved = false
+                }) {
+                    Text("Retry")
+                }
+            }
+        )
+    }
 }
 
 /**
@@ -1283,6 +1577,26 @@ fun GameInfoCard(
  * [GAME_WIN] Checks whether the puzzle is solved: the active goal's robot is on
  * the goal position. For a multi-colored goal (robotNumber == -1) any robot counts.
  */
+/**
+ * Format elapsed time in milliseconds to mm:ss or hh:mm:ss format
+ * Matches Main Game format exactly
+ */
+fun formatElapsedTime(elapsedTimeMs: Long): String {
+    val totalSeconds = (elapsedTimeMs / 1000).toInt()
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+
+    return if (minutes < 100) {
+        // mm:ss format for times under 100 minutes
+        String.format("%02d:%02d", minutes, seconds)
+    } else {
+        // hh:mm:ss format for times 100 minutes or more
+        val hours = minutes / 60
+        val mins = minutes % 60
+        String.format("%02d:%02d:%02d", hours, mins, seconds)
+    }
+}
+
 fun isSolved(board: Board): Boolean {
     val goal = board.getGoal() ?: return false // No goal set, not solved
     val goalRobot = goal.robotNumber
