@@ -67,8 +67,11 @@ class AndroidStorage(private val context: Context) : PlatformStorage {
         return try {
             val file = File(appDir, fileName)
             file.writeText(content)
+            println("[STORAGE] writeFile SUCCESS: $fileName -> ${file.absolutePath}")
             true
         } catch (e: Exception) {
+            println("[STORAGE] writeFile ERROR: $fileName - ${e.message}")
+            e.printStackTrace()
             false
         }
     }

@@ -72,7 +72,13 @@ class IosStorage : PlatformStorage {
     override fun writeFile(fileName: String, content: String): Boolean {
         val filePath = getFilePath(fileName)
         return content.encodeToByteArray().let { data ->
-            fileManager.createFileAtPath(filePath, data, null)
+            val success = fileManager.createFileAtPath(filePath, data, null)
+            if (success) {
+                println("[STORAGE] writeFile SUCCESS: $fileName -> $filePath")
+            } else {
+                println("[STORAGE] writeFile ERROR: $fileName -> $filePath")
+            }
+            success
         }
     }
 

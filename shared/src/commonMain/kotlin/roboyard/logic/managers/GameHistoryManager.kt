@@ -183,11 +183,13 @@ object GameHistoryManager {
 
             // Save updated index
             val isSaved = saveHistoryIndex(storage, entries)
+            log.d("[HISTORY] saveHistoryIndex returned: $isSaved for ${entry.getMapPath()}")
 
             log.d("Added history entry: ${entry.getMapPath()}")
             return isSaved
         } catch (e: Exception) {
             log.e("Error adding history entry: ${e.message}")
+            e.printStackTrace()
             return false
         }
     }

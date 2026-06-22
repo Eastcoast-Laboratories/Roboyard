@@ -76,8 +76,11 @@ class DesktopStorage : PlatformStorage {
             // Create parent directories if they don't exist
             file.parentFile?.mkdirs()
             file.writeText(content)
+            println("[STORAGE] writeFile SUCCESS: $fileName -> ${file.absolutePath}")
             true
         } catch (e: Exception) {
+            println("[STORAGE] writeFile ERROR: $fileName - ${e.message}")
+            e.printStackTrace()
             false
         }
     }

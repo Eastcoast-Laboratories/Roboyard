@@ -152,6 +152,11 @@ fun App() {
                             },
                             onSaveLoad = {
                                 currentScreen = Screen.SaveLoad
+                            },
+                            onNextLevel = {
+                                // Load next level
+                                selectedLevelId++
+                                currentScreen = Screen.Loading
                             }
                         )
                     }

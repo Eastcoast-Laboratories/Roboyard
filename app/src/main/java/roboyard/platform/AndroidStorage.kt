@@ -96,14 +96,17 @@ class AndroidStorage(private val context: Context) : PlatformStorage {
 
     override fun writeFile(fileName: String, content: String): Boolean {
         return try {
-            val output = FileOutputStream(context.getFileStreamPath(fileName))
+            val file = context.getFileStreamPath(fileName)
+            val output = FileOutputStream(file)
             val writer = OutputStreamWriter(output, StandardCharsets.UTF_8)
             writer.write(content)
             writer.flush()
             writer.close()
+            Timber.d("[STORAGE] writeFile SUCCESS: $fileName -> ${file.absolutePath}")
             true
         } catch (e: Exception) {
-            Timber.d("Exception writeFile: %s", e.message)
+            Timber.d("[STORAGE] writeFile ERROR: $fileName - ${e.message}")
+            e.printStackTrace()
             false
         }
     }

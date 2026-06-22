@@ -160,7 +160,8 @@ fun GameScreen(
     levelId: Int = 1,
     onBack: () -> Unit = {},
     onNewGame: () -> Unit = {},
-    onSaveLoad: () -> Unit = {}
+    onSaveLoad: () -> Unit = {},
+    onNextLevel: () -> Unit = {}
 ) {
     val storage = remember { getPlatformStorage() }
     val levelCompletionManager = remember { roboyard.logic.managers.LevelCompletionManager.getInstance() }
@@ -492,12 +493,13 @@ fun GameScreen(
                             entry.recordSolvedWithoutHints(isOptimal)
                         }
                     }
-                    
+
                     println("[HISTORY] Created new history entry: $mapName")
                 }
-                
+
                 // Save the entry directly using addHistoryEntry (handles both new and updated entries)
                 // This ensures recordCompletion changes are persisted
+                println("[HISTORY] Calling addHistoryEntry: mapName=${entry.mapName}, movesMade=${entry.movesMade}, bestMoves=${entry.bestMoves}, bestTime=${entry.bestTime}, completionCount=${entry.completionCount}")
                 val saved = roboyard.logic.managers.GameHistoryManager.addHistoryEntry(storage, entry)
                 if (saved) {
                     println("[HISTORY] Saved history entry: ${entry.mapName}")
@@ -1365,52 +1367,6 @@ fun GameScreen(
             }
         }
     }
-
-        // [GAME_WIN] Win overlay shown when the puzzle is solved
-        if (gameWon) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0xCC000000)),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFF1A1A1A))
-                        .border(BorderStroke(2.dp, Color(0xFF4CAF50)), RoundedCornerShape(16.dp))
-                        .padding(24.dp)
-                ) {
-                    Text(
-                        text = "Solved!",
-                        color = Color(0xFF4CAF50),
-                        fontSize = 28.sp,
-                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
-                    )
-                    Text(
-                        text = "Moves: $moveCount   Squares: $squaresMoved",
-                        color = Color.White,
-                        fontSize = 14.sp,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                    Row(modifier = Modifier.padding(top = 16.dp)) {
-                        FancyButton(
-                            text = "Menu",
-                            color = FancyButtonColor.GRAY,
-                            onClick = onBack,
-                            modifier = Modifier.weight(1f).padding(end = 4.dp)
-                        )
-                        FancyButton(
-                            text = "New Game",
-                            color = FancyButtonColor.GREEN,
-                            onClick = onNewGame,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-            }
-        }
     }
 
     // Completion dialog with retry button
@@ -1456,36 +1412,49 @@ fun GameScreen(
             title = { Text(title) },
             text = { Text(message) },
             confirmButton = {
-                Button(onClick = {
-                    showCompletionDialog = false
-                    // Navigate to next level or new random game
-                    // This will be handled by the parent component
-                }) {
-                    Text(nextButtonText)
-                }
-            },
-            dismissButton = {
-                Button(onClick = {
-                    showCompletionDialog = false
-                    // Retry current game - reset board to start state
-                    currentBoard = Board.Companion.createClone(startBoard)
-                    moveCount = 0
-                    squaresMoved = 0
-                    gameWon = false
-                    timerRunning = false
-                    elapsedTime = 0L
-                    hintMessage = null
-                    maxHintUsed = -1
-                    hintsUsed = 0
-                    currentHintStep = 0
-                    solution = null
-                    isSolverRunning = false
-                    boardHistory.clear()
-                    gameStartTime = System.currentTimeMillis()
-                    totalPlayTime = 0
-                    isHistorySaved = false
-                }) {
-                    Text("Retry")
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // Menu button - return to main menu
+                    Button(onClick = {
+                        showCompletionDialog = false
+                        onBack()
+                    }) {
+                        Text("Menu")
+                    }
+                    // Retry button - reset board to start state
+                    Button(onClick = {
+                        showCompletionDialog = false
+                        currentBoard = Board.Companion.createClone(startBoard).also {
+                            it.setRobots(startBoard.robotPositions.copyOf())
+                        }
+                        moveCount = 0
+                        squaresMoved = 0
+                        gameWon = false
+                        timerRunning = false
+                        elapsedTime = 0L
+                        hintMessage = null
+                        maxHintUsed = -1
+                        hintsUsed = 0
+                        currentHintStep = 0
+                        solution = null
+                        isSolverRunning = false
+                        boardHistory.clear()
+                        gameStartTime = System.currentTimeMillis()
+                        totalPlayTime = 0
+                        isHistorySaved = false
+                    }) {
+                        Text("Retry")
+                    }
+                    // Next Level / New Game button
+                    Button(onClick = {
+                        showCompletionDialog = false
+                        if (isLevelGame) {
+                            onNextLevel()
+                        } else {
+                            onNewGame()
+                        }
+                    }) {
+                        Text(nextButtonText)
+                    }
                 }
             }
         )
