@@ -1294,7 +1294,8 @@ fun HistoryItem(
         Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = displayName,
@@ -1307,21 +1308,16 @@ fun HistoryItem(
                     Text(
                         text = "★".repeat(stars),
                         color = Color.Yellow,
-                        fontSize = 16.sp
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(end = 4.dp)
                     )
                 }
-                Button(
+                CircularButton(
+                    text = "i",
+                    color = CircularButtonColor.GRAY,
                     onClick = onInfoClick,
-                    modifier = Modifier.size(32.dp).padding(start = 8.dp).semantics { testTag = "infoButton_$historyIndex" },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF404040))
-                ) {
-                    Text(
-                        text = "i",
-                        color = Color.White,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                    modifier = Modifier.semantics { testTag = "infoButton_$historyIndex" }
+                )
             }
             Text(
                 text = fileName,
@@ -2126,6 +2122,7 @@ fun HistoryInfoDialog(
         }
         
         append("\nBest time: ")
+        println("[HISTORY_INFO_DIALOG] Displaying bestTime: ${entry.bestTime}, condition: ${entry.bestTime > 0}")
         if (entry.bestTime > 0) {
             append("${entry.bestTime / 60}m ${entry.bestTime % 60}s")
         } else {
@@ -2134,6 +2131,7 @@ fun HistoryInfoDialog(
         append("\n")
         
         append("Best moves: ")
+        println("[HISTORY_INFO_DIALOG] Displaying bestMoves: ${entry.bestMoves}, condition: ${entry.bestMoves > 0}")
         append(if (entry.bestMoves > 0) entry.bestMoves else "—")
         append("\n")
         
