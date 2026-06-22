@@ -872,11 +872,11 @@ fun generatePositionSignature(board: Board): String {
         val x = position % board.width
         val y = position / board.width
         val colorChar = when (i) {
-            0 -> 'b'
-            1 -> 'g'
-            2 -> 'r'
-            3 -> 'y'
-            4 -> 's'
+            0 -> 'r' // red (pink) - matches LevelLoader.parseColorChar
+            1 -> 'g' // green
+            2 -> 'b' // blue
+            3 -> 'y' // yellow
+            4 -> 's' // silver
             else -> 'm'
         }
         robots.add("R${colorChar}$x,$y")
@@ -892,11 +892,11 @@ fun generatePositionSignature(board: Board): String {
         val x = goal.position % board.width
         val y = goal.position / board.width
         val colorChar = when (goal.robotNumber) {
-            0 -> 'b'
-            1 -> 'g'
-            2 -> 'r'
-            3 -> 'y'
-            4 -> 's'
+            0 -> 'r' // red (pink) - matches LevelLoader.parseColorChar
+            1 -> 'g' // green
+            2 -> 'b' // blue
+            3 -> 'y' // yellow
+            4 -> 's' // silver
             else -> 'm'
         }
         targets.add("T${colorChar}$x,$y")
@@ -913,9 +913,12 @@ fun generatePositionSignature(board: Board): String {
  * Generate a complete unique signature for the entire map.
  * Combines wall signature and position signature.
  * Two maps with identical signatures are considered the same map.
+ * @param board The current board state
+ * @param startBoard Optional start board to use for robot positions (instead of current positions)
  */
-fun generateMapSignature(board: Board): String {
-    return generateWallSignature(board) + "||" + generatePositionSignature(board)
+fun generateMapSignature(board: Board, startBoard: Board? = null): String {
+    val positionBoard = startBoard ?: board
+    return generateWallSignature(board) + "||" + generatePositionSignature(positionBoard)
 }
 
 /**
@@ -1378,6 +1381,9 @@ fun SaveLoadScreen(
         // Load history entries
         historyEntries = getHistoryEntries(storage)
         println("[SAVE_LOAD_SCREEN] History entries: ${historyEntries.size}")
+        for ((index, fileName, entry) in historyEntries) {
+            println("[SAVE_LOAD_SCREEN] Entry $index: ${entry?.mapName}, bestTime=${entry?.bestTime}, bestMoves=${entry?.bestMoves}")
+        }
     }
 
     Column(
@@ -2071,6 +2077,8 @@ fun HistoryInfoDialog(
     onDismiss: () -> Unit
 ) {
     val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault())
+
+    println("[HISTORY_INFO_DIALOG] entry.bestTime=${entry.bestTime}, entry.bestMoves=${entry.bestMoves}, entry.completionCount=${entry.completionCount}")
     
     val message = buildString {
         append("Completions: ${entry.completionCount}\n")

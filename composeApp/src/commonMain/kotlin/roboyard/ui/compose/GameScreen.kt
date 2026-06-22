@@ -165,11 +165,13 @@ fun GameScreen(
 ) {
     val storage = remember { getPlatformStorage() }
     val levelCompletionManager = remember { roboyard.logic.managers.LevelCompletionManager.getInstance() }
-    
+
     var moveCount by remember(board) { mutableIntStateOf(0) }
     var squaresMoved by remember(board) { mutableIntStateOf(0) }
     var currentBoard by remember(board) { mutableStateOf(board) }
-    val startBoard = remember(board) { Board.Companion.createClone(board).also { it.setRobots(board.robotPositions.copyOf()) } }
+    // Store robot start positions separately to ensure they don't change
+    val robotStartPositions = remember(board) { board.robotPositions.copyOf() }
+    val startBoard = remember(board) { Board.Companion.createClone(board).also { it.setRobots(robotStartPositions) } }
     var hintMessage by remember(board) { mutableStateOf<String?>(null) }
     var gameWon by remember(board) { mutableStateOf(false) }
     var showCompletionDialog by remember(board) { mutableStateOf(false) }
@@ -352,12 +354,12 @@ fun GameScreen(
             
             // Initialize GameHistoryManager
             roboyard.logic.managers.GameHistoryManager.initialize(storage)
-            
+
             // Generate map signatures for matching
             val wallSig = roboyard.ui.compose.generateWallSignature(currentBoard)
-            val posSig = roboyard.ui.compose.generatePositionSignature(currentBoard)
-            val mapSig = roboyard.ui.compose.generateMapSignature(currentBoard)
-            
+            val posSig = roboyard.ui.compose.generatePositionSignature(startBoard)
+            val mapSig = roboyard.ui.compose.generateMapSignature(currentBoard, startBoard)
+
             println("[HISTORY] saveToHistory: wallSig=$wallSig")
             println("[HISTORY] saveToHistory: posSig=$posSig")
             println("[HISTORY] saveToHistory: mapSig=$mapSig")
@@ -529,7 +531,7 @@ fun GameScreen(
             }
 
             // Generate map signature
-            val mapSig = roboyard.ui.compose.generateMapSignature(currentBoard)
+            val mapSig = roboyard.ui.compose.generateMapSignature(currentBoard, startBoard)
             println("[HISTORY] updateHintTrackingInHistory: mapSig=$mapSig, isComplete=$gameWon")
 
             if (mapSig.isEmpty()) {
@@ -538,6 +540,8 @@ fun GameScreen(
             }
 
             // Load the full list once - we will modify it in-place and save it back
+            // Reload index to ensure newly created entries are found
+            roboyard.logic.managers.GameHistoryManager.initialize(storage)
             val allEntries = roboyard.logic.managers.GameHistoryManager.getHistoryEntries(storage)
             var existing: roboyard.logic.core.GameHistoryEntry? = null
             for (e in allEntries) {
@@ -852,6 +856,7 @@ fun GameScreen(
         androidx.compose.runtime.key(currentBoard.robotPositions.contentHashCode()) {
             BoardCanvas(
                 board = currentBoard,
+                startBoard = startBoard,
                 onRobotMove = { robotIndex, direction ->
                 if (!gameWon) {
                     val oldPos = currentBoard.robotPositions[robotIndex]
@@ -1628,6 +1633,7 @@ fun moveRobot(board: Board, robotIndex: Int, direction: Int): Board? {
 @Composable
 fun BoardCanvas(
     board: Board,
+    startBoard: Board,
     onRobotMove: (robotIndex: Int, direction: Int) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
@@ -1660,18 +1666,18 @@ fun BoardCanvas(
     val wallH = imageResource(Res.drawable.mh)
     val wallV = imageResource(Res.drawable.mv)
     val robotSprites = listOf(
-        imageResource(Res.drawable.robot_pink_right),
-        imageResource(Res.drawable.robot_green_right),
-        imageResource(Res.drawable.robot_blue_right),
-        imageResource(Res.drawable.robot_yellow_right),
-        imageResource(Res.drawable.robot_silver_right)
+        imageResource(Res.drawable.robot_pink_right),   // 0 = red (pink) - matches LevelLoader
+        imageResource(Res.drawable.robot_green_right),  // 1 = green
+        imageResource(Res.drawable.robot_blue_right),   // 2 = blue
+        imageResource(Res.drawable.robot_yellow_right),  // 3 = yellow
+        imageResource(Res.drawable.robot_silver_right)  // 4 = silver
     )
     val targetSprites = listOf(
-        imageResource(Res.drawable.target_pink),
-        imageResource(Res.drawable.target_green),
-        imageResource(Res.drawable.target_blue),
-        imageResource(Res.drawable.target_yellow),
-        imageResource(Res.drawable.target_silver)
+        imageResource(Res.drawable.target_pink),   // 0 = red (pink) - matches LevelLoader
+        imageResource(Res.drawable.target_green),  // 1 = green
+        imageResource(Res.drawable.target_blue),   // 2 = blue
+        imageResource(Res.drawable.target_yellow),  // 3 = yellow
+        imageResource(Res.drawable.target_silver)  // 4 = silver
     )
     val targetMulti = imageResource(Res.drawable.target_multi)
 
@@ -1998,6 +2004,23 @@ fun BoardCanvas(
                 cellSize * robotScale
             )
         }
+
+        // 6. Semi-transparent robot start positions (ghost robots)
+        val ghostAlpha = 0.3f
+        for (i in startBoard.robotPositions.indices) {
+            val position = startBoard.robotPositions[i]
+            val robotX = position % startBoard.width
+            val robotY = position / startBoard.width
+            val sprite = if (i in robotSprites.indices) robotSprites[i] else robotSprites.last()
+            drawImageScaledWithAlpha(
+                sprite,
+                offsetX + robotX * cellSize - robotInset,
+                offsetY + robotY * cellSize - robotInset,
+                cellSize * robotScale,
+                cellSize * robotScale,
+                ghostAlpha
+            )
+        }
     }
 }
 
@@ -2015,6 +2038,25 @@ private fun DrawScope.drawImageScaled(
         srcSize = IntSize(image.width, image.height),
         dstOffset = IntOffset(left.roundToInt(), top.roundToInt()),
         dstSize = IntSize(width.roundToInt(), height.roundToInt())
+    )
+}
+
+/** Draws an [ImageBitmap] scaled with alpha transparency. */
+private fun DrawScope.drawImageScaledWithAlpha(
+    image: ImageBitmap,
+    left: Float,
+    top: Float,
+    width: Float,
+    height: Float,
+    alpha: Float
+) {
+    drawImage(
+        image = image,
+        srcOffset = IntOffset.Zero,
+        srcSize = IntSize(image.width, image.height),
+        dstOffset = IntOffset(left.roundToInt(), top.roundToInt()),
+        dstSize = IntSize(width.roundToInt(), height.roundToInt()),
+        alpha = alpha
     )
 }
 
