@@ -923,12 +923,13 @@ fun generateMapSignature(board: Board, startBoard: Board? = null): String {
 
 /**
  * Serialize a Board to Main Game format for save/load compatibility
+ * DRY - Random Games shall run like Level Games with consistent map signature
  */
-fun serializeBoardToMainGameFormat(board: Board, isLevelGame: Boolean): String {
+fun serializeBoardToMainGameFormat(board: Board, isLevelGame: Boolean, startBoard: Board? = null): String {
     val sb = StringBuilder()
     
-    // Generate map signature for unique map tracking
-    val mapSig = generateMapSignature(board)
+    // Generate map signature for unique map tracking (DRY - use startBoard for consistent signature)
+    val mapSig = generateMapSignature(board, startBoard)
     
     // Generate the metadata section with additional tags
     sb.append("#MAPNAME:Random")
@@ -1488,8 +1489,8 @@ fun SaveLoadScreen(
                                 println("[SAVE_LOAD_SCREEN] Saving game to slot $slotNumber")
                                 val fileName = "saves/save_$slotNumber.dat"
                                 
-                                // Serialize board to Main Game format
-                                val saveData = serializeBoardToMainGameFormat(boardToSave, isLevelGame)
+                                // Serialize board to Main Game format (DRY - use startBoard for consistent signature)
+                                val saveData = serializeBoardToMainGameFormat(boardToSave, isLevelGame, null)
                                 
                                 println("[SAVE_LOAD_SCREEN] Save data: $saveData")
                                 val result = storage.writeFile(fileName, saveData)

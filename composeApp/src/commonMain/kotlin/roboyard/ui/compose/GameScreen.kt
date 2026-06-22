@@ -389,8 +389,8 @@ fun GameScreen(
                 println("[HISTORY] New map, creating history entry: $mapName")
             }
             
-            // Serialize board to Main Game format
-            val saveData = serializeBoardToMainGameFormat(currentBoard, isLevelGame)
+            // Serialize board to Main Game format (DRY - use startBoard for consistent signature)
+            val saveData = serializeBoardToMainGameFormat(currentBoard, isLevelGame, startBoard)
             
             // Write to history file
             val result = storage.writeFile(historyFileName, saveData)

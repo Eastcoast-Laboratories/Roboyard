@@ -88,13 +88,7 @@ To clear all history entries and savegames for testing purposes:
 
 ```bash
 # Remove all history files
-rm -f ~/.roboyard/history_*.txt
-
-# Remove all savegame files
-rm -f ~/.roboyard/saves/save_*.dat
-
-# Remove history index
-rm -f ~/.roboyard/history_index.json
+rm -f ~/.roboyard/history_*.txt ~/.roboyard/saves/save_*.dat ~/.roboyard/history_index.json
 ```
 
 This is useful when testing the history and autosave functionality to ensure a clean state.
