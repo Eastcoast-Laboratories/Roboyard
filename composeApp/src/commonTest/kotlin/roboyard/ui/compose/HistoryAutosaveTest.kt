@@ -323,4 +323,126 @@ class HistoryAutosaveTest {
         assertEquals(1, entries.size) // Should be updated, not duplicated
         assertEquals(2, entries[0].completionCount) // Should have 2 completions
     }
+    
+    /**
+     * Test findByMapSignature function
+     */
+    @Test
+    fun testFindByMapSignature() {
+        val mockStorage = object : PlatformStorage {
+            private val files = mutableMapOf<String, String>()
+            private val prefs = mutableMapOf<String, Any>()
+            
+            override fun readFile(fileName: String): String = files[fileName] ?: ""
+            override fun writeFile(fileName: String, content: String): Boolean {
+                files[fileName] = content
+                return true
+            }
+            override fun fileExists(fileName: String): Boolean = files.containsKey(fileName)
+            override fun deleteFile(fileName: String): Boolean {
+                files.remove(fileName)
+                return true
+            }
+            override fun hasSavedGames(): Boolean = files.keys.any { it.startsWith("saves/") }
+            override fun getString(key: String, defaultValue: String?): String? = prefs[key] as? String ?: defaultValue
+            override fun putString(key: String, value: String) { prefs[key] = value }
+            override fun getInt(key: String, defaultValue: Int): Int = prefs[key] as? Int ?: defaultValue
+            override fun putInt(key: String, value: Int) { prefs[key] = value }
+            override fun getLong(key: String, defaultValue: Long): Long = prefs[key] as? Long ?: defaultValue
+            override fun putLong(key: String, value: Long) { prefs[key] = value }
+            override fun getBoolean(key: String, defaultValue: Boolean): Boolean = prefs[key] as? Boolean ?: defaultValue
+            override fun putBoolean(key: String, value: Boolean) { prefs[key] = value }
+            override fun remove(key: String) { prefs.remove(key) }
+            override fun clear() { prefs.clear() }
+            override fun getFilePath(fileName: String): String = fileName
+            override fun readBitmap(fileName: String): Any? = null
+            override fun writeBitmap(fileName: String, bitmap: Any?): Boolean = false
+        }
+        
+        GameHistoryManager.initialize(mockStorage)
+        
+        val entry1 = GameHistoryEntry("history_0.txt", "Map A", System.currentTimeMillis(), 30, 10, 5, "12x14", null)
+        entry1.mapSignature = "signature_a"
+        
+        val entry2 = GameHistoryEntry("history_1.txt", "Map B", System.currentTimeMillis(), 30, 10, 5, "12x14", null)
+        entry2.mapSignature = "signature_b"
+        
+        GameHistoryManager.addHistoryEntry(mockStorage, entry1)
+        GameHistoryManager.addHistoryEntry(mockStorage, entry2)
+        
+        // Find by existing signature
+        val found = GameHistoryManager.findByMapSignature(mockStorage, "signature_a")
+        assertNotNull(found)
+        assertEquals("Map A", found?.mapName)
+        
+        // Find by non-existing signature
+        val notFound = GameHistoryManager.findByMapSignature(mockStorage, "signature_c")
+        assertEquals(null, notFound)
+        
+        // Find by null signature
+        val nullSig = GameHistoryManager.findByMapSignature(mockStorage, null)
+        assertEquals(null, nullSig)
+        
+        // Find by empty signature
+        val emptySig = GameHistoryManager.findByMapSignature(mockStorage, "")
+        assertEquals(null, emptySig)
+    }
+    
+    /**
+     * Test hint tracking updates across multiple sessions
+     */
+    @Test
+    fun testHintTrackingAcrossSessions() {
+        val entry = GameHistoryEntry("history_0.txt", "Test Map", System.currentTimeMillis(), 0, 0, 0, "12x14", null)
+        
+        // Session 1: No hints used
+        entry.setSolvedWithoutHints(true)
+        entry.recordCompletion(30, 10, 3)
+        assertTrue(entry.qualifiesForNoHintsAchievement())
+        assertFalse(entry.isEverUsedHints())
+        
+        // Session 2: Hints used (simulating a later session)
+        entry.recordHintUsed(2)
+        entry.markEverUsedHints()
+        entry.setSolvedWithoutHints(false) // Explicitly set to false when hints are used
+        entry.recordCompletion(40, 15, 2)
+        
+        // After hints used, should not qualify for no hints achievement
+        assertFalse(entry.qualifiesForNoHintsAchievement())
+        assertTrue(entry.isEverUsedHints())
+        assertEquals(2, entry.maxHintUsed)
+        
+        // But completion count should be 2 (both sessions recorded)
+        assertEquals(2, entry.completionCount)
+    }
+    
+    /**
+     * Test that solvedWithoutHints is preserved even if hints are used later
+     */
+    @Test
+    fun testSolvedWithoutHintsPreservation() {
+        val entry = GameHistoryEntry("history_0.txt", "Test Map", System.currentTimeMillis(), 0, 0, 0, "12x14", null)
+        
+        // First completion without hints
+        entry.setSolvedWithoutHints(true)
+        entry.recordSolvedWithoutHints(true)
+        entry.recordCompletion(30, 10, 3)
+        
+        val firstSolvedTimestamp = entry.lastSolvedWithoutHints
+        assertTrue(firstSolvedTimestamp > 0)
+        
+        // Later session with hints
+        entry.recordHintUsed(1)
+        entry.markEverUsedHints()
+        entry.recordCompletion(40, 15, 2)
+        
+        // solvedWithoutHints flag should be preserved
+        assertTrue(entry.isSolvedWithoutHints())
+        
+        // Timestamp should not be overwritten
+        assertEquals(firstSolvedTimestamp, entry.lastSolvedWithoutHints)
+        
+        // But everUsedHints should be true
+        assertTrue(entry.isEverUsedHints())
+    }
 }

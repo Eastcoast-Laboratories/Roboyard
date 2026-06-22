@@ -28,3 +28,5 @@ androidTestResultsUserPreferences.xml
 /.idea/androidTestResultsUserPreferences.xml
 /.idea/planningMode.xml
 .kotlin/*
+/tmp/roboyard_test_screenshots/
+screenshot_*.png
