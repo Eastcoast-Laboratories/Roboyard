@@ -922,18 +922,49 @@ fun generateMapSignature(board: Board, startBoard: Board? = null): String {
 }
 
 /**
- * Generate a map name from map signature and game type
+ * Generate a unique 5-letter string from an input string (DRY - from MapIdGenerator in main app)
+ * The resulting string alternates between consonants and vowels for better readability
+ * 
+ * @param input The input string to hash
+ * @return A 5-letter unique ID string
+ */
+fun generateUnique5LetterFromString(input: String): String {
+    try {
+        // Create SHA-256 hash
+        val digest = java.security.MessageDigest.getInstance("SHA-256")
+        val hashBytes = digest.digest(input.toByteArray())
+        
+        // Define vowels and consonants
+        val vowels = charArrayOf('A', 'E', 'I', 'O', 'U')
+        val consonants = charArrayOf('B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z')
+        
+        // Convert hash bytes to 5-letter string, alternating between consonants and vowels
+        val uniqueString = StringBuilder()
+        for (i in 0 until 5) {
+            val index = Math.abs(hashBytes[i].toInt()) % (if (i % 2 == 0) consonants.size else vowels.size)
+            val letter = if (i % 2 == 0) consonants[index] else vowels[index]
+            uniqueString.append(letter)
+        }
+        
+        return uniqueString.toString()
+    } catch (e: Exception) {
+        println("[MAP_ID_GENERATOR] Failed to generate unique ID: ${e.message}")
+        return "ERROR"
+    }
+}
+
+/**
+ * Generate a map name from map signature and game type (DRY - from main app)
  * For Level Games: "Level $levelId"
- * For Random Games: 5-character hash from map signature
+ * For Random Games: 5-character hash from map signature using SHA-256
  */
 fun generateMapNameFromSignature(mapSig: String, isLevelGame: Boolean, levelId: Int? = null): String {
     if (isLevelGame && levelId != null) {
         return "Level $levelId"
     }
     
-    // Generate 5-character hash from map signature for random games
-    val hash = mapSig.take(5).uppercase()
-    return hash
+    // Generate 5-character hash from map signature for random games (DRY - use SHA-256 like main app)
+    return generateUnique5LetterFromString(mapSig)
 }
 
 /**
