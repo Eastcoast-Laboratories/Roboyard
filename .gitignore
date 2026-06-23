@@ -28,5 +28,8 @@ androidTestResultsUserPreferences.xml
 /.idea/androidTestResultsUserPreferences.xml
 /.idea/planningMode.xml
 .kotlin/*
-/tmp/roboyard_test_screenshots/
+*/python_testsuite_screenshots/
 screenshot_*.png
+*/__pycache__/*
+test_suite.cpython-*.pyc
+*_testsuite.cpython-*.pyc
