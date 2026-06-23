@@ -922,6 +922,21 @@ fun generateMapSignature(board: Board, startBoard: Board? = null): String {
 }
 
 /**
+ * Generate a map name from map signature and game type
+ * For Level Games: "Level $levelId"
+ * For Random Games: 5-character hash from map signature
+ */
+fun generateMapNameFromSignature(mapSig: String, isLevelGame: Boolean, levelId: Int? = null): String {
+    if (isLevelGame && levelId != null) {
+        return "Level $levelId"
+    }
+    
+    // Generate 5-character hash from map signature for random games
+    val hash = mapSig.take(5).uppercase()
+    return hash
+}
+
+/**
  * Serialize a Board to Main Game format for save/load compatibility
  * DRY - Random Games shall run like Level Games with consistent map signature
  */
@@ -947,6 +962,9 @@ fun serializeBoardToMainGameFormat(board: Board, isLevelGame: Boolean, startBoar
     sb.append("HEIGHT:").append(board.height).append(";\n")
     
     // Generate the board representation (walls excluded - they go in WALLS section)
+    // Use startBoard robot positions if available (DRY - Random Games shall run like Level Games)
+    val robotPositionsToUse = startBoard?.robotPositions ?: board.robotPositions
+    
     for (y in 0 until board.height) {
         for (x in 0 until board.width) {
             if (x > 0) {
@@ -955,8 +973,8 @@ fun serializeBoardToMainGameFormat(board: Board, isLevelGame: Boolean, startBoar
             
             val position = y * board.width + x
             
-            // Check if this position has a robot
-            val hasRobot = board.robotPositions.contains(position)
+            // Check if this position has a robot (use start positions for consistent history)
+            val hasRobot = robotPositionsToUse.contains(position)
             
             // Check if this position has a target
             val goal = board.goals.find { it.position == position }

@@ -380,12 +380,8 @@ fun GameScreen(
                 val historyIndex = roboyard.logic.managers.GameHistoryManager.getNextHistoryIndex(storage)
                 historyFileName = roboyard.logic.managers.GameHistoryManager.indexToPath(historyIndex)
                 
-                // Generate map name (same as main game)
-                mapName = if (isLevelGame) {
-                    "Level $levelId"
-                } else {
-                    "Random Map #$historyIndex"
-                }
+                // Generate map name (DRY - use generateMapNameFromSignature)
+                mapName = generateMapNameFromSignature(mapSig, isLevelGame, if (isLevelGame) levelId else null)
                 println("[HISTORY] New map, creating history entry: $mapName")
             }
             
