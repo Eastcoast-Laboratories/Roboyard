@@ -1,1315 +1,2245 @@
-package roboyard.ui.fragments;
+package roboyard.ui.compose
 
-import static roboyard.logic.core.Constants.PREFS_NAME;
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import roboyard.logic.core.LevelLoader
+import roboyard.logic.core.Preferences
+import roboyard.logic.storage.PlatformStorage
+import roboyard.logic.storage.getPlatformStorage
+import roboyard.ui.graphics.MinimapGenerator
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import driftingdroids.model.Board
+import roboyard.logic.core.GameLogic
+import roboyard.logic.core.MapGenerator
+import org.jetbrains.compose.resources.imageResource
+import org.jetbrains.compose.resources.painterResource
+import roboyard.composeapp.generated.resources.Res
+import roboyard.composeapp.generated.resources.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+@Composable
+fun App() {
+    var currentScreen by remember { mutableStateOf<Screen>(Screen.MainMenu) }
+    var board by remember { mutableStateOf<Board?>(null) }
+    var selectedLevelId by remember { mutableStateOf(1) }
+    var isLevelGame by remember { mutableStateOf(false) }
+    var isLoadedGame by remember { mutableStateOf(false) }
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+    MaterialTheme {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            when (currentScreen) {
+                Screen.MainMenu -> MainMenuScreen(
+                    onNewRandomGame = {
+                        // Use MapGenerator to generate random game map (same as fragment-app)
+                        val mapGenerator = MapGenerator()
+                        mapGenerator.robotCount = Preferences.robotCount
+                        mapGenerator.targetColors = Preferences.targetColors
+                        val gridElements = mapGenerator.generatedGameMap
+                        board = if (gridElements != null) {
+                            gridElementsToBoard(gridElements)
+                        } else {
+                            // Fallback to standard random board if MapGenerator fails
+                            Board.createBoardRandom(4)
+                        }
+                        isLevelGame = false
+                        isLoadedGame = false // Not a loaded game
+                        currentScreen = Screen.Game
+                    },
+                    onLevelSelection = {
+                        currentScreen = Screen.LevelSelection
+                    },
+                    onSettings = {
+                        currentScreen = Screen.Settings
+                    },
+                    onHelp = {
+                        currentScreen = Screen.Help
+                    },
+                    onCredits = {
+                        currentScreen = Screen.Credits
+                    },
+                    onSaveLoad = {
+                        currentScreen = Screen.SaveLoad
+                    },
+                    onAchievements = {
+                        currentScreen = Screen.Achievements
+                    }
+                )
+                Screen.Game -> {
+                    board?.let { currentBoard ->
+                        GameScreen(
+                            board = currentBoard,
+                            isLevelGame = isLevelGame,
+                            isLoadedGame = isLoadedGame,
+                            levelId = selectedLevelId,
+                            onBack = {
+                                currentScreen = Screen.MainMenu
+                                board = null
+                                isLoadedGame = false
+                            },
+                            onNewGame = {
+                                // Use MapGenerator to generate random game map (same as fragment-app)
+                                val mapGenerator = MapGenerator()
+                                mapGenerator.robotCount = Preferences.robotCount
+                                mapGenerator.targetColors = Preferences.targetColors
+                                val gridElements = mapGenerator.generatedGameMap
+                                board = if (gridElements != null) {
+                                    gridElementsToBoard(gridElements)
+                                } else {
+                                    // Fallback to standard random board if MapGenerator fails
+                                    Board.createBoardRandom(4)
+                                }
+                                isLoadedGame = false // Not a loaded game
+                            },
+                            onSaveLoad = {
+                                currentScreen = Screen.SaveLoad
+                            },
+                            onNextLevel = {
+                                // Load next level
+                                selectedLevelId++
+                                currentScreen = Screen.Loading
+                            }
+                        )
+                    }
+                }
+                Screen.LevelSelection -> {
+                    LevelSelectionScreen(
+                        onBack = {
+                            currentScreen = Screen.MainMenu
+                        },
+                        onLevelSelected = { levelId: Int ->
+                            selectedLevelId = levelId
+                            currentScreen = Screen.Loading
+                        }
+                    )
+                }
+                Screen.Loading -> {
+                    LoadingScreen(
+                        levelId = selectedLevelId,
+                        onLoadComplete = { loadedBoard: Board ->
+                            board = loadedBoard
+                            isLevelGame = true
+                            currentScreen = Screen.Game
+                        },
+                        onBack = {
+                            currentScreen = Screen.MainMenu
+                        }
+                    )
+                }
+                Screen.Settings -> {
+                    SettingsScreen(
+                        onBack = {
+                            currentScreen = Screen.MainMenu
+                        }
+                    )
+                }
+                Screen.Help -> {
+                    HelpScreen(
+                        onBack = {
+                            currentScreen = Screen.MainMenu
+                        }
+                    )
+                }
+                Screen.Credits -> {
+                    CreditsScreen(
+                        onBack = {
+                            currentScreen = Screen.MainMenu
+                        }
+                    )
+                }
+                Screen.SaveLoad -> {
+                    SaveLoadScreen(
+                        boardToSave = board,
+                        isLevelGame = isLevelGame,
+                        onBack = {
+                            currentScreen = Screen.MainMenu
+                        },
+                        onLoadGame = { loadedBoard ->
+                            board = loadedBoard
+                            isLevelGame = false // Default to false for loaded games
+                            isLoadedGame = true // Mark as loaded game
+                            currentScreen = Screen.Game
+                        }
+                    )
+                }
+                Screen.Achievements -> {
+                    AchievementsScreen(
+                        onBack = {
+                            currentScreen = Screen.MainMenu
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
 
-import roboyard.logic.core.Constants;
-import roboyard.logic.core.GameHistoryEntry;
-import roboyard.eclabs.R;
-import roboyard.logic.achievements.AchievementManager;
-import roboyard.logic.managers.GameHistoryManager;
-import timber.log.Timber;
-import roboyard.logic.core.LevelCompletionData;
-import roboyard.logic.managers.LevelCompletionManager;
+enum class Screen {
+    MainMenu,
+    Game,
+    LevelSelection,
+    Loading,
+    Settings,
+    Help,
+    Credits,
+    SaveLoad,
+    Achievements
+}
 
-/**
- * Level selection screen implemented as a Fragment with native Android UI components.
- * Allows users to select predefined levels to play.
- */
-public class LevelSelectionFragment extends BaseGameFragment {
+@Composable
+fun MainMenuScreen(
+    onNewRandomGame: () -> Unit = {},
+    onLevelSelection: () -> Unit = {},
+    onSettings: () -> Unit = {},
+    onHelp: () -> Unit = {},
+    onCredits: () -> Unit = {},
+    onSaveLoad: () -> Unit = {},
+    onAchievements: () -> Unit = {}
+) {
+    var hasSavedGames by remember { mutableStateOf(false) }
 
-    private RecyclerView levelRecyclerView;
-    private LevelAdapter levelAdapter;
-    private TextView titleTextView;
-    private TextView totalStarsText;
-    private TextView progressTextLeft;
-    private TextView progressTextRight;
-    private View progressFill;
-    private ImageView progressDiagonal;
-    private Button userProfileButton;
-    private Button scrollUpArrow;
-    private final List<Integer> availableLevels = new ArrayList<>();
-    private LevelCompletionManager completionManager;
-    private int totalStars = 0;
-    private int completedLevelCount = 0;
-    /** Maps level file map name (e.g. "level_1") to history entry, for minimap + info-box reuse */
-    private final Map<String, GameHistoryEntry> historyByMapName = new HashMap<>();
-
-    // Constants for custom level support (now in shared Constants)
-    private static final int CUSTOM_LEVEL_START_ID = roboyard.logic.core.Constants.CUSTOM_LEVEL_START_ID;
-    private static final int STARS_PER_LEVEL = roboyard.logic.core.Constants.STARS_PER_LEVEL;
-
-    /**
-     * Interface for handling level selection events.
-     * When a level button is clicked, this listener is called with the level ID.
-     */
-    public interface OnLevelSelectedListener {
-        /**
-         * Called when a level is selected.
-         * @param levelId The ID of the selected level
-         */
-        void onLevelSelected(int levelId);
+    // Check if there are saved games (same logic as main game)
+    LaunchedEffect(Unit) {
+        val storage = getPlatformStorage()
+        hasSavedGames = storage.hasSavedGames()
     }
 
-    /**
-     * Creates the view for this fragment.
-     * Sets up the RecyclerView with a grid layout and initializes the LevelCompletionManager
-     * to track which levels have been completed.
-     *
-     * @param inflater The LayoutInflater object to inflate views
-     * @param container The parent view that this fragment's UI should be attached to
-     * @param savedInstanceState Previous state of this fragment, if available
-     * @return The View for the fragment's UI
-     */
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, 
-                             @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_level_selection, container, false);
+    val barBrush = Brush.linearGradient(
+        colors = listOf(Color(0xCC000000), Color(0xCC000000)),
+        start = Offset(0f, 0f),
+        end = Offset.Infinite
+    )
 
-        // Set up UI elements
-        titleTextView = view.findViewById(R.id.level_selection_title);
-        totalStarsText = view.findViewById(R.id.total_stars_text);
-        progressTextLeft = view.findViewById(R.id.progress_text_left);
-        progressTextRight = view.findViewById(R.id.progress_text_right);
-        progressFill = view.findViewById(R.id.progress_fill);
-        progressDiagonal = view.findViewById(R.id.progress_diagonal);
-        levelRecyclerView = view.findViewById(R.id.level_recycler_view);
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Background image (same as main game)
+        Image(
+            painter = painterResource(Res.drawable.title_bg_optimized),
+            contentDescription = "Background image",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
 
-        // Set title
-        titleTextView.setText(getString(R.string.level_selection_title));
-
-        // Set up RecyclerView with grid layout (3 columns in portrait, 6 in landscape)
-        int spanCount = getResources().getConfiguration().orientation == 
-                android.content.res.Configuration.ORIENTATION_LANDSCAPE ? 6 : 3;
-        GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), spanCount);
-        // Make headers span full width
-        layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-            @Override
-            public int getSpanSize(int position) {
-                if (levelAdapter != null && levelAdapter.getItemViewType(position) == LevelAdapter.VIEW_TYPE_HEADER) {
-                    return spanCount;
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // Header bar with title and profile button
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(barBrush)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 44.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "ROBOYARD",
+                        color = Color.White,
+                        fontSize = 39.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.Center,
+                        style = androidx.compose.ui.text.TextStyle(
+                            shadow = Shadow(
+                                color = Color.Black,
+                                offset = Offset(2f, 2f),
+                                blurRadius = 3f
+                            )
+                        )
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    CircularButton(
+                        text = null,
+                        color = CircularButtonColor.TURQUOISE,
+                        onClick = { },
+                        modifier = Modifier.size(48.dp)
+                    )
                 }
-                return 1;
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(2.dp)
+                        .background(Color.Black)
+                )
             }
-        });
-        levelRecyclerView.setLayoutManager(layoutManager);
 
-        // Get the level completion manager
-        completionManager = LevelCompletionManager.getInstance(requireContext());
+            // Scrollable content with fancy buttons
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(24.dp))
+                // Button container with 70% width
+                Column(
+                    modifier = Modifier.fillMaxWidth(0.7f)
+                ) {
+                    FancyButton(
+                        text = "New Random Game",
+                        color = FancyButtonColor.GREEN,
+                        onClick = onNewRandomGame,
+                        modifier = Modifier.fillMaxWidth().semantics { testTag = "newRandomGameButton" }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    FancyButton(
+                        text = "Level Game",
+                        color = FancyButtonColor.BLUE,
+                        onClick = onLevelSelection,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    // Load Game button - always visible (same as main game)
+                    FancyButton(
+                        text = "Load Game",
+                        color = FancyButtonColor.RED,
+                        onClick = onSaveLoad,
+                        modifier = Modifier.fillMaxWidth().semantics { testTag = "loadGameButton" }
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
 
-        // Get total stars
-        totalStars = completionManager.getTotalStars();
-
-        // Load available levels
-        loadAvailableLevels();
-
-        // Load history entries mapped by level map name
-        loadHistoryByMapName();
-
-        // Count completed levels and update progress
-        updateProgressUI();
-
-        // Set up adapter
-        levelAdapter = new LevelAdapter(availableLevels, this, completionManager, totalStars, historyByMapName);
-        levelRecyclerView.setAdapter(levelAdapter);
-
-        // Add scroll listener to fade out cards earlier when scrolling up (keeps header visible)
-        setupScrollFadeEffect();
-
-        // Set up scroll up arrow button
-        scrollUpArrow = view.findViewById(R.id.scroll_up_arrow);
-        setupScrollUpArrow(spanCount);
-
-        // Auto-scroll to the last played level
-        scrollToLastPlayedLevel();
-
-        // Set up back button
-        Button backButton = view.findViewById(R.id.back_button);
-        backButton.setOnClickListener(v -> {
-            // Navigate back to the main menu
-            MainMenuFragment menuFragment = new MainMenuFragment();
-            navigateToDirect(menuFragment);
-        });
-
-        // Set up user profile button
-        userProfileButton = view.findViewById(R.id.user_profile_button);
-        setupUserProfileButton(userProfileButton);
-
-        // Show Level Editor button if all 140 levels (except 139) are unlocked
-        Button levelEditorButton = view.findViewById(R.id.level_editor_button);
-        if (levelEditorButton != null) {
-            updateLevelEditorButtonVisibility(levelEditorButton);
-            levelEditorButton.setOnClickListener(v -> {
-                Timber.d("[LEVEL_SELECTION] Opening Level Design Editor");
-                LevelDesignEditorFragment editorFragment = LevelDesignEditorFragment.newInstance(0);
-                requireActivity().getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.nav_host_fragment, editorFragment)
-                        .addToBackStack(null)
-                        .commit();
-            });
+            // Footer bar with icon buttons
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(barBrush)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(2.dp)
+                        .background(Color.Black)
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 0.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Credits button - X symbol
+                    CircularButton(
+                        text = "©",
+                        color = CircularButtonColor.YELLOW,
+                        onClick = onCredits,
+                        modifier = Modifier.size(48.dp).padding(8.dp)
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    // Help button
+                    CircularButton(
+                        text = null,
+                        color = CircularButtonColor.ORANGE,
+                        onClick = onHelp,
+                        modifier = Modifier.size(48.dp).padding(8.dp)
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    // Achievements button
+                    CircularButton(
+                        text = null,
+                        color = CircularButtonColor.PURPLE,
+                        onClick = onAchievements,
+                        modifier = Modifier.size(48.dp).padding(8.dp)
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    // Settings button
+                    CircularButton(
+                        text = null,
+                        color = CircularButtonColor.GRAY,
+                        onClick = onSettings,
+                        modifier = Modifier.size(48.dp).padding(8.dp)
+                    )
+                }
+            }
         }
+    }
+}
 
-        return view;
+@Composable
+fun MenuButton(text: String, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .semantics {
+                contentDescription = text
+            }
+    ) {
+        Text(text = text, style = MaterialTheme.typography.titleMedium)
+    }
+}
+
+@Composable
+fun LevelSelectionScreen(
+    onBack: () -> Unit = {},
+    onLevelSelected: (Int) -> Unit = {}
+) {
+    val totalLevels = 140
+    val levels = (1..totalLevels).toList()
+    val levelCompletionManager = remember { roboyard.logic.managers.LevelCompletionManager.getInstance() }
+    val totalStars = remember { levelCompletionManager.totalStars }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Background color (placeholder for bg_level_screen)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF4CAF50))
+        )
+
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // Header with title and profile button
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp, bottom = 4.dp, start = 16.dp, end = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Level Selection",
+                    color = Color.White,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center,
+                    style = TextStyle(
+                        shadow = Shadow(
+                            color = Color(0x80000000),
+                            offset = Offset(1f, 1f),
+                            blurRadius = 3f
+                        )
+                    )
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                CircularButton(
+                    text = null,
+                    color = CircularButtonColor.TURQUOISE,
+                    onClick = { },
+                    modifier = Modifier.size(40.dp)
+                )
+            }
+
+            // Progress bar section
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "$totalStars",
+                    color = Color(0xFFFFD700),
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    style = TextStyle(
+                        shadow = Shadow(
+                            color = Color(0x80000000),
+                            offset = Offset(1f, 1f),
+                            blurRadius = 2f
+                        )
+                    )
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                // Star icon placeholder
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .background(Color(0xFFFFD700), RoundedCornerShape(50))
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                // Progress bar
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(32.dp)
+                        .background(Color(0xFF4A90E2), RoundedCornerShape(4.dp))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0f)
+                            .fillMaxHeight()
+                            .background(Color(0xFFFFC107), RoundedCornerShape(4.dp))
+                    )
+                    Text(
+                        text = "0 / $totalLevels",
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            }
+
+            // Level grid (3 columns in portrait, 6 in landscape)
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                contentPadding = PaddingValues(vertical = 6.dp)
+            ) {
+                items(levels) { levelId ->
+                    val levelData = remember { levelCompletionManager.getLevelCompletionData(levelId) }
+                    val isUnlocked = levelId >= roboyard.logic.core.Constants.CUSTOM_LEVEL_START_ID || 
+                            (roboyard.logic.core.Constants.STARS_PER_LEVEL * (levelId - 1) <= totalStars)
+                    LevelItem(
+                        levelId = levelId,
+                        stars = levelData?.getCompletionStars() ?: 0,
+                        isUnlocked = isUnlocked,
+                        onClick = { if (isUnlocked) onLevelSelected(levelId) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LevelItem(
+    levelId: Int,
+    stars: Int = 0,
+    isUnlocked: Boolean = true,
+    onClick: () -> Unit
+) {
+    val backgroundColor = if (isUnlocked) Color(0xFF2C2C2C) else Color(0xFF1A1A1A)
+    val textColor = if (isUnlocked) Color.White else Color.Gray
+    
+    // Load level board for minimap generation
+    var board by remember { mutableStateOf<Board?>(null) }
+    
+    LaunchedEffect(levelId) {
+        if (isUnlocked && levelId < 141) {
+            try {
+                board = LevelLoader.loadLevel(levelId)
+            } catch (e: Exception) {
+                // Failed to load level
+            }
+        }
     }
     
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        
-        // Update user profile button UI
-        if (userProfileButton != null) {
-            updateUserProfileButton(userProfileButton);
-        }
-        
-        // Stop map regeneration when in level selection screen
-        if (gameStateManager != null) {
-            gameStateManager.stopRegeneration();
-            Timber.d("[SOLVER] Stopped regeneration in level selection screen");
-        }
-    }
-    
-    /**
-     * Sets up scroll up arrow button that appears when not at top and scrolls up one row.
-     */
-    private void setupScrollUpArrow(int spanCount) {
-        // Only set up if scroll up arrow exists (may not be in all layouts)
-        if (scrollUpArrow == null) {
-            return;
-        }
-        
-        scrollUpArrow.setOnClickListener(v -> {
-            GridLayoutManager layoutManager = (GridLayoutManager) levelRecyclerView.getLayoutManager();
-            if (layoutManager != null) {
-                int firstVisiblePosition = layoutManager.findFirstVisibleItemPosition();
-                if (firstVisiblePosition > 0) {
-                    // Scroll up by one row (spanCount items)
-                    int targetPosition = Math.max(0, firstVisiblePosition - spanCount);
-                    levelRecyclerView.smoothScrollToPosition(targetPosition);
+    Box(
+        modifier = Modifier
+            .padding(4.dp)
+            .aspectRatio(1f)
+            .background(backgroundColor, RoundedCornerShape(8.dp))
+            .clickable(enabled = isUnlocked, onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (board != null && isUnlocked) {
+                // Show minimap
+                Canvas(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .padding(4.dp)
+                ) {
+                    MinimapGenerator.drawMinimap(this, board, size.width, size.height)
                 }
+            } else if (!isUnlocked) {
+                Text(
+                    text = "🔒",
+                    color = Color.Gray,
+                    fontSize = 12.sp
+                )
+            } else {
+                Text(
+                    text = levelId.toString(),
+                    color = textColor,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
-        });
-
-        // Show/hide arrow based on scroll position
-        levelRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                
-                GridLayoutManager layoutManager = (GridLayoutManager) recyclerView.getLayoutManager();
-                if (layoutManager != null && scrollUpArrow != null) {
-                    int firstVisiblePosition = layoutManager.findFirstVisibleItemPosition();
-                    // Show arrow if not at the very top
-                    scrollUpArrow.setVisibility(firstVisiblePosition > 0 ? View.VISIBLE : View.GONE);
-                }
-            }
-        });
-    }
-
-    /**
-     * Sets up scroll fade effect: level cards fade out earlier when scrolling up
-     * to keep header and progress bar always visible.
-     */
-    private void setupScrollFadeEffect() {
-        // Config: fade starts when item is this many pixels below the progress bar
-        // Different values for portrait vs landscape due to different header heights
-        boolean isLandscape = getResources().getConfiguration().orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-        final int FADE_START_OFFSET_PX = isLandscape ? -80 : -190;
-        final int FADE_DISTANCE_PX = 150;
-        final int FADE_COMPLETE_DELAY_MS = 200;
-
-        final Handler fadeHandler = new Handler(Looper.getMainLooper());
-        final Runnable[] completeFadeRunnable = new Runnable[1];
-
-        levelRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-
-                // Cancel any pending complete-fade operation
-                if (completeFadeRunnable[0] != null) {
-                    fadeHandler.removeCallbacks(completeFadeRunnable[0]);
-                }
-
-                // Get the progress container height to know where cards should start fading
-                View progressContainer = getView() != null ? getView().findViewById(R.id.progress_container) : null;
-                if (progressContainer == null) return;
-
-                int progressBottom = progressContainer.getBottom();
-                int fadeStartY = progressBottom + FADE_START_OFFSET_PX;
-
-                // Iterate through visible children and apply fade based on position
-                for (int i = 0; i < recyclerView.getChildCount(); i++) {
-                    View child = recyclerView.getChildAt(i);
-                    if (child == null) continue;
-
-                    int childTop = child.getTop();
-
-                    if (childTop < fadeStartY) {
-                        // Card is in fade zone
-                        float fadeProgress = Math.max(0f, Math.min(1f, 
-                                (fadeStartY - childTop) / (float) FADE_DISTANCE_PX));
-                        child.setAlpha(1f - fadeProgress);
-                    } else {
-                        // Card is fully visible
-                        child.setAlpha(1f);
+            
+            if (stars > 0 && isUnlocked) {
+                Row {
+                    repeat(stars) {
+                        Text(
+                            text = "★",
+                            color = Color(0xFFFFD700),
+                            fontSize = 12.sp
+                        )
                     }
                 }
             }
+        }
+    }
+}
 
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
+@Composable
+fun HelpScreen(
+    onBack: () -> Unit = {}
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "How to Play",
+            color = Color.White,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp, bottom = 16.dp)
+        )
+        
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+        ) {
+            // Goal section
+            Text(
+                text = "Goal",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+            )
+            Text(
+                text = "Move the colored robot to its matching target.",
+                color = Color.White,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            
+            // Movement section
+            Text(
+                text = "Movement",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+            )
+            Text(
+                text = "Robots slide until they hit a wall or another robot.\n\nTap a robot to select it, then swipe in the direction you want it to move.",
+                color = Color.White,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            
+            // Controls section
+            Text(
+                text = "Controls",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+            )
+            Text(
+                text = "Tap a robot to select it.\n\nSwipe in any direction to move the selected robot.\n\nUse the Menu button to access settings.\n\nUse the Reset button to restart the current level.",
+                color = Color.White,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            
+            // Tips section
+            Text(
+                text = "Tips",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+            )
+            Text(
+                text = "Plan your moves carefully.\n\nUse other robots as barriers.\n\nTry to solve each level in the minimum number of moves.",
+                color = Color.White,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
+        
+        FancyButton(
+            text = "BACK",
+            color = FancyButtonColor.GRAY,
+            onClick = onBack,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
 
-                // When scroll stops, complete any partial fades
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    completeFadeRunnable[0] = () -> {
-                        View progressContainer = getView() != null ? getView().findViewById(R.id.progress_container) : null;
-                        if (progressContainer == null) return;
+@Composable
+fun CreditsScreen(
+    onBack: () -> Unit = {}
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Credits",
+            color = Color.White,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp, bottom = 16.dp)
+        )
+        
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+        ) {
+            // Version section
+            Text(
+                text = "Version",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+            )
+            Text(
+                text = "v1.9",
+                color = Color.White,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            
+            // Based on section
+            Text(
+                text = "Based on",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+            )
+            Text(
+                text = "Ricochet Robots®",
+                color = Color.White,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            
+            // Links section
+            Text(
+                text = "Links",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+            )
+            Text(
+                text = "Imprint",
+                color = Color(0xFF0000FF),
+                fontSize = 14.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Text(
+                text = "Open Source",
+                color = Color(0xFF0000FF),
+                fontSize = 14.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Text(
+                text = "Contact",
+                color = Color(0xFF0000FF),
+                fontSize = 14.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
+        
+        FancyButton(
+            text = "BACK",
+            color = FancyButtonColor.GRAY,
+            onClick = onBack,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
 
-                        int progressBottom = progressContainer.getBottom();
-                        int fadeStartY = progressBottom + FADE_START_OFFSET_PX;
+/**
+ * Generate a unique signature for the wall layout only.
+ * Used for achievements that track same walls with different robot positions.
+ * Format matches level file format: 12x14;mh1,0;mh1,3;...mv9,6;
+ */
+fun generateWallSignature(board: Board): String {
+    val sb = StringBuilder()
+    sb.append(board.width).append("x").append(board.height).append(";")
 
-                        for (int i = 0; i < recyclerView.getChildCount(); i++) {
-                            View child = recyclerView.getChildAt(i);
-                            if (child == null) continue;
+    // Collect all walls in sorted order
+    val walls = mutableListOf<String>()
+    for (y in 0 until board.height) {
+        for (x in 0 until board.width) {
+            val position = y * board.width + x
+            // Check for horizontal (SOUTH) walls
+            if (board.isWall(position, 2)) {
+                walls.add("mh$x,$y")
+            }
+            // Check for vertical (EAST) walls
+            if (board.isWall(position, 1)) {
+                walls.add("mv$x,$y")
+            }
+        }
+    }
+    walls.sort()
+    for (wall in walls) {
+        sb.append(wall).append(";")
+    }
+    return sb.toString()
+}
 
-                            int childTop = child.getTop();
-                            float currentAlpha = child.getAlpha();
+/**
+ * Generate a unique signature for robot and target positions only.
+ * Used for achievements that track same positions with different wall layouts.
+ * Format: 12x14;Rb3,4;Rg7,8;...Tb2,5;Tg9,10;...
+ */
+fun generatePositionSignature(board: Board): String {
+    val sb = StringBuilder()
+    sb.append(board.width).append("x").append(board.height).append(";")
 
-                            // If partially faded, complete the fade
-                            if (currentAlpha > 0f && currentAlpha < 1f) {
-                                if (childTop < fadeStartY) {
-                                    // Fade out completely
-                                    child.animate().alpha(0f).setDuration(150).start();
-                                } else {
-                                    // Fade in completely
-                                    child.animate().alpha(1f).setDuration(150).start();
+    // Collect all robots in sorted order
+    val robots = mutableListOf<String>()
+    for (i in board.robotPositions.indices) {
+        val position = board.robotPositions[i]
+        val x = position % board.width
+        val y = position / board.width
+        val colorChar = when (i) {
+            0 -> 'r' // red (pink) - matches LevelLoader.parseColorChar
+            1 -> 'g' // green
+            2 -> 'b' // blue
+            3 -> 'y' // yellow
+            4 -> 's' // silver
+            else -> 'm'
+        }
+        robots.add("R${colorChar}$x,$y")
+    }
+    robots.sort()
+    for (robot in robots) {
+        sb.append(robot).append(";")
+    }
+
+    // Collect all targets in sorted order
+    val targets = mutableListOf<String>()
+    for (goal in board.goals) {
+        val x = goal.position % board.width
+        val y = goal.position / board.width
+        val colorChar = when (goal.robotNumber) {
+            0 -> 'r' // red (pink) - matches LevelLoader.parseColorChar
+            1 -> 'g' // green
+            2 -> 'b' // blue
+            3 -> 'y' // yellow
+            4 -> 's' // silver
+            else -> 'm'
+        }
+        targets.add("T${colorChar}$x,$y")
+    }
+    targets.sort()
+    for (target in targets) {
+        sb.append(target).append(";")
+    }
+
+    return sb.toString()
+}
+
+/**
+ * Generate a complete unique signature for the entire map.
+ * Combines wall signature and position signature.
+ * Two maps with identical signatures are considered the same map.
+ * @param board The current board state
+ * @param startBoard Optional start board to use for robot positions (instead of current positions)
+ */
+fun generateMapSignature(board: Board, startBoard: Board? = null): String {
+    val positionBoard = startBoard ?: board
+    return generateWallSignature(board) + "||" + generatePositionSignature(positionBoard)
+}
+
+/**
+ * Generate a unique 5-letter string from an input string (DRY - from MapIdGenerator in main app)
+ * The resulting string alternates between consonants and vowels for better readability
+ * 
+ * @param input The input string to hash
+ * @return A 5-letter unique ID string
+ */
+fun generateUnique5LetterFromString(input: String): String {
+    try {
+        // Create SHA-256 hash
+        val digest = java.security.MessageDigest.getInstance("SHA-256")
+        val hashBytes = digest.digest(input.toByteArray())
+        
+        // Define vowels and consonants
+        val vowels = charArrayOf('A', 'E', 'I', 'O', 'U')
+        val consonants = charArrayOf('B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z')
+        
+        // Convert hash bytes to 5-letter string, alternating between consonants and vowels
+        val uniqueString = StringBuilder()
+        for (i in 0 until 5) {
+            val index = Math.abs(hashBytes[i].toInt()) % (if (i % 2 == 0) consonants.size else vowels.size)
+            val letter = if (i % 2 == 0) consonants[index] else vowels[index]
+            uniqueString.append(letter)
+        }
+        
+        return uniqueString.toString()
+    } catch (e: Exception) {
+        println("[MAP_ID_GENERATOR] Failed to generate unique ID: ${e.message}")
+        return "ERROR"
+    }
+}
+
+/**
+ * Generate a map name from map signature and game type (DRY - from main app)
+ * For Level Games: "Level $levelId"
+ * For Random Games: 5-character hash from map signature using SHA-256
+ */
+fun generateMapNameFromSignature(mapSig: String, isLevelGame: Boolean, levelId: Int? = null): String {
+    if (isLevelGame && levelId != null) {
+        return "Level $levelId"
+    }
+    
+    // Generate 5-character hash from map signature for random games (DRY - use SHA-256 like main app)
+    return generateUnique5LetterFromString(mapSig)
+}
+
+/**
+ * Serialize a Board to Main Game format for save/load compatibility
+ * DRY - Random Games shall run like Level Games with consistent map signature
+ */
+fun serializeBoardToMainGameFormat(board: Board, isLevelGame: Boolean, startBoard: Board? = null): String {
+    val sb = StringBuilder()
+    
+    // Generate map signature for unique map tracking (DRY - use startBoard for consistent signature)
+    val mapSig = generateMapSignature(board, startBoard)
+    
+    // Generate the metadata section with additional tags
+    sb.append("#MAPNAME:Random")
+        .append(";TIME:0")
+        .append(";MOVES:0")
+        .append(";DIFFICULTY:1") // Default difficulty
+        .append(";SIZE:").append(board.width).append(",").append(board.height)
+        .append(";SOLVED:false")
+        .append(";MAX_HINT_USED:-1") // No hints used by default
+        .append(";MAP_SIG:").append(mapSig)
+        .append("\n")
+    
+    // Add board dimensions
+    sb.append("WIDTH:").append(board.width).append(";\n")
+    sb.append("HEIGHT:").append(board.height).append(";\n")
+    
+    // Generate the board representation (walls excluded - they go in WALLS section)
+    // Use startBoard robot positions if available (DRY - Random Games shall run like Level Games)
+    val robotPositionsToUse = startBoard?.robotPositions ?: board.robotPositions
+    
+    for (y in 0 until board.height) {
+        for (x in 0 until board.width) {
+            if (x > 0) {
+                sb.append(",")
+            }
+            
+            val position = y * board.width + x
+            
+            // Check if this position has a robot (use start positions for consistent history)
+            val hasRobot = robotPositionsToUse.contains(position)
+            
+            // Check if this position has a target
+            val goal = board.goals.find { it.position == position }
+            
+            when {
+                hasRobot -> sb.append(4) // TYPE_ROBOT
+                goal != null -> {
+                    // Target with color
+                    val color = goal.robotNumber
+                    sb.append(3).append(":").append(color) // TYPE_TARGET with color
+                }
+                else -> sb.append(0) // TYPE_EMPTY
+            }
+        }
+        sb.append("\n")
+    }
+    
+    // Save targets in compact format: tcolorX,Y; (e.g., tb8,7;)
+    for (goal in board.goals) {
+        val x = goal.position % board.width
+        val y = goal.position / board.width
+        val color = goal.robotNumber
+        val colorChar = when (color) {
+            0 -> 'b' // blue
+            1 -> 'g' // green
+            2 -> 'r' // red (pink)
+            3 -> 'y' // yellow
+            4 -> 's' // silver
+            else -> 'm' // multi
+        }
+        sb.append("t").append(colorChar).append(x).append(",").append(y).append(";")
+    }
+    
+    sb.append("\n")
+    
+    // Save walls in compact format: hX,Y; and vX,Y;
+    // Horizontal walls (y goes to height to include bottom boundary)
+    for (y in 0..board.height) {
+        for (x in 0 until board.width) {
+            // Check horizontal wall at position (x, y) - this is the wall between (x, y) and (x, y+1)
+            // For the bottom boundary (y = height), we need to check if there's a wall at the bottom of the last row
+            val position = if (y < board.height) y * board.width + x else (board.height - 1) * board.width + x
+            if (y < board.height && board.isWall(position, 2)) { // SOUTH wall = horizontal
+                sb.append("h").append(x).append(",").append(y).append(";")
+            }
+        }
+    }
+    // Vertical walls (x goes to width to include right boundary)
+    for (y in 0 until board.height) {
+        for (x in 0..board.width) {
+            // Check vertical wall at position (x, y) - this is the wall between (x-1, y) and (x, y)
+            // For the right boundary (x = width), we need to check if there's a wall at the right of the last column
+            val position = if (x < board.width) y * board.width + x else y * board.width + (board.width - 1)
+            if (x < board.width && board.isWall(position, 1)) { // EAST wall = vertical
+                sb.append("v").append(x).append(",").append(y).append(";")
+            }
+        }
+    }
+    
+    sb.append("\n")
+    
+    // Save robots in compact format: rcolorX,Y; (e.g., rr1,5;)
+    for (i in board.robotPositions.indices) {
+        val position = board.robotPositions[i]
+        val x = position % board.width
+        val y = position / board.width
+        val colorChar = when (i) {
+            0 -> 'b' // blue
+            1 -> 'g' // green
+            2 -> 'r' // red (pink)
+            3 -> 'y' // yellow
+            4 -> 's' // silver
+            else -> 'm' // multi
+        }
+        sb.append("r").append(colorChar).append(x).append(",").append(y).append(";")
+    }
+    
+    return sb.toString()
+}
+
+/**
+ * Deserialize a Board from Main Game format
+ */
+private fun deserializeBoardFromMainGameFormat(saveData: String): Board? {
+    val lines = saveData.lines()
+    var width = 0
+    var height = 0
+    var boardData = mutableListOf<String>()
+    var targetsData = ""
+    var wallsData = ""
+    var robotsData = ""
+    
+    for (line in lines) {
+        when {
+            line.startsWith("WIDTH:") -> width = line.substringAfter("WIDTH:").substringBefore(";").toInt()
+            line.startsWith("HEIGHT:") -> height = line.substringAfter("HEIGHT:").substringBefore(";").toInt()
+            line.startsWith("#") -> { /* Skip metadata */ }
+            line.startsWith("t") -> targetsData += line
+            line.startsWith("h") || line.startsWith("v") -> wallsData += line
+            line.startsWith("r") -> robotsData += line
+            else -> boardData.add(line)
+        }
+    }
+    
+    if (width == 0 || height == 0) {
+        println("[DESERIALIZE] Invalid dimensions: width=$width, height=$height")
+        return null
+    }
+    
+    // Parse robots from ROBOTS section (preferred) or from board data (fallback)
+    val robotPositions = mutableListOf<Int>()
+    val robotColors = mutableListOf<Int>()
+    
+    if (robotsData.isNotEmpty()) {
+        // Parse robots from ROBOTS section: rcolorX,Y;
+        val robotPattern = Regex("r([a-z])(\\d+),(\\d+);")
+        robotPattern.findAll(robotsData).forEach { match ->
+            val colorChar = match.groupValues[1][0]
+            val rx = match.groupValues[2].toInt()
+            val ry = match.groupValues[3].toInt()
+            val robotNumber = when (colorChar) {
+                'b' -> 0
+                'g' -> 1
+                'r' -> 2
+                'y' -> 3
+                's' -> 4
+                else -> 0
+            }
+            robotPositions.add(ry * width + rx)
+            robotColors.add(robotNumber)
+        }
+    } else {
+        // Fallback: parse robots from board data
+        for (y in 0 until height) {
+            if (y >= boardData.size) break
+            val row = boardData[y].split(",")
+            for (x in 0 until width) {
+                if (x >= row.size) break
+                val cell = row[x]
+                when {
+                    cell.startsWith("4") -> { // TYPE_ROBOT
+                        robotPositions.add(y * width + x)
+                        robotColors.add(0) // Default color
+                    }
+                }
+            }
+        }
+    }
+    
+    // Parse targets
+    val goalData = mutableListOf<Triple<Int, Int, Int>>() // x, y, robotNumber
+    val targetPattern = Regex("t([a-z])(\\d+),(\\d+);")
+    targetPattern.findAll(targetsData).forEach { match ->
+        val colorChar = match.groupValues[1][0]
+        val tx = match.groupValues[2].toInt()
+        val ty = match.groupValues[3].toInt()
+        val robotNumber = when (colorChar) {
+            'b' -> 0
+            'g' -> 1
+            'r' -> 2
+            'y' -> 3
+            's' -> 4
+            else -> 0
+        }
+        goalData.add(Triple(tx, ty, robotNumber))
+    }
+    
+    if (robotPositions.isEmpty()) {
+        println("[DESERIALIZE] No robots found in save data")
+        return null
+    }
+    
+    // Create board
+    val newBoard = Board.createBoardFreestyle(null, width, height, robotPositions.size)
+    if (newBoard == null) {
+        println("[DESERIALIZE] Failed to create board")
+        return null
+    }
+    
+    // Set robot positions
+    for (i in robotPositions.indices) {
+        newBoard.robotPositions[i] = robotPositions[i]
+    }
+    
+    // Set goals
+    for ((tx, ty, robotNumber) in goalData) {
+        newBoard.addGoal(ty * width + tx, robotNumber, robotNumber)
+    }
+    newBoard.setGoalRandom()
+    
+    // Parse and set walls
+    val hWallPattern = Regex("h(\\d+),(\\d+);")
+    val vWallPattern = Regex("v(\\d+),(\\d+);")
+    
+    hWallPattern.findAll(wallsData).forEach { match ->
+        val wx = match.groupValues[1].toInt()
+        val wy = match.groupValues[2].toInt()
+        // hX,Y; means horizontal wall at (x, y) - prevents movement from (x, y) to SOUTH
+        // Set SOUTH wall at position (wx, wy)
+        newBoard.setWall(wx, wy, 2, true) // Set SOUTH wall
+        // Also set NORTH wall at position (wx, wy+1) for consistency with gridElementsToBoard
+        if (wy + 1 < newBoard.height) {
+            newBoard.setWall(wx, wy + 1, 0, true) // Set NORTH wall
+        }
+    }
+    
+    vWallPattern.findAll(wallsData).forEach { match ->
+        val wx = match.groupValues[1].toInt()
+        val wy = match.groupValues[2].toInt()
+        // vX,Y; means vertical wall at (x, y) - prevents movement from (x-1, y) to (x, y)
+        // Set EAST wall at position (wx, wy)
+        newBoard.setWall(wx, wy, 1, true) // Set EAST wall
+        // Also set WEST wall at position (wx+1, wy) for consistency with gridElementsToBoard
+        if (wx + 1 < newBoard.width) {
+            newBoard.setWall(wx + 1, wy, 3, true) // Set WEST wall
+        }
+    }
+    
+    println("[DESERIALIZE] Board created: ${newBoard.width}x${newBoard.height}, robots: ${newBoard.robotPositions.joinToString(",")}, goals: ${newBoard.goals.size}")
+    
+    return newBoard
+}
+
+/**
+ * Save a board to history using Main Game format
+ */
+private fun saveToHistory(board: Board, storage: PlatformStorage): Boolean {
+    try {
+        // Get next available history index
+        val historyIndex = getNextHistoryIndex(storage)
+        val historyFileName = "history_$historyIndex.txt"
+        
+        // Serialize board to Main Game format
+        val saveData = serializeBoardToMainGameFormat(board, false)
+        
+        // Write to history file
+        val result = storage.writeFile(historyFileName, saveData)
+        
+        if (result) {
+            println("[HISTORY] Saved to history: $historyFileName")
+        }
+        
+        return result
+    } catch (e: Exception) {
+        println("[HISTORY] Error saving to history: ${e.message}")
+        return false
+    }
+}
+
+/**
+ * Get the next available history index
+ */
+private fun getNextHistoryIndex(storage: PlatformStorage): Int {
+    var index = 1
+    while (storage.fileExists("history_$index.txt")) {
+        index++
+    }
+    return index
+}
+
+/**
+ * Get all history entries including autosave, sorted by timestamp (newest first)
+ * Uses GameHistoryManager for history entries
+ * Returns list of Triple with (index, fileName, entry)
+ */
+private fun getHistoryEntries(storage: PlatformStorage): List<Triple<Int, String, roboyard.logic.core.GameHistoryEntry?>> {
+    val entries = mutableListOf<Triple<Int, String, roboyard.logic.core.GameHistoryEntry?>>()
+    
+    // Add autosave entry first (index 0, no GameHistoryEntry)
+    if (storage.fileExists("saves/save_0.dat")) {
+        entries.add(Triple(0, "saves/save_0.dat", null))
+    }
+    
+    // Add history entries using GameHistoryManager
+    try {
+        roboyard.logic.managers.GameHistoryManager.initialize(storage)
+        val historyEntries = roboyard.logic.managers.GameHistoryManager.getHistoryEntries(storage)
+        for (entry in historyEntries) {
+            val index = entry.getHistoryIndex()
+            entries.add(Triple(index, entry.getMapPath(), entry))
+        }
+    } catch (e: Exception) {
+        println("[SAVE_LOAD_SCREEN] Error loading history entries: ${e.message}")
+    }
+    
+    // Sort by timestamp (newest first) - like the default in main app SaveGameFragment
+    // TODO: spinner option and pagination
+    val sortedEntries = entries.sortedByDescending { it.third?.timestamp ?: 0L }
+    
+    return sortedEntries
+}
+
+/**
+ * Validate that save file contains targets
+ */
+private fun validateSaveContainsTargets(saveData: String, fileName: String): Boolean {
+    val hasTargets = saveData.contains("t") || saveData.contains("3:")
+    if (!hasTargets) {
+        println("[SAVE_VERIFICATION] Save file $fileName does not contain targets")
+    }
+    return hasTargets
+}
+
+@Composable
+fun HistoryItem(
+    historyIndex: Int,
+    fileName: String,
+    mapName: String = "",
+    moves: Int = 0,
+    time: Int = 0,
+    stars: Int = 0,
+    hintsUsed: Boolean = false,
+    onClick: () -> Unit = {},
+    onInfoClick: () -> Unit = {}
+) {
+    val displayName = if (historyIndex == 0) {
+        "Autosave"
+    } else {
+        mapName.ifEmpty { "History #$historyIndex" }
+    }
+    
+    val timeStr = if (time > 0) {
+        val minutes = time / 60
+        val seconds = time % 60
+        String.format("%d:%02d", minutes, seconds)
+    } else {
+        "--:--"
+    }
+    
+    val hintsIndicator = if (hintsUsed) " (H)" else ""
+    
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.DarkGray, RoundedCornerShape(8.dp))
+            .clickable { onClick() }
+            .padding(16.dp)
+    ) {
+        Column {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = displayName,
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
+                )
+                if (stars > 0) {
+                    Text(
+                        text = "★".repeat(stars),
+                        color = Color.Yellow,
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(end = 4.dp)
+                    )
+                }
+                CircularButton(
+                    text = "i",
+                    color = CircularButtonColor.GRAY,
+                    onClick = onInfoClick,
+                    modifier = Modifier.semantics { testTag = "infoButton_$historyIndex" }
+                )
+            }
+            Text(
+                text = fileName,
+                color = Color.LightGray,
+                fontSize = 12.sp
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Moves: $moves",
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
+                Text(
+                    text = "Time: $timeStr$hintsIndicator",
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SaveLoadScreen(
+    boardToSave: Board? = null,
+    isLevelGame: Boolean = false,
+    onBack: () -> Unit = {},
+    onLoadGame: (Board) -> Unit = {}
+) {
+    var selectedTab by remember { mutableStateOf(0) }
+    val tabs = listOf("Save", "Load", "History")
+    var showInfoDialog by remember { mutableStateOf(false) }
+    var selectedEntry by remember { mutableStateOf<roboyard.logic.core.GameHistoryEntry?>(null) }
+    
+    // Check for saved games
+    val storage = remember { getPlatformStorage() }
+    var hasSavedGames by remember { mutableStateOf(false) }
+    var slotStates by remember { mutableStateOf(List(10) { false }) }
+    var historyEntries by remember { mutableStateOf<List<Triple<Int, String, roboyard.logic.core.GameHistoryEntry?>>>(emptyList()) }
+    
+    LaunchedEffect(Unit) {
+        hasSavedGames = storage.hasSavedGames()
+        println("[SAVE_LOAD_SCREEN] hasSavedGames: $hasSavedGames")
+        // Check each slot
+        val newSlotStates = mutableListOf<Boolean>()
+        for (i in 1..10) {
+            val fileName = "saves/save_$i.dat"
+            val exists = storage.fileExists(fileName)
+            newSlotStates.add(exists)
+            println("[SAVE_LOAD_SCREEN] Slot $i ($fileName): exists=$exists")
+        }
+        slotStates = newSlotStates
+        
+        // Load history entries
+        historyEntries = getHistoryEntries(storage)
+        println("[SAVE_LOAD_SCREEN] History entries: ${historyEntries.size}")
+        for ((index, fileName, entry) in historyEntries) {
+            println("[SAVE_LOAD_SCREEN] Entry $index: ${entry?.mapName}, bestTime=${entry?.bestTime}, bestMoves=${entry?.bestMoves}")
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .padding(16.dp)
+    ) {
+        // Title and profile button
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = when (selectedTab) {
+                    0 -> "Select slot to save game"
+                    1 -> "Select slot to load game"
+                    else -> "Game History"
+                },
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
+            )
+            CircularButton(
+                text = null,
+                color = CircularButtonColor.TURQUOISE,
+                onClick = { },
+                modifier = Modifier.size(48.dp)
+            )
+        }
+
+        // Tab layout
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            tabs.forEachIndexed { index, tab ->
+                FancyButton(
+                    text = tab,
+                    color = if (selectedTab == index) FancyButtonColor.BLUE else FancyButtonColor.GRAY,
+                    onClick = { selectedTab = index },
+                    modifier = Modifier.weight(1f).semantics { testTag = "tab_$index" }
+                )
+            }
+        }
+
+        // Save slots or history entries
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(top = 8.dp)
+        ) {
+            if (selectedTab == 2) {
+                // History tab
+                if (historyEntries.isEmpty()) {
+                    Text(
+                        text = "No history entries yet",
+                        color = Color.Gray,
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                } else {
+                    historyEntries.forEach { (index, fileName, entry) ->
+                        HistoryItem(
+                            historyIndex = index,
+                            fileName = fileName,
+                            mapName = entry?.mapName ?: "",
+                            moves = entry?.movesMade ?: 0,
+                            time = entry?.playDuration ?: 0,
+                            stars = entry?.starsEarned ?: 0,
+                            hintsUsed = entry?.isEverUsedHints() ?: false,
+                            onClick = {
+                                // Load history entry
+                                println("[SAVE_LOAD_SCREEN] Loading history entry: $fileName")
+                                val saveData = storage.readFile(fileName)
+                                val loadedBoard = deserializeBoardFromMainGameFormat(saveData)
+                                if (loadedBoard != null) {
+                                    onLoadGame(loadedBoard)
+                                }
+                            },
+                            onInfoClick = {
+                                selectedEntry = entry
+                                showInfoDialog = true
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
+            } else {
+                // Save/Load tabs
+                repeat(10) { slotIndex ->
+                    val slotNumber = slotIndex + 1
+                    val isEmpty = !slotStates[slotIndex]
+                    SaveSlotItem(
+                        slotNumber = slotNumber,
+                        isEmpty = isEmpty,
+                        onClick = {
+                            if (selectedTab == 0 && boardToSave != null) {
+                                // Save game to slot using Main Game format
+                                println("[SAVE_LOAD_SCREEN] Saving game to slot $slotNumber")
+                                val fileName = "saves/save_$slotNumber.dat"
+                                
+                                // Serialize board to Main Game format (DRY - use startBoard for consistent signature)
+                                val saveData = serializeBoardToMainGameFormat(boardToSave, isLevelGame, null)
+                                
+                                println("[SAVE_LOAD_SCREEN] Save data: $saveData")
+                                val result = storage.writeFile(fileName, saveData)
+                                println("[SAVE_LOAD_SCREEN] Write result: $result")
+                                
+                                if (result) {
+                                    // Verify save file contains targets
+                                    val savedContent = storage.readFile(fileName)
+                                    if (!validateSaveContainsTargets(savedContent, fileName)) {
+                                        storage.writeFile(fileName, "") // Delete invalid save
+                                        println("[SAVE_LOAD_SCREEN] Save file validation failed: No targets found")
+                                    } else {
+                                        // Update slot state
+                                        val newSlotStates = slotStates.toMutableList()
+                                        newSlotStates[slotIndex] = true
+                                        slotStates = newSlotStates
+                                        println("[SAVE_LOAD_SCREEN] Game saved to slot $slotNumber")
+                                    }
+                                }
+                            } else if (!isEmpty && selectedTab == 1) {
+                                // Load game from slot using Main Game format
+                                println("[SAVE_LOAD_SCREEN] Loading game from slot $slotNumber")
+                                val fileName = "saves/save_$slotNumber.dat"
+                                val saveData = storage.readFile(fileName)
+                                println("[SAVE_LOAD_SCREEN] Save data: $saveData")
+                                
+                                val loadedBoard = deserializeBoardFromMainGameFormat(saveData)
+                                
+                                if (loadedBoard != null) {
+                                    println("[SAVE_LOAD_SCREEN] Board created successfully: ${loadedBoard.width}x${loadedBoard.height}")
+                                    onLoadGame(loadedBoard)
                                 }
                             }
                         }
-                    };
-                    fadeHandler.postDelayed(completeFadeRunnable[0], FADE_COMPLETE_DELAY_MS);
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
-        });
+        }
+
+        // Back button
+        FancyButton(
+            text = "Back",
+            color = FancyButtonColor.GRAY,
+            onClick = onBack,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 
-    /**
-     * Scroll to the last played level automatically, positioning it in the middle of the screen
-     */
-    private void scrollToLastPlayedLevel() {
-        int lastPlayedLevel = completionManager.getLastPlayedLevel();
-        
-        // Find the position of the last played level in the list
-        int position = availableLevels.indexOf(lastPlayedLevel);
-        
-        if (position >= 0) {
-            final int scrollPosition = position;
-            levelRecyclerView.post(() -> {
-                // Get the LinearLayoutManager to scroll to position with offset
-                androidx.recyclerview.widget.LinearLayoutManager layoutManager = 
-                    (androidx.recyclerview.widget.LinearLayoutManager) levelRecyclerView.getLayoutManager();
-                
-                if (layoutManager != null) {
-                    // Calculate offset to center the item on screen
-                    // Get the height of the RecyclerView and item height
-                    int recyclerViewHeight = levelRecyclerView.getHeight();
-                    int itemHeight = 120; // Approximate height of level item
-                    int offset = (recyclerViewHeight / 2) - (itemHeight / 2);
-                    
-                    // Scroll to position with offset to center it
-                    layoutManager.scrollToPositionWithOffset(scrollPosition, offset);
-                    Timber.d("Scrolling to last played level %d at position %d with offset %d", 
-                            lastPlayedLevel, scrollPosition, offset);
-                } else {
-                    // Fallback to smooth scroll
-                    levelRecyclerView.smoothScrollToPosition(scrollPosition);
-                }
-            });
-        } else {
-            // Fallback: scroll to first level
-            Timber.d("Last played level %d not found, scrolling to first level", lastPlayedLevel);
-        }
+    // Info dialog
+    if (showInfoDialog && selectedEntry != null) {
+        HistoryInfoDialog(
+            entry = selectedEntry!!,
+            onDismiss = { showInfoDialog = false }
+        )
     }
+}
 
-    /**
-     * Called when the fragment is resumed.
-     * This is important for updating the completion stars when returning from a game.
-     * If a level was completed during gameplay, we need to refresh the adapter
-     * to show the star icon when the user returns to this screen.
-     * 
-     * Note: If stars are not showing, check that:
-     * 1. The LevelCompletionManager is properly initialized
-     * 2. The level was actually marked as completed in GameStateManager.setGameComplete()
-     * 3. The Gson library is properly included in the build.gradle dependencies
-     * 4. The star drawable exists in the drawable folder
-     */
-    @Override
-    public void onResume() {
-        super.onResume();
-        
-        // Update user profile button when returning to this screen
-        if (userProfileButton != null) {
-            updateUserProfileButton(userProfileButton);
+@Composable
+fun SaveSlotItem(
+    slotNumber: Int,
+    isEmpty: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(64.dp)
+            .background(Color(0xFF2C2C2C), RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Text(
+            text = if (isEmpty) "Slot $slotNumber (Empty)" else "Slot $slotNumber - Level 1, 5 moves",
+            color = Color.White,
+            fontSize = 16.sp
+        )
+    }
+}
+
+@Composable
+fun DebugSettingsScreen(
+    onBack: () -> Unit = {}
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Debug Settings",
+            color = Color.White,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+        ) {
+            // Hint Auto Move Settings
+            Text(
+                text = "Hint Auto Move Mode",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Text(
+                text = "Current mode: Manual",
+                color = Color(0xFFFFFF00),
+                fontSize = 14.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FancyButton(
+                    text = "Manual",
+                    color = FancyButtonColor.BLUE,
+                    onClick = { },
+                    modifier = Modifier.weight(1f)
+                )
+                FancyButton(
+                    text = "Full-Auto",
+                    color = FancyButtonColor.BLUE,
+                    onClick = { },
+                    modifier = Modifier.weight(1f)
+                )
+                FancyButton(
+                    text = "Semi-Auto",
+                    color = FancyButtonColor.BLUE,
+                    onClick = { },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Dummy History Entries
+            Text(
+                text = "Dummy History Entries",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            FancyButton(
+                text = "Add 100 Dummy Entries",
+                color = FancyButtonColor.GREEN,
+                onClick = { },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // App Control
+            Text(
+                text = "App Control",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            FancyButton(
+                text = "Restart App",
+                color = FancyButtonColor.RED,
+                onClick = { },
+                modifier = Modifier.fillMaxWidth()
+            )
         }
-        
-        // Update total stars
-        totalStars = completionManager.getTotalStars();
 
-        // Update progress UI
-        updateProgressUI();
+        // Back button
+        FancyButton(
+            text = "Back",
+            color = FancyButtonColor.GRAY,
+            onClick = onBack,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
 
-        // Reload history entries (may have new entries after playing)
-        loadHistoryByMapName();
+@Composable
+fun LevelDesignEditorScreen(
+    onBack: () -> Unit = {},
+    onPlayMap: (Board) -> Unit = {}
+) {
+    var selectedTool by remember { mutableStateOf("Wall") }
+    var selectedTarget by remember { mutableStateOf("None") }
+    var boardWidth by remember { mutableStateOf("12") }
+    var boardHeight by remember { mutableStateOf("14") }
 
-        // Refresh the adapter to update completion stars when returning to this screen
-        if (levelAdapter != null) {
-            levelAdapter.updateTotalStars(totalStars);
-            levelAdapter.notifyDataSetChanged();
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Level Design Editor",
+            color = Color.White,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+        ) {
+            // Wall Tool Selection
+            Text(
+                text = "Wall Tool",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FancyButton(
+                    text = "Wall",
+                    color = if (selectedTool == "Wall") FancyButtonColor.BLUE else FancyButtonColor.GRAY,
+                    onClick = { selectedTool = "Wall" },
+                    modifier = Modifier.weight(1f)
+                )
+                FancyButton(
+                    text = "Eraser",
+                    color = if (selectedTool == "Eraser") FancyButtonColor.BLUE else FancyButtonColor.GRAY,
+                    onClick = { selectedTool = "Eraser" },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Target Tool Selection
+            Text(
+                text = "Target Tool",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FancyButton(
+                    text = "None",
+                    color = if (selectedTarget == "None") FancyButtonColor.BLUE else FancyButtonColor.GRAY,
+                    onClick = { selectedTarget = "None" },
+                    modifier = Modifier.weight(1f)
+                )
+                FancyButton(
+                    text = "R",
+                    color = if (selectedTarget == "R") FancyButtonColor.RED else FancyButtonColor.GRAY,
+                    onClick = { selectedTarget = "R" },
+                    modifier = Modifier.weight(1f)
+                )
+                FancyButton(
+                    text = "G",
+                    color = if (selectedTarget == "G") FancyButtonColor.GREEN else FancyButtonColor.GRAY,
+                    onClick = { selectedTarget = "G" },
+                    modifier = Modifier.weight(1f)
+                )
+                FancyButton(
+                    text = "B",
+                    color = if (selectedTarget == "B") FancyButtonColor.BLUE else FancyButtonColor.GRAY,
+                    onClick = { selectedTarget = "B" },
+                    modifier = Modifier.weight(1f)
+                )
+                FancyButton(
+                    text = "Y",
+                    color = if (selectedTarget == "Y") FancyButtonColor.YELLOW else FancyButtonColor.GRAY,
+                    onClick = { selectedTarget = "Y" },
+                    modifier = Modifier.weight(1f)
+                )
+                FancyButton(
+                    text = "S",
+                    color = if (selectedTarget == "S") FancyButtonColor.GRAY else FancyButtonColor.GRAY,
+                    onClick = { selectedTarget = "S" },
+                    modifier = Modifier.weight(1f)
+                )
+                FancyButton(
+                    text = "M",
+                    color = if (selectedTarget == "M") FancyButtonColor.PURPLE else FancyButtonColor.GRAY,
+                    onClick = { selectedTarget = "M" },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Board Preview
+            Text(
+                text = "Board Preview",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(400.dp)
+                    .background(Color(0xFF1A1A1A), RoundedCornerShape(8.dp))
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Board preview will appear here",
+                    color = Color(0xFF888888),
+                    fontSize = 16.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Board Size Configuration
+            Text(
+                text = "Board Size",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Width:",
+                    color = Color(0xFFCCCCCC),
+                    fontSize = 16.sp
+                )
+                Text(
+                    text = boardWidth,
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = "Height:",
+                    color = Color(0xFFCCCCCC),
+                    fontSize = 16.sp
+                )
+                Text(
+                    text = boardHeight,
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Export/Import Buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FancyButton(
+                    text = "Export Level",
+                    color = FancyButtonColor.RED,
+                    onClick = { },
+                    modifier = Modifier.weight(1f)
+                )
+                FancyButton(
+                    text = "Import ASCII",
+                    color = FancyButtonColor.BLUE,
+                    onClick = { },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Play Map Button
+            FancyButton(
+                text = "Play Map",
+                color = FancyButtonColor.GREEN,
+                onClick = { },
+                modifier = Modifier.fillMaxWidth()
+            )
         }
 
-        // Auto-scroll to the last played level
-        scrollToLastPlayedLevel();
+        // Cancel Button
+        FancyButton(
+            text = "Cancel",
+            color = FancyButtonColor.GRAY,
+            onClick = onBack,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
 
-        // Update Level Editor button visibility
-        if (getView() != null) {
-            Button levelEditorButton = getView().findViewById(R.id.level_editor_button);
-            if (levelEditorButton != null) {
-                updateLevelEditorButtonVisibility(levelEditorButton);
+@Composable
+fun AchievementsScreen(
+    onBack: () -> Unit = {}
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
+        // Top row with back button, title, and profile button
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            FancyButton(
+                text = "BACK",
+                color = FancyButtonColor.GRAY,
+                onClick = onBack,
+                modifier = Modifier.width(100.dp)
+            )
+            Text(
+                text = "Achievements",
+                color = Color.White,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center
+            )
+            CircularButton(
+                text = null,
+                color = CircularButtonColor.TURQUOISE,
+                onClick = { },
+                modifier = Modifier.size(48.dp)
+            )
+        }
+
+        // Progress text
+        Text(
+            text = "0 / 0 Unlocked",
+            color = Color.White,
+            fontSize = 16.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            textAlign = TextAlign.Center
+        )
+
+        // Scrollable achievements list
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+        ) {
+            repeat(5) { index ->
+                AchievementItem(
+                    title = "Achievement $index",
+                    description = "Description for achievement $index",
+                    unlocked = false,
+                    progress = "0 / 10"
+                )
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
+}
 
-    /**
-     * Shows the Level Editor button if the player has earned at least 140 stars total.
-     */
-    private void updateLevelEditorButtonVisibility(Button button) {
-        int totalStars = completionManager.getTotalStars();
-        boolean visible = totalStars >= 140;
-        button.setVisibility(visible ? View.VISIBLE : View.GONE);
-        Timber.d("[LEVEL_SELECTION] Total stars: %d, Level Editor button visible: %b", totalStars, visible);
-    }
+@Composable
+fun LoadingScreen(
+    levelId: Int,
+    onLoadComplete: (Board) -> Unit,
+    onBack: () -> Unit
+) {
+    var isLoading by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    /**
-     * Loads history entries and maps them by normalized level key (e.g. "level_1" for levelId=1).
-     * History stores mapName as "Level 1" (set via GameStateManager.startLevelGame), so we
-     * extract the number and map it to the key used by onBindViewHolder.
-     */
-    private void loadHistoryByMapName() {
-        historyByMapName.clear();
+    LaunchedEffect(levelId) {
+        isLoading = true
+        errorMessage = null
         try {
-            List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(requireActivity());
-            if (entries != null) {
-                for (GameHistoryEntry entry : entries) {
-                    String key = extractLevelKey(entry);
-                    if (key == null) continue;
-                    // Keep the entry with the most completions if there are duplicates
-                    GameHistoryEntry existing = historyByMapName.get(key);
-                    if (existing == null || entry.getCompletionCount() >= existing.getCompletionCount()) {
-                        historyByMapName.put(key, entry);
-                    }
-                }
+            // Load level using LevelLoader (same as fragment-app GameState.loadLevel)
+            val board: Board? = withContext(Dispatchers.IO) {
+                LevelLoader.loadLevel(levelId)
             }
-        } catch (Exception e) {
-            Timber.e(e, "[LEVEL_SELECTION] Error loading history entries for minimap display");
-        }
-        Timber.d("[LEVEL_SELECTION] Loaded %d history entries into map", historyByMapName.size());
-    }
-
-    /**
-     * Extracts a normalized level key (e.g. "level_1") from a history entry.
-     * History mapName is "Level 1" (set via GameStateManager.startLevelGame).
-     * Also falls back to parsing the mapPath basename (e.g. "level_1.txt").
-     *
-     * @return normalized key like "level_1" or "custom_level_141", or null if not a level entry
-     */
-    private static String extractLevelKey(GameHistoryEntry entry) {
-        // Prioritize mapPath parsing to handle corrupt server data where mapNames are 5-letter codes
-        String mapPath = entry.getMapPath();
-        Timber.d("[LEVEL_SELECTION] extractLevelKey: mapName='%s', mapPath='%s'", entry.mapName, mapPath);
-        if (mapPath != null) {
-            String base = mapPath.contains("/")
-                    ? mapPath.substring(mapPath.lastIndexOf('/') + 1)
-                    : mapPath;
-            if (base.startsWith("level_") || base.startsWith("custom_level_")) {
-                String key = base.endsWith(".txt") ? base.substring(0, base.length() - 4) : base;
-                Timber.d("[LEVEL_SELECTION] extractLevelKey: parsed from mapPath, key='%s'", key);
-                return key;
-            }
-        }
-        // Fallback: try mapName "Level N" -> "level_N"
-        String mapName = entry.mapName;
-        if (mapName != null) {
-            if (mapName.matches("(?i)Level \\d+")) {
-                int id = Integer.parseInt(mapName.trim().split("\\s+")[1]);
-                String key = id >= 141 ? "custom_level_" + id : "level_" + id;
-                Timber.d("[LEVEL_SELECTION] extractLevelKey: matched Level pattern, key='%s'", key);
-                return key;
-            }
-        }
-        Timber.d("[LEVEL_SELECTION] extractLevelKey: no valid key found, returning null");
-        return null;
-    }
-
-    /**
-     * Loads available levels from the assets/Maps directory.
-     * Looks for files with the pattern "level_X.txt" where X is the level number.
-     * Also checks for custom levels in internal storage.
-     * The loaded level IDs are stored in the availableLevels list and sorted numerically.
-     */
-    private void loadAvailableLevels() {
-        availableLevels.clear();
-        try {
-            // Load built-in levels (1-140)
-            String[] files = getActivity().getAssets().list("Maps");
-            for (String file : files) {
-                if (file.startsWith("level_") && file.endsWith(".txt")) {
-                    try {
-                        int levelId = Integer.parseInt(file.substring(6, file.length() - 4));
-                        availableLevels.add(levelId);
-                    } catch (NumberFormatException e) {
-                        // Skip files with invalid level IDs
-                    }
-                }
-            }
-
-            // Check for custom levels (141+) in internal storage
-            File internalDir = requireContext().getFilesDir();
-            File[] internalFiles = internalDir.listFiles();
-            if (internalFiles != null) {
-                for (File file : internalFiles) {
-                    String fileName = file.getName();
-                    if (fileName.startsWith("custom_level_") && fileName.endsWith(".txt")) {
-                        try {
-                            int levelId = Integer.parseInt(fileName.substring("custom_level_".length(), fileName.length() - 4));
-                            availableLevels.add(levelId);
-                        } catch (NumberFormatException e) {
-                            // Skip files with invalid level IDs
-                        }
-                    }
-                }
-            }
-
-            // Sort levels by ID
-            Collections.sort(availableLevels);
-
-        } catch (IOException e) {
-            Timber.e(e, "Error loading levels");
-        }
-
-        // Calculate total stars earned
-        calculateTotalStars();
-
-        // Create and set the adapter
-        levelAdapter = new LevelAdapter(availableLevels, this, completionManager, totalStars, historyByMapName);
-        levelRecyclerView.setAdapter(levelAdapter);
-    }
-
-    /**
-     * Calculate the total number of stars earned across all levels
-     */
-    private void calculateTotalStars() {
-        totalStars = 0;
-        for (Integer levelId : availableLevels) {
-            LevelCompletionData data = completionManager.getLevelCompletionData(levelId);
-            if (data != null) {
-                totalStars += data.getStars();
-            }
-        }
-        completedLevelCount = GameHistoryManager.getUniqueCompletedLevelCount(requireActivity());
-    }
-
-    /**
-     * Updates the progress bar and stars count in the header.
-     * Shows "X / Y Level completed" in the progress bar and "X" as total star count.
-     * Dynamically positions text based on progress percentage:
-     * - 0-30%: All text on right (blue area)
-     * - 30-70%: Description left (yellow), numbers right (blue)
-     * - 70-100%: All text on left (yellow area)
-     * Positions diagonal SVG separator at the edge of the yellow fill.
-     */
-    private void updateProgressUI() {
-        calculateTotalStars();
-        int totalLevels = availableLevels.size();
-
-        // Update total stars count (large golden number left of star icon)
-        if (totalStarsText != null) {
-            totalStarsText.setText(String.valueOf(totalStars));
-        }
-
-        // Calculate progress percentage
-        float progressPercentage = totalLevels > 0 ? (float) completedLevelCount / totalLevels : 0f;
-
-        // Prepare text components
-        String numbersText = String.format("%d / %d", completedLevelCount, totalLevels);
-        String descriptionText = getString(R.string.level_progress_completed);
-
-        // Update text positioning based on progress
-        if (progressTextLeft != null && progressTextRight != null) {
-            if (progressPercentage < 0.3f) {
-                // 0-30%: All text on right (blue area)
-                progressTextLeft.setText("");
-                progressTextRight.setText(numbersText + " " + descriptionText);
-            } else if (progressPercentage < 0.7f) {
-                // 30-70%: Description left (yellow), numbers right (blue)
-                progressTextLeft.setText(descriptionText);
-                progressTextRight.setText(numbersText);
+            if (board != null) {
+                onLoadComplete(board)
             } else {
-                // 70-100%: All text on left (yellow area)
-                progressTextLeft.setText(numbersText + " " + descriptionText);
-                progressTextRight.setText("");
+                errorMessage = "Level not found"
+            }
+        } catch (e: Exception) {
+            errorMessage = "Error loading level: ${e.message}"
+        } finally {
+            isLoading = false
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (isLoading) {
+                Text(
+                    text = "Loading Level $levelId...",
+                    color = Color.White,
+                    fontSize = 24.sp
+                )
+            } else if (errorMessage != null) {
+                val errorMsg = errorMessage ?: "Unknown error"
+                Text(
+                    text = errorMsg,
+                    color = Color.Red,
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = onBack) {
+                    Text("Back")
+                }
             }
         }
+    }
+}
 
-        // Update progress bar fill width and diagonal separator position
-        if (progressFill != null && totalLevels > 0) {
-            progressFill.post(() -> {
-                View parent = (View) progressFill.getParent();
-                int parentWidth = parent.getWidth();
-                float fraction = (float) completedLevelCount / totalLevels;
-                // Ensure minimum width of 1 to keep bar visible
-                int fillWidth = Math.max(1, (int) (parentWidth * fraction));
-
-                // Update fill width
-                ViewGroup.LayoutParams params = progressFill.getLayoutParams();
-                params.width = fillWidth;
-                progressFill.setLayoutParams(params);
-
-                // Position diagonal separator at the right edge of the fill
-                if (progressDiagonal != null) {
-                    int diagonalWidth = progressDiagonal.getWidth();
-                    if (diagonalWidth == 0) diagonalWidth = (int) (20 * getResources().getDisplayMetrics().density);
-                    // Center the diagonal on the fill edge
-                    float diagonalX = fillWidth - (diagonalWidth / 2f);
-                    // Clamp to stay within bar bounds
-                    diagonalX = Math.max(0, Math.min(diagonalX, parentWidth - diagonalWidth));
-                    progressDiagonal.setTranslationX(diagonalX);
-
-                    // Hide diagonal when progress is 0% or 100%
-                    progressDiagonal.setVisibility(
-                            (fraction <= 0f || fraction >= 1f) ? View.GONE : View.VISIBLE);
-                }
-            });
+@Composable
+fun AchievementItem(
+    title: String,
+    description: String,
+    unlocked: Boolean,
+    progress: String
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(if (unlocked) Color(0xFFE8F5E9) else Color(0xFFF5F5F5), RoundedCornerShape(8.dp))
+            .border(BorderStroke(1.dp, if (unlocked) Color(0xFF4CAF50) else Color(0xFFE0E0E0)), RoundedCornerShape(8.dp))
+            .padding(16.dp)
+    ) {
+        Column {
+            Text(
+                text = title,
+                color = if (unlocked) Color(0xFF2E7D32) else Color(0xFF757575),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = description,
+                color = Color(0xFF616161),
+                fontSize = 14.sp,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+            Text(
+                text = "",
+                color = Color(0xFF616161),
+                fontSize = 14.sp,
+                modifier = Modifier.padding(top = 4.dp)
+            )
         }
     }
+}
 
-    /**
-     * Handles the selection of a level from the grid.
-     * When a level is selected, this method:
-     * 1. Starts a new level game with the selected level ID
-     * 2. Navigates to the GameFragment to display the game
-     * 
-     * After completing the level, the user will return to this screen,
-     * and the onResume method will refresh the adapter to show completion stars.
-     * 
-     * @param levelId The ID of the selected level
-     */
-    public void onLevelSelected(int levelId, View clickedCard) {
-        Timber.d("Selected level: %d", levelId);
+@Composable
+fun HistoryInfoDialog(
+    entry: roboyard.logic.core.GameHistoryEntry,
+    onDismiss: () -> Unit
+) {
+    val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault())
 
-        // Custom levels are always unlocked, regular levels have star requirements
-        boolean isCustomLevel = levelId >= CUSTOM_LEVEL_START_ID;
-        boolean isUnlocked = isCustomLevel || 
-                (STARS_PER_LEVEL * (levelId - 1) <= totalStars);
-
-        if (!isUnlocked) {
-            int starsNeeded = (levelId - 1) * STARS_PER_LEVEL - totalStars;
-            // TODO: this toast is never shown
-            Toast.makeText(requireContext(), 
-                    getString(R.string.level_locked, starsNeeded),
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Prevent double-clicks during animation
-        clickedCard.setClickable(false);
-
-        // Remove borders (both foreground and background) on click
-        clickedCard.setForeground(null);
-        
-        // Hide stars bar and stretch minimap to fill card before zoom
-        View starsContainer = clickedCard.findViewById(R.id.stars_container);
-        if (starsContainer != null) {
-            starsContainer.setVisibility(View.GONE);
-        }
-        ImageView minimapView = clickedCard.findViewById(R.id.level_minimap_view);
-        if (minimapView != null && minimapView.getVisibility() == View.VISIBLE) {
-            // Remove 1:1 ratio and stretch minimap to fill entire card
-            ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) minimapView.getLayoutParams();
-            lp.dimensionRatio = null;
-            lp.topToBottom = ConstraintLayout.LayoutParams.UNSET;
-            lp.topToTop = ConstraintLayout.LayoutParams.PARENT_ID;
-            lp.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID;
-            lp.topMargin = 0;
-            minimapView.setLayoutParams(lp);
+    println("[HISTORY_INFO_DIALOG] entry.bestTime=${entry.bestTime}, entry.bestMoves=${entry.bestMoves}, entry.completionCount=${entry.completionCount}")
+    
+    val message = buildString {
+        append("Completions: ${entry.completionCount}\n")
+        append("First started: ${sdf.format(Date(entry.timestamp))}\n")
+        if (entry.lastCompletionTimestamp > 0) {
+            append("Last played: ${sdf.format(Date(entry.lastCompletionTimestamp))}\n")
         }
         
-        // Determine card type and set borderless background
-        boolean isCompleted = completionManager.isLevelCompleted(levelId);
-        if (isCompleted) {
-            // Gold card - use borderless version
-            clickedCard.setBackgroundResource(R.drawable.bg_level_card_gold_no_border);
-        } else if (isUnlocked) {
-            // Blue card - use borderless version
-            clickedCard.setBackgroundResource(R.drawable.bg_level_card_blue_no_border);
-        }
-
-        // Animate the card zooming to fill the upper half of the screen
-        animateLevelZoom(clickedCard, levelId);
-    }
-
-    /**
-     * Animates the clicked level card zooming to match the game board position/size,
-     * then navigates to the GameFragment.
-     * Creates a bitmap snapshot of the card, places it as an overlay above everything,
-     * hides the original card, and animates the overlay.
-     */
-    private void animateLevelZoom(View card, int levelId) {
-        // --- Config ---
-        final int ZOOM_DURATION_MS = 199;
-
-        View rootView = getView();
-        if (!(rootView instanceof FrameLayout)) return;
-        FrameLayout rootFrame = (FrameLayout) rootView;
-
-        // Check if this is the last played level (has yellow border)
-        int lastPlayedLevel = LevelCompletionManager.getInstance(requireContext()).getLastPlayedLevel();
-        boolean hasYellowBorder = (levelId == lastPlayedLevel);
-
-        // Remove any foreground (border) before taking snapshot
-        // The border was already removed in onLevelSelected, but ensure it's gone
-        card.setForeground(null);
-
-        // Create a bitmap snapshot of the card (without border)
-        card.setDrawingCacheEnabled(true);
-        card.buildDrawingCache();
-        Bitmap snapshot = Bitmap.createBitmap(card.getDrawingCache());
-        card.setDrawingCacheEnabled(false);
-
-        // Get the card's position relative to the root FrameLayout
-        int[] cardLocation = new int[2];
-        int[] rootLocation = new int[2];
-        card.getLocationOnScreen(cardLocation);
-        rootFrame.getLocationOnScreen(rootLocation);
-
-        int startX = cardLocation[0] - rootLocation[0];
-        int startY = cardLocation[1] - rootLocation[1];
-
-        // Create an ImageView overlay with the snapshot, placed exactly over the original card
-        ImageView overlay = new ImageView(requireContext());
-        overlay.setImageBitmap(snapshot);
-        overlay.setScaleType(ImageView.ScaleType.FIT_XY);
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(card.getWidth(), card.getHeight());
-        params.leftMargin = startX;
-        params.topMargin = startY;
-        overlay.setLayoutParams(params);
-        overlay.setElevation(100f);
-
-        // Add overlay on top of everything and hide the original card
-        rootFrame.addView(overlay);
-        card.setVisibility(View.INVISIBLE);
-
-        // Target: match the game board position in GameFragment
-        // Portrait: full width, top-aligned, square
-        // Landscape: left or right half, depending on card position
-        boolean isLandscape = getResources().getConfiguration().orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE;
-        int screenWidth = rootFrame.getWidth();
-        int screenHeight = rootFrame.getHeight();
-        
-        float targetWidth, targetHeight, targetX, targetY;
-        
-        if (isLandscape) {
-            // Landscape: zoom to left or right half based on selected layout preference
-            // isGridLeft=true → grid_left layout → zoom to LEFT half
-            // isGridLeft=false → standard landscape → zoom to RIGHT half
-            SharedPreferences prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-            boolean isGridLeft = prefs.getBoolean("landscape_grid_left", true);
-            boolean zoomToLeft = isGridLeft; // Grid left means zoom to left
+        val timestamps = entry.getCompletionTimestamps()
+        if (timestamps != null && timestamps.size > 1) {
+            val isLevelGame = entry.mapName?.startsWith("Level ") == true
+            val completionStars = entry.getCompletionStars()
+            val completionMoves = entry.getCompletionMoves()
             
-            targetWidth = screenWidth / 2f;  // Half screen width
-            targetHeight = screenHeight;     // Full screen height
-            targetX = zoomToLeft ? (targetWidth / 2f) : (screenWidth - targetWidth / 2f);
-            targetY = targetHeight / 2f;
+            append("\nAll completions:\n")
+            for (i in timestamps.indices) {
+                append("  ${i + 1}. ${sdf.format(Date(timestamps[i]))}")
+                if (isLevelGame) {
+                    val stars = if (completionStars != null && i < completionStars.size) {
+                        completionStars[i]
+                    } else {
+                        entry.starsEarned
+                    }
+                    val moves = if (completionMoves != null && i < completionMoves.size) {
+                        completionMoves[i]
+                    } else {
+                        entry.movesMade
+                    }
+                    if (stars == 0) {
+                        append(" ✓")
+                    } else {
+                        repeat(stars) { append("★") }
+                    }
+                    append(" - $moves")
+                } else {
+                    val moves = if (completionMoves != null && i < completionMoves.size) {
+                        completionMoves[i]
+                    } else {
+                        entry.movesMade
+                    }
+                    append(" - $moves")
+                }
+                append("\n")
+            }
+        }
+        
+        append("\nBest time: ")
+        println("[HISTORY_INFO_DIALOG] Displaying bestTime: ${entry.bestTime}, condition: ${entry.bestTime > 0}")
+        if (entry.bestTime > 0) {
+            append("${entry.bestTime / 60}m ${entry.bestTime % 60}s")
         } else {
-            // Portrait: full width, top-aligned, square
-            targetWidth = screenWidth;
-            targetHeight = screenWidth; // Square board assumption (most levels are ~square)
-            targetX = targetWidth / 2f;  // Center X = half screen width
-            targetY = targetHeight / 2f; // Center Y = half of board height (top-aligned)
+            append("—")
         }
-
-        float overlayCenterX = startX + card.getWidth() / 2f;
-        float overlayCenterY = startY + card.getHeight() / 2f;
-
-        // Scale to match game board size
-        float scaleX = targetWidth / card.getWidth();
-        float scaleY = targetHeight / card.getHeight();
-
-        // Translation to move overlay center to board center
-        float translateX = targetX - overlayCenterX;
-        float translateY = targetY - overlayCenterY;
-
-        // Create a separate border overlay if this level has the yellow border
-        ImageView borderOverlay = null;
-        if (hasYellowBorder) {
-            borderOverlay = new ImageView(requireContext());
-            borderOverlay.setImageDrawable(requireContext().getDrawable(R.drawable.bg_level_card_last_played));
-            borderOverlay.setScaleType(ImageView.ScaleType.FIT_XY);
-            FrameLayout.LayoutParams borderParams = new FrameLayout.LayoutParams(card.getWidth(), card.getHeight());
-            borderParams.leftMargin = startX;
-            borderParams.topMargin = startY;
-            borderOverlay.setLayoutParams(borderParams);
-            borderOverlay.setElevation(101f); // Above the main overlay
-            rootFrame.addView(borderOverlay);
-        }
-
-        // Animate the overlay
-        AnimatorSet animatorSet = new AnimatorSet();
-        ObjectAnimator scaleXAnim = ObjectAnimator.ofFloat(overlay, "scaleX", 1f, scaleX);
-        ObjectAnimator scaleYAnim = ObjectAnimator.ofFloat(overlay, "scaleY", 1f, scaleY);
-        ObjectAnimator transXAnim = ObjectAnimator.ofFloat(overlay, "translationX", 0f, translateX);
-        ObjectAnimator transYAnim = ObjectAnimator.ofFloat(overlay, "translationY", 0f, translateY);
-
-        animatorSet.playTogether(scaleXAnim, scaleYAnim, transXAnim, transYAnim);
-
-        // If yellow border exists, animate it too (same scale/translation) + fade out
-        if (hasYellowBorder && borderOverlay != null) {
-            ImageView finalBorderOverlay = borderOverlay;
-            ObjectAnimator borderScaleX = ObjectAnimator.ofFloat(finalBorderOverlay, "scaleX", 1f, scaleX);
-            ObjectAnimator borderScaleY = ObjectAnimator.ofFloat(finalBorderOverlay, "scaleY", 1f, scaleY);
-            ObjectAnimator borderTransX = ObjectAnimator.ofFloat(finalBorderOverlay, "translationX", 0f, translateX);
-            ObjectAnimator borderTransY = ObjectAnimator.ofFloat(finalBorderOverlay, "translationY", 0f, translateY);
-            ObjectAnimator borderFadeOut = ObjectAnimator.ofFloat(finalBorderOverlay, "alpha", 1f, 0f);
-
-            animatorSet.playTogether(scaleXAnim, scaleYAnim, transXAnim, transYAnim,
-                    borderScaleX, borderScaleY, borderTransX, borderTransY, borderFadeOut);
-        }
-
-        animatorSet.setDuration(ZOOM_DURATION_MS);
-        animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
-
-        ImageView finalBorderOverlayForCleanup = borderOverlay;
-        animatorSet.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                // Reset achievement game session flags for new game
-                AchievementManager.getInstance(requireContext()).onNewGameStarted();
-
-                // Start a new game with the selected level
-                gameStateManager.startLevelGame(levelId);
-
-                // Navigate to GameFragment BEFORE removing overlay to avoid flash-back glitch
-                GameFragment gameFragment = new GameFragment();
-                navigateToDirect(gameFragment);
-
-                // Clean up overlay after navigation (post to ensure fragment transaction started)
-                rootFrame.post(() -> {
-                    rootFrame.removeView(overlay);
-                    if (finalBorderOverlayForCleanup != null) {
-                        rootFrame.removeView(finalBorderOverlayForCleanup);
-                    }
-                    card.setVisibility(View.VISIBLE);
-                    card.setClickable(true);
-                });
+        append("\n")
+        
+        append("Best moves: ")
+        println("[HISTORY_INFO_DIALOG] Displaying bestMoves: ${entry.bestMoves}, condition: ${entry.bestMoves > 0}")
+        append(if (entry.bestMoves > 0) entry.bestMoves else "—")
+        append("\n")
+        
+        append("Optimal moves: ")
+        if (entry.optimalMoves > 0) {
+            append(entry.optimalMoves)
+            if (entry.bestMoves > 0 && entry.bestMoves == entry.optimalMoves) {
+                append(" ✓ (Perfect)")
+            } else if (entry.bestMoves > 0) {
+                append(" (+${entry.bestMoves - entry.optimalMoves} extra moves)")
             }
-        });
-
-        animatorSet.start();
+        } else {
+            append("—")
+        }
+        append("\n")
+        
+        append("\nHint usage (last): ")
+        val maxHint = entry.maxHintUsed
+        when {
+            maxHint < 0 -> append("No hints used")
+            maxHint == 0 -> append("Pre-hint viewed")
+            else -> append("Up to hint ${maxHint + 1}")
+        }
+        append("\n")
+        
+        append("Hints ever used: ")
+        append(if (entry.isEverUsedHints()) "Yes" else "No")
+        append("\n")
+        
+        append("Qualifies for no-hints achievement: ")
+        append(if (entry.qualifiesForNoHintsAchievement()) "Yes" else "No")
+        append("\n")
+        
+        append("Qualifies for perfect no-hints achievement: ")
+        append(if (entry.qualifiesForPerfectNoHintsAchievement()) "Yes" else "No")
+        append("\n")
+        
+        append("Last solved without hints: ")
+        val lastNoHints = entry.lastSolvedWithoutHints
+        append(if (lastNoHints > 0) sdf.format(Date(lastNoHints)) else "—")
+        append("\n")
+        
+        append("Last perfectly solved without hints: ")
+        val lastPerfect = entry.lastPerfectlySolvedWithoutHints
+        append(if (lastPerfect > 0) sdf.format(Date(lastPerfect)) else "—")
     }
-
-    /**
-     * Returns the title for this screen to be displayed in the UI.
-     * 
-     * @return The screen title from resources
-     */
-    @Override
-    public String getScreenTitle() {
-        return getString(R.string.level_selection_title);
-    }
-
-
-    /**
-     * Adapter for the level selection grid.
-     * This adapter is responsible for creating and binding ViewHolders that display level buttons
-     * and completion stars for levels that have been completed.
-     */
-    private class LevelAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-        private static final int VIEW_TYPE_HEADER = 0;
-        private static final int VIEW_TYPE_LEVEL = 1;
-
-        private final List<Integer> levels;
-        private final LevelSelectionFragment fragment;
-        private final LevelCompletionManager completionManager;
-        private final Map<String, GameHistoryEntry> historyByMapName;
-        private int totalStars;
-
-        public LevelAdapter(List<Integer> levels, LevelSelectionFragment fragment,
-                          LevelCompletionManager completionManager, int totalStars,
-                          Map<String, GameHistoryEntry> historyByMapName) {
-            this.levels = levels;
-            this.fragment = fragment;
-            this.completionManager = completionManager;
-            this.totalStars = totalStars;
-            this.historyByMapName = historyByMapName;
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            // Check if this position is a header
-            if (position == 0) {
-                return VIEW_TYPE_HEADER; // "Standard Levels" header
-            }
-
-            // Find the position where custom levels start
-            int customLevelStartPosition = -1;
-            for (int i = 0; i < levels.size(); i++) {
-                if (levels.get(i) >= CUSTOM_LEVEL_START_ID) {
-                    customLevelStartPosition = i;
-                    break;
-                }
-            }
-
-            // If custom levels exist and this is the position before the first custom level,
-            // it's the "Custom Levels" header
-            if (customLevelStartPosition >= 0 && position == customLevelStartPosition + 1) {
-                return VIEW_TYPE_HEADER;
-            }
-
-            return VIEW_TYPE_LEVEL;
-        }
-
-        @NonNull
-        @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            if (viewType == VIEW_TYPE_HEADER) {
-                View headerView = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.item_level_header, parent, false);
-                return new HeaderViewHolder(headerView);
-            } else {
-                View levelView = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.item_level, parent, false);
-                return new LevelViewHolder(levelView);
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(entry.mapName ?: "Unknown Map") },
+        text = { Text(message, fontSize = 12.sp) },
+        confirmButton = {
+            Button(onClick = onDismiss) {
+                Text("OK")
             }
         }
-
-        @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            if (holder instanceof HeaderViewHolder) {
-                // Bind header
-                HeaderViewHolder headerHolder = (HeaderViewHolder) holder;
-
-                // First header is always "Standard Levels"
-                if (position == 0) {
-                    headerHolder.bind("Standard Levels");
-                    return;
-                }
-
-                // Find the position where custom levels start
-                int customLevelStartPosition = -1;
-                for (int i = 0; i < levels.size(); i++) {
-                    if (levels.get(i) >= CUSTOM_LEVEL_START_ID) {
-                        customLevelStartPosition = i;
-                        break;
-                    }
-                }
-
-                // If this is the custom levels header
-                if (customLevelStartPosition >= 0 && position == customLevelStartPosition + 1) {
-                    headerHolder.bind("Custom Levels");
-                }
-            } else if (holder instanceof LevelViewHolder) {
-                // Calculate the actual level position in the levels list
-                int levelIndex = position;
-
-                // Skip the "Standard Levels" header
-                levelIndex--;
-
-                // Find the position where custom levels start
-                int customLevelStartPosition = -1;
-                for (int i = 0; i < levels.size(); i++) {
-                    if (levels.get(i) >= CUSTOM_LEVEL_START_ID) {
-                        customLevelStartPosition = i;
-                        break;
-                    }
-                }
-
-                // If we've passed the custom levels header, skip that too
-                if (customLevelStartPosition >= 0 && position > customLevelStartPosition + 1) {
-                    levelIndex--;
-                }
-
-                // Make sure we don't go out of bounds
-                if (levelIndex >= 0 && levelIndex < levels.size()) {
-                    int levelId = levels.get(levelIndex);
-                    LevelViewHolder levelHolder = (LevelViewHolder) holder;
-
-                    // Check if the level is completed
-                    boolean isCompleted = completionManager.isLevelCompleted(levelId);
-
-                    // Get stars earned for this level
-                    int starsEarned = 0;
-                    if (isCompleted) {
-                        LevelCompletionData completionData = completionManager.getLevelCompletionData(levelId);
-                        starsEarned = completionData.getStars();
-                    }
-
-                    // Custom levels are always unlocked
-                    boolean isUnlocked = levelId >= CUSTOM_LEVEL_START_ID || 
-                            // Regular levels unlock based on total stars
-                            (STARS_PER_LEVEL * (levelId - 1) <= totalStars);
-
-                    // Look up history entry for this level (e.g. "level_1" for levelId=1)
-                    String mapKey = levelId < CUSTOM_LEVEL_START_ID
-                            ? "level_" + levelId
-                            : "custom_level_" + levelId;
-                    GameHistoryEntry historyEntry = historyByMapName.get(mapKey);
-
-                    // Bind the level data
-                    levelHolder.bind(levelId, fragment, isCompleted, starsEarned, isUnlocked, historyEntry);
-                }
-            }
-        }
-
-        @Override
-        public int getItemCount() {
-            // Count the regular items
-            int count = levels.size();
-
-            // Add the "Standard Levels" header
-            count++;
-
-            // Check if we need to add the "Custom Levels" header
-            boolean hasCustomLevels = false;
-            for (int levelId : levels) {
-                if (levelId >= CUSTOM_LEVEL_START_ID) {
-                    hasCustomLevels = true;
-                    break;
-                }
-            }
-
-            if (hasCustomLevels) {
-                // Add the "Custom Levels" header
-                count++;
-            }
-
-            return count;
-        }
-
-        /**
-         * Update the total stars count
-         * @param totalStars New total stars count
-         */
-        public void updateTotalStars(int totalStars) {
-            this.totalStars = totalStars;
-            notifyDataSetChanged();
-        }
-    }
-
-    /**
-     * ViewHolder for section headers
-     */
-    private class HeaderViewHolder extends RecyclerView.ViewHolder {
-        private final TextView headerTextView;
-
-        public HeaderViewHolder(@NonNull View itemView) {
-            super(itemView);
-            headerTextView = itemView.findViewById(R.id.header_text);
-        }
-
-        public void bind(String headerText) {
-            headerTextView.setText(headerText);
-            // Hide "Standard Levels" header, show "Custom Levels" header
-            if ("Standard Levels".equals(headerText)) {
-                itemView.setVisibility(View.GONE);
-            } else {
-                itemView.setVisibility(View.VISIBLE);
-            }
-        }
-    }
-
-    /**
-     * ViewHolder for level items in the RecyclerView.
-     * Displays level cards in 3 states: gold (completed), blue (playable), gray (locked).
-     */
-    private static class LevelViewHolder extends RecyclerView.ViewHolder {
-        private final ConstraintLayout levelCard;
-        private final TextView levelNumberText;
-        private final TextView levelNameText;
-        private final ImageView checkGreen;
-        private final ImageView starOne;
-        private final ImageView starTwo;
-        private final ImageView starThree;
-        private final ImageView starFour;
-        private final ImageView minimapView;
-        private final TextView minimapLevelNumber;
-        private final ImageView lockIcon;
-        private final TextView lockedLevelLabel;
-        private final ImageView playArrow;
-        private final ImageButton infoButton;
-
-        public LevelViewHolder(@NonNull View itemView) {
-            super(itemView);
-            levelCard = itemView.findViewById(R.id.level_card);
-            levelNumberText = itemView.findViewById(R.id.level_number_text);
-            levelNameText = itemView.findViewById(R.id.level_name_text);
-            checkGreen = itemView.findViewById(R.id.level_check_green);
-            starOne = itemView.findViewById(R.id.level_star_1);
-            starTwo = itemView.findViewById(R.id.level_star_2);
-            starThree = itemView.findViewById(R.id.level_star_3);
-            starFour = itemView.findViewById(R.id.level_star_4);
-            minimapView = itemView.findViewById(R.id.level_minimap_view);
-            minimapLevelNumber = itemView.findViewById(R.id.minimap_level_number);
-            lockIcon = itemView.findViewById(R.id.lock_icon);
-            lockedLevelLabel = itemView.findViewById(R.id.locked_level_label);
-            playArrow = itemView.findViewById(R.id.play_arrow);
-            infoButton = itemView.findViewById(R.id.level_info_button);
-        }
-
-        /**
-         * Binds data to this ViewHolder.
-         * Three visual states:
-         * - GOLD card: completed level with stars, minimap preview, and "Level X" label
-         * - BLUE card: playable level with large number and play arrow
-         * - GRAY card: locked level with lock icon
-         */
-        public void bind(int levelId, LevelSelectionFragment fragment, boolean isCompleted,
-                        int starsEarned, boolean isUnlocked, GameHistoryEntry historyEntry) {
-
-            // Skip binding if levelCard is not found (may happen in some layout configurations)
-            if (levelCard == null) {
-                return;
-            }
-
-            levelCard.setContentDescription("Level " + levelId);
-
-            if (isCompleted) {
-                // === GOLD CARD: Completed level (even with 0 stars) ===
-                levelCard.setBackgroundResource(R.drawable.bg_level_card_gold);
-
-                // Show green checkmark when completed with 0 stars, otherwise show stars
-                if (starsEarned == 0) {
-                    checkGreen.setVisibility(View.VISIBLE);
-                } else {
-                    checkGreen.setVisibility(View.GONE);
-                }
-                starOne.setVisibility(starsEarned >= 1 ? View.VISIBLE : View.GONE);
-                starTwo.setVisibility(starsEarned >= 2 ? View.VISIBLE : View.GONE);
-                starThree.setVisibility(starsEarned >= 3 ? View.VISIBLE : View.GONE);
-                starFour.setVisibility(starsEarned >= 4 ? View.VISIBLE : View.GONE);
-
-                // Show info button if history entry exists
-                if (historyEntry != null && infoButton != null) {
-                    infoButton.setVisibility(View.VISIBLE);
-                    infoButton.setOnClickListener(v -> fragment.showMapInfoPopup(historyEntry));
-                } else {
-                    if (infoButton != null) infoButton.setVisibility(View.GONE);
-                }
-
-                // Show minimap if history entry exists
-                if (historyEntry != null && minimapView != null) {
-                    String mapPath = historyEntry.getMapPath();
-                    Timber.d("[LEVEL_SELECTION] Level %d: historyEntry exists, mapPath='%s'", levelId, mapPath);
-                    String absolutePath = (mapPath != null && !mapPath.startsWith("/"))
-                            ? itemView.getContext().getFileStreamPath(mapPath).getAbsolutePath()
-                            : mapPath;
-                    Timber.d("[LEVEL_SELECTION] Level %d: absolutePath='%s'", levelId, absolutePath);
-                    Bitmap minimap = null;
-
-                    // Try to generate minimap from history file
-                    if (absolutePath != null) {
-                        minimap = fragment.createMinimapFromPath(
-                                itemView.getContext(), absolutePath, 120, 120);
-                        Timber.d("[LEVEL_SELECTION] Level %d: minimap from history file: %s", levelId, minimap != null ? "SUCCESS" : "NULL");
-                    }
-
-                    // Fallback: if history file doesn't exist or minimap generation failed,
-                    // generate minimap from original level file in assets
-                    if (minimap == null && levelId < 141) {
-                        try {
-                            String levelFileName = "level_" + levelId + ".txt";
-                            java.io.InputStream is = itemView.getContext().getAssets().open("Maps/" + levelFileName);
-                            String levelData = new java.util.Scanner(is).useDelimiter("\\A").next();
-                            is.close();
-                            minimap = fragment.createMinimapFromString(
-                                    itemView.getContext(), levelData, 120, 120);
-                            Timber.d("[LEVEL_SELECTION] Level %d: Generated minimap from assets: %s", levelId, minimap != null ? "SUCCESS" : "NULL");
-                        } catch (Exception e) {
-                            Timber.e(e, "[LEVEL_SELECTION] Failed to generate minimap from assets for level %d", levelId);
-                        }
-                    }
-
-                    if (minimap != null) {
-                        minimapView.setImageBitmap(minimap);
-                        minimapView.setVisibility(View.VISIBLE);
-                        levelNumberText.setVisibility(View.GONE);
-
-                        // Show level number overlay on minimap
-                        minimapLevelNumber.setText(String.valueOf(levelId));
-                        minimapLevelNumber.setVisibility(View.VISIBLE);
-                    } else {
-                        Timber.w("[LEVEL_SELECTION] Level %d: No minimap generated, showing level number instead", levelId);
-                        minimapView.setVisibility(View.GONE);
-                        minimapLevelNumber.setVisibility(View.GONE);
-                        levelNumberText.setText(String.valueOf(levelId));
-                        levelNumberText.setVisibility(View.VISIBLE);
-                    }
-                } else {
-                    Timber.d("[LEVEL_SELECTION] Level %d: No history entry, trying assets fallback", levelId);
-                    // Fallback: try to generate minimap from assets for levels without history
-                    if (minimapView != null && levelId < 141) {
-                        try {
-                            String levelFileName = "level_" + levelId + ".txt";
-                            java.io.InputStream is = itemView.getContext().getAssets().open("Maps/" + levelFileName);
-                            String levelData = new java.util.Scanner(is).useDelimiter("\\A").next();
-                            is.close();
-                            Bitmap minimap = fragment.createMinimapFromString(
-                                    itemView.getContext(), levelData, 120, 120);
-                            Timber.d("[LEVEL_SELECTION] Level %d: Generated minimap from assets (no history): %s", levelId, minimap != null ? "SUCCESS" : "NULL");
-                            if (minimap != null) {
-                                minimapView.setImageBitmap(minimap);
-                                minimapView.setVisibility(View.VISIBLE);
-                                levelNumberText.setVisibility(View.GONE);
-                                minimapLevelNumber.setText(String.valueOf(levelId));
-                                minimapLevelNumber.setVisibility(View.VISIBLE);
-                            } else {
-                                levelNumberText.setText(String.valueOf(levelId));
-                                levelNumberText.setVisibility(View.VISIBLE);
-                            }
-                        } catch (Exception e) {
-                            Timber.e(e, "[LEVEL_SELECTION] Failed to generate minimap from assets for level %d (no history)", levelId);
-                            levelNumberText.setText(String.valueOf(levelId));
-                            levelNumberText.setVisibility(View.VISIBLE);
-                        }
-                    } else {
-                        if (minimapView != null) minimapView.setVisibility(View.GONE);
-                        minimapLevelNumber.setVisibility(View.GONE);
-                        levelNumberText.setText(String.valueOf(levelId));
-                        levelNumberText.setVisibility(View.VISIBLE);
-                    }
-                }
-
-                // Hide level name (number already shown in center)
-                levelNameText.setVisibility(View.GONE);
-
-                // Hide lock, locked label & play arrow
-                lockIcon.setVisibility(View.GONE);
-                lockedLevelLabel.setVisibility(View.GONE);
-                playArrow.setVisibility(View.GONE);
-
-                levelCard.setAlpha(1.0f);
-
-            } else if (isUnlocked) {
-                // === BLUE CARD: Playable but not yet completed ===
-                levelCard.setBackgroundResource(R.drawable.bg_level_card_blue);
-
-                // Hide checkmark, stars, minimap, minimap level number, level name, info button, locked label
-                checkGreen.setVisibility(View.GONE);
-                starOne.setVisibility(View.GONE);
-                starTwo.setVisibility(View.GONE);
-                starThree.setVisibility(View.GONE);
-                starFour.setVisibility(View.GONE);
-                if (minimapView != null) minimapView.setVisibility(View.GONE);
-                minimapLevelNumber.setVisibility(View.GONE);
-                if (infoButton != null) infoButton.setVisibility(View.GONE);
-                levelNameText.setVisibility(View.GONE);
-                lockIcon.setVisibility(View.GONE);
-                lockedLevelLabel.setVisibility(View.GONE);
-
-                // Show large level number
-                levelNumberText.setText(String.valueOf(levelId));
-                levelNumberText.setVisibility(View.VISIBLE);
-
-                // Show play arrow
-                playArrow.setVisibility(View.VISIBLE);
-
-                levelCard.setAlpha(1.0f);
-
-            } else {
-                // === GRAY CARD: Locked level ===
-                levelCard.setBackgroundResource(R.drawable.bg_level_card_locked);
-
-                // Hide checkmark, stars, minimap, minimap level number, level name, play arrow, info button
-                checkGreen.setVisibility(View.GONE);
-                starOne.setVisibility(View.GONE);
-                starTwo.setVisibility(View.GONE);
-                starThree.setVisibility(View.GONE);
-                starFour.setVisibility(View.GONE);
-                if (minimapView != null) minimapView.setVisibility(View.GONE);
-                minimapLevelNumber.setVisibility(View.GONE);
-                if (infoButton != null) infoButton.setVisibility(View.GONE);
-                levelNameText.setVisibility(View.GONE);
-                playArrow.setVisibility(View.GONE);
-
-                // Hide large level number, show lock icon and "Level X" label below it
-                levelNumberText.setVisibility(View.GONE);
-                lockIcon.setVisibility(View.VISIBLE);
-                lockedLevelLabel.setText("Level " + levelId);
-                lockedLevelLabel.setVisibility(View.VISIBLE);
-
-                levelCard.setAlpha(0.8f);
-            }
-
-            // Highlight the last played level with yellow border
-            int lastPlayedLevel = LevelCompletionManager.getInstance(
-                    itemView.getContext()).getLastPlayedLevel();
-            if (levelId == lastPlayedLevel) {
-                // Apply yellow border as foreground for last played level
-                levelCard.setForeground(itemView.getContext().getDrawable(R.drawable.bg_level_card_last_played));
-                levelCard.setElevation(8f);
-            } else {
-                levelCard.setForeground(null);
-                levelCard.setElevation(2f);
-            }
-
-            // Reset alpha on levelNumberText for non-locked
-            if (isUnlocked) {
-                levelNumberText.setAlpha(1.0f);
-            }
-
-            // Set click listener on the card
-            View.OnClickListener clickListener = v -> fragment.onLevelSelected(levelId, levelCard);
-            levelCard.setOnClickListener(clickListener);
-
-            // Disable click for locked levels
-            levelCard.setClickable(isUnlocked);
-            levelCard.setFocusable(isUnlocked);
-        }
-    }
+    )
 }
