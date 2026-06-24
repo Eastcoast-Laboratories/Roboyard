@@ -14,9 +14,9 @@ Split the large App.kt file (2245 lines) into multiple files following the Main 
 | CreditsFragment.java | CreditsScreen() | CreditsScreen.kt | To create |
 | HelpFragment.java | HelpScreen() | HelpScreen.kt | To create |
 | AchievementsFragment.java | AchievementsScreen() | AchievementsScreen.kt | To create |
-| BaseGameFragment.java | (base class, not a screen) | - | N/A |
-| DebugSettingsFragment.java | (not in ComposeApp yet) | DebugSettingsScreen.kt.todo | TODO |
-| LevelDesignEditorFragment.java | (not in ComposeApp yet) | LevelDesignEditorScreen.kt.todo | TODO |
+| BaseGameFragment.java | (base class with utilities) | BaseGameUtils.kt.todo | TODO |
+| DebugSettingsFragment.java | (not in ComposeApp yet) | DebugSettingsScreen.kt.todo | TODO (done) |
+| LevelDesignEditorFragment.java | (not in ComposeApp yet) | LevelDesignEditorScreen.kt.todo | TODO (done) |
 
 ## Utility and Component Files
 
@@ -30,82 +30,86 @@ Split the large App.kt file (2245 lines) into multiple files following the Main 
 
 ## Implementation: Delete unnecessary lines from each file without code changes
 
-### Pre-step: Create TODO files for missing screens
+### Pre-step: Create TODO files for missing screens (DONE ✅)
 Copy missing Fragment files as .kt.todo files for future implementation:
+- DebugSettingsFragment.java → DebugSettingsScreen.kt.todo ✅
+- LevelDesignEditorFragment.java → LevelDesignEditorScreen.kt.todo ✅
+- BaseGameFragment.java → BaseGameUtils.kt.todo (to create - contains utilities like minimap generation, language settings, etc.)
+
+### Step 1: Create BaseGameUtils.kt.todo (DONE ✅)
 ```bash
 cd /var/www/Roboyard/composeApp/src/commonMain/kotlin/roboyard/ui/compose && \
-cp /var/www/Roboyard/app/src/main/java/roboyard/ui/fragments/DebugSettingsFragment.java DebugSettingsScreen.kt.todo && \
-cp /var/www/Roboyard/app/src/main/java/roboyard/ui/fragments/LevelDesignEditorFragment.java LevelDesignEditorScreen.kt.todo
-git add .; git commit -am "refactor: create TODO files for missing screens (DebugSettings, LevelDesignEditor)"
+cp /var/www/Roboyard/app/src/main/java/roboyard/ui/fragments/BaseGameFragment.java BaseGameUtils.kt.todo
+git add .; git commit -am "refactor: create TODO file for BaseGameFragment utilities (minimap, language settings, etc.)"
 ```
 
-### Step 1: Delete unnecessary lines from App.kt
+### Step 2: Delete unnecessary lines from App.kt
 Keep only: Screen enum and App() function (navigation logic)
 ```bash
 git commit -am "refactor: App.kt - keep only Screen enum and App() navigation function"
 ```
 
-### Step 2: Delete unnecessary lines from MainMenuScreen.kt
+### Step 3: Delete unnecessary lines from MainMenuScreen.kt
 Keep only: MainMenuScreen() @Composable function and related imports/variables
 ```bash
 git commit -am "refactor: MainMenuScreen.kt - keep only MainMenuScreen() @Composable function and related imports/variables"
 ```
 
-### Step 3: Delete unnecessary lines from LevelSelectionScreen.kt
+### Step 4: Delete unnecessary lines from LevelSelectionScreen.kt
 Keep only: LevelSelectionScreen() and LevelItem() @Composable functions and related code
 ```bash
 git commit -am "refactor: LevelSelectionScreen.kt - keep only LevelSelectionScreen() and LevelItem() @Composable functions and related code"
 ```
 
-### Step 4: Delete unnecessary lines from SaveLoadScreen.kt
+### Step 5: Delete unnecessary lines from SaveLoadScreen.kt
 Keep only: SaveLoadScreen(), HistoryItem(), HistoryInfoDialog() @Composable functions, plus getHistoryEntries(), getNextHistoryIndex(), validateSaveContainsTargets()
 ```bash
 git commit -am "refactor: SaveLoadScreen.kt - keep only SaveLoadScreen(), HistoryItem(), HistoryInfoDialog() @Composable functions and history utilities (getHistoryEntries, getNextHistoryIndex, validateSaveContainsTargets)"
 ```
 
-### Step 5: Delete unnecessary lines from SettingsScreen.kt
+### Step 6: Delete unnecessary lines from SettingsScreen.kt
 Keep only: SettingsScreen() @Composable function and related code
 ```bash
 git commit -am "refactor: SettingsScreen.kt - keep only SettingsScreen() @Composable function and related code"
 ```
 
-### Step 6: Delete unnecessary lines from CreditsScreen.kt
+### Step 7: Delete unnecessary lines from CreditsScreen.kt
 Keep only: CreditsScreen() @Composable function and related code
 ```bash
 git commit -am "refactor: CreditsScreen.kt - keep only CreditsScreen() @Composable function and related code"
 ```
 
-### Step 7: Delete unnecessary lines from HelpScreen.kt
+### Step 8: Delete unnecessary lines from HelpScreen.kt
 Keep only: HelpScreen() @Composable function and related code
 ```bash
 git commit -am "refactor: HelpScreen.kt - keep only HelpScreen() @Composable function and related code"
 ```
 
-### Step 8: Delete unnecessary lines from AchievementsScreen.kt
+### Step 9: Delete unnecessary lines from AchievementsScreen.kt
 Keep only: AchievementsScreen() @Composable function and related code
 ```bash
 git commit -am "refactor: AchievementsScreen.kt - keep only AchievementsScreen() @Composable function and related code"
 ```
 
-### Step 9: Delete unnecessary lines from LoadingScreen.kt
+### Step 10: Delete unnecessary lines from LoadingScreen.kt
 Keep only: LoadingScreen() @Composable function and related code
 ```bash
 git commit -am "refactor: LoadingScreen.kt - keep only LoadingScreen() @Composable function and related code"
 ```
 
-### Step 10: Delete unnecessary lines from BoardUtils.kt
+### Step 11: Delete unnecessary lines from BoardUtils.kt
 Keep only: Utility functions (gridElementsToBoard, generateWallSignature, generatePositionSignature, generateMapSignature, generateUnique5LetterFromString, generateMapNameFromSignature, serializeBoardToMainGameFormat, deserializeBoardFromMainGameFormat)
 ```bash
 git commit -am "refactor: BoardUtils.kt - keep only utility functions (gridElementsToBoard, signatures, serialization)"
 ```
 
-### Step 11: Delete unnecessary lines from UIComponents.kt
+### Step 12: Delete unnecessary lines from UIComponents.kt
 Keep only: UI components (GameInfoCard, CircularButton, CustomButton, MinimapGenerator)
 ```bash
 git commit -am "refactor: UIComponents.kt - keep only UI components (GameInfoCard, CircularButton, CustomButton, MinimapGenerator)"
 ```
 
-### Step 12: Make remaining changes after line deletion (package declarations, imports, etc.)
+### Step 13: Make remaining changes after line deletion (package declarations, imports, etc.)
 After deleting unnecessary lines, make the following changes to ensure all files compile correctly:
 1. **Fix package declarations**: Ensure all new files have `package roboyard.ui.compose` at the top
 2. **Add necessary imports**: Add missing imports in each file (Compose, Material3, etc.)
@@ -114,14 +118,14 @@ After deleting unnecessary lines, make the following changes to ensure all files
 5. **Update App.kt imports**: Add imports for all new screen files so App() can reference them
 6. **Update GameScreen.kt**: Add imports from BoardUtils.kt and UIComponents.kt if functions/components are used there
 
-### Step 13: Compile and verify
+### Step 14: Compile and verify
 Run compilation to ensure all files compile without errors:
 ```bash
 cd /var/www/Roboyard && ./gradlew :composeApp:compileKotlinDesktop
 ```
 Fix any compilation errors by adjusting imports or function visibility.
 
-### Step 14: Commit the final state
+### Step 15: Commit the final state
 ```bash
 git commit -am "refactor: extract code from App.kt to separate screen files for better maintainability"
 ```
