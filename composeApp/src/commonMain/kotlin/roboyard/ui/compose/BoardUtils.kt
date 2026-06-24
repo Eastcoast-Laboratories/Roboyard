@@ -3,6 +3,7 @@ package roboyard.ui.compose
 import driftingdroids.model.Board
 import roboyard.logic.core.GridElement
 import roboyard.logic.core.Preferences
+import roboyard.logic.storage.PlatformStorage
 
 /**
  * Converts a GridElement list (from GameLogic) to a Board instance.
@@ -349,7 +350,7 @@ fun serializeBoardToMainGameFormat(board: Board, isLevelGame: Boolean, startBoar
 /**
  * Deserialize a Board from Main Game format
  */
-private fun deserializeBoardFromMainGameFormat(saveData: String): Board? {
+fun deserializeBoardFromMainGameFormat(saveData: String): Board? {
     val lines = saveData.lines()
     var width = 0
     var height = 0
@@ -492,7 +493,7 @@ private fun deserializeBoardFromMainGameFormat(saveData: String): Board? {
 /**
  * Save a board to history using Main Game format
  */
-private fun saveToHistory(board: Board, storage: PlatformStorage): Boolean {
+fun saveToHistory(board: Board, storage: PlatformStorage): Boolean {
     try {
         // Get next available history index
         val historyIndex = getNextHistoryIndex(storage)
@@ -518,7 +519,7 @@ private fun saveToHistory(board: Board, storage: PlatformStorage): Boolean {
 /**
  * Get the next available history index
  */
-private fun getNextHistoryIndex(storage: PlatformStorage): Int {
+fun getNextHistoryIndex(storage: PlatformStorage): Int {
     var index = 1
     while (storage.fileExists("history_$index.txt")) {
         index++
@@ -531,7 +532,7 @@ private fun getNextHistoryIndex(storage: PlatformStorage): Int {
  * Uses GameHistoryManager for history entries
  * Returns list of Triple with (index, fileName, entry)
  */
-private fun getHistoryEntries(storage: PlatformStorage): List<Triple<Int, String, roboyard.logic.core.GameHistoryEntry?>> {
+fun getHistoryEntries(storage: PlatformStorage): List<Triple<Int, String, roboyard.logic.core.GameHistoryEntry?>> {
     val entries = mutableListOf<Triple<Int, String, roboyard.logic.core.GameHistoryEntry?>>()
     
     // Add autosave entry first (index 0, no GameHistoryEntry)
@@ -561,160 +562,10 @@ private fun getHistoryEntries(storage: PlatformStorage): List<Triple<Int, String
 /**
  * Validate that save file contains targets
  */
-private fun validateSaveContainsTargets(saveData: String, fileName: String): Boolean {
+fun validateSaveContainsTargets(saveData: String, fileName: String): Boolean {
     val hasTargets = saveData.contains("t") || saveData.contains("3:")
     if (!hasTargets) {
         println("[SAVE_VERIFICATION] Save file $fileName does not contain targets")
     }
     return hasTargets
 }
-
-@Composable
-fun HistoryItem(
-    historyIndex: Int,
-    fileName: String,
-    mapName: String = "",
-    moves: Int = 0,
-    time: Int = 0,
-    stars: Int = 0,
-    hintsUsed: Boolean = false,
-    onClick: () -> Unit = {},
-    onInfoClick: () -> Unit = {}
-) {
-    val displayName = if (historyIndex == 0) {
-        "Autosave"
-    } else {
-        mapName.ifEmpty { "History #$historyIndex" }
-    }
-    
-    val timeStr = if (time > 0) {
-        val minutes = time / 60
-        val seconds = time % 60
-        String.format("%d:%02d", minutes, seconds)
-    } else {
-        "--:--"
-    }
-    
-    val hintsIndicator = if (hintsUsed) " (H)" else ""
-    
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.DarkGray, RoundedCornerShape(8.dp))
-            .clickable { onClick() }
-            .padding(16.dp)
-    ) {
-        Column {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = displayName,
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f)
-                )
-                if (stars > 0) {
-                    Text(
-                        text = "★".repeat(stars),
-                        color = Color.Yellow,
-                        fontSize = 16.sp,
-                        modifier = Modifier.padding(end = 4.dp)
-                    )
-                }
-                CircularButton(
-                    text = "i",
-                    color = CircularButtonColor.GRAY,
-                    onClick = onInfoClick,
-                    modifier = Modifier.semantics { testTag = "infoButton_$historyIndex" }
-                )
-            }
-            Text(
-                text = fileName,
-                color = Color.LightGray,
-                fontSize = 12.sp
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Moves: $moves",
-                    color = Color.White,
-                    fontSize = 14.sp
-                )
-                Text(
-                    text = "Time: $timeStr$hintsIndicator",
-                    color = Color.White,
-                    fontSize = 14.sp
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun SaveLoadScreen(
-    boardToSave: Board? = null,
-    isLevelGame: Boolean = false,
-    onBack: () -> Unit = {},
-    onLoadGame: (Board) -> Unit = {}
-) {
-    var selectedTab by remember { mutableStateOf(0) }
-    val tabs = listOf("Save", "Load", "History")
-    var showInfoDialog by remember { mutableStateOf(false) }
-    var selectedEntry by remember { mutableStateOf<roboyard.logic.core.GameHistoryEntry?>(null) }
-    
-    // Check for saved games
-    val storage = remember { getPlatformStorage() }
-    var hasSavedGames by remember { mutableStateOf(false) }
-    var slotStates by remember { mutableStateOf(List(10) { false }) }
-    var historyEntries by remember { mutableStateOf<List<Triple<Int, String, roboyard.logic.core.GameHistoryEntry?>>>(emptyList()) }
-    
-    LaunchedEffect(Unit) {
-        hasSavedGames = storage.hasSavedGames()
-        println("[SAVE_LOAD_SCREEN] hasSavedGames: $hasSavedGames")
-        // Check each slot
-        val newSlotStates = mutableListOf<Boolean>()
-        for (i in 1..10) {
-            val fileName = "saves/save_$i.dat"
-            val exists = storage.fileExists(fileName)
-            newSlotStates.add(exists)
-            println("[SAVE_LOAD_SCREEN] Slot $i ($fileName): exists=$exists")
-        }
-        slotStates = newSlotStates
-        
-        // Load history entries
-        historyEntries = getHistoryEntries(storage)
-        println("[SAVE_LOAD_SCREEN] History entries: ${historyEntries.size}")
-        for ((index, fileName, entry) in historyEntries) {
-            println("[SAVE_LOAD_SCREEN] Entry $index: ${entry?.mapName}, bestTime=${entry?.bestTime}, bestMoves=${entry?.bestMoves}")
-        }
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-            .padding(16.dp)
-    ) {
-        // Title and profile button
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = when (selectedTab) {
-                    0 -> "Select slot to save game"
-                    1 -> "Select slot to load game"
-                    else -> "Game History"
-                },
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f)
-            )

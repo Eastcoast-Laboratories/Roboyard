@@ -87,7 +87,6 @@ import roboyard.composeapp.generated.resources.target_blue
 import roboyard.composeapp.generated.resources.target_yellow
 import roboyard.composeapp.generated.resources.target_silver
 import roboyard.composeapp.generated.resources.target_multi
-import roboyard.logic.core.GridElement
 import roboyard.logic.core.GameLogic
 import roboyard.logic.core.Preferences
 import roboyard.logic.core.calculateStars
@@ -2182,84 +2181,3 @@ private fun parseColorChar(type: String): Int {
     }
 }
 
-/**
- * Converts a GridElement list (from GameLogic) to a Board instance.
- * This is used for random game generation with GameLogic.
- * Matches fragment-app GameState.createRandom logic 1:1
- */
-fun gridElementsToBoard(gridElements: ArrayList<GridElement>): Board? {
-    // Use Preferences for board dimensions
-    val width = Preferences.boardSizeWidth
-    val height = Preferences.boardSizeHeight
-
-    val board = Board.createBoardFreestyle(null, width, height, 4) ?: return null
-    val numRobots = 4
-    val robotPositions = IntArray(numRobots) { -1 }
-
-    // Parse walls, targets, robots from GridElements (matching fragment-app GameState.createRandom)
-    for (element in gridElements) {
-        val type = element.type
-        val x = element.x
-        val y = element.y
-
-        when (type) {
-            "h", "mh" -> {
-                board.setWall(x, y, Board.NORTH, true)
-                if (y > 0) board.setWall(x, y - 1, Board.SOUTH, true)
-            }
-            "v", "mv" -> {
-                board.setWall(x, y, Board.WEST, true)
-                if (x > 0) board.setWall(x - 1, y, Board.EAST, true)
-            }
-            "target_red" -> {
-                val pos = x + y * width
-                board.addGoal(pos, 0, 0) // COLOR_PINK = 0
-            }
-            "target_green" -> {
-                val pos = x + y * width
-                board.addGoal(pos, 1, 0) // COLOR_GREEN = 1
-            }
-            "target_blue" -> {
-                val pos = x + y * width
-                board.addGoal(pos, 2, 0) // COLOR_BLUE = 2
-            }
-            "target_yellow" -> {
-                val pos = x + y * width
-                board.addGoal(pos, 3, 0) // COLOR_YELLOW = 3
-            }
-            "target_silver" -> {
-                val pos = x + y * width
-                board.addGoal(pos, 4, 0) // COLOR_SILVER = 4
-            }
-            "target_multi" -> {
-                // Multi-color target - use -1 for robotNumber to indicate multi-color
-                val pos = x + y * width
-                board.addGoal(pos, -1, 0) // robotNumber = -1 for multi-color
-            }
-            "robot_red" -> {
-                val pos = x + y * width
-                robotPositions[0] = pos
-            }
-            "robot_green" -> {
-                val pos = x + y * width
-                robotPositions[1] = pos
-            }
-            "robot_blue" -> {
-                val pos = x + y * width
-                robotPositions[2] = pos
-            }
-            "robot_yellow" -> {
-                val pos = x + y * width
-                robotPositions[3] = pos
-            }
-            "robot_silver" -> {
-                val pos = x + y * width
-                robotPositions[4] = pos
-            }
-        }
-    }
-
-    board.setRobots(robotPositions)
-    board.setGoalRandom()
-    return board
-}
