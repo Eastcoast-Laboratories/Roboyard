@@ -1,0 +1,299 @@
+package roboyard.ui.fragments;
+
+import android.graphics.Color;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.view.Gravity;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+
+import roboyard.eclabs.R;
+import roboyard.logic.achievements.Achievement;
+import roboyard.logic.achievements.AchievementCategory;
+import roboyard.ui.achievements.AchievementIconHelper;
+import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.StreakManager;
+import timber.log.Timber;
+
+/**
+ * Fragment for displaying achievements.
+ */
+public class AchievementsFragment extends BaseGameFragment {
+    
+    private AchievementManager achievementManager;
+    private LinearLayout achievementsContainer;
+    private TextView progressText;
+    private int currentLoginStreakDays = 1;
+    private int longestLoginStreakDays = 0;
+    private Button userProfileButton;
+    
+    @Override
+    public String getScreenTitle() {
+        return getString(R.string.achievements_title);
+    }
+    
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_achievements, container, false);
+        
+        // Set up back button - navigate back to previous screen
+        Button backButton = view.findViewById(R.id.back_button);
+        backButton.setOnClickListener(v -> navigateBack());
+        
+        // Set up user profile button
+        userProfileButton = view.findViewById(R.id.user_profile_button);
+        setupUserProfileButton(userProfileButton);
+        
+        // Get references to UI elements
+        progressText = view.findViewById(R.id.progress_text);
+        achievementsContainer = view.findViewById(R.id.achievements_container);
+        
+        return view;
+    }
+    
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        
+        // Intercept system back button to navigate back to previous screen
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), 
+            new androidx.activity.OnBackPressedCallback(true) {
+                @Override
+                public void handleOnBackPressed() {
+                    navigateBack();
+                }
+            });
+        
+        // Update user profile button UI
+        updateUserProfileButton(userProfileButton);
+        
+        achievementManager = AchievementManager.getInstance(requireContext());
+        achievementManager.setCurrentActivity(requireActivity());
+        loadAchievements();
+    }
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (achievementManager != null) {
+            achievementManager.setCurrentActivity(requireActivity());
+        }
+        if (achievementsContainer != null) {
+            loadAchievements();
+        }
+        // Update user profile button when returning to this screen
+        if (userProfileButton != null) {
+            updateUserProfileButton(userProfileButton);
+        }
+    }
+    
+    /**
+     * Navigate back to the previous screen (respects back stack).
+     * If back stack is empty, navigate to MainMenuFragment as fallback.
+     */
+    private void navigateBack() {
+        boolean popped = requireActivity().getSupportFragmentManager().popBackStackImmediate();
+        if (!popped) {
+            Timber.d("[ACHIEVEMENTS] Back stack empty, navigating to MainMenu as fallback");
+            MainMenuFragment fragment = new MainMenuFragment();
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.nav_host_fragment, fragment)
+                    .commit();
+        }
+    }
+    
+    private void loadAchievements() {
+        StreakManager streakManager = StreakManager.getInstance(requireContext());
+        // Load streak data
+        currentLoginStreakDays = streakManager.getCurrentStreak();
+        longestLoginStreakDays = streakManager.getLongestStreak();
+        
+        // Debug logging to identify the issue
+        Timber.d("[ACHIEVEMENTS][STREAK] - current: %d, longest: %d", currentLoginStreakDays, longestLoginStreakDays);
+        if (currentLoginStreakDays > longestLoginStreakDays) {
+            Timber.w("[ACHIEVEMENTS][STREAK] LOGIC ERROR: Current streak (%d) > longest streak (%d) - this should not happen!", currentLoginStreakDays, longestLoginStreakDays);
+        }
+        int unlocked = achievementManager.getUnlockedCount();
+        int total = achievementManager.getTotalCount();
+        progressText.setText(getString(R.string.achievements_progress, unlocked, total));
+        
+        achievementsContainer.removeAllViews();
+        
+        // Group achievements by category
+        AchievementCategory currentCategory = null;
+        
+        for (Achievement achievement : achievementManager.getAllAchievements()) {
+            // Add category header if changed
+            if (achievement.category != currentCategory) {
+                currentCategory = achievement.category;
+                addCategoryHeader(currentCategory);
+            }
+            
+            addAchievementItem(achievement);
+        }
+        
+        Timber.d("[ACHIEVEMENTS] Loaded %d/%d achievements", unlocked, total);
+    }
+    
+    private void addCategoryHeader(AchievementCategory category) {
+        LinearLayout headerLayout = new LinearLayout(requireContext());
+        headerLayout.setOrientation(LinearLayout.HORIZONTAL);
+        headerLayout.setGravity(Gravity.CENTER_VERTICAL);
+        headerLayout.setPadding(0, 32, 0, 16);
+
+        TextView header = new TextView(requireContext());
+        // Use centralized category display name from AchievementCategory enum
+        // Use lambda-based string resolver for KMP compatibility
+        header.setText(category.getDisplayName(resName -> {
+            int resId = requireContext().getResources().getIdentifier(resName, "string", requireContext().getPackageName());
+            return resId != 0 ? requireContext().getString(resId) : null;
+        }));
+        header.setTextSize(20);
+        header.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent));
+        headerLayout.addView(header);
+
+        if (category == AchievementCategory.SPECIAL) {
+            TextView streakInfo = new TextView(requireContext());
+            // Use singular "Day" for 1, plural "Days" for other values
+            String streakLabel = currentLoginStreakDays == 1 
+                ? getString(R.string.achievement_login_streak_day_label, currentLoginStreakDays)
+                : getString(R.string.achievement_login_streak_days_label, currentLoginStreakDays);
+            String longestStreakLabel = longestLoginStreakDays == 1
+                ? getString(R.string.achievement_login_streak_day_label, longestLoginStreakDays)
+                : getString(R.string.achievement_login_streak_days_label, longestLoginStreakDays);
+            streakInfo.setText(streakLabel + " • " + getString(R.string.achievement_longest_streak_label, longestStreakLabel));
+            Timber.d("[ACHIEVEMENTS][STREAK] Streak info: currentLoginStreakDays: %s, longestLoginStreakDays: %s", currentLoginStreakDays, longestLoginStreakDays);
+            streakInfo.setTextSize(14);
+            streakInfo.setTextColor(Color.parseColor("#000000"));
+            streakInfo.setPadding(16, 0, 0, 0);
+            headerLayout.addView(streakInfo);
+        }
+
+        achievementsContainer.addView(headerLayout);
+    }
+    
+    private static final long NEW_ACHIEVEMENT_THRESHOLD_MS = 10 * 60 * 1000; // 10 minutes
+    
+    private boolean isNewAchievement(Achievement achievement) {
+        if (!achievement.isUnlocked() || achievement.unlockedTimestamp == 0) {
+            return false;
+        }
+        long timeSinceUnlock = System.currentTimeMillis() - achievement.unlockedTimestamp;
+        return timeSinceUnlock <= NEW_ACHIEVEMENT_THRESHOLD_MS;
+    }
+    
+    private void addAchievementItem(Achievement achievement) {
+        LinearLayout itemLayout = new LinearLayout(requireContext());
+        itemLayout.setOrientation(LinearLayout.HORIZONTAL);
+        itemLayout.setPadding(16, 16, 16, 16);
+        
+        boolean isNew = isNewAchievement(achievement);
+        
+        // Background color: golden for new, green for unlocked, gray for locked
+        if (isNew) {
+            itemLayout.setBackgroundColor(Color.parseColor("#FFF8E1")); // Light gold for new
+        } else if (achievement.isUnlocked()) {
+            itemLayout.setBackgroundColor(Color.parseColor("#E8F5E9")); // Light green for unlocked
+        } else {
+            itemLayout.setBackgroundColor(Color.parseColor("#F5F5F5")); // Light gray for locked
+        }
+        
+        LinearLayout.LayoutParams itemParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        itemParams.bottomMargin = 8;
+        itemLayout.setLayoutParams(itemParams);
+        
+        // Icon with achievement-specific color
+        ImageView icon = new ImageView(requireContext());
+        AchievementIconHelper.setIconWithAchievementColor(requireContext(), icon, achievement.iconDrawableName, achievement.id);
+        icon.setAlpha(achievement.isUnlocked() ? 1.0f : 0.3f);
+        int iconSize = (int) requireContext().getResources().getDimension(R.dimen.achievement_icon_size);
+        LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(iconSize, iconSize);
+        iconParams.rightMargin = 16;
+        icon.setLayoutParams(iconParams);
+        itemLayout.addView(icon);
+        
+        // Text container
+        LinearLayout textContainer = new LinearLayout(requireContext());
+        textContainer.setOrientation(LinearLayout.VERTICAL);
+        textContainer.setLayoutParams(new LinearLayout.LayoutParams(
+                0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        
+        // Name with NEW badge if recently unlocked
+        LinearLayout nameRow = new LinearLayout(requireContext());
+        nameRow.setOrientation(LinearLayout.HORIZONTAL);
+        nameRow.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        
+        TextView nameText = new TextView(requireContext());
+        nameText.setText(getStringByName(achievement.nameKey));
+        nameText.setTextSize(16);
+        nameText.setTypeface(null, android.graphics.Typeface.BOLD);
+        nameText.setTextColor(achievement.isUnlocked() ?
+                Color.parseColor("#1B5E20") : // Dark green for unlocked
+                Color.parseColor("#9E9E9E")); // Gray for locked
+        nameRow.addView(nameText);
+        
+        // Add NEW badge if recently unlocked
+        if (isNew) {
+            TextView newBadge = new TextView(requireContext());
+            newBadge.setText(" >NEW<");
+            newBadge.setTextSize(12);
+            newBadge.setTextColor(Color.parseColor("#FF6F00")); // Orange
+            newBadge.setTypeface(null, android.graphics.Typeface.BOLD);
+            nameRow.addView(newBadge);
+        }
+        
+        textContainer.addView(nameRow);
+        
+        // Description
+        TextView descText = new TextView(requireContext());
+        descText.setText(getStringByName(achievement.descriptionKey));
+        descText.setTextSize(12);
+        descText.setTextColor(Color.parseColor("#666666"));
+        textContainer.addView(descText);
+
+        itemLayout.addView(textContainer);
+
+        // Right-side indicator: green checkmark if unlocked, progress counter if locked and has progress
+        if (achievement.isUnlocked()) {
+            TextView unlockedText = new TextView(requireContext());
+            unlockedText.setText("\u2713");
+            unlockedText.setTextSize(24);
+            unlockedText.setTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent));
+            itemLayout.addView(unlockedText);
+        } else {
+            AchievementManager.AchievementProgress progress = achievementManager.getProgress(achievement.id);
+            if (progress != null && progress.hasProgress()) {
+                TextView progressView = new TextView(requireContext());
+                int clamped = Math.min(progress.current, progress.required);
+                progressView.setText(clamped + "/" + progress.required);
+                progressView.setTextSize(13);
+                progressView.setTextColor(Color.parseColor("#1565C0"));
+                progressView.setTypeface(null, android.graphics.Typeface.BOLD);
+                itemLayout.addView(progressView);
+            }
+        }
+        
+        achievementsContainer.addView(itemLayout);
+    }
+    
+    private String getStringByName(String name) {
+        int resId = getResources().getIdentifier(name, "string", requireContext().getPackageName());
+        if (resId != 0) {
+            return getString(resId);
+        }
+        return name;
+    }
+}
