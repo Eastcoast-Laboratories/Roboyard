@@ -552,9 +552,9 @@ fun getHistoryEntries(storage: PlatformStorage): List<Triple<Int, String, roboya
         println("[SAVE_LOAD_SCREEN] Error loading history entries: ${e.message}")
     }
     
-    // Sort by timestamp (newest first) - like the default in main app SaveGameFragment
+    // Sort by lastCompletionTimestamp (newest first) - so recently played entries appear at top
     // TODO: spinner option and pagination
-    val sortedEntries = entries.sortedByDescending { it.third?.timestamp ?: 0L }
+    val sortedEntries = entries.sortedByDescending { it.third?.lastCompletionTimestamp ?: it.third?.timestamp ?: 0L }
     
     return sortedEntries
 }
