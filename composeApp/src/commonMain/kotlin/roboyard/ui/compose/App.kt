@@ -1267,7 +1267,7 @@ private fun getNextHistoryIndex(storage: PlatformStorage): Int {
 }
 
 /**
- * Get all history entries including autosave, in reverse order (newest first)
+ * Get all history entries including autosave, sorted by timestamp (newest first)
  * Uses GameHistoryManager for history entries
  * Returns list of Triple with (index, fileName, entry)
  */
@@ -1291,8 +1291,11 @@ private fun getHistoryEntries(storage: PlatformStorage): List<Triple<Int, String
         println("[SAVE_LOAD_SCREEN] Error loading history entries: ${e.message}")
     }
     
-    // Reverse to show newest first
-    return entries.reversed()
+    // Sort by timestamp (newest first) - like the default in main app SaveGameFragment
+    // TODO: spinner option and pagination
+    val sortedEntries = entries.sortedByDescending { it.third?.timestamp ?: 0L }
+    
+    return sortedEntries
 }
 
 /**
