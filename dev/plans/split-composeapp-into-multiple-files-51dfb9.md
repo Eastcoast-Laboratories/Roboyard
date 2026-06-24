@@ -14,8 +14,9 @@ Split the large App.kt file (2245 lines) into multiple files following the Main 
 | CreditsFragment.java | CreditsScreen() | CreditsScreen.kt | To create |
 | HelpFragment.java | HelpScreen() | HelpScreen.kt | To create |
 | AchievementsFragment.java | AchievementsScreen() | AchievementsScreen.kt | To create |
-| DebugSettingsFragment.java | (not in ComposeApp yet) | - | N/A |
-| LevelDesignEditorFragment.java | (not in ComposeApp yet) | - | N/A |
+| BaseGameFragment.java | (base class, not a screen) | - | N/A |
+| DebugSettingsFragment.java | (not in ComposeApp yet) | DebugSettingsScreen.kt.todo | TODO |
+| LevelDesignEditorFragment.java | (not in ComposeApp yet) | LevelDesignEditorScreen.kt.todo | TODO |
 
 ## Utility and Component Files
 
@@ -28,6 +29,15 @@ Split the large App.kt file (2245 lines) into multiple files following the Main 
 | Screen enum, App() navigation | App.kt | Main entry point |
 
 ## Implementation: Delete unnecessary lines from each file without code changes
+
+### Pre-step: Create TODO files for missing screens
+Copy missing Fragment files as .kt.todo files for future implementation:
+```bash
+cd /var/www/Roboyard/composeApp/src/commonMain/kotlin/roboyard/ui/compose && \
+cp /var/www/Roboyard/app/src/main/java/roboyard/ui/fragments/DebugSettingsFragment.java DebugSettingsScreen.kt.todo && \
+cp /var/www/Roboyard/app/src/main/java/roboyard/ui/fragments/LevelDesignEditorFragment.java LevelDesignEditorScreen.kt.todo
+git add .; git commit -am "refactor: create TODO files for missing screens (DebugSettings, LevelDesignEditor)"
+```
 
 ### Step 1: Delete unnecessary lines from App.kt
 Keep only: Screen enum and App() function (navigation logic)
