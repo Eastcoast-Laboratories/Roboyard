@@ -106,16 +106,20 @@ class GameHistoryEntry(
     }
     fun recordSolvedWithoutHints(optimal: Boolean) {
         solvedWithoutHints = true
-        lastSolvedWithoutHints = System.currentTimeMillis()
-        if (optimal) lastPerfectlySolvedWithoutHints = System.currentTimeMillis()
+        // Only set timestamps if hints were never used before
+        // This ensures hints used before first solve permanently disqualify
+        if (!everUsedHints) {
+            lastSolvedWithoutHints = System.currentTimeMillis()
+            if (optimal) lastPerfectlySolvedWithoutHints = System.currentTimeMillis()
+        }
     }
     fun markEverUsedHints() { everUsedHints = true }
     fun isEverUsedHints(): Boolean = everUsedHints
     fun setEverUsedHints(value: Boolean) { everUsedHints = value }
     fun setSolvedWithoutHints(value: Boolean) { solvedWithoutHints = value }
     fun isSolvedWithoutHints(): Boolean = solvedWithoutHints
-    fun qualifiesForNoHintsAchievement(): Boolean = solvedWithoutHints
-    fun qualifiesForPerfectNoHintsAchievement(): Boolean = solvedWithoutHints && (movesMade <= optimalMoves)
+    fun qualifiesForNoHintsAchievement(): Boolean = lastSolvedWithoutHints > 0
+    fun qualifiesForPerfectNoHintsAchievement(): Boolean = lastPerfectlySolvedWithoutHints > 0 && (movesMade <= optimalMoves)
 
     fun getCompletionTimestamps(): List<Long> = completionTimestamps
     fun setCompletionTimestamps(list: List<Long>) { completionTimestamps = list.toMutableList() }
