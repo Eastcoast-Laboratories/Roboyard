@@ -329,8 +329,9 @@ fun serializeBoardToMainGameFormat(board: Board, isLevelGame: Boolean, startBoar
     sb.append("\n")
     
     // Save robots in compact format: rcolorX,Y; (e.g., rr1,5;)
-    for (i in board.robotPositions.indices) {
-        val position = board.robotPositions[i]
+    // Use startBoard robot positions if available (DRY - Random Games shall run like Level Games)
+    for (i in robotPositionsToUse.indices) {
+        val position = robotPositionsToUse[i]
         val x = position % board.width
         val y = position / board.width
         val colorChar = when (i) {

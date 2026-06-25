@@ -159,7 +159,7 @@ fun GameScreen(
     levelId: Int = 1,
     onBack: () -> Unit = {},
     onNewGame: () -> Unit = {},
-    onSaveLoad: () -> Unit = {},
+    onSaveLoad: (Board, Board) -> Unit = { _, _ -> },
     onNextLevel: () -> Unit = {}
 ) {
     val storage = remember { getPlatformStorage() }
@@ -1205,7 +1205,7 @@ fun GameScreen(
                     color = FancyButtonColor.RED,
                     onClick = {
                         // Navigate to SaveLoadScreen to select save slot
-                        onSaveLoad()
+                        onSaveLoad(currentBoard, startBoard)
                     },
                     modifier = Modifier.weight(1f).padding(end = 3.dp)
                 )

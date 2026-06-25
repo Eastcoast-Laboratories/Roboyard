@@ -128,6 +128,7 @@ fun HistoryItem(
 @Composable
 fun SaveLoadScreen(
     boardToSave: Board? = null,
+    startBoard: Board? = null,
     isLevelGame: Boolean = false,
     onBack: () -> Unit = {},
     onLoadGame: (Board) -> Unit = {}
@@ -271,7 +272,7 @@ fun SaveLoadScreen(
                                 val fileName = "saves/save_$slotNumber.dat"
                                 
                                 // Serialize board to Main Game format (DRY - use startBoard for consistent signature)
-                                val saveData = serializeBoardToMainGameFormat(boardToSave, isLevelGame, null)
+                                val saveData = serializeBoardToMainGameFormat(boardToSave, isLevelGame, startBoard)
                                 
                                 println("[SAVE_LOAD_SCREEN] Save data: $saveData")
                                 val result = storage.writeFile(fileName, saveData)

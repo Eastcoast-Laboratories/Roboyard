@@ -16,6 +16,7 @@ import roboyard.logic.core.Preferences
 fun App() {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.MainMenu) }
     var board by remember { mutableStateOf<Board?>(null) }
+    var startBoardForSaveLoad by remember { mutableStateOf<Board?>(null) }
     var selectedLevelId by remember { mutableStateOf(1) }
     var isLevelGame by remember { mutableStateOf(false) }
     var isLoadedGame by remember { mutableStateOf(false) }
@@ -85,7 +86,9 @@ fun App() {
                                 }
                                 isLoadedGame = false // Not a loaded game
                             },
-                            onSaveLoad = {
+                            onSaveLoad = { currentBoardParam, startBoardParam ->
+                                board = currentBoardParam
+                                startBoardForSaveLoad = startBoardParam
                                 currentScreen = Screen.SaveLoad
                             },
                             onNextLevel = {
@@ -144,12 +147,15 @@ fun App() {
                 Screen.SaveLoad -> {
                     SaveLoadScreen(
                         boardToSave = board,
+                        startBoard = startBoardForSaveLoad,
                         isLevelGame = isLevelGame,
                         onBack = {
                             currentScreen = Screen.MainMenu
+                            startBoardForSaveLoad = null
                         },
                         onLoadGame = { loadedBoard ->
                             board = loadedBoard
+                            startBoardForSaveLoad = loadedBoard // Loaded board contains start positions
                             isLevelGame = false // Default to false for loaded games
                             isLoadedGame = true // Mark as loaded game
                             currentScreen = Screen.Game
