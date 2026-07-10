@@ -5,25 +5,19 @@ package roboyard.logic.core
  * Model class that represents all walls on a game board.
  * This class serves as a single source of truth for wall data.
  */
-class WallModel
-/**
- * Creates a new wall model with the specified board dimensions.
- * 
- * @param boardWidth The width of the game board
- * @param boardHeight The height of the game board
- */(
+class WallModel(
     /**
      * Gets the width of the board.
-     * 
+     *
      * @return The board width
      */
- val boardWidth: Int,
+    @JvmField val boardWidth: Int,
     /**
      * Gets the height of the board.
-     * 
+     *
      * @return The board height
      */
- val boardHeight: Int
+    @JvmField val boardHeight: Int
 ) {
     private val walls: MutableList<Wall?> = ArrayList<Wall?>()
 
@@ -60,7 +54,7 @@ class WallModel
          * @param height The height of the game board
          * @return A new WallModel containing all walls from the game elements
          */
-
+        @JvmStatic
         fun fromGameElements(
             elements: MutableList<GameElement>,
             width: Int,

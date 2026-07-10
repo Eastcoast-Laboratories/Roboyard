@@ -40,7 +40,7 @@ class GameLogic constructor(// Board dimensions
          * @param capitalize Whether to capitalize the first letter of the color name
          * @return The color name as a string
          */
-
+        @JvmStatic
         fun getColorName(colorId: Int, capitalize: Boolean): String {
             val name: String?
             when (colorId) {
@@ -167,7 +167,7 @@ class GameLogic constructor(// Board dimensions
          * Check if debug logging is enabled
          * @return true if debug logging is enabled
          */
-
+        @JvmStatic
         fun hasDebugLogging(): Boolean {
             // For now, always return false to minimize log output
             return false

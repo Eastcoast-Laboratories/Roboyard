@@ -105,7 +105,7 @@ class Board private constructor(val width: Int, val height: Int, numRobots: Int)
 
     /** add all outer walls (just to make sure, because the solver requires them) and return the array of walls. */
     val walls: Array<BooleanArray> // [4][width*height] 4 directions
-    val goals: MutableList<Goal> // all possible goals on the board
+    @JvmField val goals: MutableList<Goal> // all possible goals on the board
     private val randomGoals: MutableList<Goal?>
     private var goal: Goal? // the current goal
     private var activeGoals: MutableList<Goal?>? = null // all active goals for multi-goal mode
@@ -124,9 +124,9 @@ class Board private constructor(val width: Int, val height: Int, numRobots: Int)
      * Inner class representing a goal on the board with position, robot, and shape information.
      * Implements Comparable to allow sorting of goals by robot number, shape, and position.
      */
-    inner class Goal(val x: Int, val y: Int, val robotNumber: Int, val shape: Int) :
+    inner class Goal(@JvmField val x: Int, @JvmField val y: Int, @JvmField val robotNumber: Int, @JvmField val shape: Int) :
         Comparable<Goal> {
-        val position: Int
+        @JvmField val position: Int
 
         init {
             this.position = x + y * width
@@ -921,7 +921,7 @@ class Board private constructor(val width: Int, val height: Int, numRobots: Int)
     }
 
     companion object {
-        val WIDTH_STANDARD: Int = Constants.DEFAULT_BOARD_SIZE_X
+        @JvmField val WIDTH_STANDARD: Int = Constants.DEFAULT_BOARD_SIZE_X
         const val WIDTH_MIN: Int = 3
         const val WIDTH_MAX: Int = 100
         val HEIGHT_STANDARD: Int = Constants.DEFAULT_BOARD_SIZE_Y
@@ -1116,6 +1116,7 @@ class Board private constructor(val width: Int, val height: Int, numRobots: Int)
          * @param oldBoard Board to clone
          * @return New board instance that is an exact copy
          */
+        @JvmStatic
         fun createClone(oldBoard: Board): Board {
             // 1. board size, numRobots
             val newBoard = Board(oldBoard.width, oldBoard.height, oldBoard.robotPositions.size)
@@ -1147,6 +1148,7 @@ class Board private constructor(val width: Int, val height: Int, numRobots: Int)
          * @param numRobots Number of robots on new board
          * @return New freestyle board instance
          */
+        @JvmStatic
         fun createBoardFreestyle(
             oldBoard: Board?,
             width: Int,
@@ -1224,6 +1226,7 @@ class Board private constructor(val width: Int, val height: Int, numRobots: Int)
          * @param numRobots Number of robots to place
          * @return New board composed of specified quadrants
          */
+        @JvmStatic
         fun createBoardQuadrants(
             quadrantNW: Int,
             quadrantNE: Int,
@@ -1250,6 +1253,7 @@ class Board private constructor(val width: Int, val height: Int, numRobots: Int)
          * @param numRobots Number of robots to place
          * @return New board with random quadrant configuration
          */
+        @JvmStatic
         fun createBoardRandom(numRobots: Int): Board {
             val indexList = ArrayList<Int?>()
             for (i in 0..3) {
@@ -1272,6 +1276,7 @@ class Board private constructor(val width: Int, val height: Int, numRobots: Int)
          * @param idStr Game ID string to decode
          * @return New board based on game ID, or null if invalid
          */
+        @JvmStatic
         fun createBoardGameID(idStr: String): Board? {
             var result: Board? = null
             var index = 0
@@ -1320,6 +1325,7 @@ class Board private constructor(val width: Int, val height: Int, numRobots: Int)
          * @return a new Board object.
          * @see gameDump
          */
+        @JvmStatic
         fun createBoardGameDump(dump: String): Board? {
             val data: ByteArray? = unb64unzip(dump.replace("\\s".toRegex(), "")) //remove whitespace
             if (null == data) {

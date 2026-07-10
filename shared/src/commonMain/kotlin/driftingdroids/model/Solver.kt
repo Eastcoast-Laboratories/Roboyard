@@ -43,6 +43,7 @@ abstract class Solver protected constructor(board: Board) {
             USE_SLOW_SEARCH_MORE_SOLUTIONS = useSlowSearchMoreSolutions
         }
 
+        @JvmStatic
         fun createInstance(board: Board): Solver {
             return SolverIDDFS(board)
         }

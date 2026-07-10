@@ -146,3 +146,26 @@ dependencies {
     androidTestImplementation 'androidx.arch.core:core-testing:2.2.0'
     debugImplementation 'androidx.fragment:fragment-testing:1.8.9'
 }
+
+// Ensure app Kotlin classes are compiled before Java compilation and take precedence on javac classpath
+afterEvaluate {
+    tasks.withType(JavaCompile) { javaTask ->
+        def mainKotlinTask = tasks.findByName('compileDebugKotlin')
+        if (mainKotlinTask != null) {
+            javaTask.dependsOn(mainKotlinTask)
+        }
+        def mainReleaseKotlinTask = tasks.findByName('compileReleaseKotlin')
+        if (mainReleaseKotlinTask != null) {
+            javaTask.dependsOn(mainReleaseKotlinTask)
+        }
+        def buildDirPath = layout.buildDirectory.get().asFile
+        def isRelease = javaTask.name.toLowerCase().contains('release')
+        def kotlinOutput = file("${buildDirPath}/intermediates/built_in_kotlinc/${isRelease ? 'release' : 'debug'}/compile${isRelease ? 'Release' : 'Debug'}Kotlin/classes")
+        javaTask.notCompatibleWithConfigurationCache("Classpath manipulation for Kotlin output")
+        doFirst {
+            if (kotlinOutput.exists()) {
+                classpath = files(kotlinOutput) + classpath
+            }
+        }
+    }
+}

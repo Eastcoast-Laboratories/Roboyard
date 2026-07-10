@@ -14,19 +14,19 @@ object LevelFormatParser {
      * Also used for compact format entries with type/x/y for Java test compatibility.
      */
     data class LevelEntry(
-        val id: Int = 0,
-        val name: String = "",
-        val width: Int = 0,
-        val height: Int = 0,
-        val difficulty: Int = 0,
-        val minMoves: Int = 0,
-        val solution: String? = null,
-        val mapData: String = "",
+        @JvmField val id: Int = 0,
+        @JvmField val name: String = "",
+        @JvmField val width: Int = 0,
+        @JvmField val height: Int = 0,
+        @JvmField val difficulty: Int = 0,
+        @JvmField val minMoves: Int = 0,
+        @JvmField val solution: String? = null,
+        @JvmField val mapData: String = "",
         // Compact format fields for Java test compatibility
- val type: String = "",
- val data: String = "",  // Raw data string
- var x: Int = 0,
- var y: Int = 0
+        @JvmField val type: String = "",
+        @JvmField val data: String = "",  // Raw data string
+        @JvmField var x: Int = 0,
+        @JvmField var y: Int = 0
     ) {
         // Secondary constructor for Java tests: type and data (coordinates as string)
         constructor(entryType: String, entryData: String) : this(type = entryType, data = entryData) {
@@ -54,6 +54,7 @@ object LevelFormatParser {
      * Returns LevelEntry objects with type/x/y for Java test compatibility.
      */
 
+    @JvmStatic
     fun parseEntries(content: String): List<LevelEntry> {
         val result = mutableListOf<LevelEntry>()
         if (content.isBlank()) return result
@@ -104,6 +105,7 @@ object LevelFormatParser {
      * Format: type:x,y; for compact entries
      */
 
+    @JvmStatic
     fun serializeEntries(entries: List<LevelEntry>): String {
         val result = StringBuilder()
         for (entry in entries) {
@@ -124,6 +126,7 @@ object LevelFormatParser {
      * Parse raw entries from a level or save file (detailed format).
      */
 
+    @JvmStatic
     fun parseRawEntries(content: String): List<RawEntry> {
         val entries = mutableListOf<RawEntry>()
         // Split by both ; and \n to handle various formats, then trim each part
@@ -165,6 +168,7 @@ object LevelFormatParser {
     /**
      * Dummy parseLevel method for completeness
      */
+    @JvmStatic
     fun parseLevel(id: Int): LevelEntry? {
         // This is a simplified version for now
         log.d("Parsing level %d", id)

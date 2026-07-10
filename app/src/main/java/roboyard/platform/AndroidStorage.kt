@@ -132,6 +132,11 @@ class AndroidStorage(private val context: Context) : PlatformStorage {
         return context.getFileStreamPath(fileName).absolutePath
     }
 
+    override fun hasSavedGames(): Boolean {
+        val savesDir = java.io.File(context.filesDir, "saves")
+        return savesDir.exists() && savesDir.listFiles()?.isNotEmpty() == true
+    }
+
     // Bitmap operations
     override fun readBitmap(fileName: String): Any? {
         return try {

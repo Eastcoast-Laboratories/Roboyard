@@ -79,58 +79,33 @@ object Preferences {
 
     // Cached values - accessible as static fields
 
-    var robotCount: Int = 0
-        private set
-    var targetColors: Int = 0
-        private set
-    var soundEnabled: Boolean = false
-        private set
-    var difficulty: Int = 0
-        private set
-    var boardSizeWidth: Int = 0
-        private set
-    var boardSizeHeight: Int = 0
-        private set
-    var generateNewMapEachTime: Boolean = false
-        private set
-    var accessibilityMode: Boolean = false
-        private set
-    var appLanguage: String? = null
-        private set
-    var talkbackLanguage: String? = null
-        private set
-    var gameMode: Int = 0
-        private set
-    var fullscreenEnabled: Boolean = false
-        private set
-    var minSolutionMoves: Int = 0
-        private set
-    var maxSolutionMoves: Int = 0
-        private set
-    var allowMulticolorTarget: Boolean = false
-        private set
-    var highContrastMode: Boolean = false
-        private set
-    var backgroundSoundVolume: Int = 0
-        private set
-    var liveMoveCounterEnabled: Boolean = false
-        private set
-    var hintAutoMoveEnabled: Boolean = false
-        private set
-    var hintAutoMoveMode: Int = 0
-        private set
-    var soundEffectsVolume: Int = 0
-        private set
+    @JvmField var robotCount: Int = 0
+    @JvmField var targetColors: Int = 0
+    @JvmField var soundEnabled: Boolean = false
+    @JvmField var difficulty: Int = 0
+    @JvmField var boardSizeWidth: Int = 0
+    @JvmField var boardSizeHeight: Int = 0
+    @JvmField var generateNewMapEachTime: Boolean = false
+    @JvmField var accessibilityMode: Boolean = false
+    @JvmField var appLanguage: String? = null
+    @JvmField var talkbackLanguage: String? = null
+    @JvmField var gameMode: Int = 0
+    @JvmField var fullscreenEnabled: Boolean = false
+    @JvmField var minSolutionMoves: Int = 0
+    @JvmField var maxSolutionMoves: Int = 0
+    @JvmField var allowMulticolorTarget: Boolean = false
+    @JvmField var highContrastMode: Boolean = false
+    @JvmField var backgroundSoundVolume: Int = 0
+    @JvmField var liveMoveCounterEnabled: Boolean = false
+    @JvmField var hintAutoMoveEnabled: Boolean = false
+    @JvmField var hintAutoMoveMode: Int = 0
+    @JvmField var soundEffectsVolume: Int = 0
 
     // For compatibility with existing code
-    var boardSizeX: Int = 0
-        private set
-    var boardSizeY: Int = 0
-        private set
-    var generateNewMap: Boolean = false
-        private set
-    var accessibility: Boolean = false
-        private set
+    @JvmField var boardSizeX: Int = 0
+    @JvmField var boardSizeY: Int = 0
+    @JvmField var generateNewMap: Boolean = false
+    @JvmField var accessibility: Boolean = false
 
     // Listener for preference changes
     private var preferenceChangeListener: PreferenceChangeListener? = null
@@ -139,6 +114,8 @@ object Preferences {
      * Set a listener to be notified when preferences change
      * @param listener The listener to notify
      */
+
+    @JvmStatic
 
     fun setPreferenceChangeListener(listener: PreferenceChangeListener?) {
         preferenceChangeListener = listener
@@ -149,6 +126,9 @@ object Preferences {
      * @param storage Platform storage implementation
      * @param accessibilityActive Whether a screen reader is active (platform-detected)
      */
+
+
+    @JvmStatic
 
 
     fun initialize(storage: PlatformStorage?, accessibilityActive: Boolean = false) {
@@ -480,6 +460,8 @@ object Preferences {
      * @param count Number of robots
      */
 
+    @JvmStatic
+
     fun updateRobotCount(count: Int) {
         // Ensure preferences are initialized
         if (storage == null) {
@@ -513,12 +495,16 @@ object Preferences {
         log.d("[PREFERENCES] Robot count set to %d", validCount)
     }
 
+    @JvmStatic
+
     fun setRobotCount(count: Int) = updateRobotCount(count)
 
     /**
      * Set the target colors count and save to preferences
      * @param count Number of target colors
      */
+
+    @JvmStatic
 
     fun updateTargetColors(count: Int) {
         // Ensure preferences are initialized
@@ -553,12 +539,16 @@ object Preferences {
         log.d("[PREFERENCES] Target colors set to %d", validCount)
     }
 
+    @JvmStatic
+
     fun setTargetColors(count: Int) = updateTargetColors(count)
 
     /**
      * Set the sound enabled state and save to preferences
      * @param enabled True to enable sound, false to disable
      */
+
+    @JvmStatic
 
     fun updateSoundEnabled(enabled: Boolean) {
         // Ensure preferences are initialized
@@ -589,12 +579,16 @@ object Preferences {
         log.d("[PREFERENCES] Sound enabled set to %s", enabled)
     }
 
+    @JvmStatic
+
     fun setSoundEnabled(enabled: Boolean) = updateSoundEnabled(enabled)
 
     /**
      * Set the background sound volume and save to preferences
      * @param volume Volume level 0-100 (0 = off)
      */
+
+    @JvmStatic
 
     fun updateBackgroundSoundVolume(volume: Int) {
         if (storage == null) {
@@ -617,12 +611,16 @@ object Preferences {
         log.d("[PREFERENCES] Background sound volume set to %d", volume)
     }
 
+    @JvmStatic
+
     fun setBackgroundSoundVolume(volume: Int) = updateBackgroundSoundVolume(volume)
 
     /**
      * Set the live move counter enabled state and save to preferences
      * @param enabled True to enable live move counter, false to disable
      */
+
+    @JvmStatic
 
     fun updateLiveMoveCounterEnabled(enabled: Boolean) {
         if (storage == null) {
@@ -644,12 +642,16 @@ object Preferences {
         log.d("[PREFERENCES] Live move counter enabled set to %s", enabled)
     }
 
+    @JvmStatic
+
     fun setLiveMoveCounterEnabled(enabled: Boolean) = updateLiveMoveCounterEnabled(enabled)
 
     /**
      * Set the hint auto-move mode and save to preferences
      * @param mode 0=Manual, 1=Full-Auto, 2=Semi-Auto (move on next-hint button)
      */
+
+    @JvmStatic
 
     fun updateHintAutoMoveMode(mode: Int) {
         if (storage == null) {
@@ -672,12 +674,16 @@ object Preferences {
         log.d("[PREFERENCES] Hint auto-move mode set to %d", mode)
     }
 
+    @JvmStatic
+
     fun setHintAutoMoveMode(mode: Int) = updateHintAutoMoveMode(mode)
 
     /**
      * Set the sound effects volume and save to preferences
      * @param volume Volume level 0-100
      */
+
+    @JvmStatic
 
     fun updateSoundEffectsVolume(volume: Int) {
         if (storage == null) {
@@ -700,12 +706,16 @@ object Preferences {
         log.d("[PREFERENCES] Sound effects volume set to %d", volume)
     }
 
+    @JvmStatic
+
     fun setSoundEffectsVolume(volume: Int) = updateSoundEffectsVolume(volume)
 
     /**
      * Set the difficulty level and save to preferences
      * @param difficultyLevel Difficulty level (0-3)
      */
+
+    @JvmStatic
 
     fun updateDifficulty(difficultyLevel: Int) {
         // Ensure preferences are initialized
@@ -746,6 +756,8 @@ object Preferences {
         log.d("[PREFERENCES] Difficulty set to %d", validDifficulty)
     }
 
+    @JvmStatic
+
     fun setDifficulty(difficultyLevel: Int) = updateDifficulty(difficultyLevel)
 
     /**
@@ -753,6 +765,8 @@ object Preferences {
      * @param width Board width
      * @param height Board height
      */
+
+    @JvmStatic
 
     fun updateBoardSize(width: Int, height: Int) {
         // Ensure preferences are initialized
@@ -799,12 +813,16 @@ object Preferences {
         log.d("[PREFERENCES] Board size set to %dx%d", validWidth, validHeight)
     }
 
+    @JvmStatic
+
     fun setBoardSize(width: Int, height: Int) = updateBoardSize(width, height)
 
     /**
      * Set whether to generate a new map each time
      * @param generateNewMapEachTime Whether to generate a new map each time
      */
+
+    @JvmStatic
 
     fun updateGenerateNewMapEachTime(generateNewMapEachTime: Boolean) {
         if (storage == null) {
@@ -821,12 +839,15 @@ object Preferences {
         log.d("[PREFERENCES] Generate new map set to %s", generateNewMapEachTime)
     }
 
+    @JvmStatic
+
     fun setGenerateNewMapEachTime(generateNewMapEachTime: Boolean) = updateGenerateNewMapEachTime(generateNewMapEachTime)
 
     /**
      * Set whether to generate a new map each time and save to preferences
      * @param generateNewMapEachTime Whether to generate a new map each time
      */
+    @JvmStatic
     fun updateGenerateNewMapEachTimeCompatibility(generateNewMapEachTime: Boolean) {
         // Ensure preferences are initialized
         if (storage == null) {
@@ -860,6 +881,8 @@ object Preferences {
      * Set whether accessibility mode is enabled and save to preferences
      * @param enabled True if accessibility mode is enabled, false otherwise
      */
+
+    @JvmStatic
 
     fun updateAccessibilityMode(enabled: Boolean) {
         // Ensure preferences are initialized
@@ -912,12 +935,16 @@ object Preferences {
         log.d("[PREFERENCES] Accessibility mode set to %s", enabled)
     }
 
+    @JvmStatic
+
     fun setAccessibilityMode(enabled: Boolean) = updateAccessibilityMode(enabled)
 
     /**
      * Set the app language and save to preferences
      * @param language App language
      */
+
+    @JvmStatic
 
     fun updateAppLanguage(language: String?) {
         // Ensure preferences are initialized
@@ -950,12 +977,16 @@ object Preferences {
         log.d("[PREFERENCES] App language set to %s", language)
     }
 
+    @JvmStatic
+
     fun setAppLanguage(language: String?) = updateAppLanguage(language)
 
     /**
      * Set the talkback language and save to preferences
      * @param language Talkback language
      */
+
+    @JvmStatic
 
     fun updateTalkbackLanguage(language: String?) {
         // Ensure preferences are initialized
@@ -988,12 +1019,16 @@ object Preferences {
         log.d("[PREFERENCES] Talkback language set to %s", language)
     }
 
+    @JvmStatic
+
     fun setTalkbackLanguage(language: String?) = updateTalkbackLanguage(language)
 
     /**
      * Set the game mode and save to preferences
      * @param gameMode Game mode
      */
+
+    @JvmStatic
 
     fun updateGameMode(gameMode: Int) {
         // Ensure preferences are initialized
@@ -1024,12 +1059,16 @@ object Preferences {
         log.d("[PREFERENCES] Game mode set to %d", gameMode)
     }
 
+    @JvmStatic
+
     fun setGameMode(gameMode: Int) = updateGameMode(gameMode)
 
     /**
      * Set whether fullscreen mode is enabled and save to preferences
      * @param enabled True if fullscreen mode is enabled, false otherwise
      */
+
+    @JvmStatic
 
     fun updateFullscreenEnabled(enabled: Boolean) {
         // Ensure preferences are initialized
@@ -1060,12 +1099,16 @@ object Preferences {
         log.d("[PREFERENCES] Fullscreen enabled set to %s", enabled)
     }
 
+    @JvmStatic
+
     fun setFullscreenEnabled(enabled: Boolean) = updateFullscreenEnabled(enabled)
 
     /**
      * Reload all preference values from disk
      * Call this if preferences might have been changed by another component
      */
+
+    @JvmStatic
 
     fun reloadPreferences() {
         loadCachedValues()
@@ -1076,6 +1119,8 @@ object Preferences {
      * Set the minimum solution moves and save to preferences
      * @param moves Minimum number of moves required for a solution
      */
+
+    @JvmStatic
 
     fun updateMinSolutionMoves(moves: Int) {
         if (storage == null) {
@@ -1097,12 +1142,16 @@ object Preferences {
         log.d("[PREFERENCES] Min solution moves set to %d", moves)
     }
 
+    @JvmStatic
+
     fun setMinSolutionMoves(moves: Int) = updateMinSolutionMoves(moves)
 
     /**
      * Set the maximum solution moves and save to preferences
      * @param moves Maximum number of moves required for a solution
      */
+
+    @JvmStatic
 
     fun updateMaxSolutionMoves(moves: Int) {
         if (storage == null) {
@@ -1124,12 +1173,16 @@ object Preferences {
         log.d("[PREFERENCES] Max solution moves set to %d", moves)
     }
 
+    @JvmStatic
+
     fun setMaxSolutionMoves(moves: Int) = updateMaxSolutionMoves(moves)
 
     /**
      * Set whether multicolor targets are allowed and save to preferences
      * @param allowed True to allow multicolor targets, false to disallow
      */
+
+    @JvmStatic
 
     fun updateAllowMulticolorTarget(allowed: Boolean) {
         if (storage == null) {
@@ -1151,12 +1204,16 @@ object Preferences {
         log.d("[PREFERENCES] Allow multicolor target set to %b", allowed)
     }
 
+    @JvmStatic
+
     fun setAllowMulticolorTarget(allowed: Boolean) = updateAllowMulticolorTarget(allowed)
 
     /**
      * Set high contrast mode and save to preferences
      * @param enabled True to enable high contrast mode, false to disable
      */
+
+    @JvmStatic
 
     fun updateHighContrastMode(enabled: Boolean) {
         if (storage == null) {
@@ -1178,6 +1235,8 @@ object Preferences {
         log.d("[PREFERENCES] High contrast mode set to %b", enabled)
     }
 
+    @JvmStatic
+
     fun setHighContrastMode(enabled: Boolean) = updateHighContrastMode(enabled)
 
     /**
@@ -1192,6 +1251,8 @@ object Preferences {
      * @param sliderValue Linear slider value 0-100
      * @return Logarithmic volume 0.0-1.0
      */
+
+    @JvmStatic
 
     fun getLogarithmicVolume(sliderValue: Int): Float {
         if (sliderValue <= 0) return 0.0f

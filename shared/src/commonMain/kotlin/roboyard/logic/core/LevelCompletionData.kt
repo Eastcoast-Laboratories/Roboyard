@@ -5,21 +5,21 @@ package roboyard.logic.core
  * Data class for storing level completion information.
  */
 class LevelCompletionData(
- val levelId: Int,
- val moves: Int,
- val timeMillis: Long,
- val starCount: Int,
- val difficulty: Int
+    @JvmField val levelId: Int,
+    @JvmField val moves: Int,
+    @JvmField val timeMillis: Long,
+    @JvmField val starCount: Int,
+    @JvmField val difficulty: Int
 ) {
 
     private var completed: Boolean = false
     
-    var hintsShown: Int = 0
-    var timeNeeded: Long = 0
-    var movesNeeded: Int = 0
-    var robotsUsed: Int = 0
-    var squaresSurpassed: Int = 0
-    var optimalMoves: Int = 0
+    @JvmField var hintsShown: Int = 0
+    @JvmField var timeNeeded: Long = 0
+    @JvmField var movesNeeded: Int = 0
+    @JvmField var robotsUsed: Int = 0
+    @JvmField var squaresSurpassed: Int = 0
+    @JvmField var optimalMoves: Int = 0
     
     private var starsInternal: Int = 0
 
@@ -37,7 +37,7 @@ class LevelCompletionData(
     }
 
     fun setStars(stars: Int) {
-        this.starsInternal = stars.coerceIn(0, 4) // Allow up to 4 stars (hyper-optimal)
+        this.starsInternal = stars.coerceIn(0, 3) // Allow up to 3 stars
     }
 
     override fun toString(): String {

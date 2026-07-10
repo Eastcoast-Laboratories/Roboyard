@@ -21,6 +21,7 @@ object MapObjects {
      * @param objectType The full object type string (e.g., "robot_blue")
      * @return The base type string
      */
+    @JvmStatic
     fun getBaseType(objectType: String?): String {
         if (objectType == null) return "unknown"
 
@@ -97,9 +98,11 @@ object MapObjects {
      * Extract map data from a string
      */
 
+    @JvmStatic
     fun extractDataFromString(data: String?): ArrayList<GridElement> = extractDataFromString(data, false)
 
 
+    @JvmStatic
     fun extractDataFromString(data: String?, someFlag: Boolean): ArrayList<GridElement> {
         val result = ArrayList<GridElement>()
         if (data.isNullOrBlank()) return result
@@ -160,6 +163,7 @@ object MapObjects {
      * Uses SHA-256 hash for consistency with Java implementation.
      */
 
+    @JvmStatic
     fun generateUnique5LetterFromString(input: String?): String {
         if (input.isNullOrEmpty()) return "ERROR"
 

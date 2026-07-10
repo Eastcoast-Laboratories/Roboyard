@@ -78,7 +78,7 @@ object Constants {
     const val COLOR_ORANGE: Int = 7
     const val COLOR_WHITE: Int = 8
 
-    val COLOR_MULTI: Int = -1 // the multi target
+    const val COLOR_MULTI: Int = -1 // the multi target
 
     const val NUM_ROBOTS: Int = 4 // number of robots
     const val MAX_NUM_ROBOTS: Int = 5 // maximal allowed num robots
@@ -94,7 +94,7 @@ object Constants {
     const val PRECOMP_SOLVER_TIMEOUT_SECONDS: Int = 120
 
     // RGB color values for robots (used in solver)
-    val colors_rgb: IntArray = intArrayOf(
+    @JvmField val colors_rgb: IntArray = intArrayOf(
         0xFFFF00FF.toInt(),  // Magenta/Pink (COLOR_PINK)
         0xFF00FF00.toInt(),  // Green (COLOR_GREEN)
         0xFF0000FF.toInt(),  // Blue (COLOR_BLUE)

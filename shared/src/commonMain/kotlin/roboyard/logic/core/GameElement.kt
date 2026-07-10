@@ -17,22 +17,22 @@ class GameElement
      * @return Element type (TYPE_ROBOT or TYPE_TARGET)
      */
     // Element properties
- val type: Int,
+    @JvmField val type: Int,
     /**
      * Set the X position
      * @param x New X position
      */
- var x: Int,
+    @JvmField var x: Int,
     /**
      * Set the Y position
      * @param y New Y position
      */
- var y: Int
+    @JvmField var y: Int
 ) {
     private val log = RLog.tag("GameElement")
 
 
-    var color: Int = 0 // 0=red, 1=green, 2=blue, 3=yellow
+    @JvmField var color: Int = 0 // 0=red, 1=green, 2=blue, 3=yellow
 
     var isSelected: Boolean = false
 

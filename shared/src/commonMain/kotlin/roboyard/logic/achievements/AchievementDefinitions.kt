@@ -19,7 +19,7 @@ object AchievementDefinitions {
      * This array is also mirrored in Laravel: app/Config/AchievementDefinitions.php
      */
 
-    val ACHIEVEMENT_COLORS: IntArray = intArrayOf(
+    @JvmField val ACHIEVEMENT_COLORS: IntArray = intArrayOf(
         -0xb350b0,  // Green
         -0x6800,  // Orange
         -0xde690d,  // Blue
@@ -86,7 +86,7 @@ object AchievementDefinitions {
      * @param achievementId The achievement ID (used to determine color)
      * @return The color for this achievement
      */
-
+    @JvmStatic
     fun getAchievementColor(achievementId: String): Int {
         val hash = achievementId.hashCode()
         val colorIndex = abs(hash) % ACHIEVEMENT_COLORS.size
@@ -252,6 +252,7 @@ object AchievementDefinitions {
     }
 
 
+    @JvmStatic
     val all: MutableMap<String?, Achievement?>?
         get() {
             if (achievements == null) {

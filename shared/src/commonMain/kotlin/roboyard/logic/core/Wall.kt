@@ -4,32 +4,25 @@ package roboyard.logic.core
  * Represents a wall in the game board.
  * A wall is defined by its position (x,y) and type (horizontal or vertical).
  */
-class Wall
-/**
- * Creates a new wall at the specified position with the specified type.
- * 
- * @param x The x-coordinate of the wall
- * @param y The y-coordinate of the wall
- * @param type The type of wall (horizontal or vertical)
- */(
+class Wall(
     /**
      * Gets the x-coordinate of the wall.
-     * 
+     *
      * @return The x-coordinate
      */
- val x: Int,
+    @JvmField val x: Int,
     /**
      * Gets the y-coordinate of the wall.
-     * 
+     *
      * @return The y-coordinate
      */
- val y: Int,
+    @JvmField val y: Int,
     /**
      * Gets the type of the wall.
-     * 
+     *
      * @return The wall type (horizontal or vertical)
      */
- val type: WallType?
+    @JvmField val type: WallType?
 ) {
     override fun equals(o: Any?): Boolean {
         if (this === o) return true

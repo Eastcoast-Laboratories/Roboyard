@@ -265,7 +265,7 @@ class MapGenerator {
 
         // Flag to force generating a new map once (used by dice button in game screen)
         // This flag is automatically reset to false after the next map generation
-
+        @JvmField
         var forceGenerateNewMapOnce: Boolean = false
     }
 }

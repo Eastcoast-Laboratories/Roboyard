@@ -1,17 +1,19 @@
 package roboyard.logic.achievements
 
+import driftingdroids.model.TimeProvider
+
 /**
  * Represents a single achievement in the game.
  */
 class Achievement {
 
-    val id: String?
+    @JvmField val id: String?
 
-    val nameKey: String? // String resource key for name
+    @JvmField val nameKey: String? // String resource key for name
 
-    val descriptionKey: String? // String resource key for description
+    @JvmField val descriptionKey: String? // String resource key for description
 
-    val category: AchievementCategory?
+    @JvmField val category: AchievementCategory?
     private val iconResId: Int // Legacy fallback icon resource
 
     /**
@@ -19,25 +21,26 @@ class Achievement {
      * @return The sprite index
      */
 
-    val spriteIndex: Int // Index in the sprite sheet (0-63), deprecated
+    @JvmField val spriteIndex: Int // Index in the sprite sheet (0-63), deprecated
 
     /**
      * Get the drawable resource name for the icon.
      * @return The drawable resource name (e.g., "1_lightning")
      */
 
-    val iconDrawableName: String? // Name of drawable resource (e.g., "1_lightning")
+    @JvmField val iconDrawableName: String? // Name of drawable resource (e.g., "1_lightning")
     private var unlocked: Boolean
 
-    var unlockedTimestamp: Long
+    @JvmField var unlockedTimestamp: Long
 
 
-    var nameFormatArgs: Array<out Any?>? = null
-        private set
+    @JvmField var nameFormatArgs: Array<out Any?>? = null
 
+    fun getNameFormatArgs(): Array<out Any?>? = nameFormatArgs
 
-    var descriptionFormatArgs: Array<out Any?>? = null
-        private set
+    @JvmField var descriptionFormatArgs: Array<out Any?>? = null
+
+    fun getDescriptionFormatArgs(): Array<out Any?>? = descriptionFormatArgs
 
     /**
      * Create an achievement with a sprite sheet icon index (deprecated).
@@ -102,7 +105,7 @@ class Achievement {
     fun setUnlocked(unlocked: Boolean) {
         this.unlocked = unlocked
         if (unlocked && unlockedTimestamp == 0L) {
-            this.unlockedTimestamp = TODO("platform-specific time")
+            this.unlockedTimestamp = TimeProvider.currentTimeMillis()
         }
     }
 }
