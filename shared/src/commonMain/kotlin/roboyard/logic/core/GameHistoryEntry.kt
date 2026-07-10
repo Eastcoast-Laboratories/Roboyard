@@ -42,7 +42,7 @@ class GameHistoryEntry(
     @JvmField var previewImagePath: String? = null
 
     private var everUsedHints: Boolean = false
-    private var solvedWithoutHints: Boolean = true
+    private var solvedWithoutHints: Boolean = false
     private var completionTimestamps: MutableList<Long> = mutableListOf()
     private var completionStars: MutableList<Int> = mutableListOf()
     private var completionMoves: MutableList<Int> = mutableListOf()
@@ -77,14 +77,9 @@ class GameHistoryEntry(
         completionCount++
         lastCompletionTimestamp = System.currentTimeMillis()
         playDuration += time
+        // movesMade tracks the latest completion's move count
+        movesMade = moves
         var newRecord = false
-        if (movesMade == 0 || moves < movesMade) {
-            movesMade = moves
-            newRecord = true
-        }
-        if (stars > starsEarned) {
-            starsEarned = stars
-        }
         if (bestMoves == 0 || moves < bestMoves) {
             bestMoves = moves
             newRecord = true
@@ -92,6 +87,9 @@ class GameHistoryEntry(
         if (bestTime == 0 || time < bestTime) {
             bestTime = time
             newRecord = true
+        }
+        if (stars > starsEarned) {
+            starsEarned = stars
         }
         completionTimestamps.add(lastCompletionTimestamp)
         completionStars.add(stars)
@@ -124,7 +122,7 @@ class GameHistoryEntry(
     fun qualifiesForPerfectNoHintsAchievement(): Boolean = lastPerfectlySolvedWithoutHints > 0 && (movesMade <= optimalMoves)
 
     fun getCompletionTimestamps(): List<Long> = completionTimestamps
-    fun setCompletionTimestamps(list: List<Long>) { completionTimestamps = list.toMutableList() }
+    fun setCompletionTimestamps(list: List<Long>?) { completionTimestamps = list?.toMutableList() ?: mutableListOf() }
     
     fun getCompletionStars(): List<Int> = completionStars
     fun setCompletionStars(list: List<Int>) { completionStars = list.toMutableList() }

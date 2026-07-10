@@ -72,24 +72,30 @@ object LevelFormatParser {
                 val entryTrimmed = entry.trim()
                 if (entryTrimmed.isBlank()) continue
 
-                // Find first digit to separate type from coordinates
-                var firstDigitIndex = -1
+                // Find separator: colon (board:12,12) or first digit (h0,0)
+                var separatorIndex = -1
+                var isColon = false
                 for (i in entryTrimmed.indices) {
-                    if (entryTrimmed[i].isDigit()) {
-                        firstDigitIndex = i
+                    if (entryTrimmed[i] == ':') {
+                        separatorIndex = i
+                        isColon = true
+                        break
+                    } else if (entryTrimmed[i].isDigit()) {
+                        separatorIndex = i
                         break
                     }
                 }
 
-                if (firstDigitIndex > 0) {
-                    val type = entryTrimmed.substring(0, firstDigitIndex).trim()
-                    val coordStr = entryTrimmed.substring(firstDigitIndex).trim()
-                    val coords = coordStr.split(",")
+                if (separatorIndex > 0) {
+                    val type = entryTrimmed.substring(0, separatorIndex).trim()
+                    val data = entryTrimmed.substring(separatorIndex).trim()
+                    val cleanData = if (data.startsWith(":")) data.substring(1) else data
+                    val coords = cleanData.split(",")
                     if (coords.size >= 2) {
                         try {
                             val x = coords[0].toInt()
                             val y = coords[1].toInt()
-                            result.add(LevelEntry(type = type, x = x, y = y))
+                            result.add(LevelEntry(type = type, data = data, x = x, y = y))
                         } catch (e: NumberFormatException) {
                             // Skip invalid entries
                         }
@@ -102,15 +108,22 @@ object LevelFormatParser {
 
     /**
      * Serialize entries back to string format.
-     * Format: type:x,y; for compact entries
+     * Preserves original compact entry data (e.g., "board:12,12" or "h0,0") if available.
      */
 
     @JvmStatic
     fun serializeEntries(entries: List<LevelEntry>): String {
         val result = StringBuilder()
         for (entry in entries) {
-            // If it's a compact entry (type with x,y), format as type:x,y;
-            if (entry.type.isNotEmpty()) {
+            if (entry.type.isEmpty()) continue
+
+            if (entry.data.isNotEmpty()) {
+                // Use preserved original data to keep colon/no-colon format
+                result.append(entry.type)
+                result.append(entry.data)
+                result.append(";")
+            } else {
+                // Fallback to default compact format
                 result.append(entry.type)
                 result.append(":")
                 result.append(entry.x)
