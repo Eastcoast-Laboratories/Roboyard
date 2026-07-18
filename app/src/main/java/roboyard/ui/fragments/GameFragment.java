@@ -83,6 +83,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
     private static final int LEVEL_10_THRESHHOLD = 10; // this should be set to 10, increase only for debugging
     private static final int MAX_HINT_HISTORY = 6;
     private static final int BUTTON_COOLDOWN_MS = 1200; // 1,2 seconds for long-press
+    private static final long BACK_BUTTON_MOVE_COOLDOWN_MS = 1000L;
     private GameGridView gameGridView;
     private TextView moveCountTextView;
     private TextView squaresMovedTextView;
@@ -147,8 +148,16 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
 
     // Long-press variables for newMapButton and backButton
     private Handler longPressHandler = new Handler(Looper.getMainLooper());
+    private final Handler backButtonCooldownHandler = new Handler(Looper.getMainLooper());
     private ValueAnimator circularProgressAnimator;
     private boolean isLongPressInProgress = false;
+    private int lastObservedMoveCount = 0;
+    private final Runnable reEnableBackButtonRunnable = () -> {
+        if (backButton != null) {
+            backButton.setEnabled(true);
+            backButton.setAlpha(1.0f);
+        }
+    };
     
     // Guard to prevent onLevelCompleted from being called multiple times for the same level
     private int lastCompletedLevelId = -1;
@@ -1267,6 +1276,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         backButton.setText("◂ " + getString(R.string.button_back_game));
         // Set initial color based on current move count (will be green if no moves yet)
         updateBackButtonColor(gameStateManager.getMoveCount().getValue());
+        Integer currentMoveCount = gameStateManager.getMoveCount().getValue();
+        lastObservedMoveCount = currentMoveCount != null ? currentMoveCount : 0;
         // Back button - long-press mechanism for random games at start (disabled for level games)
         backButton.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
@@ -2129,6 +2140,11 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
     private void handleBackButtonClick() {
         Timber.d("GameFragment: Back button clicked");
 
+        if (backButton != null && !backButton.isEnabled()) {
+            Timber.d("[BACK_COOLDOWN] Back button pressed during cooldown - ignoring");
+            return;
+        }
+
         // Disable back button after goal is reached
         if (gameStateManager.isGameComplete().getValue()) {
             Timber.d("GameFragment: Game already complete, back button disabled");
@@ -2811,6 +2827,20 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
 
         // Update back button color based on move count
         updateBackButtonColor(count);
+
+        int currentCount = count != null ? count : 0;
+        if (currentCount > lastObservedMoveCount) {
+            triggerBackButtonMoveCooldown();
+        }
+        lastObservedMoveCount = currentCount;
+    }
+
+    private void triggerBackButtonMoveCooldown() {
+        if (backButton == null) return;
+        backButtonCooldownHandler.removeCallbacks(reEnableBackButtonRunnable);
+        backButton.setEnabled(false);
+        backButton.setAlpha(0.7f);
+        backButtonCooldownHandler.postDelayed(reEnableBackButtonRunnable, BACK_BUTTON_MOVE_COOLDOWN_MS);
     }
 
     /**
