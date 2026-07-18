@@ -178,6 +178,14 @@ class LevelCompletionManager private constructor(context: Context) {
             return totalStars
         }
 
+    fun isLevelUnlocked(levelId: Int): Boolean {
+        return isLevelUnlocked(levelId, totalStars)
+    }
+
+    fun getStarsNeededToUnlockLevel(levelId: Int): Int {
+        return getStarsNeededToUnlockLevel(levelId, totalStars)
+    }
+
     /**
      * Load all completion data from SharedPreferences
      */
@@ -295,6 +303,23 @@ class LevelCompletionManager private constructor(context: Context) {
     }
 
     companion object {
+        const val STARS_PER_LEVEL = 1
+        const val CUSTOM_LEVEL_START_ID = 141
+
+        @JvmStatic
+        fun isLevelUnlocked(levelId: Int, totalStars: Int): Boolean {
+            return getStarsNeededToUnlockLevel(levelId, totalStars) == 0
+        }
+
+        @JvmStatic
+        fun getStarsNeededToUnlockLevel(levelId: Int, totalStars: Int): Int {
+            if (levelId <= 1 || levelId >= CUSTOM_LEVEL_START_ID) {
+                return 0
+            }
+            val requiredStars = STARS_PER_LEVEL * (levelId - 1)
+            return maxOf(0, requiredStars - totalStars)
+        }
+
         // Using AndroidStorage instead of direct SharedPreferences
         private const val COMPLETION_DATA_KEY = "completion_data"
         private const val LAST_PLAYED_LEVEL_KEY = "last_played_level"
