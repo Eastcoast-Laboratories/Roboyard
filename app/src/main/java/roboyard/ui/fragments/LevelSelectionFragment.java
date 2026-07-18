@@ -73,8 +73,6 @@ public class LevelSelectionFragment extends BaseGameFragment {
 
     // Constants for custom level support
     private static final int CUSTOM_LEVEL_START_ID = 141;
-    private static final int STARS_PER_LEVEL = 1; // Number of stars required per level
-
     /**
      * Interface for handling level selection events.
      * When a level button is clicked, this listener is called with the level ID.
@@ -644,13 +642,11 @@ public class LevelSelectionFragment extends BaseGameFragment {
     public void onLevelSelected(int levelId, View clickedCard) {
         Timber.d("Selected level: %d", levelId);
 
-        // Custom levels are always unlocked, regular levels have star requirements
-        boolean isCustomLevel = levelId >= CUSTOM_LEVEL_START_ID;
-        boolean isUnlocked = isCustomLevel || 
-                (STARS_PER_LEVEL * (levelId - 1) <= totalStars);
+        // Reuse the shared star-based unlock rules from LevelCompletionManager
+        boolean isUnlocked = completionManager.isLevelUnlocked(levelId);
 
         if (!isUnlocked) {
-            int starsNeeded = (levelId - 1) * STARS_PER_LEVEL - totalStars;
+            int starsNeeded = completionManager.getStarsNeededToUnlockLevel(levelId);
             // TODO: this toast is never shown
             Toast.makeText(requireContext(), 
                     getString(R.string.level_locked, starsNeeded),
@@ -990,10 +986,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
                         starsEarned = completionData.getStars();
                     }
 
-                    // Custom levels are always unlocked
-                    boolean isUnlocked = levelId >= CUSTOM_LEVEL_START_ID || 
-                            // Regular levels unlock based on total stars
-                            (STARS_PER_LEVEL * (levelId - 1) <= totalStars);
+                    boolean isUnlocked = completionManager.isLevelUnlocked(levelId);
 
                     // Look up history entry for this level (e.g. "level_1" for levelId=1)
                     String mapKey = levelId < CUSTOM_LEVEL_START_ID

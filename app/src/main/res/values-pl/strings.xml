@@ -173,6 +173,7 @@
     <string name="button_new_game">Nowa gra</string>
     <string name="button_next_game">Następna gra</string>
     <string name="level_not_unlocked">Potrzebujesz %1$d gwiazdek do odblokowania</string>
+    <string name="unlock_more_stars_to_play_next_level">Odblokuj więcej gwiazdek, aby zagrać w następny poziom</string>
     <string name="no_more_history_entries">Brak kolejnych wpisów w historii</string>
     <string name="button_menu">Menu</string>
     

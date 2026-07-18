@@ -718,6 +718,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     if (state.levelId > 0) {
                         // This is a level game, show the Next Level button
                         nextLevelButton.setVisibility(View.VISIBLE);
+                        updateNextLevelButtonState();
                         
                         // Hide accessibility controls if accessibility mode is enabled
                         // so user can click the completion buttons below
@@ -806,6 +807,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         
                         // Show new game button instead of next level
                         nextLevelButton.setText(R.string.new_random_game_button);
+                        nextLevelButton.setEnabled(true);
+                        nextLevelButton.setAlpha(1.0f);
                         nextLevelButton.setVisibility(View.VISIBLE);
                         
                         // Show completion message
@@ -918,6 +921,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 nextLevelButton.setVisibility(View.GONE);
                 // Reset button text just in case it was changed
                 nextLevelButton.setText(R.string.next_level);
+                nextLevelButton.setEnabled(true);
+                nextLevelButton.setAlpha(1.0f);
             }
         });
         
@@ -1723,9 +1728,6 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 achievementPopup.dismiss();
             }
             
-            // Reset achievement game session flags for new game
-            AchievementManager.getInstance(requireContext()).onNewGameStarted();
-            
             // Get the current level ID
             GameState gameState = gameStateManager.getCurrentState().getValue();
             if (gameState != null) {
@@ -1749,6 +1751,14 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                             .show();
                         return;
                     }
+
+                    if (!isLevelUnlocked(nextLevelId)) {
+                        showNextLevelLockedMessage();
+                        return;
+                    }
+
+                    // Reset achievement game session flags for new game
+                    AchievementManager.getInstance(requireContext()).onNewGameStarted();
                     
                     // Start the next level
                     gameStateManager.startLevelGame(nextLevelId);
@@ -1796,6 +1806,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     // [NEXT_GAME_BUTTON] For random games, the big completion button should start
                     // a new random game immediately, not delegate to the small button which has cooldown.
                     Timber.d("[NEW_GAME] Big completion button clicked for random game, starting new game directly");
+                    AchievementManager.getInstance(requireContext()).onNewGameStarted();
                     handleNewMapButtonClick();
                 }
 
@@ -2001,9 +2012,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 }
 
                 // Check if next level is unlocked
-                LevelCompletionManager lcm = LevelCompletionManager.getInstance(requireContext());
-                int totalStars = lcm.getTotalStars();
-                boolean isNextLevelUnlocked = (nextLevelId - 1) <= totalStars;
+                boolean isNextLevelUnlocked = isLevelUnlocked(nextLevelId);
 
                 if (isNextLevelUnlocked) {
                     // Start next level
@@ -2029,12 +2038,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
 
                     hideOptimalMovesButton();
                 } else {
-                    // Show toast message that level is not unlocked
-                    int starsNeeded = (nextLevelId - 1) - totalStars;
-                    Toast.makeText(requireContext(),
-                            getString(R.string.level_not_unlocked, starsNeeded),
-                            Toast.LENGTH_SHORT).show();
-                    Timber.d("[LEVEL_NAV] Level %d not unlocked, you need %d more stars", nextLevelId, starsNeeded);
+                    showNextLevelLockedMessage();
                 }
             }
             return;
@@ -3010,7 +3014,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
     /**
      * Update the new game button for history games and Level games
      * Changes text to "Next Game" for history games, "Next Level" for level games
-     * Disables button if at last history entry or last unlocked level
+     * Visually dims the button when the next level is still locked
      */
     private void updateNewGameButtonForHistoryOrLevel() {
         if (newMapButton == null) return;
@@ -3022,19 +3026,16 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 int currentLevelId = currentState.levelId;
                 int nextLevelId = currentLevelId + 1;
 
-                // Check if next level is unlocked (need at least (nextLevelId - 1) stars)
-                LevelCompletionManager lcm = LevelCompletionManager.getInstance(requireContext());
-                int totalStars = lcm.getTotalStars();
-                boolean isNextLevelUnlocked = (nextLevelId - 1) <= totalStars;
+                boolean isNextLevelUnlocked = isLevelUnlocked(nextLevelId);
 
                 newMapButton.setText(getString(R.string.next_level_short));
 
-                // Disable button if next level is not unlocked
-                newMapButton.setEnabled(isNextLevelUnlocked);
+                // Keep button clickable so we can explain how to unlock the next level
+                newMapButton.setEnabled(true);
                 newMapButton.setAlpha(isNextLevelUnlocked ? 1.0f : 0.5f);
 
-                Timber.d("[LEVEL_NAV] New game button for level %d: next=%d, unlocked=%b, totalStars=%d",
-                        currentLevelId, nextLevelId, isNextLevelUnlocked, totalStars);
+                Timber.d("[LEVEL_NAV] New game button for level %d: next=%d, unlocked=%b",
+                        currentLevelId, nextLevelId, isNextLevelUnlocked);
             }
             return;
         }
@@ -3057,6 +3058,32 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             newMapButton.setEnabled(true);
             newMapButton.setAlpha(1.0f);
         }
+    }
+
+    private boolean isLevelUnlocked(int levelId) {
+        return LevelCompletionManager.getInstance(requireContext()).isLevelUnlocked(levelId);
+    }
+
+    private void updateNextLevelButtonState() {
+        if (nextLevelButton == null) {
+            return;
+        }
+
+        GameState currentState = gameStateManager.getCurrentState().getValue();
+        boolean isUnlocked = true;
+        if (currentState != null && currentState.levelId > 0 && currentState.levelId < 140) {
+            isUnlocked = isLevelUnlocked(currentState.levelId + 1);
+        }
+
+        nextLevelButton.setEnabled(true);
+        nextLevelButton.setAlpha(isUnlocked ? 1.0f : 0.5f);
+    }
+
+    private void showNextLevelLockedMessage() {
+        Toast.makeText(requireContext(),
+                getString(R.string.unlock_more_stars_to_play_next_level),
+                Toast.LENGTH_SHORT).show();
+        Timber.d("[LEVEL_NAV] Next level is locked, unlock more stars to continue");
     }
     
     /**

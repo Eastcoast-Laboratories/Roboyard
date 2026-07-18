@@ -283,6 +283,7 @@
     <string name="button_new_game">Nuevo juego</string>
     <string name="button_next_game">Siguiente juego</string>
     <string name="level_not_unlocked">Necesitas %1$d estrella(s) más para desbloquear</string>
+    <string name="unlock_more_stars_to_play_next_level">Desbloquea más estrellas para jugar el siguiente nivel</string>
     <string name="no_more_history_entries">No hay más entradas del historial</string>
     <string name="button_menu">Menú</string>
     <string name="back">Atrás</string>
