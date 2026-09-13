@@ -612,7 +612,7 @@ public class SaveGameFragment extends BaseGameFragment {
     private void loadHistoryEntries() {
         try {
             // Load history entries
-            List<GameHistoryEntry> historyEntries = GameHistoryManager.getHistoryEntries(requireActivity());
+            List<GameHistoryEntry> historyEntries = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(requireActivity()));
             
             // Store all entries for filtering/sorting
             allHistoryEntries = historyEntries != null ? historyEntries : new ArrayList<>();
@@ -1969,7 +1969,7 @@ public class SaveGameFragment extends BaseGameFragment {
                     // Disable the button to prevent multiple clicks
                     holder.deleteButton.setEnabled(false);
                     
-                    boolean success = GameHistoryManager.deleteHistoryEntry(requireActivity(), mapPath);
+                    boolean success = GameHistoryManager.deleteHistoryEntry(roboyard.platform.AndroidStorage.getInstance(requireActivity()), mapPath);
                     
                     if (success) {
                         // Reload all history entries instead of trying to remove a specific one
@@ -2196,7 +2196,7 @@ public class SaveGameFragment extends BaseGameFragment {
         // Look up full history entry if map signature available
         if (mapSig != null && !mapSig.isEmpty()) {
             Timber.d("[SAVE_GAME] Found MAP_SIG: %s", mapSig);
-            GameHistoryEntry histEntry = GameHistoryManager.findByMapSignature(requireActivity(), mapSig);
+            GameHistoryEntry histEntry = GameHistoryManager.findByMapSignature(roboyard.platform.AndroidStorage.getInstance(requireActivity()), mapSig);
             if (histEntry != null) {
                 Timber.d("[SAVE_GAME] Found history entry for MAP_SIG");
                 sb.append("\n").append(getString(R.string.save_slot_history_header)).append("\n");

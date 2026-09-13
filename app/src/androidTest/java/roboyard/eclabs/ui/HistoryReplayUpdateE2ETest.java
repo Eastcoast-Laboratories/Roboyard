@@ -287,7 +287,7 @@ public class HistoryReplayUpdateE2ETest {
 
     private List<GameHistoryEntry> getHistoryEntries() {
         AtomicReference<List<GameHistoryEntry>> ref = new AtomicReference<>();
-        activityRule.getScenario().onActivity(a -> ref.set(GameHistoryManager.getHistoryEntries(a)));
+        activityRule.getScenario().onActivity(a -> ref.set(GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(a))));
         return ref.get();
     }
 
@@ -296,9 +296,9 @@ public class HistoryReplayUpdateE2ETest {
         activityRule.getScenario().onActivity(ref::set);
         Activity act = ref.get();
         if (act == null) return;
-        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(act);
+        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(act));
         for (GameHistoryEntry e : entries) {
-            GameHistoryManager.deleteHistoryEntry(act, e.getMapPath());
+            GameHistoryManager.deleteHistoryEntry(roboyard.platform.AndroidStorage.getInstance(act), e.getMapPath());
         }
         FileReadWrite.writePrivateData(act, "history_index.json", "{\"historyEntries\":[]}");
         step("setup", "History cleared (" + entries.size() + " entries removed)");

@@ -117,7 +117,7 @@ public class MinimapLoginTest {
 
         // Programmatically check all history entries
         activityRule.getScenario().onActivity(activity -> {
-            java.util.List<roboyard.logic.core.GameHistoryEntry> entries = roboyard.logic.managers.GameHistoryManager.getHistoryEntries(activity);
+            java.util.List<roboyard.logic.core.GameHistoryEntry> entries = roboyard.logic.managers.GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
             Timber.d("[MINIMAP_LOGIN_TEST] Total history entries: %d", entries.size());
 
             int validMapPaths = 0;

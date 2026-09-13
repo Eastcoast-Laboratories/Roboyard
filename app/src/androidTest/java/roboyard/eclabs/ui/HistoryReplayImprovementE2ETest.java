@@ -96,7 +96,7 @@ public class HistoryReplayImprovementE2ETest {
             // NOT perfect (8 moves vs 5 optimal), so lastPerfectlySolvedWithoutHints stays 0
             
             // Save to history
-            GameHistoryManager.addHistoryEntry(activity, entry);
+            GameHistoryManager.addHistoryEntry(roboyard.platform.AndroidStorage.getInstance(activity), entry);
             testData[2] = entry.getMapPath();
             
             step("INFO", String.format("Created entry: %s, moves=8, hints=-1, solvedNoHints=true, lastPerfect=0",
@@ -107,10 +107,10 @@ public class HistoryReplayImprovementE2ETest {
         step("3/9", "Verifying initial history entry");
         long[] initialHintStats = new long[5]; // [bestMoves, completionCount, historySize, lastSolvedNoHints, lastPerfectNoHints]
         activityRule.getScenario().onActivity(activity -> {
-            List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+            List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
             initialHintStats[2] = entries.size();
             
-            GameHistoryEntry entry = GameHistoryManager.findByMapSignature(activity, testData[1]);
+            GameHistoryEntry entry = GameHistoryManager.findByMapSignature(roboyard.platform.AndroidStorage.getInstance(activity), testData[1]);
             assertNotNull("Initial history entry should be found by mapSignature", entry);
             initialHintStats[0] = entry.bestMoves;
             initialHintStats[1] = entry.completionCount;
@@ -133,14 +133,14 @@ public class HistoryReplayImprovementE2ETest {
         activityRule.getScenario().onActivity(activity -> {
             // Simulate viewing the game and clicking through hints without completing
             // This should mark everUsedHints=true but NOT change lastPerfectlySolvedWithoutHints
-            GameHistoryEntry entry = GameHistoryManager.findByMapSignature(activity, testData[1]);
+            GameHistoryEntry entry = GameHistoryManager.findByMapSignature(roboyard.platform.AndroidStorage.getInstance(activity), testData[1]);
             if (entry != null) {
                 // Update maxHintUsed to 2 (viewed hints 0, 1, 2)
                 entry.maxHintUsed = 2;
                 entry.markEverUsedHints();
                 // Hint-only update: set movesMade=0 so addHistoryEntry does NOT record another completion
                 entry.movesMade = 0;
-                GameHistoryManager.addHistoryEntry(activity, entry);
+                GameHistoryManager.addHistoryEntry(roboyard.platform.AndroidStorage.getInstance(activity), entry);
                 step("INFO", "Updated entry: maxHintUsed=2, everUsedHints=true (no completion)");
             }
         });
@@ -150,7 +150,7 @@ public class HistoryReplayImprovementE2ETest {
         boolean[] hintVerify = new boolean[3]; // [everUsedHints, qualifiesNoHints, qualifiesPerfectNoHints]
         long[] hintTimestamps = new long[2]; // [lastSolvedNoHints, lastPerfectNoHints]
         activityRule.getScenario().onActivity(activity -> {
-            GameHistoryEntry entry = GameHistoryManager.findByMapSignature(activity, testData[1]);
+            GameHistoryEntry entry = GameHistoryManager.findByMapSignature(roboyard.platform.AndroidStorage.getInstance(activity), testData[1]);
             assertNotNull("Entry should still exist after hint viewing", entry);
             hintVerify[0] = entry.isEverUsedHints();
             hintVerify[1] = entry.qualifiesForNoHintsAchievement();
@@ -187,7 +187,7 @@ public class HistoryReplayImprovementE2ETest {
             improvedEntry.mapSignature = testData[1];
             
             // Add to history - should update existing entry, not create new one
-            GameHistoryManager.addHistoryEntry(activity, improvedEntry);
+            GameHistoryManager.addHistoryEntry(roboyard.platform.AndroidStorage.getInstance(activity), improvedEntry);
             
             step("INFO", "Added improved entry with 6 moves (still not perfect)");
         });
@@ -196,10 +196,10 @@ public class HistoryReplayImprovementE2ETest {
         step("7/9", "Verifying history entry was updated (not duplicated)");
         long[] updatedStats = new long[5]; // [bestMoves, completionCount, historySize, lastSolvedNoHints, lastPerfectNoHints]
         activityRule.getScenario().onActivity(activity -> {
-            List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+            List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
             updatedStats[2] = entries.size();
             
-            GameHistoryEntry entry = GameHistoryManager.findByMapSignature(activity, testData[1]);
+            GameHistoryEntry entry = GameHistoryManager.findByMapSignature(roboyard.platform.AndroidStorage.getInstance(activity), testData[1]);
             assertNotNull("Updated history entry should still be found by mapSignature", entry);
             updatedStats[0] = entry.bestMoves;
             updatedStats[1] = entry.completionCount;
@@ -226,7 +226,7 @@ public class HistoryReplayImprovementE2ETest {
         step("8/9", "Verifying qualifiesForPerfectNoHintsAchievement returns false");
         boolean[] finalQualify = new boolean[1];
         activityRule.getScenario().onActivity(activity -> {
-            GameHistoryEntry entry = GameHistoryManager.findByMapSignature(activity, testData[1]);
+            GameHistoryEntry entry = GameHistoryManager.findByMapSignature(roboyard.platform.AndroidStorage.getInstance(activity), testData[1]);
             finalQualify[0] = entry.qualifiesForPerfectNoHintsAchievement();
             step("INFO", "qualifiesForPerfectNoHintsAchievement = " + finalQualify[0]);
         });

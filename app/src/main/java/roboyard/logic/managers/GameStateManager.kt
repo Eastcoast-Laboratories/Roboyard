@@ -48,6 +48,7 @@ import roboyard.logic.solver.RRGameMove
 import roboyard.logic.solver.RRPiece
 import roboyard.logic.solver.SolverDD
 import roboyard.logic.storage.FileReadWrite.Companion.writePrivateData
+import roboyard.platform.AndroidStorage
 import roboyard.ui.RoboyardApplication
 import roboyard.ui.animation.RobotAnimationManager
 import roboyard.ui.components.GameGridView
@@ -438,7 +439,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
         state.levelName = "Level " + levelId
 
         // Save last played level for scroll position in level selection
-        LevelCompletionManager.getInstance(getApplication<Application>()!!).lastPlayedLevel =
+        LevelCompletionManager.getInstance(AndroidStorage.getInstance(getApplication<Application>()!!)).lastPlayedLevel =
             levelId
 
         // Set reference to this GameStateManager in the new state
@@ -2305,7 +2306,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                     "[SAVE] [STARS] Game completed, saving level completion data for level %d",
                     state.levelId
                 )
-                val manager = LevelCompletionManager.getInstance(context!!)
+                val manager = LevelCompletionManager.getInstance(AndroidStorage.getInstance(context!!))
                 val starsBefore = manager.totalStars
                 val data = saveLevelCompletionData(state)
 
@@ -2325,7 +2326,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                         Thread(Runnable {
                             try {
                                 Thread.sleep(500)
-                                val allEntries = getHistoryEntries(currentActivity)
+                                val allEntries = getHistoryEntries(AndroidStorage.getInstance(currentActivity))
                                 var updatedCount = 0
                                 val levelName = "Level " + finalLevelId
                                 for (entry in allEntries) {
@@ -2347,7 +2348,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                                     }
                                 }
                                 if (updatedCount > 0) {
-                                    saveHistoryIndex(currentActivity, allEntries)
+                                    saveHistoryIndex(AndroidStorage.getInstance(currentActivity), allEntries)
                                     d(
                                         "[HISTORY_SYNC] Updated and persisted %d level history entries with stars+moves",
                                         updatedCount
@@ -2440,7 +2441,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
         d("Preparing completion data for level %d", levelId)
 
         // Get the level completion manager
-        val manager = LevelCompletionManager.getInstance(context!!)
+        val manager = LevelCompletionManager.getInstance(AndroidStorage.getInstance(context!!))
 
         // Calculate optimal moves
         var optimalMoves = 0
@@ -2498,7 +2499,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
          * @return Total number of stars
          */
         get() {
-            val manager = LevelCompletionManager.getInstance(context!!)
+            val manager = LevelCompletionManager.getInstance(AndroidStorage.getInstance(context!!))
             return manager.totalStars
         }
 
@@ -2695,7 +2696,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
         }
 
         try {
-            val allEntries = getHistoryEntries(activity)
+            val allEntries = getHistoryEntries(AndroidStorage.getInstance(activity))
             if (allEntries.isEmpty()) {
                 d("[HISTORY_NAV] No history entries found")
                 return false
@@ -2764,7 +2765,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
         }
 
         try {
-            val allEntries = getHistoryEntries(activity)
+            val allEntries = getHistoryEntries(AndroidStorage.getInstance(activity))
             if (allEntries.isEmpty()) {
                 d("[HISTORY_NAV] No history entries found")
                 return false
@@ -2831,7 +2832,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
         }
 
         try {
-            val allEntries = getHistoryEntries(activity)
+            val allEntries = getHistoryEntries(AndroidStorage.getInstance(activity))
             if (allEntries.isEmpty()) {
                 return false
             }
@@ -3001,7 +3002,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
             if (mapSig == null || mapSig.isEmpty()) return
 
             // Load the full list once - we will modify it in-place and save it back
-            val allEntries = getHistoryEntries(activity)
+            val allEntries = getHistoryEntries(AndroidStorage.getInstance(activity))
             var existing: GameHistoryEntry? = null
             for (e in allEntries) {
                 if (mapSig == e.mapSignature) {
@@ -3088,7 +3089,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
                 }
 
                 // Save the same list we modified (not a freshly-read copy from disk)
-                saveHistoryIndex(activity, allEntries)
+                saveHistoryIndex(AndroidStorage.getInstance(activity), allEntries)
                 d(
                     "[HISTORY] Saved updated history entry: completionCount=%d, maxHintUsed=%d, everUsedHints=%b",
                     existing.completionCount, maxHint, existing.isEverUsedHints()
@@ -3118,10 +3119,10 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
             }
 
             // Initialize GameHistoryManager if needed
-            initialize(activity)
+            initialize(AndroidStorage.getInstance(activity))
 
             // Get next available history index
-            val historyIndex = getNextHistoryIndex(activity)
+            val historyIndex = getNextHistoryIndex(AndroidStorage.getInstance(activity))
             val historyFileName = "history_" + historyIndex + ".txt"
             val historyPath = historyFileName
 
@@ -3257,10 +3258,10 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
             )
 
             // Add entry to history index
-            addHistoryEntry(activity, entry)
+            addHistoryEntry(AndroidStorage.getInstance(activity), entry)
 
             // Verify the entry was stored with the correct mapSignature
-            val stored = findByMapSignature(activity, mapSig)
+            val stored = findByMapSignature(AndroidStorage.getInstance(activity), mapSig)
             d(
                 "[MAPSIG] saveToHistory: after addHistoryEntry, findByMapSignature('%s') = %s",
                 mapSig,

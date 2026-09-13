@@ -43,7 +43,7 @@ public class DebugHistoryTest {
         // Get initial history count
         int[] initialCount = {0};
         activityRule.getScenario().onActivity(activity -> {
-            initialCount[0] = GameHistoryManager.getHistoryEntries(activity).size();
+            initialCount[0] = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity)).size();
             Timber.d("[UNITTESTS][DEBUG_TEST] Initial history count: %d", initialCount[0]);
         });
         
@@ -82,7 +82,7 @@ public class DebugHistoryTest {
         Timber.d("[UNITTESTS][DEBUG_TEST] Step 7: Verifying entries were created");
         int[] finalCount = {0};
         activityRule.getScenario().onActivity(activity -> {
-            finalCount[0] = GameHistoryManager.getHistoryEntries(activity).size();
+            finalCount[0] = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity)).size();
             Timber.d("[UNITTESTS][DEBUG_TEST] Final history count: %d", finalCount[0]);
             
             int added = finalCount[0] - initialCount[0];
@@ -99,7 +99,7 @@ public class DebugHistoryTest {
         // Step 9: Verify memory stats are updated (should show > 0 entries)
         Timber.d("[UNITTESTS][DEBUG_TEST] Step 9: Verifying updated memory stats");
         activityRule.getScenario().onActivity(activity -> {
-            int historyCount = GameHistoryManager.getHistoryEntries(activity).size();
+            int historyCount = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity)).size();
             Timber.d("[UNITTESTS][DEBUG_TEST] History entries after refresh: %d", historyCount);
             if (historyCount == 0) {
                 throw new AssertionError("Memory stats show 0 entries but " + finalCount[0] + " should exist");

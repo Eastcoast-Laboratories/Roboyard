@@ -878,7 +878,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                             // saveToHistoryNow writes the entry, so isFirstCompletion would always return false after it.
                             String mapSignature = state.generateMapSignature();
                             boolean isFirstCompletion = GameHistoryManager.isFirstCompletion(
-                                    requireActivity(), mapSignature);
+                                    roboyard.platform.AndroidStorage.getInstance(requireActivity()), mapSignature);
                             Timber.d("[ACHIEVEMENTS] isFirstCompletion=%b (checked before saveToHistoryNow)", isFirstCompletion);
 
                             // Save to history immediately on completion (bypasses time threshold)
@@ -889,7 +889,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                             boolean qualifiesForNoHints = !state.hasUsedHintsThisSession();
                             if (!isFirstCompletion) {
                                 GameHistoryEntry existingEntry = GameHistoryManager.findByMapSignature(
-                                        requireActivity(), mapSignature);
+                                        roboyard.platform.AndroidStorage.getInstance(requireActivity()), mapSignature);
                                 if (existingEntry != null) {
                                     qualifiesForNoHints = existingEntry.qualifiesForNoHintsAchievement();
                                 }
@@ -2001,7 +2001,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 }
 
                 // Check if next level is unlocked
-                LevelCompletionManager lcm = LevelCompletionManager.getInstance(requireContext());
+                LevelCompletionManager lcm = LevelCompletionManager.getInstance(roboyard.platform.AndroidStorage.getInstance(requireContext()));
                 int totalStars = lcm.getTotalStars();
                 boolean isNextLevelUnlocked = (nextLevelId - 1) <= totalStars;
 
@@ -2819,7 +2819,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
      */
     private java.util.List<roboyard.logic.core.GameHistoryEntry> getFilteredHistoryEntries() {
         java.util.List<roboyard.logic.core.GameHistoryEntry> allEntries =
-            roboyard.logic.managers.GameHistoryManager.getHistoryEntries(requireActivity());
+            roboyard.logic.managers.GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(requireActivity()));
         java.util.List<roboyard.logic.core.GameHistoryEntry> filteredEntries = new java.util.ArrayList<>();
         for (roboyard.logic.core.GameHistoryEntry entry : allEntries) {
             String mapName = entry.mapName;
@@ -3023,7 +3023,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 int nextLevelId = currentLevelId + 1;
 
                 // Check if next level is unlocked (need at least (nextLevelId - 1) stars)
-                LevelCompletionManager lcm = LevelCompletionManager.getInstance(requireContext());
+                LevelCompletionManager lcm = LevelCompletionManager.getInstance(roboyard.platform.AndroidStorage.getInstance(requireContext()));
                 int totalStars = lcm.getTotalStars();
                 boolean isNextLevelUnlocked = (nextLevelId - 1) <= totalStars;
 

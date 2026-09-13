@@ -420,7 +420,7 @@ public class DebugSettingsFragment extends Fragment {
                     Toast.makeText(requireContext(), "Please enter a number between 1 and 140", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                LevelCompletionManager completionManager = LevelCompletionManager.getInstance(requireContext());
+                LevelCompletionManager completionManager = LevelCompletionManager.getInstance(roboyard.platform.AndroidStorage.getInstance(requireContext()));
                 completionManager.unlockStars(numStars);
                 Toast.makeText(requireContext(), numStars + " stars unlocked", Toast.LENGTH_SHORT).show();
                 Timber.d("[DEBUG] Unlocked %d stars via debug button", numStars);
@@ -441,7 +441,7 @@ public class DebugSettingsFragment extends Fragment {
                     .setTitle("Reset Levels")
                     .setMessage("Are you sure you want to reset all level progress?")
                     .setPositiveButton("Reset", (dialog, which) -> {
-                        LevelCompletionManager completionManager = LevelCompletionManager.getInstance(requireContext());
+                        LevelCompletionManager completionManager = LevelCompletionManager.getInstance(roboyard.platform.AndroidStorage.getInstance(requireContext()));
                         completionManager.resetAll();
                         Toast.makeText(requireContext(), "All levels reset", Toast.LENGTH_SHORT).show();
                         Timber.d("[DEBUG] All levels reset via debug button");
@@ -508,7 +508,7 @@ public class DebugSettingsFragment extends Fragment {
             try {
                 // History entries
                 java.util.List<roboyard.logic.core.GameHistoryEntry> historyEntries = 
-                    roboyard.logic.managers.GameHistoryManager.getHistoryEntries(requireActivity());
+                    roboyard.logic.managers.GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(requireActivity()));
                 int historyCount = historyEntries.size();
                 long historyMemoryBytes = 0;
                 for (roboyard.logic.core.GameHistoryEntry entry : historyEntries) {
@@ -530,7 +530,7 @@ public class DebugSettingsFragment extends Fragment {
                 achievementText.setText(String.format("Achievements Unlocked: %d", achievementCount));
                 
                 // Levels
-                LevelCompletionManager completionManager = LevelCompletionManager.getInstance(requireContext());
+                LevelCompletionManager completionManager = LevelCompletionManager.getInstance(roboyard.platform.AndroidStorage.getInstance(requireContext()));
                 int starsCount = completionManager.getTotalStars();
                 levelText.setText(String.format("Level Stars: %d/139", starsCount));
                 
@@ -584,7 +584,7 @@ public class DebugSettingsFragment extends Fragment {
                 
                 // Find the next available Test number
                 java.util.List<roboyard.logic.core.GameHistoryEntry> existingEntries = 
-                    roboyard.logic.managers.GameHistoryManager.getHistoryEntries(requireActivity());
+                    roboyard.logic.managers.GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(requireActivity()));
                 int nextTestNumber = 1;
                 for (roboyard.logic.core.GameHistoryEntry entry : existingEntries) {
                     String mapName = entry.mapName;
@@ -678,7 +678,7 @@ public class DebugSettingsFragment extends Fragment {
                     Timber.d("[DEBUG_DUMMY] Entry %d boardSize before save: '%s'", i + 1, entry.boardSize);
                     
                     // Add to history
-                    Boolean success = roboyard.logic.managers.GameHistoryManager.addHistoryEntry(requireActivity(), entry);
+                    Boolean success = roboyard.logic.managers.GameHistoryManager.addHistoryEntry(roboyard.platform.AndroidStorage.getInstance(requireActivity()), entry);
                     if (success != null && success) {
                         added++;
                         Timber.d("[DEBUG_DUMMY] Entry %d added successfully, boardSize='%s'", i + 1, entry.boardSize);
