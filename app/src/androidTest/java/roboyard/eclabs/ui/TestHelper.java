@@ -140,9 +140,9 @@ public class TestHelper {
      * Use this at the beginning of tests that need a clean state.
      */
     public static void startNewSessionWithEmptyStorage(Activity activity) throws InterruptedException {
-        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
         for (GameHistoryEntry e : entries) {
-            GameHistoryManager.deleteHistoryEntry(activity, e.getMapPath());
+            GameHistoryManager.deleteHistoryEntry(roboyard.platform.AndroidStorage.getInstance(activity), e.getMapPath());
         }
         FileReadWrite.writePrivateData(activity, "history_index.json", "{\"historyEntries\":[]}");
         Timber.d("[UNITTESTS][TEST_HELPER] History cleared (%d entries removed)", entries.size());

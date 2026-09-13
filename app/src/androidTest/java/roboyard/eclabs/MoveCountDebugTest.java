@@ -62,7 +62,7 @@ public class MoveCountDebugTest {
         clearAllHistory();
 
         // Initialize
-        GameHistoryManager.initialize(activity);
+        GameHistoryManager.initialize(roboyard.platform.AndroidStorage.getInstance(activity));
         activityRule.getScenario().onActivity(a -> {
             gameStateManager = ((MainActivity) a).getGameStateManager();
         });
@@ -74,9 +74,9 @@ public class MoveCountDebugTest {
     }
 
     private void clearAllHistory() {
-        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
         for (GameHistoryEntry entry : entries) {
-            GameHistoryManager.deleteHistoryEntry(activity, entry.getMapPath());
+            GameHistoryManager.deleteHistoryEntry(roboyard.platform.AndroidStorage.getInstance(activity), entry.getMapPath());
         }
         FileReadWrite.writePrivateData(activity, "history_index.json", "{\"historyEntries\":[]}");
     }
@@ -143,7 +143,7 @@ public class MoveCountDebugTest {
         // For now, just verify the state
         
         // Check history entries
-        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
         Timber.d("[UNITTESTS][MOVE_COUNT_TEST] History entries count: %d", entries.size());
 
         for (GameHistoryEntry entry : entries) {

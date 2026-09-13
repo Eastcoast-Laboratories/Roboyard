@@ -76,7 +76,7 @@ public class HistoryPaginationTest {
                     entry.difficulty = i % 4; // 0=Beginner, 1=Intermediate, 2=Advanced, 3=Expert
                     entry.completionCount = i % 3 == 0 ? 1 : 0;
                     
-                    GameHistoryManager.addHistoryEntry(activity, entry);
+                    GameHistoryManager.addHistoryEntry(roboyard.platform.AndroidStorage.getInstance(activity), entry);
                     
                     if ((i + 1) % 25 == 0) {
                         Timber.d("[UNITTESTS][PAGINATION_TEST] Created %d/100 entries", i + 1);

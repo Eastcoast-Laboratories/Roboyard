@@ -430,7 +430,7 @@ class DataExportImportManager(context: Context) {
         StreakManager.getInstance(context).resetStreak()
         tag(TAG).d("[STREAK][RESET] Streak manager reset")
 
-        LevelCompletionManager.getInstance(context).resetAll()
+        LevelCompletionManager.getInstance(AndroidStorage.getInstance(context)).resetAll()
         tag(TAG).d("[LEVEL][RESET] Level completion manager reset")
 
 
@@ -471,7 +471,7 @@ class DataExportImportManager(context: Context) {
 
 
         // Reset level completion data (stars and solved status)
-        val levelCompletionManager = LevelCompletionManager.getInstance(context)
+        val levelCompletionManager = LevelCompletionManager.getInstance(AndroidStorage.getInstance(context))
         levelCompletionManager.resetAll()
 
 

@@ -131,7 +131,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
         levelRecyclerView.setLayoutManager(layoutManager);
 
         // Get the level completion manager
-        completionManager = LevelCompletionManager.getInstance(requireContext());
+        completionManager = LevelCompletionManager.getInstance(roboyard.platform.AndroidStorage.getInstance(requireContext()));
 
         // Get total stars
         totalStars = completionManager.getTotalStars();
@@ -435,7 +435,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
     private void loadHistoryByMapName() {
         historyByMapName.clear();
         try {
-            List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(requireActivity());
+            List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(requireActivity()));
             if (entries != null) {
                 for (GameHistoryEntry entry : entries) {
                     String key = extractLevelKey(entry);
@@ -553,7 +553,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
                 totalStars += data.getStars();
             }
         }
-        completedLevelCount = GameHistoryManager.getUniqueCompletedLevelCount(requireActivity());
+        completedLevelCount = GameHistoryManager.getUniqueCompletedLevelCount(roboyard.platform.AndroidStorage.getInstance(requireActivity()));
     }
 
     /**
@@ -710,7 +710,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
         FrameLayout rootFrame = (FrameLayout) rootView;
 
         // Check if this is the last played level (has yellow border)
-        int lastPlayedLevel = LevelCompletionManager.getInstance(requireContext()).getLastPlayedLevel();
+        int lastPlayedLevel = LevelCompletionManager.getInstance(roboyard.platform.AndroidStorage.getInstance(requireContext())).getLastPlayedLevel();
         boolean hasYellowBorder = (levelId == lastPlayedLevel);
 
         // Remove any foreground (border) before taking snapshot
@@ -1288,7 +1288,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
 
             // Highlight the last played level with yellow border
             int lastPlayedLevel = LevelCompletionManager.getInstance(
-                    itemView.getContext()).getLastPlayedLevel();
+                    roboyard.platform.AndroidStorage.getInstance(itemView.getContext())).getLastPlayedLevel();
             if (levelId == lastPlayedLevel) {
                 // Apply yellow border as foreground for last played level
                 levelCard.setForeground(itemView.getContext().getDrawable(R.drawable.bg_level_card_last_played));

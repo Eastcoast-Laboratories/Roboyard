@@ -15,6 +15,7 @@ import roboyard.logic.network.RoboyardApiClient.ApiCallback
 import roboyard.logic.storage.FileReadWrite.Companion.readPrivateData
 import roboyard.logic.storage.FileReadWrite.Companion.writePrivateData
 import roboyard.platform.AndroidNetworkMonitor
+import roboyard.platform.AndroidStorage
 import timber.log.Timber.Forest.d
 import timber.log.Timber.Forest.e
 import timber.log.Timber.Forest.w
@@ -242,7 +243,7 @@ class SyncManager private constructor(context: Context) {
     @JvmOverloads
     fun uploadHistory(@Suppress("UNUSED_PARAMETER") _context: Context? = null, callback: HistoryUploadCallback? = null) {
         try {
-            val entries = GameHistoryManager.getHistoryEntries(this.context)
+            val entries = GameHistoryManager.getHistoryEntries(AndroidStorage.getInstance(this.context))
             uploadHistory(this.context, entries, callback)
         } catch (e: Exception) {
             e(e, "[HISTORY_SYNC] Error loading history entries for upload")
@@ -461,8 +462,8 @@ class SyncManager private constructor(context: Context) {
                 var restoredCount = 0
 
                 try {
-                    GameHistoryManager.initialize(this@SyncManager.context)
-                    val existingEntries = GameHistoryManager.getHistoryEntries(this@SyncManager.context)
+                    GameHistoryManager.initialize(AndroidStorage.getInstance(this@SyncManager.context))
+                    val existingEntries = GameHistoryManager.getHistoryEntries(AndroidStorage.getInstance(this@SyncManager.context))
 
                     for (i in 0..<(history?.length() ?: 0)) {
                         val entry = history!!.getJSONObject(i)
@@ -499,7 +500,7 @@ class SyncManager private constructor(context: Context) {
                                     historyPath
                                 )
                             } else {
-                                val nextIndex = GameHistoryManager.getNextHistoryIndex(this@SyncManager.context)
+                                val nextIndex = GameHistoryManager.getNextHistoryIndex(AndroidStorage.getInstance(this@SyncManager.context))
                                 historyPath = GameHistoryManager.indexToPath(nextIndex)
                             }
 
@@ -588,7 +589,7 @@ class SyncManager private constructor(context: Context) {
                                 historyEntry.setCompletionStars(starsList)
                             }
 
-                            GameHistoryManager.addHistoryEntry(this@SyncManager.context, historyEntry)
+                            GameHistoryManager.addHistoryEntry(AndroidStorage.getInstance(this@SyncManager.context), historyEntry)
                             restoredCount++
 
 
@@ -665,7 +666,7 @@ class SyncManager private constructor(context: Context) {
                         // Count level entries separately
                         var levelsRestored = 0
                         try {
-                            val allEntries = GameHistoryManager.getHistoryEntries(this@SyncManager.context)
+                            val allEntries = GameHistoryManager.getHistoryEntries(AndroidStorage.getInstance(this@SyncManager.context))
                             for (entry in allEntries) {
                                 if (entry.mapName != null && entry.mapName!!.startsWith("Level ")) {
                                     levelsRestored++
@@ -834,7 +835,7 @@ class SyncManager private constructor(context: Context) {
      */
     private fun restoreLevelStarsFromHistory(history: JSONArray) {
         try {
-            val lcm = LevelCompletionManager.getInstance(this.context)
+            val lcm = LevelCompletionManager.getInstance(AndroidStorage.getInstance(this.context))
             var restoredLevels = 0
 
             for (i in 0..<history.length()) {

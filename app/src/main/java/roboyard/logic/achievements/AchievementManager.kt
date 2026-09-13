@@ -735,7 +735,7 @@ class AchievementManager private constructor(context: Context) {
         // Same-walls achievements: count unique position-signatures sharing the same wall layout
         if (wallSignature != null && !wallSignature.isEmpty()) {
             val sameWallEntries =
-                findByWallSignature(context, wallSignature)
+                findByWallSignature(AndroidStorage.getInstance(context), wallSignature)
             val uniquePositions =
                 sameWallEntries.size // each entry = distinct positionSignature
             d(
@@ -1009,10 +1009,10 @@ class AchievementManager private constructor(context: Context) {
     }
 
     private val uniqueCompletedLevelCount: Int
-        get() = getUniqueCompletedLevelCount(context)
+        get() = getUniqueCompletedLevelCount(AndroidStorage.getInstance(context))
 
     private val uniqueThreeStarLevelCount: Int
-        get() = getUniqueThreeStarLevelCount(context)
+        get() = getUniqueThreeStarLevelCount(AndroidStorage.getInstance(context))
 
     /**
      * Sync achievement unlock to the server after unlock.

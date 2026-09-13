@@ -137,7 +137,7 @@ public class HistorySyncStarsTest {
         // Verify LevelCompletionData has stars
         final int[] starsHolder = new int[1];
         activityRule.getScenario().onActivity(activity -> {
-            LevelCompletionManager lcm = LevelCompletionManager.getInstance(activity);
+            LevelCompletionManager lcm = LevelCompletionManager.getInstance(roboyard.platform.AndroidStorage.getInstance(activity));
             starsHolder[0] = lcm.getLevelCompletionData(1).getStars();
             Timber.d("[UNITTESTS][SYNC_TEST] LevelCompletionData stars for Level 1: %d", starsHolder[0]);
         });
@@ -148,7 +148,7 @@ public class HistorySyncStarsTest {
         final int[] histMoves = new int[1];
         final boolean[] histFound = new boolean[1];
         activityRule.getScenario().onActivity(activity -> {
-            List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+            List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
             for (GameHistoryEntry entry : entries) {
                 if ("Level 1".equals(entry.mapName)) {
                     histFound[0] = true;

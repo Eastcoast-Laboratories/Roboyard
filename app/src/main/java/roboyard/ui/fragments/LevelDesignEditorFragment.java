@@ -130,7 +130,7 @@ public class LevelDesignEditorFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // Initialize completion manager
-        LevelCompletionManager completionManager = LevelCompletionManager.getInstance(requireContext());
+        LevelCompletionManager completionManager = LevelCompletionManager.getInstance(roboyard.platform.AndroidStorage.getInstance(requireContext()));
 
         // Initialize UI elements
         levelIdTextView = view.findViewById(R.id.level_id_text);

@@ -44,7 +44,7 @@ public class HistoryMinimapTest {
         // Step 1: Check if history entries exist
         int[] historyCount = {0};
         activityRule.getScenario().onActivity(activity -> {
-            historyCount[0] = GameHistoryManager.getHistoryEntries(activity).size();
+            historyCount[0] = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity)).size();
             Timber.d("[UNITTESTS][TEST] Found %d history entries", historyCount[0]);
         });
         

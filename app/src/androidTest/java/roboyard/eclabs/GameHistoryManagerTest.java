@@ -51,7 +51,7 @@ public class GameHistoryManagerTest {
         clearAllHistory();
 
         // Initialize
-        GameHistoryManager.initialize(activity);
+        GameHistoryManager.initialize(roboyard.platform.AndroidStorage.getInstance(activity));
     }
 
     @After
@@ -60,12 +60,12 @@ public class GameHistoryManagerTest {
     }
 
     private void clearAllHistory() {
-        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
         for (GameHistoryEntry entry : entries) {
-            GameHistoryManager.deleteHistoryEntry(activity, entry.getMapPath());
+            GameHistoryManager.deleteHistoryEntry(roboyard.platform.AndroidStorage.getInstance(activity), entry.getMapPath());
         }
         // Verify cleared
-        List<GameHistoryEntry> remaining = GameHistoryManager.getHistoryEntries(activity);
+        List<GameHistoryEntry> remaining = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
         if (!remaining.isEmpty()) {
             // Force-clear the index file
             FileReadWrite.writePrivateData(activity, "history_index.json", "{\"historyEntries\":[]}");
@@ -77,9 +77,9 @@ public class GameHistoryManagerTest {
     @Test
     public void testHistoryPathsAreFlat() {
         GameHistoryEntry entry = createTestEntry(0, "TestMap");
-        GameHistoryManager.addHistoryEntry(activity, entry);
+        GameHistoryManager.addHistoryEntry(roboyard.platform.AndroidStorage.getInstance(activity), entry);
 
-        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
         assertFalse("Should have entries", entries.isEmpty());
 
         for (GameHistoryEntry e : entries) {
@@ -93,9 +93,9 @@ public class GameHistoryManagerTest {
     @Test
     public void testHistoryFileNameFormat() {
         GameHistoryEntry entry = createTestEntry(0, "TestMap");
-        GameHistoryManager.addHistoryEntry(activity, entry);
+        GameHistoryManager.addHistoryEntry(roboyard.platform.AndroidStorage.getInstance(activity), entry);
 
-        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
         assertEquals(1, entries.size());
         assertTrue("mapPath should start with 'history_'",
                 entries.get(0).getMapPath().startsWith("history_"));
@@ -108,10 +108,10 @@ public class GameHistoryManagerTest {
     @Test
     public void testAddAndGetHistoryEntry() {
         GameHistoryEntry entry = createTestEntry(0, "MyMap");
-        Boolean result = GameHistoryManager.addHistoryEntry(activity, entry);
+        Boolean result = GameHistoryManager.addHistoryEntry(roboyard.platform.AndroidStorage.getInstance(activity), entry);
         assertTrue("addHistoryEntry should return true", result);
 
-        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
         assertEquals("Should have 1 entry", 1, entries.size());
         assertEquals("MyMap", entries.get(0).mapName);
         assertEquals(5, entries.get(0).movesMade);
@@ -122,10 +122,10 @@ public class GameHistoryManagerTest {
     public void testAddMultipleEntries() {
         for (int i = 0; i < 5; i++) {
             GameHistoryEntry entry = createTestEntry(i, "Map_" + i);
-            GameHistoryManager.addHistoryEntry(activity, entry);
+            GameHistoryManager.addHistoryEntry(roboyard.platform.AndroidStorage.getInstance(activity), entry);
         }
 
-        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
         assertEquals("Should have 5 entries", 5, entries.size());
     }
 
@@ -135,10 +135,10 @@ public class GameHistoryManagerTest {
             GameHistoryEntry entry = createTestEntry(i, "Map_" + i);
             // Set timestamps so Map_2 is newest
             entry.timestamp = 1000L + i * 1000L;
-            GameHistoryManager.addHistoryEntry(activity, entry);
+            GameHistoryManager.addHistoryEntry(roboyard.platform.AndroidStorage.getInstance(activity), entry);
         }
 
-        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
         assertEquals(3, entries.size());
         // Newest first
         assertEquals("Map_2", entries.get(0).mapName);
@@ -152,14 +152,14 @@ public class GameHistoryManagerTest {
     public void testUpdateExistingEntryByMapName() {
         GameHistoryEntry entry1 = createTestEntry(0, "SameMap");
         entry1.movesMade = 3;
-        GameHistoryManager.addHistoryEntry(activity, entry1);
+        GameHistoryManager.addHistoryEntry(roboyard.platform.AndroidStorage.getInstance(activity), entry1);
 
         // Add another entry with the same mapName — should update, not duplicate
         GameHistoryEntry entry2 = createTestEntry(0, "SameMap");
         entry2.movesMade = 7;
-        GameHistoryManager.addHistoryEntry(activity, entry2);
+        GameHistoryManager.addHistoryEntry(roboyard.platform.AndroidStorage.getInstance(activity), entry2);
 
-        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
         assertEquals("Should have 1 entry (updated, not duplicated)", 1, entries.size());
         assertEquals(7, entries.get(0).movesMade);
     }
@@ -169,30 +169,30 @@ public class GameHistoryManagerTest {
     @Test
     public void testDeleteHistoryEntry() {
         GameHistoryEntry entry = createTestEntry(0, "ToDelete");
-        GameHistoryManager.addHistoryEntry(activity, entry);
+        GameHistoryManager.addHistoryEntry(roboyard.platform.AndroidStorage.getInstance(activity), entry);
 
-        List<GameHistoryEntry> before = GameHistoryManager.getHistoryEntries(activity);
+        List<GameHistoryEntry> before = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
         assertEquals(1, before.size());
 
-        GameHistoryManager.deleteHistoryEntry(activity, before.get(0));
+        GameHistoryManager.deleteHistoryEntry(roboyard.platform.AndroidStorage.getInstance(activity), before.get(0));
 
-        List<GameHistoryEntry> after = GameHistoryManager.getHistoryEntries(activity);
+        List<GameHistoryEntry> after = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
         assertEquals("Should have 0 entries after delete", 0, after.size());
     }
 
     @Test
     public void testDeleteByPath() {
         GameHistoryEntry entry = createTestEntry(0, "ToDeleteByPath");
-        GameHistoryManager.addHistoryEntry(activity, entry);
+        GameHistoryManager.addHistoryEntry(roboyard.platform.AndroidStorage.getInstance(activity), entry);
 
-        List<GameHistoryEntry> before = GameHistoryManager.getHistoryEntries(activity);
+        List<GameHistoryEntry> before = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
         assertEquals(1, before.size());
         String mapPath = before.get(0).getMapPath();
 
-        boolean deleted = GameHistoryManager.deleteHistoryEntry(activity, mapPath);
+        boolean deleted = GameHistoryManager.deleteHistoryEntry(roboyard.platform.AndroidStorage.getInstance(activity), mapPath);
         assertTrue("deleteHistoryEntry(path) should return true", deleted);
 
-        List<GameHistoryEntry> after = GameHistoryManager.getHistoryEntries(activity);
+        List<GameHistoryEntry> after = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
         assertEquals("Should have 0 entries after delete", 0, after.size());
     }
 
@@ -204,10 +204,10 @@ public class GameHistoryManagerTest {
         for (int i = 0; i < 15; i++) {
             GameHistoryEntry entry = createTestEntry(i, "Map_" + i);
             entry.timestamp = System.currentTimeMillis() + i * 1000L;
-            GameHistoryManager.addHistoryEntry(activity, entry);
+            GameHistoryManager.addHistoryEntry(roboyard.platform.AndroidStorage.getInstance(activity), entry);
         }
 
-        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
         assertTrue("Should have at most 11 entries, got " + entries.size(),
                 entries.size() <= 11);
     }
@@ -216,28 +216,28 @@ public class GameHistoryManagerTest {
 
     @Test
     public void testGetNextHistoryIndex() {
-        int firstIndex = GameHistoryManager.getNextHistoryIndex(activity);
+        int firstIndex = GameHistoryManager.getNextHistoryIndex(roboyard.platform.AndroidStorage.getInstance(activity));
         assertEquals("First index should be 0", 0, firstIndex);
 
         GameHistoryEntry entry = createTestEntry(0, "IndexTest");
-        GameHistoryManager.addHistoryEntry(activity, entry);
+        GameHistoryManager.addHistoryEntry(roboyard.platform.AndroidStorage.getInstance(activity), entry);
 
-        int secondIndex = GameHistoryManager.getNextHistoryIndex(activity);
+        int secondIndex = GameHistoryManager.getNextHistoryIndex(roboyard.platform.AndroidStorage.getInstance(activity));
         assertEquals("Second index should be 1", 1, secondIndex);
     }
 
     @Test
     public void testGetHistoryIndex() {
         GameHistoryEntry entry = createTestEntry(0, "FindMe");
-        GameHistoryManager.addHistoryEntry(activity, entry);
+        GameHistoryManager.addHistoryEntry(roboyard.platform.AndroidStorage.getInstance(activity), entry);
 
-        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
         String mapPath = entries.get(0).getMapPath();
 
-        int index = GameHistoryManager.getHistoryIndex(activity, mapPath);
+        int index = GameHistoryManager.getHistoryIndex(roboyard.platform.AndroidStorage.getInstance(activity), mapPath);
         assertEquals("Should find entry at index 0", 0, index);
 
-        int notFound = GameHistoryManager.getHistoryIndex(activity, "nonexistent.txt");
+        int notFound = GameHistoryManager.getHistoryIndex(roboyard.platform.AndroidStorage.getInstance(activity), "nonexistent.txt");
         assertEquals("Should return -1 for missing entry", -1, notFound);
     }
 
@@ -275,7 +275,7 @@ public class GameHistoryManagerTest {
 
     @Test
     public void testEmptyHistoryReturnsEmptyList() {
-        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(activity);
+        List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(activity));
         assertNotNull("Should return non-null list", entries);
         assertTrue("Should be empty", entries.isEmpty());
     }
@@ -286,7 +286,7 @@ public class GameHistoryManagerTest {
         FileReadWrite.deletePrivateData(activity, "history_index.json");
         assertFalse(FileReadWrite.privateDataExists(activity, "history_index.json"));
 
-        GameHistoryManager.initialize(activity);
+        GameHistoryManager.initialize(roboyard.platform.AndroidStorage.getInstance(activity));
         assertTrue("Index file should exist after initialize",
                 FileReadWrite.privateDataExists(activity, "history_index.json"));
     }

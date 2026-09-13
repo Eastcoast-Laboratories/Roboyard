@@ -2,6 +2,7 @@ package roboyard.logic.managers
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import roboyard.logic.core.Constants
 import roboyard.logic.core.GameHistoryEntry
 import roboyard.logic.storage.PlatformStorage
 import roboyard.logic.util.RLog
@@ -34,7 +35,7 @@ data class HistoryEntryData(
     val everUsedHints: Boolean,
     val lastSolvedWithoutHints: Long,
     val lastPerfectlySolvedWithoutHints: Long,
-    val difficulty: Int
+    val difficulty: String?
 )
 
 /**
@@ -55,8 +56,26 @@ object GameHistoryManager {
     private val gson = Gson()
 
     /**
+     * Parse history index JSON, handling both wrapped object format and legacy direct array format.
+     * Wrapped: {"historyEntries": [...]}
+     * Legacy: [...]
+     */
+    private fun parseHistoryIndex(indexJson: String): HistoryIndex {
+        val trimmed = indexJson.trim()
+        return if (trimmed.startsWith("{")) {
+            gson.fromJson(indexJson, HistoryIndex::class.java) ?: HistoryIndex(emptyList())
+        } else {
+            // Legacy direct array format
+            val type = object : TypeToken<List<HistoryEntryData>>() {}.type
+            val list: List<HistoryEntryData> = gson.fromJson(indexJson, type) ?: emptyList()
+            HistoryIndex(list)
+        }
+    }
+
+    /**
      * Initialize the history index file if it doesn't exist
      */
+    @JvmStatic
     fun initialize(storage: PlatformStorage) {
         try {
             // Create empty history index file if it doesn't exist
@@ -78,6 +97,7 @@ object GameHistoryManager {
      * 
      * @return true if entry was added/updated successfully
      */
+    @JvmStatic
     fun addHistoryEntry(storage: PlatformStorage, entry: GameHistoryEntry): Boolean {
         try {
             // Load existing entries
@@ -197,6 +217,7 @@ object GameHistoryManager {
     /**
      * Get all history entries
      */
+    @JvmStatic
     fun getHistoryEntries(storage: PlatformStorage): MutableList<GameHistoryEntry> {
         val entries: MutableList<GameHistoryEntry> = mutableListOf()
         try {
@@ -204,7 +225,7 @@ object GameHistoryManager {
             log.d("[HISTORY] getHistoryEntries: indexJson=${if (indexJson != null) "loaded (${indexJson.length} chars)" else "null"}")
 
             if (indexJson != null && !indexJson.isEmpty()) {
-                val index = gson.fromJson(indexJson, HistoryIndex::class.java)
+                val index = parseHistoryIndex(indexJson)
                 
                 for (entryData in index.historyEntries) {
                     val entry = GameHistoryEntry()
@@ -223,7 +244,7 @@ object GameHistoryManager {
                     entry.optimalMoves = entryData.optimalMoves
                     entry.boardSize = entryData.boardSize
                     entry.previewImagePath = entryData.previewImagePath
-                    entry.difficulty = entryData.difficulty
+                    entry.difficulty = migrateDifficultyStringToInt(entryData.difficulty)
                     entry.completionCount = entryData.completionCount
                     entry.lastCompletionTimestamp = entryData.lastCompletionTimestamp
                     entry.bestTime = entryData.bestTime
@@ -256,6 +277,7 @@ object GameHistoryManager {
      * 
      * @return true if saved successfully
      */
+    @JvmStatic
     fun saveHistoryIndex(storage: PlatformStorage, entries: MutableList<GameHistoryEntry>): Boolean {
         try {
             val entryDataList = entries.map { entry ->
@@ -284,7 +306,7 @@ object GameHistoryManager {
                     everUsedHints = entry.isEverUsedHints(),
                     lastSolvedWithoutHints = entry.lastSolvedWithoutHints,
                     lastPerfectlySolvedWithoutHints = entry.lastPerfectlySolvedWithoutHints,
-                    difficulty = entry.difficulty
+                    difficulty = entry.difficulty.toString()
                 )
             }
             
@@ -306,6 +328,7 @@ object GameHistoryManager {
      * @param storage the platform storage
      * @return the next available index
      */
+    @JvmStatic
     fun getNextHistoryIndex(storage: PlatformStorage): Int {
         val entries = getHistoryEntries(storage)
 
@@ -326,6 +349,7 @@ object GameHistoryManager {
     /**
      * Find the index of a history entry by map path
      */
+    @JvmStatic
     fun getHistoryIndex(storage: PlatformStorage, mapPath: String?): Int {
         val entries = getHistoryEntries(storage)
         for (i in entries.indices) {
@@ -342,6 +366,7 @@ object GameHistoryManager {
      * @param mapSignature The map signature to search for
      * @return The history entry if found, null otherwise
      */
+    @JvmStatic
     fun findByMapSignature(storage: PlatformStorage, mapSignature: String?): GameHistoryEntry? {
         if (mapSignature == null || mapSignature.isEmpty()) {
             return null
@@ -359,6 +384,7 @@ object GameHistoryManager {
     /**
      * Convert a history index to a file path
      */
+    @JvmStatic
     fun indexToPath(index: Int): String {
         return "history_$index.txt"
     }
@@ -369,6 +395,7 @@ object GameHistoryManager {
      * @param mapPath The map path to delete
      * @return true if the history entry was deleted successfully
      */
+    @JvmStatic
     fun deleteHistoryEntry(storage: PlatformStorage, mapPath: String): Boolean {
         try {
             log.d("[HISTORY_DELETE] Attempting to delete history entry: $mapPath")
@@ -444,6 +471,7 @@ object GameHistoryManager {
      * @param mapSignature The unique map signature to check
      * @return true if this map has never been completed before
      */
+    @JvmStatic
     fun isFirstCompletion(storage: PlatformStorage, mapSignature: String?): Boolean {
         if (mapSignature == null || mapSignature.isEmpty()) {
             return true // No signature = treat as new
@@ -455,15 +483,202 @@ object GameHistoryManager {
     }
 
     /**
-     * Migrate difficulty string to int ID
+     * Find all history entries with the same wall signature (same walls, different positions).
+     * @param storage The platform storage
+     * @param wallSignature The wall signature to match
+     * @return List of entries with matching wall layout
      */
-    private fun migrateDifficultyStringToInt(diffStr: String): Int {
-        return when (diffStr.lowercase()) {
-            "beginner" -> 0
-            "intermediate" -> 1
-            "advanced" -> 2
-            "impossible" -> 3
-            else -> 0 // default to beginner
+    @JvmStatic
+    fun findByWallSignature(
+        storage: PlatformStorage,
+        wallSignature: String?
+    ): MutableList<GameHistoryEntry> {
+        val result: MutableList<GameHistoryEntry> = ArrayList()
+        if (wallSignature == null || wallSignature.isEmpty()) {
+            return result
         }
+        val entries = getHistoryEntries(storage)
+        for (entry in entries) {
+            if (wallSignature == entry.wallSignature) {
+                result.add(entry)
+            }
+        }
+        return result
+    }
+
+    /**
+     * Get the total count of unique maps completed.
+     * @param storage The platform storage
+     * @return Number of unique maps in history
+     */
+    @JvmStatic
+    fun getUniqueMapCount(storage: PlatformStorage): Int {
+        return getHistoryEntries(storage).size
+    }
+
+    /**
+     * Get the total count of unique completed levels from history.
+     * Only entries with map names like "Level N" or matching level file paths are counted.
+     * @param storage The platform storage
+     * @return Number of unique completed levels in history
+     */
+    @JvmStatic
+    fun getUniqueCompletedLevelCount(storage: PlatformStorage): Int {
+        val entries = getHistoryEntries(storage)
+        val uniqueLevelKeys: MutableSet<String> = HashSet()
+
+        for (entry in entries) {
+            val levelKey = extractLevelKey(entry)
+            if (levelKey != null) {
+                uniqueLevelKeys.add(levelKey)
+            }
+        }
+        log.d(
+            "[GAME_HISTORY][ACHIEVEMENTS][LEVEL] getUniqueCompletedLevelCount: Found ${uniqueLevelKeys.size} unique levels"
+        )
+        return uniqueLevelKeys.size
+    }
+
+    /**
+     * Get the total count of unique completed levels that earned at least three stars.
+     * @param storage The platform storage
+     * @return Number of unique 3-star levels in history
+     */
+    @JvmStatic
+    fun getUniqueThreeStarLevelCount(storage: PlatformStorage): Int {
+        val entries = getHistoryEntries(storage)
+        val uniqueLevelKeys: MutableSet<String> = HashSet()
+
+        for (entry in entries) {
+            if (entry.starsEarned < 3) {
+                continue
+            }
+
+            val levelKey = extractLevelKey(entry)
+            if (levelKey != null) {
+                uniqueLevelKeys.add(levelKey)
+            }
+        }
+
+        log.d(
+            "[GAME_HISTORY][ACHIEVEMENTS][LEVEL] getUniqueThreeStarLevelCount: Found ${uniqueLevelKeys.size} unique 3-star levels"
+        )
+        return uniqueLevelKeys.size
+    }
+
+    /**
+     * Extract a unique level key from a history entry.
+     * Handles both "Level N" map names and level file paths.
+     * @param entry The history entry
+     * @return The level key, or null if not a level
+     */
+    private fun extractLevelKey(entry: GameHistoryEntry): String? {
+        val mapName = entry.mapName
+        if (mapName != null && mapName.matches("(?i)Level \\d+".toRegex())) {
+            val id =
+                mapName.trim { it <= ' ' }.split("\\s+".toRegex()).dropLastWhile { it.isEmpty() }
+                    .toTypedArray()[1].toInt()
+
+            val levelKey = if (id >= 141) "custom_level_$id" else "level_$id"
+            return levelKey
+        }
+
+        val mapPath = entry.getMapPath()
+        if (mapPath != null) {
+            val base = if (mapPath.contains("/"))
+                mapPath.substring(mapPath.lastIndexOf('/') + 1)
+            else
+                mapPath
+            if (base.startsWith("level_") || base.startsWith("custom_level_")) {
+                return if (base.endsWith(".txt")) base.substring(0, base.length - 4) else base
+            }
+        }
+        return null
+    }
+
+    /**
+     * Get the completion count for a specific map.
+     * @param storage The platform storage
+     * @param mapSignature The map signature to check
+     * @return Number of times this map was completed, or 0 if never
+     */
+    @JvmStatic
+    fun getCompletionCount(storage: PlatformStorage, mapSignature: String?): Int {
+        val entry = findByMapSignature(storage, mapSignature)
+        return if (entry != null) entry.completionCount else 0
+    }
+
+    /**
+     * Delete a history entry by entry object.
+     * @param storage The platform storage
+     * @param entry The history entry to delete
+     */
+    @JvmStatic
+    fun deleteHistoryEntry(storage: PlatformStorage, entry: GameHistoryEntry) {
+        try {
+            val entries = getHistoryEntries(storage)
+
+            var removed = false
+            for (i in entries.indices) {
+                if (entries[i].getMapPath() == entry.getMapPath()) {
+                    entries.removeAt(i)
+                    removed = true
+                    break
+                }
+            }
+
+            if (removed) {
+                storage.deleteFile(entry.getMapPath())
+                if (entry.previewImagePath != null) {
+                    storage.deleteFile(entry.previewImagePath!!)
+                }
+                saveHistoryIndex(storage, entries)
+                log.d("Deleted history entry: ${entry.getMapPath()}")
+            }
+        } catch (e: Exception) {
+            log.e("Error deleting history entry: ${e.message}")
+        }
+    }
+
+    /**
+     * Migrate old string difficulty values to int IDs.
+     * Supports both English and German localized strings.
+     * @param difficultyStr The old string difficulty value
+     * @return The corresponding difficulty ID (0-3)
+     */
+    private fun migrateDifficultyStringToInt(difficultyStr: String?): Int {
+        if (difficultyStr == null || difficultyStr.isEmpty()) {
+            return Constants.DIFFICULTY_BEGINNER
+        }
+
+        val lower = difficultyStr.lowercase().trim { it <= ' ' }
+
+        // English strings
+        if (lower.contains("beginner") || lower.contains("easy")) {
+            return Constants.DIFFICULTY_BEGINNER
+        } else if (lower.contains("intermediate") || lower.contains("advanced") || lower.contains("medium")) {
+            return Constants.DIFFICULTY_ADVANCED
+        } else if (lower.contains("insane") || lower.contains("hard")) {
+            return Constants.DIFFICULTY_INSANE
+        } else if (lower.contains("impossible") || lower.contains("expert")) {
+            return Constants.DIFFICULTY_IMPOSSIBLE
+        }
+
+        // German strings (Anfänger, Fortgeschritten, verrückt, Unmöglich)
+        if (lower.length >= 3) {
+            val prefix = lower.substring(0, 3)
+            if (prefix == "anf") {
+                return Constants.DIFFICULTY_BEGINNER
+            } else if (prefix == "for") {
+                return Constants.DIFFICULTY_ADVANCED
+            } else if (prefix == "ver") {
+                return Constants.DIFFICULTY_INSANE
+            } else if (prefix == "unm") {
+                return Constants.DIFFICULTY_IMPOSSIBLE
+            }
+        }
+
+        log.w("[HISTORY_MIGRATION] Unknown difficulty string: '$difficultyStr', defaulting to BEGINNER")
+        return Constants.DIFFICULTY_BEGINNER
     }
 }
