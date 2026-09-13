@@ -23,14 +23,53 @@ class AndroidStorage(private val context: Context) : PlatformStorage {
     companion object {
         private const val PREFS_NAME = "roboyard_prefs"
 
+        // Old SharedPreferences file used by LevelCompletionManager before KMP migration
+        private const val OLD_LEVEL_COMPLETION_PREFS = "level_completion_prefs"
+
         @Volatile
         private var instance: AndroidStorage? = null
 
         @JvmStatic
         fun getInstance(context: Context): AndroidStorage {
             return instance ?: AndroidStorage(context.applicationContext).also {
+                it.migrateOldPrefs(context.applicationContext)
                 instance = it
             }
+        }
+    }
+
+    /**
+     * One-time migration: copy data from the old level_completion_prefs SharedPreferences file
+     * to the unified roboyard_prefs file. Runs once, then deletes the old file.
+     */
+    private fun migrateOldPrefs(context: Context) {
+        try {
+            val oldPrefs = context.getSharedPreferences(OLD_LEVEL_COMPLETION_PREFS, Context.MODE_PRIVATE)
+            if (!oldPrefs.contains("completion_data") && !oldPrefs.contains("last_played_level")) {
+                return
+            }
+
+            Timber.d("[STORAGE_MIGRATION] Migrating data from $OLD_LEVEL_COMPLETION_PREFS to $PREFS_NAME")
+
+            val editor = prefs.edit()
+            val oldMap = oldPrefs.all
+            for ((key, value) in oldMap) {
+                when (value) {
+                    is String -> editor.putString(key, value)
+                    is Int -> editor.putInt(key, value)
+                    is Long -> editor.putLong(key, value)
+                    is Boolean -> editor.putBoolean(key, value)
+                    is Float -> editor.putFloat(key, value)
+                    is Set<*> -> @Suppress("UNCHECKED_CAST") editor.putStringSet(key, value as Set<String>)
+                }
+            }
+            editor.apply()
+
+            // Delete the old prefs file to prevent re-migration
+            oldPrefs.edit().clear().apply()
+            Timber.d("[STORAGE_MIGRATION] Migration complete, old prefs cleared")
+        } catch (e: Exception) {
+            Timber.e(e, "[STORAGE_MIGRATION] Error migrating old prefs: %s", e.message)
         }
     }
 

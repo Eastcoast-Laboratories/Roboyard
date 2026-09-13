@@ -4,6 +4,7 @@
 /.idea/caches/*
 /.idea/libraries
 /.idea/modules
+/.idea/*.iml
 .DS_Store
 /build
 /shared/build

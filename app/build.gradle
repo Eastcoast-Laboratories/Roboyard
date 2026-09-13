@@ -94,6 +94,26 @@ android {
             returnDefaultValues = true
         }
     }
+
+    sourceSets {
+        main {
+            assets.srcDirs += [layout.buildDirectory.dir("generated/assets").get().asFile]
+        }
+    }
+}
+
+// Copy level files from shared module (single source of truth) to app assets
+// so the Android app can read them via getAssets().list("Maps")
+// ComposeApp reads the same files via Compose resources from shared/commonMain/resources
+tasks.register('copySharedMapsToAssets', Copy) {
+    from file("${project(':shared').projectDir}/src/commonMain/resources/Maps")
+    into layout.buildDirectory.dir("generated/assets/Maps")
+}
+
+afterEvaluate {
+    tasks.matching { it.name.startsWith('merge') && it.name.contains('Assets') }.configureEach {
+        dependsOn('copySharedMapsToAssets')
+    }
 }
 
 dependencies {
