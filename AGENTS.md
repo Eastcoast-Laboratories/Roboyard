@@ -22,7 +22,7 @@
 
 ## Documentation Sync
 
-- `dev/achievements.md` is the source of truth for achievement definitions — keep it synchronized with `AchievementDefinitions.java` when changing the achievement system.
+- `dev/achievements.md` is the source of truth for achievement definitions — keep it synchronized with `shared/src/commonMain/kotlin/roboyard/logic/achievements/AchievementDefinitions.kt` when changing the achievement system.
 - `dev/TESTSUITE.md` is the source of truth for the test suite status.
 
 ## Deployment

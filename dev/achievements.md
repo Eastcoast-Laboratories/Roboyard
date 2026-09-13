@@ -1,13 +1,13 @@
 # Roboyard Achievements
 
-This document defines all achievements in the game. Keep this file synchronized with the implementation in `AchievementDefinitions.java`.
+This document defines all achievements in the game. Keep this file synchronized with the implementation in `shared/src/commonMain/kotlin/roboyard/logic/achievements/AchievementDefinitions.kt`.
 
 ## Implementation Status
 
-- [x] Achievement data model (`Achievement.java`)
-- [x] Achievement categories (`AchievementCategory.java`)
-- [x] Achievement definitions (`AchievementDefinitions.java`)
-- [x] Achievement manager with unlock logic (`AchievementManager.java`)
+- [x] Achievement data model (`Achievement.kt` in `shared/`)
+- [x] Achievement categories (`AchievementCategory.kt` in `shared/`)
+- [x] Achievement definitions (`AchievementDefinitions.kt` in `shared/`)
+- [x] Achievement manager with unlock logic (`AchievementManager.kt`)
 - [x] Achievement UI (`AchievementsFragment.java`)
 - [x] Achievement unlock popup (`AchievementPopup.java`)
 - [x] Achievement triggers in game completion
@@ -19,7 +19,7 @@ This document defines all achievements in the game. Keep this file synchronized 
 ## Achievement Categories
 
 
-### Login Streak Achievements (4)
+### Login Streak Achievements (3)
 
 | ID | Name | Description | Status | tested |
 |----|------|-------------|--------|--------|
@@ -47,7 +47,7 @@ This document defines all achievements in the game. Keep this file synchronized 
 | `perfect_solutions_50` | Optimization Expert | Solve 50 levels with optimal moves | ✅ Implemented |
 | `speedrun_under_30s` | Quick Thinker | Complete a level in under 30 seconds | ✅ Implemented |
 | `speedrun_under_10s` | Lightning Fast | Complete a level in under 10 seconds | ✅ Implemented |
-| `view_1_hour` | Patient Observer | View a map for 1 hour without completing it | ✅ Implemented |
+| `view_1_hour` | Don't give up | Try to solve a map for 1 hour without completing it | ✅ Implemented |
 
 ### Challenge Achievements (0 active, 3 pending)
 
@@ -82,7 +82,7 @@ This document defines all achievements in the game. Keep this file synchronized 
 | `impossible_mode_streak_5` | Impossible Streak | Complete 5 games in a row in Impossible mode with optimal moves | ✅ Implemented |
 | `impossible_mode_streak_10` | Impossible Legend | Complete 10 games in a row in Impossible mode with optimal moves | ✅ Implemented |
 
-### Solution Length (11)
+### Solution Length (13)
 
 | ID | Name | Description | Status | tested |
 |----|------|-------------|--------|--------|
@@ -108,7 +108,7 @@ This document defines all achievements in the game. Keep this file synchronized 
 | `play_12_move_games_all_resolutions` | Resolution Explorer 12 | Play games with 12+ moves on all screen resolutions | ✅ Implemented |
 | `play_15_move_games_all_resolutions` | Resolution Explorer 15 | Play games with 15+ moves on all screen resolutions | ✅ Implemented |
 
-### Multiple Targets (6)
+### Multiple Targets (9)
 
 | ID | Name | Description | Status | tested |
 |----|------|-------------|--------|
@@ -141,7 +141,7 @@ This document defines all achievements in the game. Keep this file synchronized 
 | `traverse_all_squares_all_robots` | Team Explorer | Visit all squares on the board with all robots combined (after goal allowed) | ✅ Implemented | ✅ |
 | `traverse_all_squares_all_robots_goal` | Team Goal Explorer | Visit all squares with all robots, reaching the goal last | ✅ Implemented | ✅ |
 
-### Streaks & Challenges (10)
+### Streaks & Challenges (11)
 
 | ID | Name | Description | Status | tested |
 |----|------|-------------|--------|--------|
@@ -151,7 +151,7 @@ This document defines all achievements in the game. Keep this file synchronized 
 | `perfect_random_games_streak_5` | Perfect Streak 5 | Complete 5 random games with optimal moves in a row | ✅ Implemented | |
 | `perfect_random_games_streak_10` | Perfect Streak 10 | Complete 10 random games with optimal moves in a row | ✅ Implemented | |
 | `perfect_random_games_streak_20` | Perfect Streak 20 | Complete 20 random games with optimal moves in a row | ✅ Implemented | |
-| `perfect_no_hints_random_1` | Perfect No Help | Complete a random game with optimal moves (10+ moves) without using hints | not Implemented | |
+| `perfect_no_hints_random_1` | Perfect No Help | Complete a random game with optimal moves (10+ moves) without using hints | ✅ Implemented | |
 | `no_hints_random_10` | No Help Needed 10 | Complete 10 random games without using hints (cumulative) | ✅ Implemented | |
 | `no_hints_random_50` | No Help Needed 50 | Complete 50 random games without using hints (cumulative) | ✅ Implemented | |
 | `no_hints_streak_random_10` | No Help Streak 10 | Complete 10 random games without using hints in a row | ✅ Implemented | |
@@ -167,26 +167,25 @@ This document defines all achievements in the game. Keep this file synchronized 
 
 ---
 
-## Total: 63 Achievements
+## Total: 72 Achievements
 
-| Category | Count |
+| Category (`AchievementCategory`) | Count |
 |----------|-------|
-| Progression | 6 |
-| Performance | 5 |
-| Challenge | 5 |
-| Mastery | 5 |
-| Special | 4 |
-| Random - Speed | 3 |
-| Random - Difficulty | 4 |
-| Random - Solution Length | 11 |
-| Random - Screen Resolutions | 3 |
-| Random - Multiple Targets | 8 |
-| Random - Fun Challenges | 5 |
-| Random - Square Coverage | 4 |
-| Random - Streaks | 5 |
-| Random - Same Walls | 3 |
+| SPECIAL (Login Streak) | 3 |
+| PROGRESSION | 6 |
+| PERFORMANCE | 6 |
+| CHALLENGE | 0 active (3 pending) |
+| MASTERY | 5 |
+| RANDOM_SPEED | 3 |
+| RANDOM_DIFFICULTY | 4 |
+| RANDOM_SOLUTION | 13 |
+| RANDOM_RESOLUTION | 3 |
+| RANDOM_TARGETS | 9 |
+| RANDOM_ROBOTS (Fun Challenges incl. Same Walls) | 5 |
+| RANDOM_COVERAGE | 4 |
+| RANDOM_STREAKS | 11 |
 
-Note: The solution length achievements include 20-29 (10 achievements) plus 30+ (1 achievement) = 11 total.
+Note: The solution length achievements include 18-29 (12 achievements) plus 30+ (1 achievement) = 13 total.
 
 ---
 
@@ -352,10 +351,10 @@ Note: The order of elements in the comparison does not matter - positions are so
 ## Technical Notes
 
 ### Storage
-- Achievements are stored in SharedPreferences (`roboyard_achievements`)
+- Achievements are stored via `AndroidStorage` (SharedPreferences `roboyard_prefs`)
 - Each achievement has: `unlocked_<id>` (boolean) and `timestamp_<id>` (long)
 - Counters for progressive achievements: `counter_<name>` (int)
-- **Map History**: Stored in `map_history.json` (internal storage, not SharedPreferences due to size)
+- **Map History**: Stored in `history_index.json` (internal storage, not SharedPreferences due to size)
 
 ### Triggers
 - Level completion: `AchievementManager.onLevelCompleted()`
@@ -363,12 +362,12 @@ Note: The order of elements in the comparison does not matter - positions are so
 - Custom level events: `onCustomLevelCreated()`, `onCustomLevelSolved()`, `onCustomLevelShared()`
 - Daily login: `onDailyLogin()`
 - Comeback: `onComebackPlayer()`
-- **Map history check**: `MapHistoryManager.isFirstCompletion()` called before achievement triggers
+- **Map history check**: `GameHistoryManager.isFirstCompletion()` called before achievement triggers
 
 ### UI
 - `AchievementsFragment`: Main achievements screen
 - `AchievementPopup`: Unlock notification popup
-- Icons: `ic_achievement_*.xml` drawables
+- Icons: `icon_<n>_<name>.png` drawables in `res/drawable/` (assigned per achievement in `AchievementDefinitions.kt`)
 
 ### Data Migration
 - On first launch after update: No migration needed (history starts empty)
