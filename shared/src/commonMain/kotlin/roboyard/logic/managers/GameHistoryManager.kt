@@ -641,9 +641,12 @@ object GameHistoryManager {
     }
 
     /**
-     * Migrate old string difficulty values to int IDs.
-     * Supports both English and German localized strings.
-     * @param difficultyStr The old string difficulty value
+     * Migrate old difficulty values to int IDs.
+     * Handles three formats:
+     * - Numeric string ("0", "1", "2", "3") — already an int, just parse it
+     * - English strings ("beginner", "intermediate", "advanced", "impossible")
+     * - German strings ("Anfänger", "Fortgeschritten", "verrückt", "Unmöglich")
+     * @param difficultyStr The old difficulty value (may be numeric or localized string)
      * @return The corresponding difficulty ID (0-3)
      */
     private fun migrateDifficultyStringToInt(difficultyStr: String?): Int {
@@ -652,6 +655,21 @@ object GameHistoryManager {
         }
 
         val lower = difficultyStr.lowercase().trim { it <= ' ' }
+
+        // Numeric string (already an int ID, just parse it)
+        val num = lower.toIntOrNull()
+        if (num != null) {
+            return when (num) {
+                Constants.DIFFICULTY_BEGINNER,
+                Constants.DIFFICULTY_ADVANCED,
+                Constants.DIFFICULTY_INSANE,
+                Constants.DIFFICULTY_IMPOSSIBLE -> num
+                else -> {
+                    log.w("[HISTORY_MIGRATION] Unknown difficulty int: '$difficultyStr', defaulting to BEGINNER")
+                    Constants.DIFFICULTY_BEGINNER
+                }
+            }
+        }
 
         // English strings
         if (lower.contains("beginner") || lower.contains("easy")) {
