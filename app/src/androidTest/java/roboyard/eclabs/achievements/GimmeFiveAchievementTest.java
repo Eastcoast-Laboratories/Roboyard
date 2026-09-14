@@ -1,6 +1,7 @@
 package roboyard.eclabs.achievements;
 
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 import roboyard.logic.achievements.Achievement;
 
 import static org.junit.Assert.*;
@@ -52,7 +53,7 @@ public class GimmeFiveAchievementTest {
     @Before
     public void setUp() {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        achievementManager = AchievementManager.getInstance(context);
+        achievementManager = AchievementManagerFactory.getInstance(context);
         
         // Reset achievements before each test
         achievementManager.resetAll();

@@ -24,6 +24,7 @@ import org.junit.runner.RunWith;
 import roboyard.eclabs.R;
 import roboyard.ui.activities.MainActivity;
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 import roboyard.logic.managers.GameStateManager;
 
 import timber.log.Timber;
@@ -49,7 +50,7 @@ public class Level3E2ETest {
     @Before
     public void setUp() {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        achievementManager = AchievementManager.getInstance(context);
+        achievementManager = AchievementManagerFactory.getInstance(context);
         achievementManager.resetAll();
         Timber.d("[UNITTESTS][E2E_10LEVELS] ========== TEST STARTED ==========");
     }

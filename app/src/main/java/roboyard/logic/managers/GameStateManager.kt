@@ -23,6 +23,7 @@ import androidx.navigation.Navigation.findNavController
 import roboyard.eclabs.R
 import roboyard.logic.ui.UiNotifier
 import roboyard.logic.achievements.AchievementManager
+import roboyard.logic.achievements.AchievementManagerFactory
 import roboyard.logic.core.Constants
 import roboyard.logic.core.GameElement
 import roboyard.logic.core.GameHistoryEntry
@@ -434,7 +435,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
         preCompRobotOrder.clear()
 
         // Load level from assets
-        val state = GameState.loadLevel(getApplication<Application>()!!, levelId)
+        val state = GameState.loadLevel(levelId)
         state.levelId = levelId
         state.levelName = "Level " + levelId
 
@@ -503,7 +504,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
      */
     open fun loadLevel(levelId: Int) {
         // Load level from assets
-        val newState = GameState.loadLevel(getApplication<Application>()!!, levelId)
+        val newState = GameState.loadLevel(levelId)
         newState.levelId = levelId
 
         // Set reference to this GameStateManager in the new state
@@ -530,7 +531,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
     fun loadGame(saveId: Int) {
         if (saveId >= 0) {
             // Load saved game using the original method
-            val newState = GameState.loadSavedGame(getApplication<Application>()!!, saveId)
+            val newState = GameState.loadSavedGame(AndroidStorage.getInstance(getApplication<Application>()!!), saveId)
             if (newState != null) {
                 // Set flag to skip min/max moves validation for loaded games
                 isLoadedFromSave = true
@@ -964,7 +965,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
             )
 
             // Parse the save data into a GameState
-            val newState = parseFromSaveData(saveData.toString(), getApplication<Application>())
+            val newState = parseFromSaveData(saveData.toString())
             if (newState != null) {
                 // Set flag to skip min/max moves validation for loaded games
                 isLoadedFromSave = true
@@ -2950,7 +2951,7 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
     private fun checkViewTimeAchievement() {
         if (context == null) return
 
-        val achievementManager = AchievementManager.getInstance(context)
+        val achievementManager = AchievementManagerFactory.getInstance(context)
         if (!achievementManager.isUnlocked("view_1_hour")) {
             d(
                 "[ACHIEVEMENT] Unlocking view_1_hour ('Don't give up') - played for %d seconds",

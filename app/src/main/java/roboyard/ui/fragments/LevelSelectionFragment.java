@@ -43,6 +43,7 @@ import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameHistoryEntry;
 import roboyard.eclabs.R;
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 import roboyard.logic.managers.GameHistoryManager;
 import timber.log.Timber;
 import roboyard.logic.core.LevelCompletionData;
@@ -830,7 +831,7 @@ public class LevelSelectionFragment extends BaseGameFragment {
             @Override
             public void onAnimationEnd(Animator animation) {
                 // Reset achievement game session flags for new game
-                AchievementManager.getInstance(requireContext()).onNewGameStarted();
+                AchievementManagerFactory.getInstance(requireContext()).onNewGameStarted();
 
                 // Start a new game with the selected level
                 gameStateManager.startLevelGame(levelId);

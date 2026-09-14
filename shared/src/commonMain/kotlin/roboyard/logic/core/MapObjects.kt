@@ -157,6 +157,32 @@ object MapObjects {
     }
 
     /**
+     * Generate a unique 5-letter ID from a list of grid elements.
+     * @param gridElements List of game elements
+     * @return A 5-letter unique ID string
+     */
+    @JvmStatic
+    fun generateUniqueId(gridElements: ArrayList<GridElement?>?): String {
+        if (gridElements == null || gridElements.isEmpty()) {
+            log.w("MapObjects: Attempted to generate ID from empty grid elements")
+            return "EMPTY"
+        }
+
+        // Build a string representation of the map for hashing
+        val mapData = StringBuilder()
+        for (element in gridElements) {
+            if (element == null) continue
+            mapData.append(element.type)
+                .append(element.x)
+                .append(",")
+                .append(element.y)
+                .append(";")
+        }
+
+        return generateUnique5LetterFromString(mapData.toString())
+    }
+
+    /**
      * Generate a unique 5-letter identifier from a string.
      * Deterministic - same input produces same output.
      * Alternates vowels and consonants.

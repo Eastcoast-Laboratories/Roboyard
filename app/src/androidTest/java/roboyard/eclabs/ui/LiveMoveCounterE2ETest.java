@@ -31,6 +31,7 @@ import roboyard.eclabs.R;
 import roboyard.logic.core.GameElement;
 import roboyard.ui.activities.MainActivity;
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 import roboyard.logic.core.GameSolution;
 import roboyard.logic.core.IGameMove;
 import roboyard.logic.solver.RRGameMove;
@@ -63,12 +64,12 @@ public class LiveMoveCounterE2ETest {
     @Before
     public void setUp() {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        AchievementManager.getInstance(context).resetAll();
+        AchievementManagerFactory.getInstance(context).resetAll();
     }
 
     @After
     public void tearDown() {
-        AchievementManager.getInstance(context).resetAll();
+        AchievementManagerFactory.getInstance(context).resetAll();
     }
 
     private void navigateToLevel1() throws InterruptedException {

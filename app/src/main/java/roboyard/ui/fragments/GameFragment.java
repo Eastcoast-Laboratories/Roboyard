@@ -62,6 +62,7 @@ import roboyard.logic.managers.LevelCompletionManager;
 import roboyard.logic.core.GameHistoryEntry;
 import roboyard.logic.achievements.Achievement;
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 import roboyard.ui.achievements.AchievementPopup;
 import timber.log.Timber;
 
@@ -582,7 +583,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             }
         });
         
-        AchievementManager.getInstance(requireContext()).setUnlockListener(achievement -> {
+        AchievementManagerFactory.getInstance(requireContext()).setUnlockListener(achievement -> {
             Timber.d("[ACHIEVEMENT_POPUP] Achievement unlocked: %s", achievement.id);
             pendingAchievements.add(achievement);
             // Show popup after a short delay to allow game completion UI to settle
@@ -623,7 +624,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         updateDifficulty();
         
         // Check and unlock login streak achievements when entering game screen
-        AchievementManager.getInstance(requireContext()).checkAndUnlockStreakAchievements();
+        AchievementManagerFactory.getInstance(requireContext()).checkAndUnlockStreakAchievements();
         Timber.d("[ACHIEVEMENT] Checked login streak achievements on game screen entry");
 
         
@@ -786,7 +787,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                             // Only call onLevelCompleted if this is a different level or enough time has passed
                             if (currentLevelId != lastCompletedLevelId || (currentTime - lastCompletedTime) > 1000) {
                                 Timber.d("[ACHIEVEMENT_GUARD] Calling onLevelCompleted for levelId=%d (last was %d)", currentLevelId, lastCompletedLevelId);
-                                AchievementManager.getInstance(requireContext())
+                                AchievementManagerFactory.getInstance(requireContext())
                                     .onLevelCompleted(currentLevelId, playerMoves, optimalMoves, hintsUsed, stars, elapsedTime);
                                 lastCompletedLevelId = currentLevelId;
                                 lastCompletedTime = currentTime;
@@ -898,8 +899,8 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                             Timber.d("[ACHIEVEMENTS] Unique map check: isFirstCompletion=%b, qualifiesForNoHints=%b, mapSignature=%s",
                                     isFirstCompletion, qualifiesForNoHints, mapSignature);
                             
-                            AchievementManager am = AchievementManager.getInstance(requireContext());
-                            am.setCurrentActivity(requireActivity());
+                            AchievementManager am = AchievementManagerFactory.getInstance(requireContext());
+                            AchievementManagerFactory.setCurrentActivity(requireActivity());
                             am.onRandomGameCompleted(playerMoves, optimalMoves, hintsUsed, elapsedTime,
                                     isImpossibleMode, robotCount, targetCount, targetsNeeded,
                                     isFirstCompletion, qualifiesForNoHints, wallSignature);
@@ -1727,7 +1728,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             }
             
             // Reset achievement game session flags for new game
-            AchievementManager.getInstance(requireContext()).onNewGameStarted();
+            AchievementManagerFactory.getInstance(requireContext()).onNewGameStarted();
             
             // Get the current level ID
             GameState gameState = gameStateManager.getCurrentState().getValue();
@@ -2450,7 +2451,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         int robotCount = robots.size();
         
         if (movingRobotIndex >= 0 && hitRobotIndex >= 0) {
-            AchievementManager.getInstance(requireContext())
+            AchievementManagerFactory.getInstance(requireContext())
                     .onRobotTouched(movingRobotIndex, hitRobotIndex, robotCount);
             Timber.d("[ACHIEVEMENTS][GIMME_FIVE] Robot %d touched robot %d (total robots: %d)", 
                     movingRobotIndex, hitRobotIndex, robotCount);
@@ -3776,7 +3777,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             currentState.incrementHintCount();
             // Record max hint index for permanent history tracking (anti-cheat)
             currentState.recordHintUsed(hintIndex);
-            AchievementManager.getInstance(requireContext()).onHintUsed();
+            AchievementManagerFactory.getInstance(requireContext()).onHintUsed();
             Timber.d("[HINT_SYSTEM] Hint counted for achievements: hintCount=%d, maxHintUsed=%d", 
                     currentState.getHintCount(), currentState.maxHintUsedThisSession);
         }

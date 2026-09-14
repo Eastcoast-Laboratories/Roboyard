@@ -1,16 +1,7 @@
 package roboyard.logic.core
 
-import android.content.Context
-import roboyard.logic.managers.GameStateManager
-import roboyard.ui.util.MapIdGenerator
-import timber.log.Timber
-import java.io.BufferedReader
-import java.io.File
-import java.io.FileInputStream
-import java.io.IOException
-import java.io.InputStreamReader
-import java.io.Serializable
-import java.util.Collections
+import roboyard.logic.storage.PlatformStorage
+import roboyard.logic.util.RLog
 import kotlin.math.max
 import kotlin.math.min
 
@@ -25,7 +16,7 @@ class GameState(
     // Board properties
     @JvmField var width: Int,
     @JvmField var height: Int
-) : Serializable {
+) {
 
     /**
      * Get map data for minimap generation (used by GameButtonGotoSavedGame)
@@ -85,7 +76,6 @@ class GameState(
     var isComplete: Boolean = false
         private set
 
-    @Transient
     private var completionHandledThisSession = false
 
     /**
@@ -130,7 +120,7 @@ class GameState(
          */
         set(robot) {
             field = robot
-            Timber.d(
+            log.d(
                 "[MOVE_TRACKING] Last moved robot set to color: %d",
                 if (robot != null) robot.color else -1
             )
@@ -147,18 +137,17 @@ class GameState(
          */
         set(direction) {
             field = direction
-            Timber.d(
+            log.d(
                 "[MOVE_TRACKING] Last move direction set to: %d",
                 if (direction != null) direction else -1
             )
         }
 
     // Transient properties (not serialized)
-    @Transient
     private var selectedRobot: GameElement? = null
 
-    @Transient
-    private var gameStateManager: GameStateManager? = null
+    // GameStateManager reference stored as Any? to avoid Android dependency in commonMain
+    private var gameStateManager: Any? = null
 
     // Store initial robot positions for reset functionality
     @JvmField
@@ -201,7 +190,7 @@ class GameState(
     init {
         this.mapData = Array<IntArray?>(height) { IntArray(width) }
         this.targetColors = Array<IntArray?>(height) { IntArray(width) }
-        this.gameElements = java.util.ArrayList<GameElement>()
+        this.gameElements = ArrayList<GameElement>()
         this.levelId = -1
         this.levelName = "XXXXX"
         this.startTime = System.currentTimeMillis()
@@ -276,13 +265,13 @@ class GameState(
      * Add a target at the specified coordinates with the given color
      */
     fun addTarget(x: Int, y: Int, color: Int) {
-        Timber.d("[TARGET LOADING] Adding target at (%d,%d) with color %d", x, y, color)
+        log.d("[TARGET LOADING] Adding target at (%d,%d) with color %d", x, y, color)
         val target = GameElement(GameElement.TYPE_TARGET, x, y)
         target.color = color
         gameElements.add(target)
         setCellType(x, y, Constants.TYPE_TARGET)
         setTargetColor(x, y, color)
-        Timber.d(
+        log.d(
             "[TARGET LOADING] Target added, current board state at (%d,%d): cellType=%d, targetColor=%d",
             x, y, getCellType(x, y), getTargetColor(x, y)
         )
@@ -370,7 +359,7 @@ class GameState(
     fun checkCompletion(): Boolean {
         // Use the areAllRobotsAtTargets method to check if all robots are on their targets
         if (areAllRobotsAtTargets()) {
-            // Timber.d("[GOAL DEBUG] Game complete! All robots are on matching targets.");
+            // log.d("[GOAL DEBUG] Game complete! All robots are on matching targets.");
             this.isComplete = true
             return true
         } else {
@@ -400,14 +389,14 @@ class GameState(
             if (isRobotAtTarget(robot)) {
                 // Count robots that are on their targets
                 robotsAtTarget++
-                Timber.d(
+                log.d(
                     "[GOAL DEBUG] Robot %d is at target (%d,%d)",
                     robot.color,
                     robot.x,
                     robot.y
                 )
             } else {
-                Timber.d(
+                log.d(
                     "[GOAL DEBUG] Robot %d is NOT at target (%d,%d)",
                     robot.color,
                     robot.x,
@@ -425,7 +414,7 @@ class GameState(
         // Game is complete when the number of robots at targets matches the required count
         val allRobotsAtTargets = (robotsAtTarget >= requiredRobots)
 
-        Timber.d(
+        log.d(
             "[GOAL DEBUG] %d/%d robots at targets (required: %d, total targets: %d, robotCount: %d) -> Game complete: %b",
             robotsAtTarget,
             robots.size,
@@ -473,7 +462,7 @@ class GameState(
     fun recordHintUsed(hintIndex: Int) {
         if (hintIndex > maxHintUsedThisSession) {
             maxHintUsedThisSession = hintIndex
-            Timber.d("[HINT_TRACKING] Recorded hint usage: maxHintUsed=%d", maxHintUsedThisSession)
+            log.d("[HINT_TRACKING] Recorded hint usage: maxHintUsed=%d", maxHintUsedThisSession)
         }
     }
 
@@ -493,7 +482,7 @@ class GameState(
          * @return List of GridElements
          */
         get() {
-            val elements = java.util.ArrayList<GridElement?>()
+            val elements = ArrayList<GridElement?>()
 
 
             // SSOT: Read ALL elements from gameElements, not from board[][]
@@ -515,7 +504,7 @@ class GameState(
                         val targetColor = element.color
                         if (targetColor == Constants.COLOR_MULTI) {
                             gridElementType = "target_multi"
-                            Timber.d(
+                            log.d(
                                 "[SOLUTION_SOLVER_TARGET] Found multi-color target at (%d,%d) in gameElements",
                                 element.x,
                                 element.y
@@ -532,7 +521,7 @@ class GameState(
                             gridElementType = "target_silver"
                         } else {
                             gridElementType = "target_red"
-                            Timber.w(
+                            log.w(
                                 "[SOLUTION_SOLVER_TARGET] Unknown target color: %d at (%d,%d), defaulting to red",
                                 targetColor,
                                 element.x,
@@ -634,7 +623,7 @@ class GameState(
         // Synchronize targets from gameElements to board array
         val syncedTargets = synchronizeTargets()
         if (syncedTargets > 0) {
-            Timber.d("[SAVE_DATA] Synchronized %d targets before serialization", syncedTargets)
+            log.d("[SAVE_DATA] Synchronized %d targets before serialization", syncedTargets)
         }
 
         val sb = StringBuilder()
@@ -689,7 +678,7 @@ class GameState(
                     var color: Int = targetColors[y]!![x]
                     if ((color < -1 || color > 4)) {
                         // Target color is invalid (not COLOR_MULTI and not 0-4) - try to recover from gameElements
-                        Timber.e(
+                        log.e(
                             "[SAVE_DATA] Target at (%d,%d) has invalid color %d in targetColors array, recovering from gameElements",
                             x,
                             y,
@@ -698,7 +687,7 @@ class GameState(
                         for (element in gameElements) {
                             if (element.type == GameElement.TYPE_TARGET && element.x == x && element.y == y) {
                                 color = element.color
-                                Timber.d(
+                                log.d(
                                     "[SAVE_DATA] Recovered target color %d from gameElement at (%d,%d)",
                                     color,
                                     x,
@@ -709,7 +698,7 @@ class GameState(
                             }
                         }
                         if (color < -1 || color > 4) {
-                            Timber.e(
+                            log.e(
                                 "[SAVE_DATA] FATAL: Could not recover target color at (%d,%d), gameElements has no matching target",
                                 x,
                                 y
@@ -719,7 +708,7 @@ class GameState(
                     sb.append("t").append(getColorChar(color))
                         .append(x).append(",").append(y).append(";")
                     targetCount++
-                    Timber.d("[SAVE_DATA] Serializing target at (%d,%d) with color %d", x, y, color)
+                    log.d("[SAVE_DATA] Serializing target at (%d,%d) with color %d", x, y, color)
                 }
             }
         }
@@ -727,7 +716,7 @@ class GameState(
         if (targetCount == 0) {
             // This is a fatal error - all Roboyard games MUST have targets
             val t = Throwable()
-            Timber.e(t, "[SAVE_DATA] FATAL ERROR: No targets found while serializing game state!")
+            log.e(t, "[SAVE_DATA] FATAL ERROR: No targets found while serializing game state!")
             throw IllegalStateException("[SAVE_DATA] Cannot save game: no targets found in game state")
         }
 
@@ -760,7 +749,7 @@ class GameState(
         // This is set by storeInitialRobotPositions() when the game is created.
         if (initialRobotPositions == null || initialRobotPositions!!.isEmpty()) {
             val t = Throwable()
-            Timber.e(
+            log.e(
                 t,
                 "[SAVE_DATA] FATAL ERROR: initialRobotPositions not set! Game must call storeInitialRobotPositions() after creation."
             )
@@ -786,18 +775,18 @@ class GameState(
     fun resetRobotPositions() {
         // Store initial robot positions if not already stored
         if (initialRobotPositions == null || initialRobotPositions!!.isEmpty()) {
-            Timber.e("[ROBOTS] resetRobotPositions: Cannot reset, initialRobotPositions is null or empty")
+            log.e("[ROBOTS] resetRobotPositions: Cannot reset, initialRobotPositions is null or empty")
             return
         }
 
-        Timber.d(
+        log.d(
             "[ROBOTS] resetRobotPositions: Starting reset with %d stored initial positions",
             initialRobotPositions!!.size
         )
 
 
         // Get current robot elements
-        val currentRobots: MutableList<GameElement> = java.util.ArrayList<GameElement>()
+        val currentRobots: MutableList<GameElement> = ArrayList<GameElement>()
         for (element in gameElements) {
             if (element.type == GameElement.TYPE_ROBOT) {
                 currentRobots.add(element)
@@ -807,28 +796,28 @@ class GameState(
 
         // Skip if no robots found
         if (currentRobots.isEmpty()) {
-            Timber.e("[ROBOTS] resetRobotPositions: No robots found in current game state")
+            log.e("[ROBOTS] resetRobotPositions: No robots found in current game state")
             return
         }
 
-        Timber.d("[ROBOTS] resetRobotPositions: Found %d robots to reset", currentRobots.size)
+        log.d("[ROBOTS] resetRobotPositions: Found %d robots to reset", currentRobots.size)
 
 
         // Reset each robot to its initial position
         for (robot in currentRobots) {
             val robotColor = robot.color
-            Timber.d("[ROBOTS] resetRobotPositions: Processing robot with color %d", robotColor)
+            log.d("[ROBOTS] resetRobotPositions: Processing robot with color %d", robotColor)
 
             if (initialRobotPositions!!.containsKey(robotColor)) {
                 val position = initialRobotPositions!!.get(robotColor)
-                Timber.d(
+                log.d(
                     "[ROBOTS] resetRobotPositions: Resetting robot color %d from (%d, %d) to (%d, %d)",
                     robotColor, robot.x, robot.y, position!![0], position[1]
                 )
                 robot.x = position[0]
                 robot.y = position[1]
             } else {
-                Timber.e(
+                log.e(
                     "[ROBOTS] resetRobotPositions: No initial position found for robot color %d",
                     robotColor
                 )
@@ -847,7 +836,7 @@ class GameState(
         // Reset completion flag
         this.isComplete = false
 
-        Timber.d("[ROBOTS] resetRobotPositions: Reset complete")
+        log.d("[ROBOTS] resetRobotPositions: Reset complete")
     }
 
 
@@ -871,7 +860,7 @@ class GameState(
             if (element.type == GameElement.TYPE_TARGET && element.x == robotX && element.y == robotY) {
                 // Allow any robot to match a multi-color target
                 if (element.color == Constants.COLOR_MULTI) {
-                    Timber.d(
+                    log.d(
                         "[TARGET_MULTI_MATCH] Robot %d matches multi target at (%d,%d)",
                         robot.color,
                         robotX,
@@ -942,7 +931,7 @@ class GameState(
          */
         get() {
             val robots: MutableList<GameElement> =
-                java.util.ArrayList<GameElement>()
+                ArrayList<GameElement>()
             for (element in gameElements) {
                 if (element.type == GameElement.TYPE_ROBOT) {
                     robots.add(element)
@@ -972,7 +961,7 @@ class GameState(
          */
         get() {
             val targets: MutableList<GameElement?> =
-                java.util.ArrayList<GameElement?>()
+                ArrayList<GameElement?>()
             for (element in gameElements) {
                 if (element.type == GameElement.TYPE_TARGET) {
                     targets.add(element)
@@ -988,7 +977,7 @@ class GameState(
     fun setRobotCount(count: Int) {
         // Ensure count is within valid range
         this.robotCount = max(1, min(Constants.NUM_ROBOTS, count))
-        Timber.d("Robot count set to %d", this.robotCount)
+        log.d("Robot count set to %d", this.robotCount)
     }
 
     /**
@@ -1006,7 +995,7 @@ class GameState(
     fun setTargetColors(count: Int) {
         // Ensure count is within valid range
         this.targetColorsCount = max(1, min(4, count))
-        Timber.d("Target colors count set to %d", this.targetColorsCount)
+        log.d("Target colors count set to %d", this.targetColorsCount)
     }
 
     /**
@@ -1031,9 +1020,9 @@ class GameState(
         // Initialize the map if it doesn't exist
         if (initialRobotPositions == null) {
             initialRobotPositions = HashMap<Int?, IntArray?>()
-            Timber.d("[ROBOTS] storeInitialRobotPositions: Created new initialRobotPositions map")
+            log.d("[ROBOTS] storeInitialRobotPositions: Created new initialRobotPositions map")
         } else {
-            Timber.d(
+            log.d(
                 "[ROBOTS] storeInitialRobotPositions: Using existing initialRobotPositions map with %d entries",
                 initialRobotPositions!!.size
             )
@@ -1046,7 +1035,7 @@ class GameState(
                 // Store the robot's position by its color
                 val position = intArrayOf(element.x, element.y)
                 initialRobotPositions!!.put(element.color, position)
-                Timber.d(
+                log.d(
                     "[ROBOTS] storeInitialRobotPositions: Stored robot color %d at position (%d, %d)",
                     element.color, position[0], position[1]
                 )
@@ -1054,14 +1043,14 @@ class GameState(
             }
         }
 
-        Timber.d("[ROBOTS] storeInitialRobotPositions: Stored positions for %d robots", robotCount)
+        log.d("[ROBOTS] storeInitialRobotPositions: Stored positions for %d robots", robotCount)
     }
 
     /**
      * Set the GameStateManager reference
      * @param manager The GameStateManager to use
      */
-    fun setGameStateManager(manager: GameStateManager?) {
+    fun setGameStateManager(manager: Any?) {
         this.gameStateManager = manager
     }
 
@@ -1153,7 +1142,7 @@ class GameState(
             }
         }
 
-        Timber.d(
+        log.d(
             "[TARGET SYNC] Before synchronization: %d targets in board, %d targets in gameElements",
             boardTargets, elementTargets
         )
@@ -1166,7 +1155,7 @@ class GameState(
                 val y = element.y
                 val color = element.color
 
-                Timber.d(
+                log.d(
                     "[TARGET SYNC] GameElement target at (%d,%d) with color %d, board=%d, targetColors=%d",
                     x, y, color,
                     if (x >= 0 && y >= 0 && x < width && y < height) this.mapData[y]!![x] else -999,
@@ -1176,7 +1165,7 @@ class GameState(
 
                 // Skip invalid coordinates
                 if (x < 0 || y < 0 || x >= width || y >= height) {
-                    Timber.e(
+                    log.e(
                         "[TARGET SYNC] Target at invalid position (%d,%d) with color %d",
                         x,
                         y,
@@ -1188,7 +1177,7 @@ class GameState(
 
                 // If this target is not reflected in the board array, update it
                 if (this.mapData[y]!![x] != Constants.TYPE_TARGET) {
-                    Timber.d(
+                    log.d(
                         "[TARGET SYNC] Updating board at (%d,%d) from %d to %s for target with color %d",
                         x, y, this.mapData[y]!![x], Constants.TYPE_TARGET, color
                     )
@@ -1197,7 +1186,7 @@ class GameState(
                     syncedTargets++
                 } else if (targetColors[y]!![x] != color) {
                     // The cell is already a target but the color doesn't match
-                    Timber.d(
+                    log.d(
                         "[TARGET SYNC] Updating target color at (%d,%d) from %d to %d",
                         x, y, targetColors[y]!![x], color
                     )
@@ -1209,7 +1198,7 @@ class GameState(
                 // Detect invalid color on either side and log for root cause analysis
                 // COLOR_MULTI (-1) is valid, so only flag colors < -1
                 if (color < -1 || color > 4) {
-                    Timber.e(
+                    log.e(
                         "[TARGET SYNC] GameElement at (%d,%d) has invalid color %d",
                         x,
                         y,
@@ -1217,7 +1206,7 @@ class GameState(
                     )
                 }
                 if (targetColors[y]!![x] < -1 || targetColors[y]!![x] > 4) {
-                    Timber.e(
+                    log.e(
                         "[TARGET SYNC] targetColors[%d][%d] has invalid value %d after sync",
                         y,
                         x,
@@ -1227,7 +1216,7 @@ class GameState(
             }
         }
 
-        Timber.d("[TARGET SYNC] Synchronized %d targets", syncedTargets)
+        log.d("[TARGET SYNC] Synchronized %d targets", syncedTargets)
         return syncedTargets
     }
 
@@ -1244,7 +1233,7 @@ class GameState(
 
 
         // Collect all walls in sorted order
-        val walls: MutableList<String?> = java.util.ArrayList<String?>()
+        val walls = mutableListOf<String>()
         for (element in gameElements) {
             if (element.type == GameElement.TYPE_HORIZONTAL_WALL) {
                 walls.add("mh" + element.x + "," + element.y)
@@ -1252,7 +1241,7 @@ class GameState(
                 walls.add("mv" + element.x + "," + element.y)
             }
         }
-        Collections.sort(walls as MutableList<String>)
+        walls.sort()
         for (wall in walls) {
             sb.append(wall).append(";")
         }
@@ -1268,14 +1257,14 @@ class GameState(
 
 
         // Collect initial robot positions in sorted order
-        val robots: MutableList<String?> = java.util.ArrayList<String?>()
+        val robots = mutableListOf<String>()
         if (initialRobotPositions != null) {
             for (entry in initialRobotPositions!!.entries) {
                 val pos: IntArray = entry.value!!
                 robots.add("R" + entry.key + "@" + pos[0] + "," + pos[1])
             }
         }
-        Collections.sort(robots as MutableList<String>)
+        robots.sort()
         for (robot in robots) {
             sb.append(robot).append(";")
         }
@@ -1284,13 +1273,13 @@ class GameState(
 
 
         // Collect target positions in sorted order
-        val targets: MutableList<String?> = java.util.ArrayList<String?>()
+        val targets = mutableListOf<String>()
         for (element in gameElements) {
             if (element.type == GameElement.TYPE_TARGET) {
                 targets.add("T" + element.color + "@" + element.x + "," + element.y)
             }
         }
-        Collections.sort(targets as MutableList<String>)
+        targets.sort()
         for (target in targets) {
             sb.append(target).append(";")
         }
@@ -1309,71 +1298,45 @@ class GameState(
     }
 
     companion object {
-        private const val serialVersionUID = 1L
-        private const val TAG = "GameState"
+        private val log = RLog.tag("GameState")
 
         /**
          * Load a saved game from a file
          */
         @JvmStatic
-        fun loadSavedGame(context: Context, slotId: Int): GameState? {
+        fun loadSavedGame(storage: PlatformStorage, slotId: Int): GameState? {
             try {
-                val saveDir = File(context.getFilesDir(), Constants.SAVE_DIRECTORY)
-                if (!saveDir.exists()) {
-                    return null
-                }
-
                 val fileName =
-                    Constants.SAVE_FILENAME_PREFIX + slotId + Constants.SAVE_FILENAME_EXTENSION
-                val saveFile = File(saveDir, fileName)
+                    Constants.SAVE_DIRECTORY + "/" + Constants.SAVE_FILENAME_PREFIX + slotId + Constants.SAVE_FILENAME_EXTENSION
 
-                Timber.d(
+                log.d(
                     "[GAME_LOAD][SOLUTIONS_SAVE_LOAD] Attempting to load game from slot %d with filename: %s",
                     slotId,
                     fileName
                 )
-                Timber.d(
-                    "[GAME_LOAD] Save directory path: %s, exists: %s",
-                    saveDir.getAbsolutePath(),
-                    saveDir.exists()
-                )
-                Timber.d(
-                    "[GAME_LOAD] Save file path: %s, exists: %s, size: %d bytes",
-                    saveFile.getAbsolutePath(),
-                    saveFile.exists(),
-                    if (saveFile.exists()) saveFile.length() else 0
-                )
 
-                if (!saveFile.exists()) {
+                val saveData = storage.readFile(fileName)
+                if (saveData.isEmpty()) {
                     return null
                 }
 
-                val saveData = StringBuilder()
-                FileInputStream(saveFile).use { fis ->
-                    BufferedReader(InputStreamReader(fis)).use { reader ->
-                        var line: String?
-                        while ((reader.readLine().also { line = it }) != null) {
-                            saveData.append(line).append("\n")
-                        }
-                    }
-                }
-                Timber.d("Read %d characters from save file", saveData.length)
+                log.d("Read %d characters from save file", saveData.length)
 
-                val state: GameState? = parseFromSaveData(saveData.toString(), context)
+                val state: GameState? = parseFromSaveData(saveData)
 
 
                 // Extract and store solutions from metadata if available
                 if (state != null) {
-                    val metadata = GameStateManager.extractMetadataFromSaveData(saveData.toString())
+                    val metadata = extractMetadataFromSaveData(saveData)
                     if (metadata != null && metadata.containsKey("SOLUTIONS")) {
                         val solutionsStr = metadata.get("SOLUTIONS")
-                        Timber.d(
+                        log.d(
                             "[SOLUTIONS_SAVE_LOAD] Found SOLUTIONS in metadata: %s",
                             solutionsStr
                         )
                         state.savedSolutions = solutionsStr
                     } else {
-                        Timber.d("[SOLUTIONS_SAVE_LOAD] No SOLUTIONS found in save metadata")
+                        log.d("[SOLUTIONS_SAVE_LOAD] No SOLUTIONS found in save metadata")
                     }
                 }
 
@@ -1388,7 +1351,7 @@ class GameState(
                     for (element in state.gameElements) {
                         if (element.type == GameElement.TYPE_TARGET) {
                             targetCount++
-                            Timber.d(
+                            log.d(
                                 "[GAME_LOAD][SOLUTIONS_SAVE_LOAD] Found target in gameElements at (%d,%d) with color %d",
                                 element.x, element.y, element.color
                             )
@@ -1402,7 +1365,7 @@ class GameState(
                             for (x in 0..<state.width) {
                                 if (state.getCellType(x, y) == Constants.TYPE_TARGET) {
                                     targetCount++
-                                    Timber.d(
+                                    log.d(
                                         "[GAME_LOAD][SOLUTIONS_SAVE_LOAD] Found target in board array at (%d,%d) with color %d",
                                         x, y, state.getTargetColor(x, y)
                                     )
@@ -1411,22 +1374,22 @@ class GameState(
                         }
                     }
 
-                    Timber.d(
+                    log.d(
                         "[GAME_LOAD][SOLUTIONS_SAVE_LOAD] Loaded GameState has %d targets",
                         targetCount
                     )
 
                     if (targetCount == 0) {
-                        Timber.e(
+                        log.e(
                             "[GAME_LOAD][SOLUTIONS_SAVE_LOAD] NO TARGETS FOUND after loading save file %s",
                             fileName
                         )
                         // Try to examine the save file contents to debug this issue
                         val contentLines =
-                            saveData.toString().split("\n".toRegex()).dropLastWhile { it.isEmpty() }
+                            saveData.split("\n".toRegex()).dropLastWhile { it.isEmpty() }
                                 .toTypedArray()
                         for (i in 0..<min(contentLines.size, 20)) {
-                            Timber.e(
+                            log.e(
                                 "[GAME_LOAD][SOLUTIONS_SAVE_LOAD] Line %d: %s",
                                 i,
                                 contentLines[i]
@@ -1434,7 +1397,7 @@ class GameState(
                         }
                         // Don't load games without targets - this is a critical error
                         val t = Throwable()
-                        Timber.e(
+                        log.e(
                             t,
                             "[GAME_LOAD][SOLUTIONS_SAVE_LOAD] Stack trace for no target found"
                         )
@@ -1443,8 +1406,8 @@ class GameState(
                 }
 
                 return state
-            } catch (e: IOException) {
-                Timber.e(
+            } catch (e: Exception) {
+                log.e(
                     e,
                     "[GAME_LOAD][SOLUTIONS_SAVE_LOAD] Error loading saved game from slot %d",
                     slotId
@@ -1478,7 +1441,7 @@ class GameState(
 
 
             // Collect all items from metadata line and separate lines
-            val allItems: MutableList<String> = java.util.ArrayList<String>()
+            val allItems: MutableList<String> = ArrayList<String>()
             if (lines.size > 0 && lines[0].startsWith("#")) {
                 val metadata =
                     lines[0].substring(1).split(";".toRegex()).dropLastWhile { it.isEmpty() }
@@ -1547,16 +1510,15 @@ class GameState(
         /**
          * Parse a game state from save data
          * @param saveData The save data string
-         * @param context The context
          * @return The parsed game state or null if parsing failed
          */
         @JvmStatic
-        fun parseFromSaveData(saveData: String, context: Context?): GameState? {
+        fun parseFromSaveData(saveData: String): GameState? {
             try {
                 // Use central metadata parser (DRY)
                 val metadata: MutableMap<String?, Any?>? = parseMetadata(saveData)
                 if (metadata == null) {
-                    Timber.e("[TARGET LOADING] Failed to parse save data metadata")
+                    log.e("[TARGET LOADING] Failed to parse save data metadata")
                     return null
                 }
 
@@ -1567,7 +1529,7 @@ class GameState(
                 val timePlayed = metadata.get("timePlayed") as Long
                 val difficulty = metadata.get("difficulty") as Int
 
-                Timber.d(
+                log.d(
                     "[TARGET LOADING] Parsing save data: %dx%d, %s, difficulty: %d",
                     width,
                     height,
@@ -1633,13 +1595,13 @@ class GameState(
                                     state.levelName = mapName
                                     state.moveCount = moveCount
                                     state.startTime = System.currentTimeMillis() - timePlayed
-                                    Timber.d(
+                                    log.d(
                                         "[BOARD_SIZE_DEBUG] parseFromSaveData compact format board size: %dx%d",
                                         width,
                                         height
                                     )
                                 } catch (e: NumberFormatException) {
-                                    Timber.e(
+                                    log.e(
                                         e,
                                         "[BOARD_SIZE_DEBUG] Error parsing board dimensions from compact format"
                                     )
@@ -1740,7 +1702,7 @@ class GameState(
                                 }
                             }
                         } catch (e: NumberFormatException) {
-                            Timber.e(
+                            log.e(
                                 "Error parsing compact format entry '%s:%s': %s",
                                 type,
                                 data,
@@ -1752,7 +1714,7 @@ class GameState(
 
                     // Store initial robot positions
                     state.storeInitialRobotPositions()
-                    Timber.d(
+                    log.d(
                         "[SAVE_LOAD] Successfully parsed compact format save data: %d targets, %d walls",
                         targetsAdded,
                         wallsAdded
@@ -1799,7 +1761,7 @@ class GameState(
                             }
                         }
                         wallsAdded -= removedWalls
-                        Timber.d(
+                        log.d(
                             "[MAPSIG] Entering WALLS section, removed %d duplicate wall GameElements from board data",
                             removedWalls
                         )
@@ -1809,7 +1771,7 @@ class GameState(
                         inRobotsSection = false
                         inInitialPositionsSection = false
                         boardDataStarted = false
-                        Timber.d("[TARGET LOADING] Entering TARGET_SECTION section")
+                        log.d("[TARGET LOADING] Entering TARGET_SECTION section")
                         inTargetSection = true
                         // Remove any target GameElements already added from board data parsing
                         // to avoid duplicates — TARGET_SECTION is the authoritative source
@@ -1822,7 +1784,7 @@ class GameState(
                             }
                         }
                         if (removedCount > 0) {
-                            Timber.d(
+                            log.d(
                                 "[TARGET LOADING] Removed %d duplicate target GameElements from board data (TARGET_SECTION takes precedence)",
                                 removedCount
                             )
@@ -1839,7 +1801,7 @@ class GameState(
                             val y = targetData[1].toInt()
                             val color = targetData[2].toInt()
 
-                            Timber.d(
+                            log.d(
                                 "[TARGET LOADING] Processing target data from TARGET_SECTION entry: (%d,%d) with color %d",
                                 x,
                                 y,
@@ -1859,7 +1821,7 @@ class GameState(
                             state.gameElements.add(target)
 
                             targetsAdded++
-                            Timber.d(
+                            log.d(
                                 "[TARGET LOADING] Added target at (%d,%d) with color %d from TARGET_SECTION section",
                                 x,
                                 y,
@@ -1869,26 +1831,26 @@ class GameState(
 
                             // Verify that the target was added correctly by directly querying the data structures
                             if (y >= 0 && y < state.height && x >= 0 && x < state.width) {
-                                Timber.d(
+                                log.d(
                                     "[TARGET LOADING] Verification - Board value at (%d,%d): %d",
                                     x,
                                     y,
                                     state.mapData[y]!![x]
                                 )
-                                Timber.d(
+                                log.d(
                                     "[TARGET LOADING] Verification - Target color at (%d,%d): %d",
                                     x,
                                     y,
                                     state.targetColors[y]!![x]
                                 )
                             } else {
-                                Timber.e(
+                                log.e(
                                     "[TARGET LOADING] ERROR - Target at (%d,%d) is out of bounds (width=%d, height=%d)",
                                     x, y, state.width, state.height
                                 )
                             }
                         } else {
-                            Timber.e(
+                            log.e(
                                 "[TARGET LOADING] ERROR - Invalid TARGET_SECTION format: %s",
                                 line
                             )
@@ -1914,11 +1876,11 @@ class GameState(
                             if ("H" == wallType) {
                                 state.addHorizontalWall(x, y)
                                 wallsAdded++
-                                //Timber.d("Added horizontal wall at (%d,%d) from WALLS section", x, y);
+                                //log.d("Added horizontal wall at (%d,%d) from WALLS section", x, y);
                             } else if ("V" == wallType) {
                                 state.addVerticalWall(x, y)
                                 wallsAdded++
-                                // Timber.d("Added vertical wall at (%d,%d) from WALLS section", x, y);
+                                // log.d("Added vertical wall at (%d,%d) from WALLS section", x, y);
                             }
                         }
                         continue
@@ -1926,14 +1888,14 @@ class GameState(
 
                     if (!boardDataStarted && line.contains(",")) {
                         boardDataStarted = true
-                        Timber.d("Started parsing board data at line %d", i)
+                        log.d("Started parsing board data at line %d", i)
                     }
 
                     if (boardDataStarted && boardLine < state.height) {
                         // Parse this line of board data
                         val cells =
                             line.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                        Timber.d(
+                        log.d(
                             "[TARGET LOADING] Parsing board line %d with %d cells",
                             boardLine,
                             cells.size
@@ -1945,7 +1907,7 @@ class GameState(
 
                             // Don't skip empty cells, they might be important for column 0
                             if (cellData.isEmpty()) {
-                                Timber.d(
+                                log.d(
                                     "Empty cell data at (%d,%d), treating as empty cell",
                                     x,
                                     boardLine
@@ -1962,7 +1924,7 @@ class GameState(
                                     val cellType = targetParts[0].toInt()
                                     val targetColor = targetParts[1].toInt()
 
-                                    Timber.d(
+                                    log.d(
                                         "[TARGET LOADING] Found target cell at (%d,%d) with type %d and color %d",
                                         x,
                                         boardLine,
@@ -1973,14 +1935,14 @@ class GameState(
                                     if (cellType == Constants.TYPE_TARGET) {
                                         state.addTarget(x, boardLine, targetColor)
                                         targetsAdded++
-                                        Timber.d(
+                                        log.d(
                                             "[TARGET LOADING] Added target at (%d,%d) with color %d from board data",
                                             x,
                                             boardLine,
                                             targetColor
                                         )
                                     } else {
-                                        Timber.d(
+                                        log.d(
                                             "[LOAD/SAVE] unexpected target cellType: %d",
                                             cellType
                                         )
@@ -1988,20 +1950,20 @@ class GameState(
                                 } else {
                                     val cellType = cellData.toInt()
 
-                                    // Timber.d("Found cell at (%d,%d) with type %d", x, boardLine, cellType);
+                                    // log.d("Found cell at (%d,%d) with type %d", x, boardLine, cellType);
                                     if (cellType == Constants.TYPE_HORIZONTAL_WALL) {
                                         state.addHorizontalWall(x, boardLine)
                                         wallsAdded++
-                                        // Timber.d("Added horizontal wall at (%d,%d)", x, boardLine);
+                                        // log.d("Added horizontal wall at (%d,%d)", x, boardLine);
                                     } else if (cellType == Constants.TYPE_VERTICAL_WALL) {
                                         state.addVerticalWall(x, boardLine)
                                         wallsAdded++
-                                        // Timber.d("Added vertical wall at (%d,%d)", x, boardLine);
+                                        // log.d("Added vertical wall at (%d,%d)", x, boardLine);
                                     } else if (cellType == Constants.TYPE_EMPTY) {
                                         // Empty cell, nothing to do
                                     } else if (cellType != Constants.TYPE_TARGET && cellType != Constants.TYPE_ROBOT) {
                                         // Only log unknown cell types that aren't targets or robots
-                                        Timber.d(
+                                        log.d(
                                             "[LOAD/SAVE] unknown cellType: %d at (%d,%d)",
                                             cellType,
                                             x,
@@ -2010,7 +1972,7 @@ class GameState(
                                     }
                                 }
                             } catch (e: NumberFormatException) {
-                                Timber.e(
+                                log.e(
                                     "Error parsing cell data '%s' at (%d,%d): %s",
                                     cellData,
                                     x,
@@ -2032,7 +1994,7 @@ class GameState(
                             val y = robotData[1].toInt()
                             val color = robotData[2].toInt()
                             state.addRobot(x, y, color)
-                            Timber.d("Added robot at (%d,%d) with color %d", x, y, color)
+                            log.d("Added robot at (%d,%d) with color %d", x, y, color)
                         }
                         continue
                     }
@@ -2054,7 +2016,7 @@ class GameState(
 
                             // Store the initial position for the robot
                             state.initialRobotPositions!!.put(color, intArrayOf(x, y))
-                            Timber.d(
+                            log.d(
                                 "Added initial position for robot color %d at (%d,%d)",
                                 color,
                                 x,
@@ -2077,20 +2039,20 @@ class GameState(
                 // reset the robots to their initial positions
                 if (state.initialRobotPositions != null && !state.initialRobotPositions!!.isEmpty()) {
                     state.resetRobotPositions()
-                    Timber.d("Reset robots to their initial positions after loading")
+                    log.d("Reset robots to their initial positions after loading")
                 } else {
                     // If we don't have initial positions saved in the file, store the current positions as initial
                     state.storeInitialRobotPositions()
-                    Timber.d("No initial positions found in save file, storing current positions as initial")
+                    log.d("No initial positions found in save file, storing current positions as initial")
                 }
 
 
                 // Log a summary of the parsing results
-                Timber.d("[TARGET LOADING] Parsing complete - Summary:")
-                Timber.d("[TARGET LOADING] - Map name: %s", state.levelName)
-                Timber.d("[TARGET LOADING] - Board dimensions: %dx%d", state.width, state.height)
-                Timber.d("[TARGET LOADING] - Targets added: %d", targetsAdded)
-                Timber.d("[TARGET LOADING] - Game elements count: %d", state.gameElements.size)
+                log.d("[TARGET LOADING] Parsing complete - Summary:")
+                log.d("[TARGET LOADING] - Map name: %s", state.levelName)
+                log.d("[TARGET LOADING] - Board dimensions: %dx%d", state.width, state.height)
+                log.d("[TARGET LOADING] - Targets added: %d", targetsAdded)
+                log.d("[TARGET LOADING] - Game elements count: %d", state.gameElements.size)
 
 
                 // Count targets in game elements as a verification
@@ -2100,7 +2062,7 @@ class GameState(
                         targetElementsCount++
                     }
                 }
-                Timber.d(
+                log.d(
                     "[TARGET LOADING] - Target elements in gameElements list: %d",
                     targetElementsCount
                 )
@@ -2115,12 +2077,12 @@ class GameState(
                         }
                     }
                 }
-                Timber.d("[TARGET LOADING] - Targets in board array: %d", targetsInBoard)
+                log.d("[TARGET LOADING] - Targets in board array: %d", targetsInBoard)
 
 
                 // If we detect a mismatch, log a warning
                 if (targetsAdded != targetElementsCount || targetsAdded != targetsInBoard) {
-                    Timber.w(
+                    log.w(
                         "[TARGET LOADING] WARNING - Target count mismatch: targetsAdded=%d, targetElementsCount=%d, targetsInBoard=%d",
                         targetsAdded, targetElementsCount, targetsInBoard
                     )
@@ -2131,20 +2093,20 @@ class GameState(
                 val actualTargets = max(targetElementsCount, targetsInBoard)
                 if (actualTargets > 0) {
                     state.setRobotCount(actualTargets)
-                    Timber.d(
+                    log.d(
                         "[TARGET LOADING] Set robotCount to %d based on actual target count",
                         actualTargets
                     )
                 }
 
-                Timber.d(
+                log.d(
                     "Successfully parsed game state from save data: %d walls, %d targets",
                     wallsAdded,
                     targetsAdded
                 )
                 return state
             } catch (e: Exception) {
-                Timber.e(e, "Error parsing save data: %s", e.message)
+                log.e(e, "Error parsing save data: %s", e.message)
                 return null
             }
         }
@@ -2153,45 +2115,34 @@ class GameState(
          * Load a level from assets
          */
         @JvmStatic
-        fun loadLevel(context: Context, levelId: Int): GameState {
-            Timber.d("Loading level %d from assets", levelId)
+        fun loadLevel(levelId: Int): GameState {
+            log.d("Loading level %d from assets", levelId)
 
             try {
-                // Construct the level file path
-                val levelFilePath = "Maps/level_" + levelId + ".txt"
+                // Read the level file content using the platform-specific ResourceLoader
+                val levelContent = ResourceLoader.loadLevelContent(levelId)
 
-
-                // Read the level file content
-                var levelContent = ""
-                context.getAssets().open(levelFilePath).use { `is` ->
-                    BufferedReader(
-                        InputStreamReader(`is`)
-                    ).use { reader ->
-                        val sb = StringBuilder()
-                        var line: String?
-                        while ((reader.readLine().also { line = it }) != null) {
-                            sb.append(line).append("\n")
-                        }
-                        levelContent = sb.toString()
-                        Timber.d("Successfully read level file: %s", levelFilePath)
-                    }
+                if (levelContent == null || levelContent.isEmpty()) {
+                    throw RuntimeException("Failed to load level $levelId: content is null or empty")
                 }
 
+                log.d("Successfully read level file for level %d", levelId)
+
                 // Parse the level content
-                val state: GameState = parseLevel(context, levelContent, levelId)
+                val state: GameState = parseLevel(levelContent, levelId)
                 state.levelId = levelId
                 state.levelName = "Level " + levelId
 
 
                 // Initialize the solver with the grid elements
-                Timber.d(
+                log.d(
                     "Level %d loaded successfully with %d grid elements",
                     levelId, state.gridElements.size
                 )
 
                 return state
-            } catch (e: IOException) {
-                Timber.e(e, "Error loading level %d: %s", levelId, e.message)
+            } catch (e: Exception) {
+                log.e(e, "Error loading level %d: %s", levelId, e.message)
                 // Don't fall back to random level - throw an exception instead
                 throw RuntimeException("Failed to load level " + levelId, e)
             }
@@ -2203,7 +2154,7 @@ class GameState(
          * Supports comments (#) and optional line breaks
          */
         @JvmStatic
-        fun parseLevel(context: Context?, levelContent: String?, levelId: Int): GameState {
+        fun parseLevel(levelContent: String?, levelId: Int): GameState {
             // Default board size
             var width = 14
             var height = 14
@@ -2222,9 +2173,9 @@ class GameState(
                         try {
                             width = parts[0].trim().toInt()
                             height = parts[1].trim().toInt()
-                            Timber.d("[BOARD_SIZE_DEBUG] Level %d has board size: %dx%d", levelId, width, height)
+                            log.d("[BOARD_SIZE_DEBUG] Level %d has board size: %dx%d", levelId, width, height)
                         } catch (e: NumberFormatException) {
-                            Timber.e(e, "[BOARD_SIZE_DEBUG] Error parsing board dimensions")
+                            log.e(e, "[BOARD_SIZE_DEBUG] Error parsing board dimensions")
                         }
                     }
                     break
@@ -2347,7 +2298,7 @@ class GameState(
                     // Parse predefined solution
                     if (type == "solution") {
                         state.predefinedSolution = data
-                        Timber.d("[LEVEL LOADING] Found predefined solution: %s", data)
+                        log.d("[LEVEL LOADING] Found predefined solution: %s", data)
                         continue
                     }
 
@@ -2357,14 +2308,14 @@ class GameState(
                         try {
                             val numMoves = data.toInt()
                             state.predefinedNumMoves = numMoves
-                            Timber.d("[LEVEL LOADING] Found predefined num_moves: %d", numMoves)
+                            log.d("[LEVEL LOADING] Found predefined num_moves: %d", numMoves)
                         } catch (e: NumberFormatException) {
-                            Timber.e(e, "[LEVEL LOADING] Error parsing num_moves: %s", data)
+                            log.e(e, "[LEVEL LOADING] Error parsing num_moves: %s", data)
                         }
                         continue
                     }
                 } catch (e: NumberFormatException) {
-                    Timber.e(e, "[LEVEL LOADING] Error parsing entry %s:%s", type, data)
+                    log.e(e, "[LEVEL LOADING] Error parsing entry %s:%s", type, data)
                 }
             }
 
@@ -2372,11 +2323,11 @@ class GameState(
             // If no target was found, throw an exception
             // This prevents the NullPointerException in the solver
             if (!hasTarget && !state.gameElements.isEmpty()) {
-//            Timber.d("[LEVEL LOADING] Generated ASCII map:\n%s", roboyard.logic.solver.RRGetMap.generateAsciiMap(state.getGameElements()));
+//            log.d("[LEVEL LOADING] Generated ASCII map:\n%s", roboyard.logic.solver.RRGetMap.generateAsciiMap(state.getGameElements()));
 
-                Timber.e("[LEVEL LOADING] No target found in level")
+                log.e("[LEVEL LOADING] No target found in level")
                 val t = Throwable()
-                Timber.e(t, "[LEVEL LOADING] Stack trace for no target found")
+                log.e(t, "[LEVEL LOADING] Stack trace for no target found")
                 throw IllegalStateException("[LEVEL LOADING] Level has no target, cannot create a valid game state")
             }
 
@@ -2385,7 +2336,7 @@ class GameState(
             val targets = state.targets
             if (!targets.isEmpty()) {
                 state.setRobotCount(targets.size)
-                Timber.d(
+                log.d(
                     "[LEVEL LOADING] Set robotCount from %d to %d based on actual target count",
                     Preferences.robotCount,
                     targets.size
@@ -2397,6 +2348,40 @@ class GameState(
             state.storeInitialRobotPositions()
 
             return state
+        }
+
+        /**
+         * Extract metadata from save data string.
+         * @param saveData The save data string
+         * @return A map containing the metadata or null if no metadata was found
+         */
+        @JvmStatic
+        fun extractMetadataFromSaveData(saveData: String?): MutableMap<String?, String?> {
+            val metadata: MutableMap<String?, String?> = HashMap<String?, String?>()
+
+            // Check if the save data has a metadata line
+            if (saveData != null && saveData.startsWith("#")) {
+                // Extract the first line
+                val endOfFirstLine = saveData.indexOf('\n')
+                if (endOfFirstLine > 0) {
+                    val metadataLine = saveData.substring(1, endOfFirstLine)
+
+                    // Parse metadata entries (MAPNAME:name;TIME:seconds;MOVES:count;SOLUTIONS:0U,1R|0D,1L;)
+                    // Note: SOLUTIONS can contain | separators, so we need to handle it specially
+                    val entries = metadataLine.split(";".toRegex()).dropLastWhile { it.isEmpty() }
+                        .toTypedArray()
+                    for (entry in entries) {
+                        val colonPos = entry.indexOf(":")
+                        if (colonPos > 0) {
+                            val key = entry.substring(0, colonPos)
+                            val value = entry.substring(colonPos + 1)
+                            metadata.put(key, value)
+                        }
+                    }
+                }
+            }
+
+            return metadata
         }
 
         /**
@@ -2464,9 +2449,8 @@ class GameState(
 
 
             // Log initial board size and requested size
-            Timber.tag(TAG)
-                .d("[BOARD_SIZE_DEBUG] createRandom called with size: " + Preferences.boardSizeX + "x" + Preferences.boardSizeY)
-            Timber.tag(TAG).d(
+            log.d("[BOARD_SIZE_DEBUG] createRandom called with size: " + Preferences.boardSizeX + "x" + Preferences.boardSizeY)
+            log.d(
                 "[BOARD_SIZE_DEBUG] Current board size from Preferences: " +
                         Preferences.boardSizeX + "x" + Preferences.boardSizeY
             )
@@ -2480,7 +2464,7 @@ class GameState(
 
             // Safety check: ensure board dimensions are valid (at least 4x4)
             if (boardSizeX < 4 || boardSizeY < 4) {
-                Timber.tag(TAG).e(
+                log.e(
                     "[BOARD_SIZE_DEBUG] Invalid board dimensions: %dx%d, using default 16x16",
                     boardSizeX,
                     boardSizeY
@@ -2496,7 +2480,7 @@ class GameState(
 
             // Board size is now managed via Preferences only, removed MainActivity dependency
             // Log the board size being used for map generation
-            Timber.tag(TAG).d("[BOARD_SIZE_DEBUG] Using board size: %dx%d", boardSizeX, boardSizeY)
+            log.d("[BOARD_SIZE_DEBUG] Using board size: %dx%d", boardSizeX, boardSizeY)
 
 
             // Create new game state with specified dimensions
@@ -2505,10 +2489,10 @@ class GameState(
 
             // Store the current difficulty level in the game state for savegame restoration
             state.difficulty = Preferences.difficulty
-            Timber.tag(TAG).d("[DIFFICULTY] Set game difficulty to %d", Preferences.difficulty)
+            log.d("[DIFFICULTY] Set game difficulty to %d", Preferences.difficulty)
 
             // Use MapGenerator instead of directly using GameLogic
-            Timber.tag(TAG).d(
+            log.d(
                 "[BOARD_SIZE_DEBUG] Creating MapGenerator with dimensions: " +
                         boardSizeX + "x" + boardSizeY
             )
@@ -2528,7 +2512,7 @@ class GameState(
             mapGenerator.robotCount = state.robotCount
             mapGenerator.targetColors = state.targetColorsCount
 
-            Timber.tag(TAG).d(
+            log.d(
                 "[PREFERENCES] Using robotCount=%d, targetColors=%d from static Preferences",
                 state.robotCount, state.targetColorsCount
             )
@@ -2537,11 +2521,10 @@ class GameState(
             // Generate a new game map
             val gridElements = mapGenerator.generatedGameMap
 
-            Timber.tag(TAG)
-                .d("[BOARD_SIZE_DEBUG] MapGenerator generated " + gridElements?.size + " grid elements")
+            log.d("[BOARD_SIZE_DEBUG] MapGenerator generated " + gridElements?.size + " grid elements")
 
             if (gridElements == null) {
-                Timber.tag(TAG).e("[BOARD_SIZE_DEBUG] MapGenerator returned null gridElements!")
+                log.e("[BOARD_SIZE_DEBUG] MapGenerator returned null gridElements!")
                 return state
             }
 
@@ -2562,7 +2545,7 @@ class GameState(
                 } else if (type == "target_red") {
                     // Add target as a GameElement (TYPE_TARGET) and also mark the cell as a target
                     state.addTarget(x, y, Constants.COLOR_PINK)
-                    Timber.d(
+                    log.d(
                         "[COLOR_MAPPING] Added %s target at (%d,%d) with color ID %d (%s)",
                         type,
                         x,
@@ -2572,7 +2555,7 @@ class GameState(
                     )
                 } else if (type == "target_green") {
                     state.addTarget(x, y, Constants.COLOR_GREEN)
-                    Timber.d(
+                    log.d(
                         "[COLOR_MAPPING] Added green target at (%d,%d) with color ID %d",
                         x,
                         y,
@@ -2580,7 +2563,7 @@ class GameState(
                     )
                 } else if (type == "target_blue") {
                     state.addTarget(x, y, Constants.COLOR_BLUE)
-                    Timber.d(
+                    log.d(
                         "[COLOR_MAPPING] Added blue target at (%d,%d) with color ID %d",
                         x,
                         y,
@@ -2588,7 +2571,7 @@ class GameState(
                     )
                 } else if (type == "target_yellow") {
                     state.addTarget(x, y, Constants.COLOR_YELLOW)
-                    Timber.d(
+                    log.d(
                         "[COLOR_MAPPING] Added yellow target at (%d,%d) with color ID %d",
                         x,
                         y,
@@ -2596,7 +2579,7 @@ class GameState(
                     )
                 } else if (type == "target_silver") {
                     state.addTarget(x, y, Constants.COLOR_SILVER)
-                    Timber.d(
+                    log.d(
                         "[COLOR_MAPPING] Added silver target at (%d,%d) with color ID %d",
                         x,
                         y,
@@ -2605,7 +2588,7 @@ class GameState(
                 } else if (type == "target_multi") {
                     // Multi-color target - we'll use pink as default
                     state.addTarget(x, y, Constants.COLOR_MULTI)
-                    Timber.d(
+                    log.d(
                         "[COLOR_MAPPING] Added multi-color target at (%d,%d) with color ID %d",
                         x,
                         y,
@@ -2614,7 +2597,7 @@ class GameState(
                 } else if (type == "robot_red") {
                     // Both pink and red map to COLOR_PINK (index 0) - pink is the actual game color, red is used in solver
                     state.addRobot(x, y, Constants.COLOR_PINK)
-                    Timber.d(
+                    log.d(
                         "[COLOR_MAPPING] Added %s robot at (%d,%d) with color ID %d (%s)",
                         type,
                         x,
@@ -2624,7 +2607,7 @@ class GameState(
                     )
                 } else if (type == "robot_green") {
                     state.addRobot(x, y, Constants.COLOR_GREEN)
-                    Timber.d(
+                    log.d(
                         "[COLOR_MAPPING] Added green robot at (%d,%d) with color ID %d",
                         x,
                         y,
@@ -2632,7 +2615,7 @@ class GameState(
                     )
                 } else if (type == "robot_blue") {
                     state.addRobot(x, y, Constants.COLOR_BLUE)
-                    Timber.d(
+                    log.d(
                         "[COLOR_MAPPING] Added blue robot at (%d,%d) with color ID %d",
                         x,
                         y,
@@ -2640,7 +2623,7 @@ class GameState(
                     )
                 } else if (type == "robot_yellow") {
                     state.addRobot(x, y, Constants.COLOR_YELLOW)
-                    Timber.d(
+                    log.d(
                         "[COLOR_MAPPING] Added yellow robot at (%d,%d) with color ID %d",
                         x,
                         y,
@@ -2648,7 +2631,7 @@ class GameState(
                     )
                 } else if (type == "robot_silver") {
                     state.addRobot(x, y, Constants.COLOR_SILVER)
-                    Timber.d(
+                    log.d(
                         "[COLOR_MAPPING] Added silver robot at (%d,%d) with color ID %d",
                         x,
                         y,
@@ -2662,16 +2645,16 @@ class GameState(
 
             // Store initial robot positions for reset functionality
             state.storeInitialRobotPositions()
-            Timber.d("[ROBOTS] Stored initial robot positions for new random game")
+            log.d("[ROBOTS] Stored initial robot positions for new random game")
 
 
             // Generate a unique map ID for this random game
             val stateGridElements = state.gridElements
-            val uniqueId = MapIdGenerator.generateUniqueId(stateGridElements)
+            val uniqueId = MapObjects.generateUniqueId(stateGridElements)
             state.uniqueMapId = uniqueId
             state.levelName = uniqueId // Use the unique ID as the level name
 
-            Timber.d("GameState: Created random game with unique ID: %s", uniqueId)
+            log.d("GameState: Created random game with unique ID: %s", uniqueId)
 
             return state
         }
@@ -2684,7 +2667,7 @@ class GameState(
          * @return A new GameState populated with the given elements
          */
         @JvmStatic
-        fun createFromGridElements(gridElements: java.util.ArrayList<GridElement>): GameState {
+        fun createFromGridElements(gridElements: ArrayList<GridElement>): GameState {
             // Determine board dimensions from elements.
             // Walls (mh/mv) can have coordinates equal to the board size (border walls),
             // so we use non-wall elements (robots, targets) to determine the playable area,
@@ -2707,7 +2690,7 @@ class GameState(
             // So boardSize = max wall coordinate. Cell elements are 0-indexed within the board.
             val width = max(maxWallX, if (maxCellX >= 0) maxCellX + 1 else 0)
             val height = max(maxWallY, if (maxCellY >= 0) maxCellY + 1 else 0)
-            Timber.d(
+            log.d(
                 "[ASCII_IMPORT] Board size from elements: %dx%d (maxCell=%d,%d maxWall=%d,%d)",
                 width, height, maxCellX, maxCellY, maxWallX, maxWallY
             )
@@ -2752,10 +2735,10 @@ class GameState(
             state.storeInitialRobotPositions()
 
             val stateGridElements = state.gridElements
-            val uniqueId = MapIdGenerator.generateUniqueId(stateGridElements)
+            val uniqueId = MapObjects.generateUniqueId(stateGridElements)
             state.uniqueMapId = uniqueId
 
-            Timber.d(
+            log.d(
                 "[ASCII_IMPORT] Created GameState %dx%d with %d elements, ID: %s",
                 width, height, stateGridElements.size, uniqueId
             )

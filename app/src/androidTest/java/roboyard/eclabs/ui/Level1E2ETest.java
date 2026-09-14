@@ -24,6 +24,7 @@ import roboyard.ui.activities.MainActivity;
 import roboyard.eclabs.R;
 import roboyard.logic.core.GameElement;
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 import roboyard.logic.core.GameSolution;
 import roboyard.logic.core.IGameMove;
 import roboyard.logic.solver.RRGameMove;
@@ -60,12 +61,12 @@ public class Level1E2ETest {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         
         // Clear achievements
-        AchievementManager.getInstance(context).resetAll();
+        AchievementManagerFactory.getInstance(context).resetAll();
     }
 
     @After
     public void tearDown() {
-        AchievementManager.getInstance(context).resetAll();
+        AchievementManagerFactory.getInstance(context).resetAll();
     }
 
     /**
@@ -138,7 +139,7 @@ public class Level1E2ETest {
         Timber.d("[UNITTESTS][E2E_TEST] Level 1 completed successfully!");
         
         // Verify achievements were unlocked
-        AchievementManager achievementManager = AchievementManager.getInstance(context);
+        AchievementManager achievementManager = AchievementManagerFactory.getInstance(context);
         Timber.d("[UNITTESTS][E2E_TEST] Unlocked achievements: %d", achievementManager.getUnlockedCount());
     }
 
@@ -334,7 +335,7 @@ public class Level1E2ETest {
         Thread.sleep(2000);
         
         // Verify that achievements were unlocked (which should trigger the popup)
-        AchievementManager achievementManager = AchievementManager.getInstance(context);
+        AchievementManager achievementManager = AchievementManagerFactory.getInstance(context);
         int unlockedCount = achievementManager.getUnlockedCount();
         
         Timber.d("[UNITTESTS][E2E_TEST] Unlocked achievements: %d", unlockedCount);

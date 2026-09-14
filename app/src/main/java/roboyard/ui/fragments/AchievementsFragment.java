@@ -20,7 +20,9 @@ import roboyard.logic.achievements.Achievement;
 import roboyard.logic.achievements.AchievementCategory;
 import roboyard.ui.achievements.AchievementIconHelper;
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 import roboyard.logic.achievements.StreakManager;
+import roboyard.logic.achievements.StreakManagerFactory;
 import timber.log.Timber;
 
 /**
@@ -76,8 +78,8 @@ public class AchievementsFragment extends BaseGameFragment {
         // Update user profile button UI
         updateUserProfileButton(userProfileButton);
         
-        achievementManager = AchievementManager.getInstance(requireContext());
-        achievementManager.setCurrentActivity(requireActivity());
+        achievementManager = AchievementManagerFactory.getInstance(requireContext());
+        AchievementManagerFactory.setCurrentActivity(requireActivity());
         loadAchievements();
     }
     
@@ -85,7 +87,7 @@ public class AchievementsFragment extends BaseGameFragment {
     public void onResume() {
         super.onResume();
         if (achievementManager != null) {
-            achievementManager.setCurrentActivity(requireActivity());
+            AchievementManagerFactory.setCurrentActivity(requireActivity());
         }
         if (achievementsContainer != null) {
             loadAchievements();
@@ -113,7 +115,7 @@ public class AchievementsFragment extends BaseGameFragment {
     }
     
     private void loadAchievements() {
-        StreakManager streakManager = StreakManager.getInstance(requireContext());
+        StreakManager streakManager = StreakManagerFactory.getInstance(requireContext());
         // Load streak data
         currentLoginStreakDays = streakManager.getCurrentStreak();
         longestLoginStreakDays = streakManager.getLongestStreak();

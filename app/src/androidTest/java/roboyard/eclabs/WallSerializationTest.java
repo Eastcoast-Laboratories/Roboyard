@@ -164,7 +164,7 @@ public class WallSerializationTest {
         Timber.d("[UNITTESTS][WALL_TEST] Serialized data:\n%s", serialized);
 
         // Parse back
-        GameState loaded = GameState.parseFromSaveData(serialized, context);
+        GameState loaded = GameState.parseFromSaveData(serialized);
         assertNotNull("Parsed state should not be null", loaded);
 
         // Count walls by type
@@ -193,7 +193,7 @@ public class WallSerializationTest {
         int height = 14;
         GameState original = createTestGameState(width, height);
         String serialized = original.serialize();
-        GameState loaded = GameState.parseFromSaveData(serialized, context);
+        GameState loaded = GameState.parseFromSaveData(serialized);
         assertNotNull(loaded);
 
         // Check that right boundary walls (x=width) exist in loaded state
@@ -219,7 +219,7 @@ public class WallSerializationTest {
         int height = 14;
         GameState original = createTestGameState(width, height);
         String serialized = original.serialize();
-        GameState loaded = GameState.parseFromSaveData(serialized, context);
+        GameState loaded = GameState.parseFromSaveData(serialized);
         assertNotNull(loaded);
 
         // Check that bottom boundary walls (y=height) exist in loaded state
@@ -288,7 +288,7 @@ public class WallSerializationTest {
     private void verifyRoundtripForSize(int width, int height) {
         GameState original = createTestGameState(width, height);
         String serialized = original.serialize();
-        GameState loaded = GameState.parseFromSaveData(serialized, context);
+        GameState loaded = GameState.parseFromSaveData(serialized);
         assertNotNull("Parsed state should not be null for " + width + "x" + height, loaded);
 
         // Count all walls

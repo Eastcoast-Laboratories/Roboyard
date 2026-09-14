@@ -1,6 +1,7 @@
 package roboyard.eclabs.achievements;
 
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 
 import static org.junit.Assert.*;
 
@@ -35,7 +36,7 @@ public class AchievementDebugTest {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         prefs.edit().clear().apply();
-        achievementManager = AchievementManager.getInstance(context);
+        achievementManager = AchievementManagerFactory.getInstance(context);
         achievementManager.resetAll();
         // Reset game session flags so achievements can be unlocked
         achievementManager.onNewGameStarted();
@@ -110,8 +111,8 @@ public class AchievementDebugTest {
         Timber.d("[UNITTESTS][DEBUG_TEST] ===== TESTING SINGLETON INSTANCE =====");
         
         // Get instance multiple times
-        AchievementManager instance1 = AchievementManager.getInstance(context);
-        AchievementManager instance2 = AchievementManager.getInstance(context);
+        AchievementManager instance1 = AchievementManagerFactory.getInstance(context);
+        AchievementManager instance2 = AchievementManagerFactory.getInstance(context);
         
         // They should be the same object
         assertSame("Singleton instances should be the same", instance1, instance2);

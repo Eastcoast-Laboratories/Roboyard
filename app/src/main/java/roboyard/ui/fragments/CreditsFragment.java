@@ -20,6 +20,7 @@ import androidx.annotation.Nullable;
 
 import roboyard.eclabs.R;
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 import timber.log.Timber;
 
 /**
@@ -48,8 +49,8 @@ public class CreditsFragment extends BaseGameFragment {
         disableAccessibilityForDecorations(view);
 
         // Show update nudge if new version available (always on credits page, no cooldown)
-        AchievementManager am = AchievementManager.getInstance(requireContext());
-        am.setCurrentActivity(requireActivity());
+        AchievementManager am = AchievementManagerFactory.getInstance(requireContext());
+        AchievementManagerFactory.setCurrentActivity(requireActivity());
         am.showUpdateNudgeForCredits();
 
         // Set up back button

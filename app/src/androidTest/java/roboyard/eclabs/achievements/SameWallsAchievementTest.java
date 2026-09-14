@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import roboyard.logic.core.GameHistoryEntry;
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 import roboyard.ui.activities.MainActivity;
 import roboyard.logic.storage.FileReadWrite;
 import roboyard.logic.managers.GameHistoryManager;
@@ -63,7 +64,7 @@ public class SameWallsAchievementTest {
         // Clear achievements
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         prefs.edit().clear().apply();
-        achievementManager = AchievementManager.getInstance(context);
+        achievementManager = AchievementManagerFactory.getInstance(context);
         achievementManager.resetAll();
 
         // Clear history on Main thread and set activity reference

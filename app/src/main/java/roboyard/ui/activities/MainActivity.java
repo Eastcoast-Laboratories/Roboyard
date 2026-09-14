@@ -731,7 +731,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             // Parse the map data into a GameState
             Timber.d("[DEEPLINK_PROCESS] Beginning to parse map data into GameState");
-            GameState gameState = GameState.parseFromSaveData(mapData, this);
+            GameState gameState = GameState.parseFromSaveData(mapData);
             
             if (gameState != null) {
                 // If we successfully parsed the game state, load it
@@ -816,11 +816,11 @@ public class MainActivity extends AppCompatActivity {
         Timber.d("[DEEPLINK] Random game deep link detected (%s)", source);
         if (gameStateManager != null) {
             // Record daily login when starting a new game
-            roboyard.logic.achievements.StreakManager.getInstance(this).recordDailyLogin();
+            roboyard.logic.achievements.StreakManagerFactory.getInstance(this).recordDailyLogin();
             Timber.d("[STREAK] Daily login recorded on random game deep link");
             
             // Reset achievement game session flags for new game
-            roboyard.logic.achievements.AchievementManager.getInstance(this).onNewGameStarted();
+            roboyard.logic.achievements.AchievementManagerFactory.getInstance(this).onNewGameStarted();
             
             // Start a new game
             gameStateManager.startGame();

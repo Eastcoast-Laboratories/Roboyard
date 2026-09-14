@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 
 import roboyard.eclabs.R;
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 import roboyard.ui.activities.MainActivity;
 import roboyard.logic.managers.GameStateManager;
 import roboyard.logic.storage.FileReadWrite;
@@ -59,7 +60,7 @@ public class PerfectRandom5E2ETest {
     @Before
     public void setUp() throws InterruptedException {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        achievementManager = AchievementManager.getInstance(context);
+        achievementManager = AchievementManagerFactory.getInstance(context);
 
         // Clear achievements
         SharedPreferences prefs = context.getSharedPreferences("roboyard_achievements", Context.MODE_PRIVATE);

@@ -106,6 +106,13 @@ public class RoboyardApplication extends Application implements Application.Acti
         PlatformStorage storage = AndroidStorage.getInstance(appContext);
         Preferences.INSTANCE.setStorageProvider(() -> storage);
 
+        // Initialize PlatformInfo with app version and Play Games flag
+        roboyard.logic.platform.PlatformInfo.INSTANCE.init(
+            appContext,
+            roboyard.eclabs.BuildConfig.VERSION_NAME,
+            roboyard.eclabs.BuildConfig.ENABLE_PLAY_GAMES
+        );
+
         // Check if accessibility is active
         boolean isAccessibilityActive = AccessibilityUtil.isScreenReaderActive(appContext);
 

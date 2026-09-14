@@ -59,7 +59,7 @@ public class LevelEditorParsingTest {
     public void testParseLevelBoardDimensions() {
         Timber.d("[UNITTESTS][TEST_LEVEL_PARSE] Testing board dimension parsing");
         String levelContent = "board:12,14;\nmh0,0;\nmh1,0;\nmv0,0;\nmv12,0;\n";
-        GameState state = GameState.parseLevel(context, levelContent, 999);
+        GameState state = GameState.parseLevel(levelContent, 999);
 
         assertNotNull("Parsed state should not be null", state);
         assertEquals("Board width should be 12", 12, state.width);
@@ -74,7 +74,7 @@ public class LevelEditorParsingTest {
     public void testParseHorizontalWalls() {
         Timber.d("[UNITTESTS][TEST_LEVEL_PARSE] Testing horizontal wall parsing");
         String levelContent = "board:12,14;\nmh0,0;\nmh5,7;\nmh11,14;\n";
-        GameState state = GameState.parseLevel(context, levelContent, 999);
+        GameState state = GameState.parseLevel(levelContent, 999);
 
         int hWallCount = 0;
         boolean foundTopLeft = false;
@@ -104,7 +104,7 @@ public class LevelEditorParsingTest {
     public void testParseVerticalWalls() {
         Timber.d("[UNITTESTS][TEST_LEVEL_PARSE] Testing vertical wall parsing");
         String levelContent = "board:12,14;\nmv0,0;\nmv6,5;\nmv12,13;\n";
-        GameState state = GameState.parseLevel(context, levelContent, 999);
+        GameState state = GameState.parseLevel(levelContent, 999);
 
         int vWallCount = 0;
         boolean foundLeft = false;
@@ -143,7 +143,7 @@ public class LevelEditorParsingTest {
         scanner.close();
         is.close();
 
-        GameState state = GameState.parseLevel(context, content.toString(), 1);
+        GameState state = GameState.parseLevel(content.toString(), 1);
 
         assertNotNull("Parsed level 1 should not be null", state);
         assertEquals("Level 1 width should be 12", 12, state.width);
@@ -198,7 +198,7 @@ public class LevelEditorParsingTest {
                 "robot_green9,9;\n" +
                 "target_blue8,11;\n";
 
-        GameState state = GameState.parseLevel(context, levelContent, 999);
+        GameState state = GameState.parseLevel(levelContent, 999);
 
         int robots = 0, targets = 0;
         for (GameElement element : state.gameElements) {
@@ -244,7 +244,7 @@ public class LevelEditorParsingTest {
             sb.append("mv").append(boardWidth).append(",").append(y).append(";\n");
         }
 
-        GameState state = GameState.parseLevel(context, sb.toString(), 999);
+        GameState state = GameState.parseLevel(sb.toString(), 999);
 
         int topWalls = 0, bottomWalls = 0, leftWalls = 0, rightWalls = 0;
         for (GameElement element : state.gameElements) {

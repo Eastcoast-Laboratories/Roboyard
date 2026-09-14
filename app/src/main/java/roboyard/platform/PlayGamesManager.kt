@@ -64,7 +64,7 @@ class PlayGamesManager private constructor(context: Context) {
             return
         }
 
-        val playGamesId = AchievementManager.getInstance(context)
+        val playGamesId = roboyard.logic.achievements.AchievementManagerFactory.getInstance(context)
             .getPlayGamesAchievementId(localAchievementId)
         if (playGamesId == null || playGamesId.startsWith("REPLACE_")) {
             Timber.w("%s Achievement ID not configured for: %s", TAG, localAchievementId)

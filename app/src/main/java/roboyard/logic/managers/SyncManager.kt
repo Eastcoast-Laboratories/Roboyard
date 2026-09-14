@@ -6,6 +6,7 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import roboyard.logic.achievements.AchievementManager
+import roboyard.logic.achievements.AchievementManagerFactory
 import roboyard.logic.core.Constants
 import roboyard.logic.core.GameHistoryEntry
 import roboyard.logic.core.LevelCompletionData
@@ -82,7 +83,7 @@ class SyncManager private constructor(context: Context) {
 
 
         // Upload achievements (includes streak data)
-        AchievementManager.getInstance(this.context).syncToServer()
+        AchievementManagerFactory.getInstance(this.context).syncToServer()
 
 
         // Upload save games and history

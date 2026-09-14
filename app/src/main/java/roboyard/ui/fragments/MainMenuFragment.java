@@ -18,8 +18,10 @@ import roboyard.logic.network.RoboyardApiClient;
 import roboyard.logic.achievements.Achievement;
 import roboyard.logic.achievements.AchievementCategory;
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 import roboyard.ui.achievements.AchievementPopup;
 import roboyard.logic.achievements.StreakManager;
+import roboyard.logic.achievements.StreakManagerFactory;
 import timber.log.Timber;
 import java.util.Locale;
 import android.content.res.Resources;
@@ -137,7 +139,7 @@ public class MainMenuFragment extends BaseGameFragment {
     @Override
     public void onResume() {
         super.onResume();
-        AchievementManager.getInstance(requireContext()).setUnlockListener(achievement -> {
+        AchievementManagerFactory.getInstance(requireContext()).setUnlockListener(achievement -> {
             if (achievementPopup == null) {
                 Timber.w("[ACHIEVEMENT_POPUP] Root view missing, cannot show achievement %s", achievement.id);
                 return;
@@ -145,7 +147,7 @@ public class MainMenuFragment extends BaseGameFragment {
             achievementPopup.show(achievement);
             Timber.d("[ACHIEVEMENT_POPUP] Main menu displayed achievement: %s", achievement.id);
         });
-        StreakManager.StreakUpdate streakUpdate = StreakManager.getInstance(requireContext()).recordDailyLogin();
+        StreakManager.StreakUpdate streakUpdate = StreakManagerFactory.getInstance(requireContext()).recordDailyLogin();
         Timber.d("[STREAK][APP_START] Daily login checked on main menu resume: newDayRecorded=%b, streak=%d",
                 streakUpdate.isNewDayRecorded(), streakUpdate.streakDays);
         maybeShowDailyStreakPopup();
@@ -153,7 +155,7 @@ public class MainMenuFragment extends BaseGameFragment {
 
     @Override
     public void onPause() {
-        AchievementManager.getInstance(requireContext()).setUnlockListener(null);
+        AchievementManagerFactory.getInstance(requireContext()).setUnlockListener(null);
         super.onPause();
     }
 
@@ -195,7 +197,7 @@ public class MainMenuFragment extends BaseGameFragment {
             Timber.w("[STREAK_POPUP] Root view unavailable, skipping streak popup");
             return false;
         }
-        int streakDays = StreakManager.getInstance(requireContext()).getCurrentStreak();
+        int streakDays = StreakManagerFactory.getInstance(requireContext()).getCurrentStreak();
         Timber.d("[STREAK_POPUP] Using persisted streak for popup: %d", streakDays);
         
         // Determine headline based on streak day
@@ -223,11 +225,11 @@ public class MainMenuFragment extends BaseGameFragment {
     }
 
     private void maybeShowDailyStreakPopup() {
-        if (!StreakManager.getInstance(requireContext()).shouldShowStreakPopupToday()) {
+        if (!StreakManagerFactory.getInstance(requireContext()).shouldShowStreakPopupToday()) {
             return;
         }
         if (showDailyStreakPopup()) {
-            StreakManager.getInstance(requireContext()).markStreakPopupShownToday();
+            StreakManagerFactory.getInstance(requireContext()).markStreakPopupShownToday();
         }
     }
     
@@ -239,11 +241,11 @@ public class MainMenuFragment extends BaseGameFragment {
         newGameButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.new_random_game_scaled_large, 0, 0, 0);
         newGameButton.setOnClickListener(v -> {
             // Record daily login when starting a new game
-            StreakManager.getInstance(requireContext()).recordDailyLogin();
+            StreakManagerFactory.getInstance(requireContext()).recordDailyLogin();
             Timber.d("[STREAK] Daily login recorded on new random game start");
             
             // Reset achievement game session flags for new game
-            AchievementManager.getInstance(requireContext()).onNewGameStarted();
+            AchievementManagerFactory.getInstance(requireContext()).onNewGameStarted();
             
             // Check if auto-save (slot 0) exists and load it
             String autosavePath = roboyard.logic.storage.FileReadWrite.getSaveGamePath(requireActivity(), 0);
@@ -283,7 +285,7 @@ public class MainMenuFragment extends BaseGameFragment {
         levelGameButton.setCompoundDrawablesWithIntrinsicBounds(R.drawable.level_game_scaled_large, 0, 0, 0);
         levelGameButton.setOnClickListener(v -> {
             // Record daily login when starting a level game
-            StreakManager.getInstance(requireContext()).recordDailyLogin();
+            StreakManagerFactory.getInstance(requireContext()).recordDailyLogin();
             Timber.d("[STREAK] Daily login recorded on level game start");
             
             LevelSelectionFragment levelSelectionFragment = new LevelSelectionFragment();

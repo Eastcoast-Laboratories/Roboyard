@@ -16,6 +16,7 @@ import org.junit.runner.RunWith;
 
 import roboyard.ui.activities.MainActivity;
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 import roboyard.logic.core.GameElement;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.GameSolution;
@@ -47,7 +48,7 @@ public class Level111DebugTest {
     @Before
     public void setUp() {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        achievementManager = AchievementManager.getInstance(context);
+        achievementManager = AchievementManagerFactory.getInstance(context);
         achievementManager.resetAll();
         Timber.d("[UNITTESTS][LEVEL111_DEBUG] ========== TEST STARTED ==========");
     }

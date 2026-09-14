@@ -6,7 +6,9 @@ import org.json.JSONException
 import org.json.JSONObject
 import roboyard.eclabs.BuildConfig
 import roboyard.logic.achievements.AchievementManager
+import roboyard.logic.achievements.AchievementManagerFactory
 import roboyard.logic.achievements.StreakManager
+import roboyard.logic.achievements.StreakManagerFactory
 import roboyard.logic.storage.PlatformStorage
 import roboyard.platform.AndroidStorage
 import roboyard.logic.storage.FileReadWrite.Companion.loadAbsoluteData
@@ -424,10 +426,10 @@ class DataExportImportManager(context: Context) {
 
 
         // Reset in-memory singleton state
-        AchievementManager.getInstance(context).resetAll()
+        AchievementManagerFactory.getInstance(context).resetAll()
         tag(TAG).d("[ACHIEVEMENT][RESET] Achievement manager reset")
 
-        StreakManager.getInstance(context).resetStreak()
+        StreakManagerFactory.getInstance(context).resetStreak()
         tag(TAG).d("[STREAK][RESET] Streak manager reset")
 
         LevelCompletionManager.getInstance(AndroidStorage.getInstance(context)).resetAll()

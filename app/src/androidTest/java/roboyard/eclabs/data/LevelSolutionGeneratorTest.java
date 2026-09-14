@@ -119,7 +119,7 @@ public class LevelSolutionGeneratorTest {
         
         try {
             // Load the level
-            GameState gameState = GameState.loadLevel(context, levelId);
+            GameState gameState = GameState.loadLevel(levelId);
             if (gameState == null) {
                 result.error = "Failed to load level";
                 return result;

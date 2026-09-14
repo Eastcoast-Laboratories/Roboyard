@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 import roboyard.eclabs.R;
 import roboyard.ui.fragments.AchievementsFragment;
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 import roboyard.eclabs.ui.mock.MockMainActivity;
 
 /**
@@ -64,7 +65,7 @@ public class AchievementsFragmentTest {
     @After
     public void tearDown() {
         // Clean up
-        AchievementManager.getInstance(context).resetAll();
+        AchievementManagerFactory.getInstance(context).resetAll();
     }
 
     /**
@@ -121,7 +122,7 @@ public class AchievementsFragmentTest {
     @Test
     public void testUnlockingAchievementUpdatesProgress() {
         // Unlock an achievement
-        AchievementManager.getInstance(context).unlock("first_game");
+        AchievementManagerFactory.getInstance(context).unlock("first_game");
         
         // Reload the fragment to see updated progress
         activityRule.getScenario().onActivity(activity -> {

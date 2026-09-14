@@ -1,6 +1,7 @@
 package roboyard.eclabs.achievements;
 
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 import roboyard.logic.achievements.Achievement;
 
 import static org.junit.Assert.*;
@@ -40,7 +41,7 @@ public class AchievementManagerTest {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         prefs.edit().clear().apply();
         // Get fresh instance
-        achievementManager = AchievementManager.getInstance(context);
+        achievementManager = AchievementManagerFactory.getInstance(context);
         achievementManager.resetAll();
         // Reset game session flags so achievements can be unlocked
         achievementManager.onNewGameStarted();

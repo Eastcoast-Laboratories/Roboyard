@@ -1,6 +1,7 @@
 package roboyard.eclabs.achievements;
 
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 import roboyard.logic.achievements.Achievement;
 
 import static org.junit.Assert.*;
@@ -43,7 +44,7 @@ public class AchievementSyncTest {
     @Before
     public void setUp() {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        achievementManager = AchievementManager.getInstance(context);
+        achievementManager = AchievementManagerFactory.getInstance(context);
         apiClient = RoboyardApiClient.getInstance(context);
         
         // Reset achievements for clean test
