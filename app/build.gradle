@@ -3,8 +3,24 @@ plugins {
     id 'androidx.navigation.safeargs'
 }
 
+// Load keystore properties from file (works in Android Studio and CLI)
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('keystore.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     compileSdk 36
+
+    signingConfigs {
+        uploadRelease {
+            storeFile file(keystoreProperties['uploadStoreFile'] ?: 'upload-keystore.jks')
+            storePassword keystoreProperties['uploadStorePassword'] ?: System.getenv('UPLOAD_KEYSTORE_PASSWORD')
+            keyAlias keystoreProperties['uploadKeyAlias'] ?: 'key0'
+            keyPassword keystoreProperties['uploadKeyPassword'] ?: System.getenv('UPLOAD_KEY_PASSWORD')
+        }
+    }
 
     defaultConfig {
         applicationId "de.z11.roboyard"
@@ -34,6 +50,7 @@ android {
                     'proguard-android-optimize.txt'),
                     'proguard-rules.pro'
             buildConfigField "boolean", "ENABLE_PLAY_GAMES", "false"
+            signingConfig signingConfigs.uploadRelease
           }
     }
     
