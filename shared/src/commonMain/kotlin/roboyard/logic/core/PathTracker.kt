@@ -48,9 +48,19 @@ class PathTracker {
     fun addPathSegment(robotColor: Int, fromX: Int, fromY: Int, toX: Int, toY: Int) {
         val path = robotPaths.getOrPut(robotColor) { mutableListOf() }
 
-        // If path is empty, add the starting position
+        // If path is empty or the "from" doesn't match the last point, start fresh
+        // This prevents diagonal lines when a move follows an undo or reset
         if (path.isEmpty()) {
             path.add(intArrayOf(fromX, fromY))
+        } else {
+            val lastPoint = path.last()
+            if (lastPoint[0] != fromX || lastPoint[1] != fromY) {
+                // The robot's current position doesn't match the last path point
+                // This happens after undo/reset — start a fresh path
+                path.clear()
+                segmentCounts[robotColor]?.clear()
+                path.add(intArrayOf(fromX, fromY))
+            }
         }
 
         // Add the destination
