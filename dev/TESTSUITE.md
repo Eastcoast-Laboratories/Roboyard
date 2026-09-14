@@ -246,6 +246,50 @@ These tests require a connected Android device or emulator.
 | `UISmokeTest` [e]                   | ✅ Passing               | 1     | Fast UI smoke test (~28s): Settings, Random Game, Achievements, Save/Load, History tab, Level Selection, Debug Settings. Sets min=2/max=20 moves for instant map generation.                                         | e2e, smoke-test, settings, navigation, espresso                              |
 | `TestHelper`                        | N/A                      | —     | **Global test helper class with common methods.** Use in all new tests: startNewSessionWithEmptyStorage(), startAndWait8sForPopupClose(), startRandomGame(), startLevelGame(), openDebugScreen(), openLevelEditorThroughDebug(), openSettingsAndScrollDown(), navigateToSaveLoadScreen(), navigateToHistoryTab(), closeAchievementPopupIfPresent(). | test-helper, espresso, navigation, setup, common-methods |
 
+### ComposeApp Desktop Tests
+
+**How to run all ComposeApp desktop tests:**
+```bash
+./gradlew :composeApp:desktopTest
+```
+
+**How to run a single test class:**
+```bash
+./gradlew :composeApp:desktopTest --tests "roboyard.ui.compose.ComposeAppUiSmokeTest"
+```
+
+#### Compose UI Tests (launch the app, click through screens)
+
+| Class | Status | Tests | Description | Tags |
+|-------|--------|-------|-------------|------|
+| `ComposeAppUiSmokeTest` | ✅ Passing | 4 | Compose UI smoke test: main menu visible, navigate to Level Selection, navigate to Credits, navigate to Credits and back. | compose, desktop, ui-test, smoke-test, navigation |
+
+#### Compose Non-UI Unit Tests (logic only, no app launch)
+
+| Class | Status | Tests | Description | Tags |
+|-------|--------|-------|-------------|------|
+| `RobotMovementTest` | ✅ Passing | 8 | Robot movement logic (N/S/E/W, wall collision, robot blocking). Tests shared `moveRobotOnBoard`. | compose, desktop, unit-test, robot-movement |
+| `GameplayHistoryTest` | ✅ Passing | 1 | Integration test: play a complete game and verify history saving. Tests shared `isBoardSolved`, `moveRobotOnBoard`. | compose, desktop, integration-test, history |
+| `HistoryAutosaveTest` | ❌ Failing (2/9) | 9 | History autosave and hint tracking. 2 pre-existing failures (testGameHistoryEntryAchievementQualification, testHintTrackingAcrossSessions). | compose, desktop, history, autosave |
+
+### ComposeApp PyAutoGUI Tests (headed, real mouse clicks)
+
+These tests start the ComposeApp desktop window and click with PyAutoGUI on real pixel coordinates. They parse the app log to verify game state. Requires a display (X11).
+
+**How to run:**
+```bash
+cd composeApp
+python3 random_game_test.py
+python3 history_info_button_headed_test.py
+```
+
+**Shared test suite:** `composeApp/testsuite/test_suite.py` (generic PyAutoGUI helpers) and `composeApp/testsuite/roboyard_testsuite.py` (Roboyard-specific: robot movement, log parsing).
+
+| File | Status | Description | Tags |
+|------|--------|-------------|------|
+| `random_game_test.py` | ✅ Passing | Starts ComposeApp, clicks "New Random Game", parses robot positions and solver solution from log, executes first move, verifies history update. | compose, desktop, pyautogui, headed, random-game, mouse, drag |
+| `history_info_button_headed_test.py | ✅ Passing | Starts ComposeApp, clicks "Level Game", selects Level 1, moves robots to complete level, verifies completion dialog, navigates to history, clicks info button, verifies bestTime/bestMoves. | compose, desktop, pyautogui, headed, level-game, history, mouse, drag |
+
 ### Non-UI Instrumented Tests
 
 | Class                    | Status              | Tests | Description                                                                                   | Tags                                                          |
