@@ -404,7 +404,7 @@ public class LevelDesignEditorFragment extends Fragment {
                     savegameSpinner.setSelection(0);
                     return;
                 }
-                GameState state = GameState.parseFromSaveData(saveData, requireContext());
+                GameState state = GameState.parseFromSaveData(saveData);
                 if (state == null) {
                     Toast.makeText(requireContext(), getString(R.string.editor_could_not_load_save), Toast.LENGTH_SHORT).show();
                     savegameSpinner.setSelection(0);
@@ -466,7 +466,7 @@ public class LevelDesignEditorFragment extends Fragment {
                     saveData.length(), saveData.substring(0, Math.min(200, saveData.length())));
             
             // Parse the save data into a GameState
-            GameState state = GameState.parseFromSaveData(saveData, requireContext());
+            GameState state = GameState.parseFromSaveData(saveData);
             if (state == null) {
                 Timber.e("[EDITOR] Failed to parse autosave data");
                 return false;
@@ -1852,7 +1852,7 @@ public class LevelDesignEditorFragment extends Fragment {
         Timber.d("Parsing level content: %d characters", content.length());
         // Delegate to the existing GameState.parseLevel which correctly handles
         // the board:W,H; mhX,Y; mvX,Y; target_colorX,Y; robot_colorX,Y; format
-        return GameState.parseLevel(requireContext(), content, currentLevelId);
+        return GameState.parseLevel(content, currentLevelId);
     }
     
     /**

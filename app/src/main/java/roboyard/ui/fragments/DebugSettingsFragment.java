@@ -19,7 +19,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 import roboyard.logic.achievements.StreakManager;
+import roboyard.logic.achievements.StreakManagerFactory;
 import timber.log.Timber;
 import roboyard.logic.managers.LevelCompletionManager;
 import roboyard.eclabs.R;
@@ -40,8 +42,8 @@ public class DebugSettingsFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        achievementManager = AchievementManager.getInstance(requireContext());
-        streakManager = StreakManager.getInstance(requireContext());
+        achievementManager = AchievementManagerFactory.getInstance(requireContext());
+        streakManager = StreakManagerFactory.getInstance(requireContext());
         
         // Create main layout
         LinearLayout mainLayout = new LinearLayout(requireContext());

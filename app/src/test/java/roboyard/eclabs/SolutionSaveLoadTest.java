@@ -181,7 +181,7 @@ public class SolutionSaveLoadTest {
         Context mockContext = Mockito.mock(Context.class);
         Mockito.when(mockContext.getFilesDir()).thenReturn(new File("/tmp"));
         
-        GameState state = GameState.parseFromSaveData(saveData, mockContext);
+        GameState state = GameState.parseFromSaveData(saveData);
         assertNotNull("GameState should be parsed", state);
         
         // Note: In the actual load flow, GameState.loadSavedGame() calls setSavedSolutions()

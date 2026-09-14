@@ -2,6 +2,8 @@ package roboyard.ui.compose
 
 import driftingdroids.model.Board
 import roboyard.logic.core.GameHistoryEntry
+import roboyard.logic.core.isBoardSolved
+import roboyard.logic.core.moveRobotOnBoard
 import roboyard.logic.storage.getPlatformStorage
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -46,7 +48,7 @@ class GameplayHistoryTest {
         var moveCount = 0
         
         // Move robot north to goal
-        val newBoard = moveRobot(currentBoard, 0, Board.NORTH)
+        val newBoard = moveRobotOnBoard(currentBoard, 0, Board.NORTH)
         assertNotNull(newBoard, "Move should succeed")
         currentBoard = newBoard
         moveCount++
@@ -54,7 +56,7 @@ class GameplayHistoryTest {
         println("[TEST] Move $moveCount: Robot moved to (2, 0)")
         
         // Verify game is solved
-        assertTrue(isSolved(currentBoard), "Game should be solved")
+        assertTrue(isBoardSolved(currentBoard), "Game should be solved")
         println("[TEST] Game solved in $moveCount moves")
         
         // Create a history entry

@@ -21,6 +21,7 @@ import org.junit.runner.RunWith;
 
 import roboyard.eclabs.R;
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 import roboyard.ui.activities.MainActivity;
 import roboyard.logic.managers.GameStateManager;
 
@@ -54,7 +55,7 @@ public class RandomGame11E2ETest {
     @Before
     public void setUp() {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        achievementManager = AchievementManager.getInstance(context);
+        achievementManager = AchievementManagerFactory.getInstance(context);
         achievementManager.resetAll();
         Timber.d("[UNITTESTS][E2E_RANDOM11] ========== TEST STARTED ==========");
     }

@@ -1,54 +1,46 @@
 package roboyard.logic.achievements
 
-import android.app.Activity
-import android.content.Context
-import android.content.res.Resources
-import android.os.Build
-import android.widget.Toast
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.json.JSONArray
-import org.json.JSONException
-import org.json.JSONObject
-import roboyard.eclabs.BuildConfig
-import roboyard.eclabs.R
 import roboyard.logic.achievements.AchievementDefinitions.all
 import roboyard.logic.achievements.AchievementDefinitions.getPlayGamesResourceKey
 import roboyard.logic.core.Preferences
 import roboyard.logic.managers.GameHistoryManager.findByWallSignature
 import roboyard.logic.managers.GameHistoryManager.getUniqueCompletedLevelCount
 import roboyard.logic.managers.GameHistoryManager.getUniqueThreeStarLevelCount
+import roboyard.logic.platform.PlatformInfo
+import roboyard.logic.platform.PlayGamesClient
 import roboyard.logic.storage.PlatformStorage
-import roboyard.logic.network.RoboyardApiClient
-import roboyard.logic.network.RoboyardApiClient.AchievementFetchResult
-import roboyard.logic.network.RoboyardApiClient.AchievementSyncResult
-import roboyard.logic.network.RoboyardApiClient.ApiCallback
-import roboyard.platform.AndroidStorage
-import roboyard.platform.PlayGamesManager
+import roboyard.logic.ui.StringProvider
 import roboyard.logic.ui.UiNotifier
-import timber.log.Timber.Forest.d
-import timber.log.Timber.Forest.e
-import timber.log.Timber.Forest.i
-import timber.log.Timber.Forest.w
-import java.lang.ref.WeakReference
-import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.TimeZone
+import roboyard.logic.util.DateUtils
+import roboyard.logic.util.RLog
 import kotlin.math.max
 import kotlin.math.min
 
 /**
  * Manages achievement unlocking, storage, and retrieval.
  */
-class AchievementManager private constructor(context: Context) {
-    private val context: Context
-    private val storage: PlatformStorage
+class AchievementManager private constructor(
+    private val storage: PlatformStorage,
+    private val stringProvider: StringProvider?,
+    uiNotifier: UiNotifier?
+) : roboyard.logic.achievements.AchievementCallback {
+    private val log = RLog.tag("AchievementManager")
+
     private val achievements: MutableMap<String?, Achievement?>?
     private var unlockListener: AchievementUnlockListener? = null
-    private var currentActivity: WeakReference<Activity?>? = null
-    private var uiNotifier: UiNotifier? = null
+    private var uiNotifier: UiNotifier? = uiNotifier
+
+    // Platform-specific clients (set by the platform factory)
+    var syncClient: AchievementSyncClient? = null
+    var playGamesClient: PlayGamesClient? = null
+    var streakDataProvider: StreakDataProvider? = null
 
     // Counters for tracking progress
     private var levelsCompleted = 0
@@ -81,36 +73,19 @@ class AchievementManager private constructor(context: Context) {
         this.unlockListener = listener
     }
 
-    fun setCurrentActivity(activity: Activity?) {
-        this.currentActivity = WeakReference<Activity?>(activity)
-        // Create Android UiNotifier adapter when activity is set
-        if (activity != null) {
-            val ctx = this.context
-            this.uiNotifier = UiNotifier { message ->
-                CoroutineScope(Dispatchers.Main).launch {
-                    try {
-                        Toast.makeText(ctx, message, Toast.LENGTH_LONG).show()
-                    } catch (e: Exception) {
-                        e(e, "[UPDATE_NUDGE] Failed to show toast")
-                    }
-                }
-            }
-        }
-        // Show any pending update nudge now that we have an activity
-        if (activity != null && pendingNudgeVersion != null) {
+    /**
+     * Set a platform-agnostic UI notifier for showing messages (e.g., update nudges).
+     * Use this on all platforms (Android, iOS, Desktop) instead of setCurrentActivity.
+     */
+    fun setUiNotifier(notifier: UiNotifier?) {
+        this.uiNotifier = notifier
+        // Show any pending update nudge now that we have a notifier
+        if (notifier != null && pendingNudgeVersion != null) {
             showUpdateNudgeInternal(pendingNudgeVersion)
             pendingNudgeVersion = null
         }
     }
 
-    /**
-     * Set a platform-agnostic UI notifier for showing messages (e.g., update nudges).
-     * Use this on non-Android platforms (KMP/iOS) instead of setCurrentActivity.
-     */
-    fun setUiNotifier(notifier: UiNotifier?) {
-        this.uiNotifier = notifier
-    }
-    
     /**
      * Clear UI notifier to prevent memory leaks when activity is destroyed
      */
@@ -123,26 +98,30 @@ class AchievementManager private constructor(context: Context) {
      * Should be called when opening the credits/about screen.
      */
     fun showUpdateNudgeForCredits() {
-        d("[UPDATE_NUDGE_CREDITS] Called")
+        log.d("[UPDATE_NUDGE_CREDITS] Called")
         val latestAppVersion = storage.getString(KEY_PENDING_NUDGE_VERSION, null)
-        d("[UPDATE_NUDGE_CREDITS] Pending version from storage: %s", latestAppVersion)
+        log.d("[UPDATE_NUDGE_CREDITS] Pending version from storage: %s", latestAppVersion)
         if (latestAppVersion == null) {
-            d("[UPDATE_NUDGE_CREDITS] No pending version stored, checking fallback...")
+            log.d("[UPDATE_NUDGE_CREDITS] No pending version stored, checking fallback...")
             return
         }
-        val current = BuildConfig.VERSION_NAME
-        d("[UPDATE_NUDGE_CREDITS] Comparing: current=%s, latest=%s", current, latestAppVersion)
+        val current = PlatformInfo.getAppVersionName()
+        log.d("[UPDATE_NUDGE_CREDITS] Comparing: current=%s, latest=%s", current, latestAppVersion)
         if (compareVersions(current, latestAppVersion) >= 0) {
-            d("[UPDATE_NUDGE_CREDITS] App is up to date, not showing nudge")
+            log.d("[UPDATE_NUDGE_CREDITS] App is up to date, not showing nudge")
             return  // up to date
         }
-        i("[UPDATE_NUDGE_CREDITS] Showing nudge for version %s", latestAppVersion)
+        log.i("[UPDATE_NUDGE_CREDITS] Showing nudge for version %s", latestAppVersion)
         showUpdateNudgeInternal(latestAppVersion)
     }
 
     private fun showUpdateNudgeInternal(version: String?) {
-        val message = context.getString(R.string.update_available_nudge, version)
-        uiNotifier?.showMessage(message) ?: d("[UPDATE_NUDGE] No UiNotifier available, cannot show nudge: version=%s", version)
+        val message = stringProvider?.getString("update_available_nudge", version ?: "")
+        if (message != null) {
+            uiNotifier?.showMessage(message)
+        } else {
+            log.d("[UPDATE_NUDGE] No StringProvider/UiNotifier available, cannot show nudge: version=%s", version)
+        }
     }
 
     /**
@@ -271,7 +250,7 @@ class AchievementManager private constructor(context: Context) {
         storage.putBoolean("orphaned_keys_migrated", true)
 
         if (migratedCount > 0) {
-            d("[ACHIEVEMENTS] Migrated %d orphaned sync keys to correct format", migratedCount)
+            log.d("[ACHIEVEMENTS] Migrated %d orphaned sync keys to correct format", migratedCount)
         }
     }
 
@@ -306,7 +285,7 @@ class AchievementManager private constructor(context: Context) {
         speedrunRandomGamesUnder30s = storage.getInt(KEY_COUNTER_PREFIX + "speedrun_random_30s", 0)
         sameWallsMaxPositions = storage.getInt(KEY_COUNTER_PREFIX + "same_walls_max_positions", 0)
 
-        d(
+        log.d(
             "[ACHIEVEMENTS] Loaded state: %d achievements, %d unlocked",
             achievements.size, this.unlockedCount
         )
@@ -323,7 +302,7 @@ class AchievementManager private constructor(context: Context) {
     fun unlock(achievementId: String): Boolean {
         val achievement = achievements!!.get(achievementId)
         if (achievement == null) {
-            w("[ACHIEVEMENTS] Unknown achievement: %s", achievementId)
+            log.w("[ACHIEVEMENTS] Unknown achievement: %s", achievementId)
             return false
         }
 
@@ -340,7 +319,7 @@ class AchievementManager private constructor(context: Context) {
         storage.putBoolean(KEY_PREFIX_UNLOCKED + achievementId, true)
         storage.putLong(KEY_PREFIX_TIMESTAMP + achievementId, timestamp)
 
-        d("[ACHIEVEMENTS] Unlocked: %s", achievementId)
+        log.d("[ACHIEVEMENTS] Unlocked: %s", achievementId)
 
 
         // Sync to Google Play Games if enabled
@@ -371,45 +350,43 @@ class AchievementManager private constructor(context: Context) {
         try {
             val resourceKey = getPlayGamesResourceKey(localId)
             if (resourceKey == null) {
-                w("[ACHIEVEMENTS] Unknown achievement ID: %s", localId)
+                log.w("[ACHIEVEMENTS] Unknown achievement ID: %s", localId)
                 return null
             }
 
-            val resId = context.getResources()
-                .getIdentifier(resourceKey, "string", context.getPackageName())
-            if (resId == 0) {
-                w("[ACHIEVEMENTS] String resource not found: %s", resourceKey)
+            val value = stringProvider?.getString(resourceKey)
+            if (value == null) {
+                log.w("[ACHIEVEMENTS] String resource not found: %s", resourceKey)
                 return null
             }
 
-            return context.getString(resId)
+            return value
         } catch (e: Exception) {
-            e(e, "[ACHIEVEMENTS] Failed to get Play Games ID for: %s", localId)
+            log.e(e, "[ACHIEVEMENTS] Failed to get Play Games ID for: %s", localId)
             return null
         }
     }
 
     /**
      * Sync achievement unlock to Google Play Games Services.
-     * Only works if ENABLE_PLAY_GAMES is true and user is signed in.
+     * Only works if Play Games is enabled and a PlayGamesClient is set.
      */
     private fun syncToPlayGames(achievementId: String) {
-        if (!BuildConfig.ENABLE_PLAY_GAMES) {
+        if (!PlatformInfo.isPlayGamesEnabled()) {
             return
         }
 
-        val activity = if (currentActivity != null) currentActivity!!.get() else null
-        if (activity == null) {
-            d("[ACHIEVEMENTS] Cannot sync to Play Games - no activity set")
+        val client = playGamesClient
+        if (client == null) {
+            log.d("[ACHIEVEMENTS] Cannot sync to Play Games - no PlayGamesClient set")
             return
         }
 
         try {
-            val playGames = PlayGamesManager.getInstance(context)
-            playGames.unlockAchievement(activity, achievementId)
-            d("[ACHIEVEMENTS] Synced to Play Games: %s", achievementId)
+            client.unlockAchievement(achievementId)
+            log.d("[ACHIEVEMENTS] Synced to Play Games: %s", achievementId)
         } catch (e: Exception) {
-            e(e, "[ACHIEVEMENTS] Failed to sync to Play Games: %s", achievementId)
+            log.e(e, "[ACHIEVEMENTS] Failed to sync to Play Games: %s", achievementId)
         }
     }
 
@@ -452,7 +429,7 @@ class AchievementManager private constructor(context: Context) {
     ) {
         // Log the levelId for debugging
 
-        d(
+        log.d(
             "[ACHIEVEMENTS] onLevelCompleted called: levelId=%d, levelsCompleted=%d->%d, playerMoves=%d, optimalMoves=%d, hintsUsed=%d, stars=%d, time=%dms",
             levelId,
             levelsCompleted,
@@ -466,7 +443,7 @@ class AchievementManager private constructor(context: Context) {
 
         val uniqueCompletedLevelsBefore = this.uniqueCompletedLevelCount
         if (uniqueCompletedLevelsBefore <= levelsCompleted) {
-            d(
+            log.d(
                 "[ACHIEVEMENTS][LEVEL] Skipping duplicate level completion for levelId=%d (history count=%d, stored=%d)",
                 levelId, uniqueCompletedLevelsBefore, levelsCompleted
             )
@@ -492,7 +469,7 @@ class AchievementManager private constructor(context: Context) {
         if (optimalMoves > 0 && playerMoves == optimalMoves) {
             perfectSolutions++
             saveCounter("perfect_solutions", perfectSolutions)
-            d(
+            log.d(
                 "[ACHIEVEMENTS][PERFECT] Level %d: perfect solution counted! total=%d (playerMoves=%d == optimalMoves=%d)",
                 levelId, perfectSolutions, playerMoves, optimalMoves
             )
@@ -500,12 +477,12 @@ class AchievementManager private constructor(context: Context) {
             unlockIfComplete("perfect_solutions_10")
             unlockIfComplete("perfect_solutions_50")
         } else if (optimalMoves <= 0) {
-            w(
+            log.w(
                 "[ACHIEVEMENTS][PERFECT] Level %d: optimalMoves=%d (solver not ready?), perfect solution NOT counted!",
                 levelId, optimalMoves
             )
         } else {
-            d(
+            log.d(
                 "[ACHIEVEMENTS][PERFECT] Level %d: not perfect (playerMoves=%d, optimalMoves=%d), total=%d",
                 levelId, playerMoves, optimalMoves, perfectSolutions
             )
@@ -540,7 +517,7 @@ class AchievementManager private constructor(context: Context) {
         if (timeMs < 30000) unlock("speedrun_under_30s")
         if (timeMs < 10000) unlock("speedrun_under_10s")
 
-        d(
+        log.d(
             "[ACHIEVEMENTS] Level %d completed: moves=%d/%d, hints=%d, stars=%d, time=%dms",
             levelId, playerMoves, optimalMoves, hintsUsed, stars, timeMs
         )
@@ -573,10 +550,10 @@ class AchievementManager private constructor(context: Context) {
         var hintsUsed = hintsUsed
         if (hintUsedInCurrentGame) {
             hintsUsed = max(hintsUsed, 1) // Ensure hintsUsed reflects that a hint was used
-            d("[ACHIEVEMENTS] Hint was used during this game session")
+            log.d("[ACHIEVEMENTS] Hint was used during this game session")
         }
 
-        d(
+        log.d(
             "[ACHIEVEMENTS] onRandomGameCompleted: isFirstCompletion=%b, qualifiesForNoHints=%b, hintsUsed=%d",
             isFirstCompletion, qualifiesForNoHints, hintsUsed
         )
@@ -605,14 +582,14 @@ class AchievementManager private constructor(context: Context) {
                 impossibleModeStreak = 0
                 saveCounter("impossible_mode_streak", 0)
             }
-            d(
+            log.d(
                 "[ACHIEVEMENTS] Impossible mode game counted (optimalMoves=%d >= 17, isFirstCompletion=true)",
                 optimalMoves
             )
         } else if (isImpossibleMode && optimalMoves >= 17 && !isFirstCompletion) {
-            d("[ACHIEVEMENTS] Impossible mode game NOT counted - map already completed before")
+            log.d("[ACHIEVEMENTS] Impossible mode game NOT counted - map already completed before")
         } else {
-            d(
+            log.d(
                 "[ACHIEVEMENTS] Impossible mode game NOT counted (optimalMoves=%d < 17), isImpossibleMode=%b",
                 optimalMoves,
                 isImpossibleMode
@@ -629,11 +606,11 @@ class AchievementManager private constructor(context: Context) {
                 unlock("solution_30_plus_moves")
             }
         } else if (!isFirstCompletion) {
-            d("[ACHIEVEMENTS] Solution length achievements skipped - map already completed before")
+            log.d("[ACHIEVEMENTS] Solution length achievements skipped - map already completed before")
         } else if (!qualifiesForNoHints) {
-            d("[ACHIEVEMENTS] Solution length achievements skipped - hints were used")
+            log.d("[ACHIEVEMENTS] Solution length achievements skipped - hints were used")
         } else {
-            d(
+            log.d(
                 "[ACHIEVEMENTS] Solution length achievements skipped - not optimal (playerMoves=%d, optimalMoves=%d)",
                 playerMoves,
                 optimalMoves
@@ -675,25 +652,25 @@ class AchievementManager private constructor(context: Context) {
             unlockIfComplete("perfect_random_games_streak_5")
             unlockIfComplete("perfect_random_games_streak_10")
             unlockIfComplete("perfect_random_games_streak_20")
-            d(
+            log.d(
                 "[ACHIEVEMENTS] Perfect game on unique map - total: %d, streak: %d",
                 perfectRandomGames,
                 perfectRandomGamesStreak
             )
         } else if (playerMoves == optimalMoves && !isFirstCompletion) {
-            d("[ACHIEVEMENTS] Perfect game NOT counted - map already completed before")
+            log.d("[ACHIEVEMENTS] Perfect game NOT counted - map already completed before")
         } else {
             // Reset streak when non-optimal
             perfectRandomGamesStreak = 0
             saveCounter("perfect_random_games_streak", perfectRandomGamesStreak)
-            d("[ACHIEVEMENTS] Non-optimal game - perfect streak reset to 0")
+            log.d("[ACHIEVEMENTS] Non-optimal game - perfect streak reset to 0")
         }
 
 
         // Perfect solution with no hints (10+ moves optimal) - only on FIRST completion
         if (playerMoves == optimalMoves && qualifiesForNoHints && optimalMoves >= 10 && isFirstCompletion) {
             unlock("perfect_no_hints_random_1")
-            d(
+            log.d(
                 "[ACHIEVEMENTS] Perfect no hints achievement unlocked - optimal: %d moves, qualifiesForNoHints=true",
                 optimalMoves
             )
@@ -714,7 +691,7 @@ class AchievementManager private constructor(context: Context) {
             saveCounter("no_hint_random_games", noHintRandomGames)
             unlockIfComplete("no_hints_streak_random_10")
             unlockIfComplete("no_hints_streak_random_50")
-            d(
+            log.d(
                 "[ACHIEVEMENTS] No hints on unique map - total: %d, streak: %d",
                 noHintRandomGamesTotal,
                 noHintRandomGames
@@ -723,22 +700,22 @@ class AchievementManager private constructor(context: Context) {
             // Reset streak counter when hints were used (on this or previous completion)
             noHintRandomGames = 0
             saveCounter("no_hint_random_games", noHintRandomGames)
-            d(
+            log.d(
                 "[ACHIEVEMENTS] Hints used - no_hint streak reset to 0 (total stays: %d)",
                 noHintRandomGamesTotal
             )
         } else if (!isFirstCompletion) {
-            d("[ACHIEVEMENTS] No hints NOT counted - map already completed before")
+            log.d("[ACHIEVEMENTS] No hints NOT counted - map already completed before")
         }
 
 
         // Same-walls achievements: count unique position-signatures sharing the same wall layout
         if (wallSignature != null && !wallSignature.isEmpty()) {
             val sameWallEntries =
-                findByWallSignature(AndroidStorage.getInstance(context), wallSignature)
+                findByWallSignature(storage, wallSignature)
             val uniquePositions =
                 sameWallEntries.size // each entry = distinct positionSignature
-            d(
+            log.d(
                 "[ACHIEVEMENTS] same_walls: wallSig=%s uniquePositions=%d",
                 wallSignature.substring(0, min(30, wallSignature.length)), uniquePositions
             )
@@ -760,7 +737,7 @@ class AchievementManager private constructor(context: Context) {
             unlockIfComplete("speedrun_random_5_games_under_30s")
         }
 
-        d(
+        log.d(
             "[ACHIEVEMENTS] Random game completed: moves=%d/%d, hints=%d, time=%dms, impossible=%s, robots=%d, targets=%d/%d",
             playerMoves,
             optimalMoves,
@@ -796,7 +773,7 @@ class AchievementManager private constructor(context: Context) {
 
         val isNewTouch = robotTouchPairs.add(touchPair)
         if (isNewTouch) {
-            d(
+            log.d(
                 "[ACHIEVEMENTS] Robot %d touched robot %d (pair: %s)",
                 movingRobotIndex,
                 hitRobotIndex,
@@ -811,12 +788,12 @@ class AchievementManager private constructor(context: Context) {
 
         if (robotTouchPairs.size >= requiredPairs) {
             unlock("gimme_five")
-            d(
+            log.d(
                 "[ACHIEVEMENTS] All %d robots have touched each other (%d pairs) - gimme_five unlocked!",
                 robotCount, robotTouchPairs.size
             )
         } else {
-            d(
+            log.d(
                 "[ACHIEVEMENTS] Robot touch progress: %d/%d pairs",
                 robotTouchPairs.size,
                 requiredPairs
@@ -855,14 +832,14 @@ class AchievementManager private constructor(context: Context) {
         unlockIfComplete("daily_login_7")
         unlockIfComplete("daily_login_30")
 
-        d("[ACHIEVEMENTS] New game started - session flags reset")
+        log.d("[ACHIEVEMENTS] New game started - session flags reset")
     }
 
     /**
      * For testing only This should only be used in unit tests.
      */
     fun setTestMode(enabled: Boolean) {
-        d("[ACHIEVEMENTS] Test mode enabled")
+        log.d("[ACHIEVEMENTS] Test mode enabled")
     }
 
     /**
@@ -871,7 +848,7 @@ class AchievementManager private constructor(context: Context) {
      */
     fun onHintUsed() {
         hintUsedInCurrentGame = true
-        d("[ACHIEVEMENTS] Hint used in current game session")
+        log.d("[ACHIEVEMENTS] Hint used in current game session")
     }
 
 
@@ -900,20 +877,20 @@ class AchievementManager private constructor(context: Context) {
      * Called on daily login - only updates streak counter, doesn't unlock achievements
      * Achievements are unlocked when player starts a game (onNewGameStarted)
      */
-    fun onDailyLogin(streakDays: Int) {
+    override fun onDailyLogin(streakDays: Int) {
         dailyLoginStreak = streakDays
         saveCounter("daily_login_streak", dailyLoginStreak)
-        d("[ACHIEVEMENT] Daily login recorded - streak: %d days", streakDays)
+        log.d("[ACHIEVEMENT] Daily login recorded - streak: %d days", streakDays)
     }
 
     /**
      * Update daily login streak from server sync - keeps AchievementManager in sync with StreakManager
      */
-    fun updateDailyLoginStreak(streakDays: Int) {
+    override fun updateDailyLoginStreak(streakDays: Int) {
         val beforeStreak = dailyLoginStreak
         dailyLoginStreak = streakDays
         saveCounter("daily_login_streak", dailyLoginStreak)
-        d(
+        log.d(
             "[ACHIEVEMENT] Daily login streak updated from sync - streak: %d days (was: %d)",
             streakDays,
             beforeStreak
@@ -927,7 +904,7 @@ class AchievementManager private constructor(context: Context) {
         val streakDays = dailyLoginStreak
         unlockIfComplete("daily_login_7")
         unlockIfComplete("daily_login_30")
-        d(
+        log.d(
             "[ACHIEVEMENT] Checked Login Streak achievements at game start - streak: %d days",
             streakDays
         )
@@ -936,7 +913,7 @@ class AchievementManager private constructor(context: Context) {
     /**
      * Called when player returns after inactivity
      */
-    fun onComebackPlayer(daysAway: Int) {
+    override fun onComebackPlayer(daysAway: Int) {
         if (daysAway >= 30) {
             unlock("comeback_player")
         }
@@ -968,7 +945,7 @@ class AchievementManager private constructor(context: Context) {
         for (achievement in achievements!!.values.filterNotNull()) {
             unlock(achievement.id!!)
         }
-        d("[ACHIEVEMENTS] All achievements unlocked")
+        log.d("[ACHIEVEMENTS] All achievements unlocked")
     }
 
     /**
@@ -981,7 +958,7 @@ class AchievementManager private constructor(context: Context) {
             achievement.setUnlocked(false)
             achievement.unlockedTimestamp = 0
             storage.putBoolean(achievementId, false)
-            d("[ACHIEVEMENTS] Achievement locked: %s", achievementId)
+            log.d("[ACHIEVEMENTS] Achievement locked: %s", achievementId)
         }
     }
 
@@ -1009,10 +986,10 @@ class AchievementManager private constructor(context: Context) {
     }
 
     private val uniqueCompletedLevelCount: Int
-        get() = getUniqueCompletedLevelCount(AndroidStorage.getInstance(context))
+        get() = getUniqueCompletedLevelCount(storage)
 
     private val uniqueThreeStarLevelCount: Int
-        get() = getUniqueThreeStarLevelCount(AndroidStorage.getInstance(context))
+        get() = getUniqueThreeStarLevelCount(storage)
 
     /**
      * Sync achievement unlock to the server after unlock.
@@ -1024,97 +1001,95 @@ class AchievementManager private constructor(context: Context) {
      * Only syncs if user is logged in.
      */
     fun syncToServer() {
-        val apiClient = RoboyardApiClient.getInstance(context)
-        if (!apiClient.isLoggedIn) {
-            d("[ACHIEVEMENT_SYNC] Not logged in, skipping sync")
+        val client = syncClient
+        if (client == null || !client.isLoggedIn) {
+            log.d("[ACHIEVEMENT_SYNC] Not logged in or no sync client, skipping sync")
             return
         }
 
         try {
             // Build achievements array
-            val achievementsArray = JSONArray()
+            val achievementsArray = JsonArray()
             for (achievement in achievements!!.values.filterNotNull()) {
-                val achievementJson = JSONObject()
-                achievementJson.put("id", achievement.id)
-                achievementJson.put("unlocked", achievement.isUnlocked())
-                achievementJson.put("unlocked_timestamp", achievement.unlockedTimestamp)
-                achievementsArray.put(achievementJson)
+                val achievementJson = JsonObject()
+                achievementJson.addProperty("id", achievement.id)
+                achievementJson.addProperty("unlocked", achievement.isUnlocked())
+                achievementJson.addProperty("unlocked_timestamp", achievement.unlockedTimestamp)
+                achievementsArray.add(achievementJson)
             }
 
 
             // Build stats object
-            val stats = JSONObject()
-            stats.put("total_games_solved", levelsCompleted + perfectRandomGames)
-            stats.put("total_games_solved_no_hints", noHintRandomGamesTotal)
-            stats.put("total_perfect_solutions", perfectSolutions + perfectRandomGames)
+            val stats = JsonObject()
+            stats.addProperty("total_games_solved", levelsCompleted + perfectRandomGames)
+            stats.addProperty("total_games_solved_no_hints", noHintRandomGamesTotal)
+            stats.addProperty("total_perfect_solutions", perfectSolutions + perfectRandomGames)
 
 
             // Include streak data for bidirectional sync
-            val streakManager = StreakManager.getInstance(context)
-            stats.put("daily_login_streak", streakManager.currentStreak)
-            stats.put("last_login_date", streakManager.lastLoginDateString)
-            stats.put("last_streak_date", streakManager.lastLoginDateString)
-            stats.put("longest_streak", streakManager.longestStreak)
-            stats.put("longest_streak_date", streakManager.longestStreakDate)
-            stats.put("timezone", TimeZone.getDefault().getID())
+            val streakManager = streakDataProvider
+            if (streakManager != null) {
+                stats.addProperty("daily_login_streak", streakManager.currentStreak)
+                stats.addProperty("last_login_date", streakManager.lastLoginDateString)
+                stats.addProperty("last_streak_date", streakManager.lastLoginDateString)
+                stats.addProperty("longest_streak", streakManager.longestStreak)
+                stats.addProperty("longest_streak_date", streakManager.longestStreakDate)
+            }
+            stats.addProperty("timezone", DateUtils.getTimezoneId())
 
             // Device / app metadata for server-side rankings and analytics
             // system_language: TRUE device locale, bypassing the app-level Locale override done
             //                  by RoboyardApplication.updateAppContextLocale().
-            //                  Reads from Resources.getSystem() which is not affected by app overrides.
             // app_language:    user-chosen language preference from Settings (Preferences.appLanguage).
-            val systemLanguage: String? = systemLanguageTag
+            val systemLanguage: String? = PlatformInfo.getSystemLanguageTag()
             val appLanguage = Preferences.appLanguage
-            val appVersion = BuildConfig.VERSION_NAME
-            val androidVersion = Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")"
-            if (systemLanguage != null) stats.put("system_language", systemLanguage)
-            if (appLanguage != null && !appLanguage.isEmpty()) stats.put(
+            val appVersion = PlatformInfo.getAppVersionName()
+            val osVersion = PlatformInfo.getOsVersionString()
+            if (systemLanguage != null) stats.addProperty("system_language", systemLanguage)
+            if (appLanguage != null && !appLanguage.isEmpty()) stats.addProperty(
                 "app_language",
                 appLanguage
             )
-            stats.put("app_version", appVersion)
-            stats.put("android_version", androidVersion)
+            stats.addProperty("app_version", appVersion)
+            stats.addProperty("android_version", osVersion)
 
-            d(
-                "[ACHIEVEMENT_SYNC_UP] Uploading: streak=%d, last_login_date=%s, longest=%d, timezone=%s, sysLang=%s, appLang=%s, app=%s, android=%s",
-                streakManager.currentStreak, streakManager.lastLoginDateString,
-                streakManager.longestStreak, TimeZone.getDefault().getID(),
-                systemLanguage, appLanguage, appVersion, androidVersion
+            log.d(
+                "[ACHIEVEMENT_SYNC_UP] Uploading: streak=%s, last_login_date=%s, longest=%s, timezone=%s, sysLang=%s, appLang=%s, app=%s, android=%s",
+                streakManager?.currentStreak, streakManager?.lastLoginDateString,
+                streakManager?.longestStreak, DateUtils.getTimezoneId(),
+                systemLanguage, appLanguage, appVersion, osVersion
             )
 
 
             // Send to server
-            apiClient.syncAchievements(
-                achievementsArray,
-                stats,
-                object : ApiCallback<AchievementSyncResult?> {
-                    override fun onSuccess(result: AchievementSyncResult?) {
-                        d(
+            client.syncAchievements(
+                achievementsArray.toString(),
+                stats.toString(),
+                object : AchievementSyncCallback {
+                    override fun onSuccess(syncedCount: Int, newAchievements: Int, latestAppVersion: String?) {
+                        log.d(
                             "[ACHIEVEMENT_SYNC] Sync successful: %d synced, %d new achievements",
-                            result?.syncedCount, result?.newAchievements
+                            syncedCount, newAchievements
                         )
                         // Optional "update available" nudge if server reports a newer version
-                        d("[UPDATE_NUDGE] Latest app version: %s", result?.latestAppVersion)
-                        if (result?.latestAppVersion != null) {
-                            maybeShowUpdateNudge(result.latestAppVersion)
+                        log.d("[UPDATE_NUDGE] Latest app version: %s", latestAppVersion)
+                        if (latestAppVersion != null) {
+                            maybeShowUpdateNudge(latestAppVersion)
                         }
                     }
 
                     override fun onError(error: String?) {
-                        e("[ACHIEVEMENT_SYNC] Sync failed: %s", error)
+                        log.e("[ACHIEVEMENT_SYNC] Sync failed: %s", error)
                     }
                 })
-        } catch (e: JSONException) {
-            e(e, "[ACHIEVEMENT_SYNC] Failed to build sync request")
+        } catch (e: Exception) {
+            log.e(e, "[ACHIEVEMENT_SYNC] Failed to build sync request")
         }
     }
 
     private var pendingNudgeVersion: String? = null
 
     init {
-        val appContext = context.getApplicationContext()
-        this.context = appContext
-        this.storage = AndroidStorage.getInstance(appContext)
         this.achievements = all
         loadState()
     }
@@ -1124,19 +1099,19 @@ class AchievementManager private constructor(context: Context) {
      * show a Toast nudge — but only once per (version, 24h) window to avoid spam.
      */
     private fun maybeShowUpdateNudge(latestAppVersion: String?) {
-        val current = BuildConfig.VERSION_NAME
-        d("[UPDATE_NUDGE] Checking: current=%s, latest=%s", current, latestAppVersion)
+        val current = PlatformInfo.getAppVersionName()
+        log.d("[UPDATE_NUDGE] Checking: current=%s, latest=%s", current, latestAppVersion)
 
         if (latestAppVersion == null || latestAppVersion.isEmpty()) {
-            d("[UPDATE_NUDGE] Skipping: latestAppVersion is null or empty")
+            log.d("[UPDATE_NUDGE] Skipping: latestAppVersion is null or empty")
             return
         }
 
         val cmp: Int = compareVersions(current, latestAppVersion)
-        d("[UPDATE_NUDGE] Version compare result: %d (negative=update available)", cmp)
+        log.d("[UPDATE_NUDGE] Version compare result: %d (negative=update available)", cmp)
 
         if (cmp >= 0) {
-            d("[UPDATE_NUDGE] Skipping: current >= latest (no update needed)")
+            log.d("[UPDATE_NUDGE] Skipping: current >= latest (no update needed)")
             return  // we're up to date or ahead (dev builds)
         }
 
@@ -1146,18 +1121,18 @@ class AchievementManager private constructor(context: Context) {
         val elapsed = now - lastNudgeMs
         val sameVersion = latestAppVersion == lastNudgedVersion
 
-        d(
+        log.d(
             "[UPDATE_NUDGE] Cooldown check: lastNudgedVersion=%s, sameVersion=%b, elapsed=%d ms, cooldown=%d ms",
             lastNudgedVersion, sameVersion, elapsed, NUDGE_COOLDOWN_MS
         )
 
         // Always store the latest version for credits page (independent of cooldown)
         storage.putString(KEY_PENDING_NUDGE_VERSION, latestAppVersion)
-        d("[UPDATE_NUDGE] Stored pending version for credits: %s", latestAppVersion)
+        log.d("[UPDATE_NUDGE] Stored pending version for credits: %s", latestAppVersion)
 
         // Check cooldown - only affects automatic nudge at app start, not credits page
         if (sameVersion && elapsed < NUDGE_COOLDOWN_MS) {
-            d(
+            log.d(
                 "[UPDATE_NUDGE] Cooldown active, storing for later. remaining=%d ms",
                 NUDGE_COOLDOWN_MS - elapsed
             )
@@ -1165,14 +1140,13 @@ class AchievementManager private constructor(context: Context) {
             return
         }
 
-        i("[UPDATE_NUDGE] Conditions met - will show nudge for version %s", latestAppVersion)
+        log.i("[UPDATE_NUDGE] Conditions met - will show nudge for version %s", latestAppVersion)
         storage.putString(KEY_LAST_NUDGED_VERSION, latestAppVersion)
         storage.putLong(KEY_LAST_NUDGE_MS, now)
 
-        val act = if (currentActivity != null) currentActivity!!.get() else null
-        if (act == null) {
-            d(
-                "[UPDATE_NUDGE] No activity available, storing pending nudge for version=%s",
+        if (uiNotifier == null) {
+            log.d(
+                "[UPDATE_NUDGE] No UiNotifier available, storing pending nudge for version=%s",
                 latestAppVersion
             )
             pendingNudgeVersion = latestAppVersion
@@ -1197,32 +1171,32 @@ class AchievementManager private constructor(context: Context) {
      * 
      * @param callback Optional callback for sync result
      */
-    fun syncFromServer(callback: ApiCallback<Int?>?) {
-        val apiClient = RoboyardApiClient.getInstance(context)
-        if (!apiClient.isLoggedIn) {
-            d("[ACHIEVEMENT_SYNC_DOWN] Not logged in, skipping download")
-            if (callback != null) callback.onError("Not logged in")
+    fun syncFromServer(callback: AchievementSyncCallback? = null) {
+        val client = syncClient
+        if (client == null || !client.isLoggedIn) {
+            log.d("[ACHIEVEMENT_SYNC_DOWN] Not logged in or no sync client, skipping download")
+            callback?.onError("Not logged in")
             return
         }
 
-        d("[ACHIEVEMENT_SYNC_DOWN] Starting achievement download from server")
+        log.d("[ACHIEVEMENT_SYNC_DOWN] Starting achievement download from server")
 
-        apiClient.fetchAchievements(object : ApiCallback<AchievementFetchResult?> {
-            override fun onSuccess(result: AchievementFetchResult?) {
+        client.fetchAchievements(object : AchievementFetchCallback {
+            override fun onSuccess(achievementsJson: String, statsJson: String?) {
                 var restoredCount = 0
 
                 try {
-                    val serverAchievements = result?.achievements
-                    d(
+                    val serverAchievements = JsonParser.parseString(achievementsJson).asJsonArray
+                    log.d(
                         "[ACHIEVEMENT_SYNC_DOWN] Received %d achievements from server",
-                        serverAchievements!!.length()
+                        serverAchievements.size()
                     )
 
-                    for (i in 0..<serverAchievements.length()) {
-                        val serverAchievement = serverAchievements.getJSONObject(i)
-                        val id = serverAchievement.getString("id")
-                        val unlocked = serverAchievement.optBoolean("unlocked", false)
-                        val unlockedAt = serverAchievement.optString("unlocked_at", null)
+                    for (i in 0..<serverAchievements.size()) {
+                        val serverAchievement = serverAchievements[i].asJsonObject
+                        val id = serverAchievement.get("id").asString
+                        val unlocked = if (serverAchievement.has("unlocked")) serverAchievement.get("unlocked").asBoolean else false
+                        val unlockedAt = if (serverAchievement.has("unlocked_at") && !serverAchievement.get("unlocked_at").isJsonNull) serverAchievement.get("unlocked_at").asString else null
 
                         if (!unlocked) continue
 
@@ -1230,7 +1204,7 @@ class AchievementManager private constructor(context: Context) {
                         // Check if we have this achievement locally
                         val localAchievement = achievements!!.get(id)
                         if (localAchievement == null) {
-                            d("[ACHIEVEMENT_SYNC_DOWN] Unknown achievement ID from server: %s", id)
+                            log.d("[ACHIEVEMENT_SYNC_DOWN] Unknown achievement ID from server: %s", id)
                             continue
                         }
 
@@ -1239,16 +1213,9 @@ class AchievementManager private constructor(context: Context) {
                         if (!localAchievement.isUnlocked()) {
                             var timestamp: Long = 0
                             if (unlockedAt != null && !unlockedAt.isEmpty()) {
-                                try {
-                                    // Parse ISO 8601 timestamp
-                                    val sdf =
-                                        SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.US)
-                                    val date = sdf.parse(unlockedAt)
-                                    if (date != null) {
-                                        timestamp = date.getTime()
-                                    }
-                                } catch (e: Exception) {
-                                    w(
+                                timestamp = DateUtils.parseTimestampIso(unlockedAt)
+                                if (timestamp == 0L) {
+                                    log.w(
                                         "[ACHIEVEMENT_SYNC_DOWN] Could not parse timestamp for %s: %s",
                                         id,
                                         unlockedAt
@@ -1266,61 +1233,54 @@ class AchievementManager private constructor(context: Context) {
                             storage.putBoolean(KEY_PREFIX_UNLOCKED + id, true)
                             storage.putLong(
                                 KEY_PREFIX_TIMESTAMP + id,
-                                    localAchievement.unlockedTimestamp
-                                )
+                                localAchievement.unlockedTimestamp
+                            )
 
                             restoredCount++
-                            d("[ACHIEVEMENT_SYNC_DOWN] Restored achievement: %s", id)
+                            log.d("[ACHIEVEMENT_SYNC_DOWN] Restored achievement: %s", id)
                         }
                     }
 
-                    d(
+                    log.d(
                         "[ACHIEVEMENT_SYNC_DOWN] Download complete: %d achievements restored",
                         restoredCount
                     )
 
 
                     // Restore streak data from server (bidirectional)
-                    if (result.stats != null) {
-                        val serverStreak = result.stats.optInt("daily_login_streak", 0)
-                        val serverLongestStreak = result.stats.optInt("longest_streak", 0)
+                    if (statsJson != null) {
+                        val stats = JsonParser.parseString(statsJson).asJsonObject
+                        val serverStreak = if (stats.has("daily_login_streak")) stats.get("daily_login_streak").asInt else 0
+                        val serverLongestStreak = if (stats.has("longest_streak")) stats.get("longest_streak").asInt else 0
                         // Use last_login_date with fallback to last_streak_date (for users who synced before last_login_date was introduced)
-                        var serverLastLoginDate =
-                            if (result.stats.isNull("last_login_date")) null else result.stats.optString(
-                                "last_login_date",
-                                null
-                            )
-                        if (serverLastLoginDate == null) {
-                            serverLastLoginDate =
-                                if (result.stats.isNull("last_streak_date")) null else result.stats.optString(
-                                    "last_streak_date",
-                                    null
-                                )
+                        var serverLastLoginDate: String? = null
+                        if (stats.has("last_login_date") && !stats.get("last_login_date").isJsonNull) {
+                            serverLastLoginDate = stats.get("last_login_date").asString
                         }
-                        val serverLongestStreakDate =
-                            if (result.stats.isNull("longest_streak_date")) null else result.stats.optString(
-                                "longest_streak_date",
-                                null
-                            )
-                        StreakManager.getInstance(context).restoreFromServer(
+                        if (serverLastLoginDate == null && stats.has("last_streak_date") && !stats.get("last_streak_date").isJsonNull) {
+                            serverLastLoginDate = stats.get("last_streak_date").asString
+                        }
+                        val serverLongestStreakDate: String? =
+                            if (stats.has("longest_streak_date") && !stats.get("longest_streak_date").isJsonNull) stats.get("longest_streak_date").asString else null
+                        streakDataProvider?.restoreFromServer(
                             serverStreak,
                             serverLastLoginDate,
                             serverLongestStreak,
                             serverLongestStreakDate
                         )
                     }
-                } catch (e: JSONException) {
-                    e(e, "[ACHIEVEMENT_SYNC_DOWN] Error parsing server achievements")
-                    if (callback != null) callback.onError("Error parsing achievements: " + e.message)
+                } catch (e: Exception) {
+                    log.e(e, "[ACHIEVEMENT_SYNC_DOWN] Error parsing server achievements")
+                    callback?.onError("Error parsing achievements: " + e.message)
                     return
                 }
 
-                if (callback != null) callback.onSuccess(restoredCount)
+                callback?.onSuccess(restoredCount, 0, null)
             }
 
             override fun onError(error: String?) {
-                e("[ACHIEVEMENT_SYNC_DOWN] Download failed: %s", error)
-                if (callback != null) callback.onError(error)
+                log.e("[ACHIEVEMENT_SYNC_DOWN] Download failed: %s", error)
+                callback?.onError(error)
             }
         })
     }
@@ -1335,44 +1295,12 @@ class AchievementManager private constructor(context: Context) {
 
         @JvmStatic
         @Synchronized
-        fun getInstance(context: Context): AchievementManager {
+        fun getInstance(storage: PlatformStorage, stringProvider: StringProvider? = null, uiNotifier: UiNotifier? = null): AchievementManager {
             if (instance == null) {
-                instance = AchievementManager(context)
+                instance = AchievementManager(storage, stringProvider, uiNotifier)
             }
             return instance!!
         }
-
-        private val systemLanguageTag: String?
-            /**
-             * Get the true device/system language tag, ignoring any app-level Locale override
-             * done via `Locale.setDefault(...)` (e.g. in RoboyardApplication.updateAppContextLocale()).
-             * Uses Resources.getSystem() which is backed by the framework config, not the app config.
-             */
-            get() {
-                try {
-                    val sysConfig =
-                        Resources.getSystem().getConfiguration()
-                    val locale: Locale?
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        val locales = sysConfig.getLocales()
-                        if (locales == null || locales.isEmpty()) return null
-                        locale = locales.get(0)
-                    } else {
-                        locale = sysConfig.locale
-                    }
-                    if (locale == null) return null
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        return locale.toLanguageTag()
-                    }
-                    // Fallback for very old API levels — simple "lang-REGION" join
-                    val lang = locale.getLanguage()
-                    val country = locale.getCountry()
-                    return if (country == null || country.isEmpty()) lang else (lang + "-" + country)
-                } catch (e: Exception) {
-                    w(e, "[LOCALE] Failed to read system language tag")
-                    return null
-                }
-            }
 
         // Storage key for dedup of the update nudge: we store "last_nudged_version"
         private const val KEY_LAST_NUDGED_VERSION = "last_nudged_version"

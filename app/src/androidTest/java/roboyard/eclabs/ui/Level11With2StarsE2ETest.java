@@ -24,6 +24,7 @@ import org.junit.runner.RunWith;
 import roboyard.eclabs.R;
 import roboyard.ui.activities.MainActivity;
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 import roboyard.logic.core.GameElement;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.GameSolution;
@@ -52,7 +53,7 @@ public class Level11With2StarsE2ETest {
     @Before
     public void setUp() throws InterruptedException {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        achievementManager = AchievementManager.getInstance(context);
+        achievementManager = AchievementManagerFactory.getInstance(context);
         achievementManager.resetAll();
         Timber.d("[UNITTESTS][E2E_2STARS] ========== TEST STARTED ==========");
         

@@ -91,65 +91,25 @@ import roboyard.logic.core.GameLogic
 import roboyard.logic.core.Preferences
 import roboyard.logic.core.calculateStars
 import roboyard.logic.core.saveLevelCompletion
+import roboyard.logic.core.formatTime
+import roboyard.logic.core.formatElapsedTime
+import roboyard.logic.core.buildGameWinMessage
+import roboyard.logic.core.isBoardSolved
+import roboyard.logic.core.moveRobotOnBoard
+import roboyard.logic.core.serializeBoard
+import roboyard.logic.core.deserializeBoard
 import roboyard.logic.storage.PlatformStorage
 
 // Compose App Version - increment after each session
 const val COMPOSE_APP_VERSION = "v1.9"
 
-// Helper function to format time as MM:SS
-fun formatTime(elapsedTimeMs: Long): String {
-    val seconds = (elapsedTimeMs / 1000) % 60
-    val minutes = (elapsedTimeMs / 1000) / 60
-    return String.format("%d:%02d", minutes, seconds)
-}
-
-// Calculate star rating based on player performance
-// Star allocation rules (from HOW-TO-PLAY.md):
-// - 3 stars: Complete the level in optimal moves
-// - 2 stars: Complete the level within optimal moves + 1
-// - 1 star: Complete the level (any number of moves)
-fun calculateStars(playerMoves: Int, optimalMoves: Int, hintsUsed: Int): Int {
-    if (optimalMoves <= 0) {
-        return 1 // No optimal solution available, but level completed
-    }
-
-    // Calculate stars based on the rules
-    if (playerMoves == optimalMoves) {
-        // Optimal solution
-        return 3
-    } else if (playerMoves <= optimalMoves + 1) {
-        // Within optimal moves + 1
-        return 2
-    } else {
-        // Any number of moves (level completed)
-        return 1
-    }
-}
-
-// Helper function to handle game win logic (DRY)
+// Helper function to handle game win logic (DRY - delegates to shared buildGameWinMessage)
 fun handleGameWin(
     moveCount: Int,
     isLevelGame: Boolean = false,
     optimalMoves: Int? = null,
     stars: Int = 0
-): String {
-    val baseMessage = if (isLevelGame) {
-        "Level completed in $moveCount moves!"
-    } else {
-        "Game completed in $moveCount moves!"
-    }
-    
-    // Add optimal moves information if available
-    if (optimalMoves != null) {
-        if (moveCount == optimalMoves) {
-            return "$baseMessage Perfect solution! Stars: $stars"
-        } else {
-            return "$baseMessage (Optimal: $optimalMoves moves) Stars: $stars"
-        }
-    }
-    
-    return "$baseMessage Stars: $stars"
-}
+): String = buildGameWinMessage(moveCount, isLevelGame, optimalMoves, stars)
 
 @Composable
 fun GameScreen(
@@ -855,7 +815,7 @@ fun GameScreen(
                 onRobotMove = { robotIndex, direction ->
                 if (!gameWon) {
                     val oldPos = currentBoard.robotPositions[robotIndex]
-                    val newBoard = moveRobot(currentBoard, robotIndex, direction)
+                    val newBoard = moveRobotOnBoard(currentBoard, robotIndex, direction)
                     if (newBoard != null) {
                         // Save current board to history before move (for undo)
                         boardHistory.add(Board.Companion.createClone(currentBoard))
@@ -921,7 +881,7 @@ fun GameScreen(
                         }
                         
                         // [GAME_WIN] Check if the goal robot reached its target
-                        if (newBoard.goals.isNotEmpty() && isSolved(newBoard)) {
+                        if (newBoard.goals.isNotEmpty() && isBoardSolved(newBoard)) {
                             gameWon = true
                             // Save to history immediately on completion (same as main game)
                             saveToHistoryNow("completed")
@@ -1000,14 +960,14 @@ fun GameScreen(
                     color = FancyButtonColor.BLUE,
                     onClick = {
                         if (!gameWon) {
-                            val newBoard = moveRobot(currentBoard, selectedRobotIndex, Board.NORTH)
+                            val newBoard = moveRobotOnBoard(currentBoard, selectedRobotIndex, Board.NORTH)
                             if (newBoard != null) {
                                 boardHistory.add(Board.Companion.createClone(currentBoard))
                                 currentBoard = newBoard
                                 moveCount++
                                 squaresMoved++
                                 hintMessage = null
-                                if (newBoard.goals.isNotEmpty() && isSolved(newBoard)) {
+                                if (newBoard.goals.isNotEmpty() && isBoardSolved(newBoard)) {
                                     gameWon = true
                                     val optimalMoves = solution?.size() ?: 0
                                     val stars = roboyard.logic.core.calculateStars(moveCount, optimalMoves, hintsUsed)
@@ -1030,14 +990,14 @@ fun GameScreen(
                     color = FancyButtonColor.BLUE,
                     onClick = {
                         if (!gameWon) {
-                            val newBoard = moveRobot(currentBoard, selectedRobotIndex, Board.SOUTH)
+                            val newBoard = moveRobotOnBoard(currentBoard, selectedRobotIndex, Board.SOUTH)
                             if (newBoard != null) {
                                 boardHistory.add(Board.Companion.createClone(currentBoard))
                                 currentBoard = newBoard
                                 moveCount++
                                 squaresMoved++
                                 hintMessage = null
-                                if (newBoard.goals.isNotEmpty() && isSolved(newBoard)) {
+                                if (newBoard.goals.isNotEmpty() && isBoardSolved(newBoard)) {
                                     gameWon = true
                                     val optimalMoves = solution?.size() ?: 0
                                     val stars = roboyard.logic.core.calculateStars(moveCount, optimalMoves, hintsUsed)
@@ -1060,14 +1020,14 @@ fun GameScreen(
                     color = FancyButtonColor.BLUE,
                     onClick = {
                         if (!gameWon) {
-                            val newBoard = moveRobot(currentBoard, selectedRobotIndex, Board.EAST)
+                            val newBoard = moveRobotOnBoard(currentBoard, selectedRobotIndex, Board.EAST)
                             if (newBoard != null) {
                                 boardHistory.add(Board.Companion.createClone(currentBoard))
                                 currentBoard = newBoard
                                 moveCount++
                                 squaresMoved++
                                 hintMessage = null
-                                if (newBoard.goals.isNotEmpty() && isSolved(newBoard)) {
+                                if (newBoard.goals.isNotEmpty() && isBoardSolved(newBoard)) {
                                     gameWon = true
                                     val optimalMoves = solution?.size() ?: 0
                                     val stars = roboyard.logic.core.calculateStars(moveCount, optimalMoves, hintsUsed)
@@ -1090,14 +1050,14 @@ fun GameScreen(
                     color = FancyButtonColor.BLUE,
                     onClick = {
                         if (!gameWon) {
-                            val newBoard = moveRobot(currentBoard, selectedRobotIndex, Board.WEST)
+                            val newBoard = moveRobotOnBoard(currentBoard, selectedRobotIndex, Board.WEST)
                             if (newBoard != null) {
                                 boardHistory.add(Board.Companion.createClone(currentBoard))
                                 currentBoard = newBoard
                                 moveCount++
                                 squaresMoved++
                                 hintMessage = null
-                                if (newBoard.goals.isNotEmpty() && isSolved(newBoard)) {
+                                if (newBoard.goals.isNotEmpty() && isBoardSolved(newBoard)) {
                                     gameWon = true
                                     val optimalMoves = solution?.size() ?: 0
                                     val stars = roboyard.logic.core.calculateStars(moveCount, optimalMoves, hintsUsed)
@@ -1550,81 +1510,6 @@ fun GameInfoCard(
  * Format elapsed time in milliseconds to mm:ss or hh:mm:ss format
  * Matches Main Game format exactly
  */
-fun formatElapsedTime(elapsedTimeMs: Long): String {
-    val totalSeconds = (elapsedTimeMs / 1000).toInt()
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-
-    return if (minutes < 100) {
-        // mm:ss format for times under 100 minutes
-        String.format("%02d:%02d", minutes, seconds)
-    } else {
-        // hh:mm:ss format for times 100 minutes or more
-        val hours = minutes / 60
-        val mins = minutes % 60
-        String.format("%02d:%02d:%02d", hours, mins, seconds)
-    }
-}
-
-fun isSolved(board: Board): Boolean {
-    val goal = board.getGoal() ?: return false // No goal set, not solved
-    val goalRobot = goal.robotNumber
-    return if (goalRobot in board.robotPositions.indices) {
-        board.robotPositions[goalRobot] == goal.position
-    } else {
-        board.robotPositions.any { it == goal.position }
-    }
-}
-
-fun moveRobot(board: Board, robotIndex: Int, direction: Int): Board? {
-    val currentPos = board.robotPositions[robotIndex]
-    var newPos = currentPos
-    val directionIncrement = board.directionIncrement[direction]
-
-    // Slide robot until it hits a wall or another robot
-    while (true) {
-        val nextPos = newPos + directionIncrement
-        val x = nextPos % board.width
-        val y = nextPos / board.width
-
-        // Check bounds
-        if (x < 0 || x >= board.width || y < 0 || y >= board.height) {
-            break
-        }
-
-        // Check for wall
-        if (board.isWall(newPos, direction)) {
-            break
-        }
-
-        // Check for another robot
-        var isBlocked = false
-        for (i in board.robotPositions.indices) {
-            if (i != robotIndex && board.robotPositions[i] == nextPos) {
-                isBlocked = true
-                break
-            }
-        }
-        if (isBlocked) {
-            break
-        }
-
-        newPos = nextPos
-    }
-
-    // Check if robot actually moved
-    if (newPos == currentPos) {
-        return null
-    }
-
-    // Create new board with updated robot position
-    val newRobots = board.robotPositions.copyOf()
-    newRobots[robotIndex] = newPos
-    val newBoard = Board.Companion.createClone(board)
-    newBoard.setRobots(newRobots)
-    return newBoard
-}
-
 @Composable
 fun BoardCanvas(
     board: Board,
@@ -2053,131 +1938,5 @@ private fun DrawScope.drawImageScaledWithAlpha(
         dstSize = IntSize(width.roundToInt(), height.roundToInt()),
         alpha = alpha
     )
-}
-
-/** Serializes a Board to a string format for saving. */
-fun serializeBoard(board: Board): String {
-    val sb = StringBuilder()
-    sb.append("board:${board.width},${board.height};")
-    
-    // Serialize walls
-    for (y in 0 until board.height) {
-        for (x in 0 until board.width) {
-            val pos = x + y * board.width
-            if (board.walls[0][pos]) sb.append("h$x,$y;")
-            if (board.walls[3][pos]) sb.append("v$x,$y;")
-        }
-    }
-    
-    // Serialize targets
-    for (goal in board.goals) {
-        val colorChar = when (goal.robotNumber) {
-            0 -> 'p'
-            1 -> 'g'
-            2 -> 'b'
-            3 -> 'y'
-            4 -> 's'
-            else -> 'm'
-        }
-        sb.append("t$colorChar${goal.x},${goal.y};")
-    }
-    
-    // Serialize robots
-    for (i in board.robotPositions.indices) {
-        val pos = board.robotPositions[i]
-        val x = pos % board.width
-        val y = pos / board.width
-        val colorChar = when (i) {
-            0 -> 'p'
-            1 -> 'g'
-            2 -> 'b'
-            3 -> 'y'
-            4 -> 's'
-            else -> 'p'
-        }
-        sb.append("r$colorChar$x,$y;")
-    }
-    
-    return sb.toString()
-}
-
-/** Deserializes a Board from a string format for loading. */
-fun deserializeBoard(data: String): Board? {
-    val entries: List<LevelFormatParser.RawEntry> = LevelFormatParser.parseRawEntries(data)
-    var width = 14
-    var height = 14
-    
-    // First pass: extract board dimensions
-    for (entry in entries) {
-        if (entry.type == "board") {
-            val data = entry.data
-            val cleanData = if (data.startsWith(":")) data.substring(1) else data
-            val parts = cleanData.split(",").map { it.trim() }
-            if (parts.size == 2) {
-                width = parts[0].toIntOrNull() ?: 14
-                height = parts[1].toIntOrNull() ?: 14
-            }
-            break
-        }
-    }
-    
-    val board = Board.createBoardFreestyle(null, width, height, 4) ?: return null
-    val numRobots = 4
-    val robotPositions = IntArray(numRobots) { -1 }
-    var robotIndex = 0
-    
-    // Second pass: parse walls, targets, robots
-    for (entry in entries) {
-        val type = entry.type
-        val data = entry.data
-        
-        if (type == "board") continue
-        
-        val parts = data.split(",").map { it.trim() }
-        if (parts.size < 2) continue
-        val x = parts[0].toIntOrNull() ?: continue
-        val y = parts[1].toIntOrNull() ?: continue
-        
-        when {
-            type == "h" || type == "mh" -> {
-                board.setWall(x, y, Board.NORTH, true)
-                if (y > 0) board.setWall(x, y - 1, Board.SOUTH, true)
-            }
-            type == "v" || type == "mv" -> {
-                board.setWall(x, y, Board.WEST, true)
-                if (x > 0) board.setWall(x - 1, y, Board.EAST, true)
-            }
-            type.startsWith("t") -> {
-                val colorId = parseColorChar(type)
-                if (colorId >= -1) {
-                    val pos = x + y * width
-                    board.addGoal(pos, colorId, 0)
-                }
-            }
-            type.startsWith("r") -> {
-                val colorId = parseColorChar(type)
-                if (colorId >= 0 && robotIndex < numRobots) {
-                    robotPositions[robotIndex] = x + y * width
-                    robotIndex++
-                }
-            }
-        }
-    }
-    
-    board.setRobots(robotPositions)
-    return board
-}
-
-/** Parses color character (r/g/b/y/s) to robot index (0-4). Matches fragment-app parseColorChar logic 1:1 */
-private fun parseColorChar(type: String): Int {
-    val char = if (type.length == 2) type[1] else type[0]
-    return when (char) {
-        'r' -> 0 // red (pink)
-        'g' -> 1 // green
-        'b' -> 2 // blue
-        'y' -> 3 // yellow
-        's' -> 4 // silver
-        else -> -1
-    }
 }
 

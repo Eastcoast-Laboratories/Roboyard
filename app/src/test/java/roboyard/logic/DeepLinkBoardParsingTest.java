@@ -198,7 +198,7 @@ public class DeepLinkBoardParsingTest {
 
     @Test
     public void testParseFromSaveDataBoardSize12x12() {
-        GameState state = GameState.parseFromSaveData(DEEP_LINK_MAP_DATA_12x12, null);
+        GameState state = GameState.parseFromSaveData(DEEP_LINK_MAP_DATA_12x12);
 
         assertNotNull("parseFromSaveData should return a non-null GameState", state);
         assertEquals("Board width should be 12", 12, state.width);
@@ -207,7 +207,7 @@ public class DeepLinkBoardParsingTest {
 
     @Test
     public void testParseFromSaveDataRobotCount() {
-        GameState state = GameState.parseFromSaveData(DEEP_LINK_MAP_DATA_12x12, null);
+        GameState state = GameState.parseFromSaveData(DEEP_LINK_MAP_DATA_12x12);
 
         assertNotNull("GameState should not be null", state);
 
@@ -222,7 +222,7 @@ public class DeepLinkBoardParsingTest {
 
     @Test
     public void testParseFromSaveDataTargetCount() {
-        GameState state = GameState.parseFromSaveData(DEEP_LINK_MAP_DATA_12x12, null);
+        GameState state = GameState.parseFromSaveData(DEEP_LINK_MAP_DATA_12x12);
 
         assertNotNull("GameState should not be null", state);
 
@@ -237,7 +237,7 @@ public class DeepLinkBoardParsingTest {
 
     @Test
     public void testParseFromSaveDataTargetPosition() {
-        GameState state = GameState.parseFromSaveData(DEEP_LINK_MAP_DATA_12x12, null);
+        GameState state = GameState.parseFromSaveData(DEEP_LINK_MAP_DATA_12x12);
 
         assertNotNull("GameState should not be null", state);
 
@@ -255,7 +255,7 @@ public class DeepLinkBoardParsingTest {
 
     @Test
     public void testParseFromSaveDataWallCount() {
-        GameState state = GameState.parseFromSaveData(DEEP_LINK_MAP_DATA_12x12, null);
+        GameState state = GameState.parseFromSaveData(DEEP_LINK_MAP_DATA_12x12);
 
         assertNotNull("GameState should not be null", state);
 
@@ -276,7 +276,7 @@ public class DeepLinkBoardParsingTest {
 
     @Test
     public void testParseLevelBoardSize12x12() {
-        GameState state = GameState.parseLevel(null, DEEP_LINK_MAP_DATA_12x12, -1);
+        GameState state = GameState.parseLevel(DEEP_LINK_MAP_DATA_12x12, -1);
 
         assertNotNull("parseLevel should return a non-null GameState", state);
         assertEquals("Board width should be 12", 12, state.width);
@@ -296,7 +296,7 @@ public class DeepLinkBoardParsingTest {
                 "rb1,7;\n" +
                 "ry7,1;\n";
 
-        GameState state = GameState.parseFromSaveData(smallBoard, null);
+        GameState state = GameState.parseFromSaveData(smallBoard);
 
         assertNotNull("GameState should not be null", state);
         assertEquals("Board width should be 8", 8, state.width);
@@ -313,7 +313,7 @@ public class DeepLinkBoardParsingTest {
                 "rb2,14;\n" +
                 "ry14,2;\n";
 
-        GameState state = GameState.parseFromSaveData(largeBoard, null);
+        GameState state = GameState.parseFromSaveData(largeBoard);
 
         assertNotNull("GameState should not be null", state);
         assertEquals("Board width should be 16", 16, state.width);

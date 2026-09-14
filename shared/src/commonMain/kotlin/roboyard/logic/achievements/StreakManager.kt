@@ -1,43 +1,34 @@
 package roboyard.logic.achievements
 
-import android.content.Context
 import roboyard.logic.storage.PlatformStorage
-import roboyard.platform.AndroidStorage
-import timber.log.Timber.Forest.d
-import timber.log.Timber.Forest.w
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
+import roboyard.logic.util.DateUtils
+import roboyard.logic.util.RLog
 import kotlin.math.max
 
 /**
  * Manages daily login streaks and comeback tracking.
- * 
+ *
  * Use setTestMode(true) for quick testing with shortened time periods:
  * - 1 "day" = 10 seconds (instead of 24 hours)
  * - 7 "days" = 70 seconds
  * - 30 "days" = 300 seconds (5 minutes)
  */
-class StreakManager private constructor(context: Context) {
+class StreakManager private constructor(
+    private val storage: PlatformStorage,
+    private val achievementCallback: AchievementCallback?
+) : StreakDataProvider {
+    private val log = RLog.tag("StreakManager")
+
     // Test mode flag - can be enabled via Settings for quick streak testing
     private var testMode = false
-
-    private val context: Context?
-    private val storage: PlatformStorage
-    private val achievementManager: AchievementManager
 
     // For testing: allows overriding the current date
     private var mockTodayDate: Long? = null
 
     init {
-        val appContext = context.getApplicationContext()
-        this.context = appContext
-        this.storage = AndroidStorage.getInstance(appContext)
-        this.achievementManager = AchievementManager.getInstance(appContext)
         // Load test mode setting from storage
         this.testMode = storage.getBoolean(KEY_TEST_MODE, false)
-        d("[STREAK] Test mode loaded from storage: %s", testMode)
+        log.d("[STREAK] Test mode loaded from storage: %s", testMode)
     }
 
     /**
@@ -48,17 +39,16 @@ class StreakManager private constructor(context: Context) {
         val lastLoginDate = storage.getLong(KEY_LAST_LOGIN_DATE, 0)
         var currentStreak = storage.getInt(KEY_CURRENT_STREAK, 0)
 
-        d(
+        log.d(
             "[STREAK] Recording daily login - today: %d, lastLogin: %d, streak: %d",
             today,
             lastLoginDate,
             currentStreak
         )
 
-
         // Check if already logged in today
         if (lastLoginDate == today) {
-            d("[STREAK] Already logged in today, skipping")
+            log.d("[STREAK] Already logged in today, skipping")
             return StreakUpdate(false, currentStreak, false, false, false)
         }
 
@@ -66,34 +56,33 @@ class StreakManager private constructor(context: Context) {
         var isNewStreak = false
         var triggeredComebackAchievement = false
 
-
         // Check if this is a new streak or continuation
         val yesterday = today - 1
         if (lastLoginDate == yesterday) {
             // Continue the streak
             currentStreak++
-            d("[STREAK] Streak continued: %d days", currentStreak)
+            log.d("[STREAK] Streak continued: %d days", currentStreak)
             isContinuation = true
         } else if (lastLoginDate > 0 && lastLoginDate < yesterday) {
             // Streak broken (but user was active before), check for comeback
             val daysAway = today - lastLoginDate
             if (daysAway > 30) {
-                d("[STREAK] Comeback after %d days away", daysAway)
-                achievementManager.onComebackPlayer(daysAway.toInt())
+                log.d("[STREAK] Comeback after %d days away", daysAway)
+                achievementCallback?.onComebackPlayer(daysAway.toInt())
                 triggeredComebackAchievement = true
             }
             // Start new streak
             currentStreak = 1
-            d("[STREAK] Streak broken after %d days away, new streak started", daysAway)
+            log.d("[STREAK] Streak broken after %d days away, new streak started", daysAway)
             isNewStreak = true
         } else if (lastLoginDate == 0L) {
             // First login ever - don't trigger comeback
             currentStreak = 1
-            d("[STREAK] First login recorded")
+            log.d("[STREAK] First login recorded")
             isNewStreak = true
         } else {
             // This shouldn't happen, but handle it gracefully
-            w(
+            log.w(
                 "[STREAK] Unexpected state: today=%d, lastLogin=%d, streak=%d",
                 today,
                 lastLoginDate,
@@ -103,14 +92,12 @@ class StreakManager private constructor(context: Context) {
             isNewStreak = true
         }
 
-
         // Update longest streak if current exceeds it
         var longestStreak = storage.getInt(KEY_LONGEST_STREAK, 0)
         if (currentStreak > longestStreak) {
             longestStreak = currentStreak
-            d("[STREAK] New longest streak record: %d days", longestStreak)
+            log.d("[STREAK] New longest streak record: %d days", longestStreak)
         }
-
 
         // Save updated values
         storage.putLong(KEY_LAST_LOGIN_DATE, today)
@@ -119,11 +106,10 @@ class StreakManager private constructor(context: Context) {
         storage.putInt(KEY_LONGEST_STREAK, longestStreak)
         storage.putString(KEY_LONGEST_STREAK_DATE, dayNumberToDateString(today))
 
-
         // Notify achievement manager
-        achievementManager.onDailyLogin(currentStreak)
+        achievementCallback?.onDailyLogin(currentStreak)
 
-        d("[STREAK] Daily login recorded - new streak: %d days", currentStreak)
+        log.d("[STREAK] Daily login recorded - new streak: %d days", currentStreak)
         return StreakUpdate(
             true,
             currentStreak,
@@ -138,12 +124,11 @@ class StreakManager private constructor(context: Context) {
         private val newStreak: Boolean, private val comebackTriggered: Boolean
     )
 
-    val currentStreak: Int
+    override val currentStreak: Int
         /**
          * Get current streak in days
          */
         get() = storage.getInt(KEY_CURRENT_STREAK, 0)
-
 
     val storedStreakDays: Int
         /**
@@ -159,7 +144,7 @@ class StreakManager private constructor(context: Context) {
         val today = this.todayDate
         val lastPopupDate = storage.getLong(KEY_LAST_POPUP_DATE, 0)
         val shouldShow = lastPopupDate < today
-        d(
+        log.d(
             "[STREAK_POPUP] shouldShowStreakPopupToday: today=%d, lastPopup=%d, shouldShow=%b",
             today,
             lastPopupDate,
@@ -174,10 +159,10 @@ class StreakManager private constructor(context: Context) {
     fun markStreakPopupShownToday() {
         val today = this.todayDate
         storage.putLong(KEY_LAST_POPUP_DATE, today)
-        d("[STREAK_POPUP] Marked popup shown for day %d", today)
+        log.d("[STREAK_POPUP] Marked popup shown for day %d", today)
     }
 
-    protected val todayDate: Long
+    val todayDate: Long
         /**
          * Get today's date as number of "days" since epoch.
          * Uses the device's local timezone so the day changes at local midnight, not UTC midnight.
@@ -191,7 +176,7 @@ class StreakManager private constructor(context: Context) {
                 return System.currentTimeMillis() / TEST_DAY_MS
             }
             val now = System.currentTimeMillis()
-            val offsetMs = TimeZone.getDefault().getOffset(now)
+            val offsetMs = DateUtils.getTimezoneOffsetMs(now)
             return (now + offsetMs) / NORMAL_DAY_MS
         }
 
@@ -206,14 +191,13 @@ class StreakManager private constructor(context: Context) {
         // Persist test mode setting to preferences
         storage.putBoolean(KEY_TEST_MODE, enabled)
 
-
         // Reset streak when switching modes because time units are incompatible
         if (wasTestMode != enabled) {
             resetStreak()
-            d("[STREAK] Streak reset due to test mode change")
+            log.d("[STREAK] Streak reset due to test mode change")
         }
 
-        d(
+        log.d(
             "[STREAK] Test mode %s - 1 day = %d ms", if (enabled) "ENABLED" else "DISABLED",
             if (enabled) TEST_DAY_MS else NORMAL_DAY_MS
         )
@@ -231,7 +215,7 @@ class StreakManager private constructor(context: Context) {
      */
     fun setMockTodayDate(daysSinceEpoch: Long) {
         mockTodayDate = daysSinceEpoch
-        d("[STREAK] Mock date set to: %d", daysSinceEpoch)
+        log.d("[STREAK] Mock date set to: %d", daysSinceEpoch)
     }
 
     /**
@@ -239,16 +223,16 @@ class StreakManager private constructor(context: Context) {
      */
     fun clearMockTodayDate() {
         mockTodayDate = null
-        d("[STREAK] Mock date cleared")
+        log.d("[STREAK] Mock date cleared")
     }
 
-    val longestStreak: Int
+    override val longestStreak: Int
         /**
          * Get the longest streak ever achieved
          */
         get() = storage.getInt(KEY_LONGEST_STREAK, 0)
 
-    val longestStreakDate: String?
+    override val longestStreakDate: String?
         /**
          * Get the date when the longest streak was achieved (ISO format)
          */
@@ -261,22 +245,21 @@ class StreakManager private constructor(context: Context) {
     private fun dayNumberToDateString(dayNumber: Long): String {
         if (testMode) {
             val timestampMs: Long = dayNumber * TEST_DAY_MS
-            return SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(timestampMs))
+            return DateUtils.formatDateIso(timestampMs)
         }
         val timestampMs: Long = dayNumber * NORMAL_DAY_MS
-        val offsetMs = TimeZone.getDefault().getOffset(timestampMs)
-        return SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(timestampMs - offsetMs))
+        val offsetMs = DateUtils.getTimezoneOffsetMs(timestampMs)
+        return DateUtils.formatDateIso(timestampMs - offsetMs)
     }
 
-    val lastLoginDateString: String?
+    override val lastLoginDateString: String?
         /**
          * Get last login date as ISO date string for server sync.
          */
         get() {
-            val lastLoginDate =
-                storage.getLong(KEY_LAST_LOGIN_DATE, 0)
+            val lastLoginDate = storage.getLong(KEY_LAST_LOGIN_DATE, 0)
             if (lastLoginDate == 0L) return null
-            d(
+            log.d(
                 "[STREAK_SYNC_DATE] Returning stored last_login_date=%d (%s) without mutating streak state",
                 lastLoginDate, dayNumberToDateString(lastLoginDate)
             )
@@ -287,7 +270,7 @@ class StreakManager private constructor(context: Context) {
      * Restore streak data from server (bidirectional sync).
      * Resets current streak if server data is stale. Always preserves the highest longest streak.
      */
-    fun restoreFromServer(
+    override fun restoreFromServer(
         serverStreak: Int,
         serverLastDate: String?,
         serverLongestStreak: Int,
@@ -297,7 +280,6 @@ class StreakManager private constructor(context: Context) {
         val localStreak = this.currentStreak
         val localLongest = storage.getInt(KEY_LONGEST_STREAK, 0)
 
-
         // Always restore longest streak first - takes max of server and local, never loses it
         val maxLongest = max(serverLongestStreak, localLongest)
         if (maxLongest > localLongest) {
@@ -306,7 +288,7 @@ class StreakManager private constructor(context: Context) {
                 KEY_LONGEST_STREAK_DATE,
                 serverLongestStreakDate ?: dayNumberToDateString(this.todayDate)
             )
-            d(
+            log.d(
                 "[STREAK_SYNC] Restored longest streak: %d (local was: %d, server: %d)",
                 maxLongest,
                 localLongest,
@@ -314,26 +296,25 @@ class StreakManager private constructor(context: Context) {
             )
         }
 
-
         // Check if current streak data is stale (user was absent for >1 day)
         if (serverStreak > 1 && serverLastDate != null) {
             val serverLastLoginDay = parseDateStringToDayNumber(serverLastDate)
             val today = this.todayDate
             val daysSinceServerLogin = today - serverLastLoginDay
 
-            d(
+            log.d(
                 "[STREAK_SYNC] Checking server data freshness: serverStreak=%d, serverLastDate=%s, daysSince=%d",
                 serverStreak, serverLastDate, daysSinceServerLogin
             )
 
             if (daysSinceServerLogin > 1) {
-                d(
+                log.d(
                     "[STREAK_SYNC] Server data is stale: %d days since last login, resetting server streak to 1",
                     daysSinceServerLogin
                 )
                 serverStreak = 1
             } else {
-                d(
+                log.d(
                     "[STREAK_SYNC] Server data is fresh (%d days), keeping server streak %d",
                     daysSinceServerLogin,
                     serverStreak
@@ -345,26 +326,25 @@ class StreakManager private constructor(context: Context) {
 
         if (maxStreak != localStreak) {
             storage.putInt(KEY_CURRENT_STREAK, maxStreak)
-            d(
+            log.d(
                 "[STREAK_SYNC] Updated current streak to: %d (local: %d, server: %d)",
                 maxStreak,
                 localStreak,
                 serverStreak
             )
         } else {
-            d(
+            log.d(
                 "[STREAK_SYNC] Local streak %d is already the maximum (server: %d), keeping local",
                 localStreak,
                 serverStreak
             )
         }
 
-        d("[STREAK_SYNC_DATE] Server restore kept stored last_login_date unchanged; recordDailyLogin owns day advancement")
-
+        log.d("[STREAK_SYNC_DATE] Server restore kept stored last_login_date unchanged; recordDailyLogin owns day advancement")
 
         // Update AchievementManager to keep it in sync
-        achievementManager.updateDailyLoginStreak(maxStreak)
-        d("[STREAK_SYNC] AchievementManager dailyLoginStreak updated to: %d", maxStreak)
+        achievementCallback?.updateDailyLoginStreak(maxStreak)
+        log.d("[STREAK_SYNC] AchievementManager dailyLoginStreak updated to: %d", maxStreak)
     }
 
     /**
@@ -374,19 +354,17 @@ class StreakManager private constructor(context: Context) {
         if (dateString == null || "null" == dateString || dateString.isEmpty()) return 0
 
         try {
-            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-            val timestampMs = sdf.parse(dateString).getTime()
+            val timestampMs = DateUtils.parseDateIso(dateString)
             if (testMode) {
                 return timestampMs / TEST_DAY_MS
             }
-            val offsetMs = TimeZone.getDefault().getOffset(timestampMs)
+            val offsetMs = DateUtils.getTimezoneOffsetMs(timestampMs)
             return (timestampMs + offsetMs) / NORMAL_DAY_MS
         } catch (e: Exception) {
-            w(e, "[STREAK] Failed to parse date string: %s", dateString)
+            log.w("[STREAK] Failed to parse date string: %s", dateString)
             return 0
         }
     }
-
 
     /**
      * Reset streak (for testing)
@@ -398,12 +376,11 @@ class StreakManager private constructor(context: Context) {
         storage.remove(KEY_LAST_POPUP_DATE)
         storage.remove(KEY_LONGEST_STREAK)
         storage.remove(KEY_LONGEST_STREAK_DATE)
-        d("[STREAK] Streak reset (including longest streak)")
+        log.d("[STREAK] Streak reset (including longest streak)")
     }
 
     companion object {
-        // Using AndroidStorage instead of direct SharedPreferences
-    // Keys are prefixed automatically by storage implementation
+        // Keys are prefixed automatically by storage implementation
         private const val KEY_LAST_LOGIN_DATE = "last_login_date"
         private const val KEY_CURRENT_STREAK = "current_streak"
         private const val KEY_LAST_STREAK_DATE = "last_streak_date"
@@ -422,9 +399,9 @@ class StreakManager private constructor(context: Context) {
 
         @JvmStatic
         @Synchronized
-        fun getInstance(context: Context): StreakManager {
+        fun getInstance(storage: PlatformStorage, achievementCallback: AchievementCallback?): StreakManager {
             if (instance == null) {
-                instance = StreakManager(context)
+                instance = StreakManager(storage, achievementCallback)
             }
             return instance!!
         }

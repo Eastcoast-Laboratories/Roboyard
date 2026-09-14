@@ -12,6 +12,7 @@ import roboyard.eclabs.R;
 import roboyard.logic.network.RoboyardApiClient;
 import roboyard.logic.managers.SyncManager;
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 import timber.log.Timber;
 
 /**
@@ -121,16 +122,16 @@ public class LoginDialogHelper {
                 
                 // Sync achievements from server after successful login
                 Timber.d("[LOGIN_SYNC] Login successful, starting achievement sync from server");
-                AchievementManager.getInstance(context).syncFromServer(new RoboyardApiClient.ApiCallback<Integer>() {
+                AchievementManagerFactory.getInstance(context).syncFromServer(new roboyard.logic.achievements.AchievementSyncCallback() {
                     @Override
-                    public void onSuccess(Integer restoredCount) {
-                        Timber.d("[LOGIN_SYNC] Achievement sync complete: %d achievements restored", restoredCount);
-                        if (restoredCount > 0) {
-                            Toast.makeText(context, restoredCount + " achievements restored from server", Toast.LENGTH_SHORT).show();
+                    public void onSuccess(int syncedCount, int newAchievements, String latestAppVersion) {
+                        Timber.d("[LOGIN_SYNC] Achievement sync complete: %d achievements restored", syncedCount);
+                        if (syncedCount > 0) {
+                            Toast.makeText(context, syncedCount + " achievements restored from server", Toast.LENGTH_SHORT).show();
                         }
                         // Upload corrected local state back to server (e.g. streak reset after long absence)
                         Timber.d("[LOGIN_SYNC] Uploading corrected local state back to server");
-                        AchievementManager.getInstance(context).syncToServer();
+                        AchievementManagerFactory.getInstance(context).syncToServer();
                     }
                     
                     @Override

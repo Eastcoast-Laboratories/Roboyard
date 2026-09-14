@@ -27,6 +27,7 @@ import java.util.Map;
 
 import roboyard.eclabs.R;
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 import roboyard.logic.core.GameSolution;
 import roboyard.ui.activities.MainActivity;
 import roboyard.logic.managers.GameStateManager;
@@ -86,7 +87,7 @@ public class Level140E2ETest {
     @Before
     public void setUp() {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        achievementManager = AchievementManager.getInstance(context);
+        achievementManager = AchievementManagerFactory.getInstance(context);
         achievementManager.resetAll();
         levelResults.clear();
         totalStarsEarned = 0;

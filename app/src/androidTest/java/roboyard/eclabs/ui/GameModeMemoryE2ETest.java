@@ -24,6 +24,7 @@ import org.junit.runner.RunWith;
 import roboyard.eclabs.R;
 import roboyard.ui.activities.MainActivity;
 import roboyard.logic.achievements.AchievementManager;
+import roboyard.logic.achievements.AchievementManagerFactory;
 import roboyard.logic.managers.GameStateManager;
 
 import timber.log.Timber;
@@ -60,7 +61,7 @@ public class GameModeMemoryE2ETest {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         
         // Clear achievements to ensure fresh state
-        AchievementManager.getInstance(context).resetAll();
+        AchievementManagerFactory.getInstance(context).resetAll();
         
         // Clear game mode memory SharedPreferences
         context.getSharedPreferences("game_mode_memory", Context.MODE_PRIVATE)
@@ -71,7 +72,7 @@ public class GameModeMemoryE2ETest {
 
     @After
     public void tearDown() {
-        AchievementManager.getInstance(context).resetAll();
+        AchievementManagerFactory.getInstance(context).resetAll();
     }
 
     /**

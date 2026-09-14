@@ -107,7 +107,7 @@ public abstract class BaseGameFragment extends Fragment {
      */
     protected Bitmap createMinimapFromString(Context context, String saveData, int width, int height) {
         try {
-            GameState gameState = GameState.parseFromSaveData(saveData, context);
+            GameState gameState = GameState.parseFromSaveData(saveData);
             if (gameState == null) {
                 Timber.e("[MINIMAP] GameState.parseFromSaveData returned null");
             } else {

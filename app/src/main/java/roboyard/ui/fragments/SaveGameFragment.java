@@ -51,6 +51,7 @@ import roboyard.logic.core.GameHistoryEntry;
 import roboyard.logic.managers.GameStateManager;
 import roboyard.logic.managers.GameHistoryManager;
 import roboyard.logic.network.RoboyardApiClient;
+import roboyard.platform.AndroidStorage;
 import timber.log.Timber;
 import roboyard.ui.graphics.MinimapGenerator;
 
@@ -1344,7 +1345,7 @@ public class SaveGameFragment extends BaseGameFragment {
             // First try to load the game state and synchronize targets
             GameState gameState = null;
             try {
-                gameState = GameState.loadSavedGame(requireContext(), slotId);
+                gameState = GameState.loadSavedGame(AndroidStorage.getInstance(requireContext()), slotId);
                 if (gameState != null) {
                     // Synchronize targets to ensure board array and gameElements list are in sync
                     int syncedTargets = gameState.synchronizeTargets();
