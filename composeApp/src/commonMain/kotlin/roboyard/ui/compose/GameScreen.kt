@@ -92,7 +92,6 @@ import roboyard.logic.core.GameLogic
 import roboyard.logic.core.Preferences
 import roboyard.logic.core.calculateStars
 import roboyard.logic.core.saveLevelCompletion
-import roboyard.logic.core.formatTime
 import roboyard.logic.core.formatElapsedTime
 import roboyard.logic.core.buildGameWinMessage
 import roboyard.logic.core.isBoardSolved
@@ -278,7 +277,55 @@ fun GameScreen(
     val boardHistory = remember(board) { mutableListOf<Board>() }
     val gameController = remember(board) { GameController() }
     val pathTracker = remember(board) { PathTracker() }
-    val hintManager = remember(board) { HintManager(getStringProvider()) }
+    val stringProvider = remember(board) { getStringProvider() }
+    val hintManager = remember(board) { HintManager(stringProvider) }
+
+    // Helper: get localized robot color name for button text (matches Android)
+    fun getRobotColorName(colorIndex: Int): String {
+        val key = when (colorIndex) {
+            0 -> "color_red"
+            1 -> "color_green"
+            2 -> "color_blue"
+            3 -> "color_yellow"
+            4 -> "color_silver"
+            5 -> "color_pink"
+            6 -> "color_brown"
+            7 -> "color_orange"
+            8 -> "color_white"
+            else -> return "Robot"
+        }
+        return stringProvider.getString(key) ?: when (colorIndex) {
+            0 -> "Red"; 1 -> "Green"; 2 -> "Blue"; 3 -> "Yellow"; 4 -> "Silver"
+            else -> "Robot"
+        }
+    }
+
+    // Helper: get localized direction name for button text (matches Android)
+    fun getDirectionName(direction: Int): String {
+        val key = when (direction) {
+            Board.NORTH -> "direction_north"
+            Board.SOUTH -> "direction_south"
+            Board.EAST -> "direction_east"
+            Board.WEST -> "direction_west"
+            else -> return ""
+        }
+        return stringProvider.getString(key) ?: when (direction) {
+            Board.NORTH -> "North"; Board.SOUTH -> "South"
+            Board.EAST -> "East"; Board.WEST -> "West"
+            else -> ""
+        }
+    }
+
+    // Helper: get FancyButtonColor matching robot color (matches Android tint)
+    fun getRobotButtonColor(colorIndex: Int): FancyButtonColor {
+        return when (colorIndex) {
+            0 -> FancyButtonColor.RED    // red
+            1 -> FancyButtonColor.GREEN  // green
+            2 -> FancyButtonColor.BLUE   // blue
+            3 -> FancyButtonColor.YELLOW // yellow
+            else -> FancyButtonColor.GRAY // silver/pink/brown/etc
+        }
+    }
     val soundManager = remember(board) { getSoundManager() }
     var elapsedTime by remember(board) { mutableLongStateOf(0L) }
     var timerRunning by remember(board) { mutableStateOf(false) }
@@ -702,13 +749,13 @@ fun GameScreen(
         }
     }
 
-    // Timer effect - runs every second when timer is enabled
+    // Timer effect - runs every 500ms when timer is enabled (matches Android)
     LaunchedEffect(timerRunning) {
         if (timerRunning) {
             while (timerRunning) {
-                delay(1000)
+                delay(500)
                 if (timerRunning) {
-                    elapsedTime += 1000
+                    elapsedTime += 500
                     
                     // Update totalPlayTime (same as main game)
                     val elapsedSeconds = ((System.currentTimeMillis() - gameStartTime) / 1000).toInt()
@@ -950,7 +997,7 @@ fun GameScreen(
                 fontSize = 14.sp
             )
             Text(
-                text = formatTime(elapsedTime),
+                text = formatElapsedTime(elapsedTime),
                 color = Color.White,
                 fontSize = 14.sp
             )
@@ -967,19 +1014,21 @@ fun GameScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 // Select robot button
+                val robotColorName = if (selectedRobotIndex >= 0) getRobotColorName(selectedRobotIndex) else "Robot"
+                val robotButtonColor = if (selectedRobotIndex >= 0) getRobotButtonColor(selectedRobotIndex) else FancyButtonColor.BLUE
                 FancyButton(
-                    text = "Select Robot",
-                    color = FancyButtonColor.BLUE,
+                    text = robotColorName,
+                    color = robotButtonColor,
                     onClick = {
                         selectedRobotIndex = (selectedRobotIndex + 1) % currentBoard.robotPositions.size
                         selectedRobotHasMoved = false
                     },
                     modifier = Modifier.weight(1f).padding(end = 4.dp)
                 )
-                // Direction buttons
+                // Direction buttons (text shows "ColorName DirectionName" like Android)
                 FancyButton(
-                    text = "N",
-                    color = FancyButtonColor.BLUE,
+                    text = "$robotColorName ${getDirectionName(Board.NORTH)}",
+                    color = robotButtonColor,
                     onClick = {
                         if (!gameWon) {
                             val newBoard = gameController.moveRobotWithCooldown(currentBoard, selectedRobotIndex, Board.NORTH)
@@ -1008,8 +1057,8 @@ fun GameScreen(
                     modifier = Modifier.weight(1f).padding(end = 4.dp)
                 )
                 FancyButton(
-                    text = "S",
-                    color = FancyButtonColor.BLUE,
+                    text = "$robotColorName ${getDirectionName(Board.SOUTH)}",
+                    color = robotButtonColor,
                     onClick = {
                         if (!gameWon) {
                             val newBoard = gameController.moveRobotWithCooldown(currentBoard, selectedRobotIndex, Board.SOUTH)
@@ -1038,8 +1087,8 @@ fun GameScreen(
                     modifier = Modifier.weight(1f).padding(end = 4.dp)
                 )
                 FancyButton(
-                    text = "E",
-                    color = FancyButtonColor.BLUE,
+                    text = "$robotColorName ${getDirectionName(Board.EAST)}",
+                    color = robotButtonColor,
                     onClick = {
                         if (!gameWon) {
                             val newBoard = gameController.moveRobotWithCooldown(currentBoard, selectedRobotIndex, Board.EAST)
@@ -1068,8 +1117,8 @@ fun GameScreen(
                     modifier = Modifier.weight(1f).padding(end = 4.dp)
                 )
                 FancyButton(
-                    text = "W",
-                    color = FancyButtonColor.BLUE,
+                    text = "$robotColorName ${getDirectionName(Board.WEST)}",
+                    color = robotButtonColor,
                     onClick = {
                         if (!gameWon) {
                             val newBoard = gameController.moveRobotWithCooldown(currentBoard, selectedRobotIndex, Board.WEST)
@@ -1223,7 +1272,7 @@ fun GameScreen(
                     modifier = Modifier.weight(1f).padding(end = 3.dp)
                 )
                 FancyButton(
-                    text = if (isSolverRunning) "Calculating..." else "💡Hint",
+                    text = if (hintMessage != null) "❌ Hint" else if (isSolverRunning) "Calculating..." else "💡Hint",
                     color = FancyButtonColor.HINT,
                     onClick = {
                         println("[HINT] Hint button clicked, isSolverRunning=$isSolverRunning, solution=${solution}")
@@ -1295,7 +1344,7 @@ fun GameScreen(
                 )
                 FancyButton(
                     text = if (gameController.getPathHistorySize() > 0) "Undo" else "Back",
-                    color = FancyButtonColor.HINT,
+                    color = if (gameController.getPathHistorySize() > 0) FancyButtonColor.YELLOW else FancyButtonColor.GREEN,
                     onClick = {
                         if (gameController.getPathHistorySize() > 0) {
                             // Get the last path entry BEFORE undoing (undoLastMove removes it from history)
@@ -1340,7 +1389,7 @@ fun GameScreen(
                     modifier = Modifier.weight(1f).padding(end = 3.dp)
                 )
                 FancyButton(
-                    text = "Reset",
+                    text = if (gameWon) "Retry" else "Reset",
                     color = FancyButtonColor.BLUE,
                     onClick = {
                         currentBoard = Board.Companion.createClone(startBoard).also {
@@ -2072,24 +2121,8 @@ fun BoardCanvas(
             )
         }
 
-        // 6. Semi-transparent robot start positions (ghost robots)
-        val ghostAlpha = 0.3f
-        val ghostRobotScale = defaultRobotScale
-        val ghostRobotInset = (ghostRobotScale - 1f) * cellSize / 2f
-        for (i in startBoard.robotPositions.indices) {
-            val position = startBoard.robotPositions[i]
-            val robotX = position % startBoard.width
-            val robotY = position / startBoard.width
-            val sprite = if (i in robotSprites.indices) robotSprites[i] else robotSprites.last()
-            drawImageScaledWithAlpha(
-                sprite,
-                offsetX + robotX * cellSize - ghostRobotInset,
-                offsetY + robotY * cellSize - ghostRobotInset,
-                cellSize * ghostRobotScale,
-                cellSize * ghostRobotScale,
-                ghostAlpha
-            )
-        }
+        // Note: Ghost robots (semi-transparent start positions) are NOT drawn.
+        // Android GameGridView does not have this feature.
     }
 }
 
