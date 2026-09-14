@@ -2,6 +2,7 @@ package roboyard.logic.core
 
 import driftingdroids.model.Board
 import driftingdroids.model.Solution
+import roboyard.logic.ui.StringProvider
 import roboyard.logic.util.RLog
 
 /**
@@ -13,8 +14,10 @@ import roboyard.logic.util.RLog
  * - Prev/next navigation
  *
  * Both Android and ComposeApp use this class for consistent hint behavior.
+ * Uses StringProvider for localization (reads from strings.xml on Android,
+ * strings.json on Desktop).
  */
-class HintManager {
+class HintManager(private val stringProvider: StringProvider? = null) {
 
     private val log = RLog.tag("HintManager")
 
@@ -128,25 +131,35 @@ class HintManager {
             currentHintStep < numPreHints -> {
                 val offset = numPreHints - currentHintStep
                 val hintValue = totalMoves + offset
-                "Less than $hintValue moves"
+                if (hintValue <= 1) {
+                    stringProvider?.getString("pre_hint_less_than_1") ?: "You found a better solution than the A.I.!"
+                } else {
+                    stringProvider?.getString("pre_hint_less_than_x", hintValue)
+                        ?: "The A.I. found a solution in less than $hintValue moves"
+                }
             }
             // First fixed pre-hint: exact solution length
             currentHintStep == numPreHints -> {
-                "Exact solution: $totalMoves moves"
+                stringProvider?.getString("pre_hint_exact_solution", totalMoves)
+                    ?: "The A.I. found a solution in $totalMoves moves"
             }
             // Second fixed pre-hint: involved robots
             currentHintStep == numPreHints + 1 -> {
                 val robots = getInvolvedRobots()
-                "Involved robots: ${robots.joinToString(", ")}"
+                val prefix = stringProvider?.getString("pre_hint_involved_robots") ?: "Move the"
+                val andWord = stringProvider?.getString("and") ?: "and"
+                val robotList = formatRobotList(robots, andWord)
+                "$prefix $robotList"
             }
             // Third fixed pre-hint: move first robot
             currentHintStep == numPreHints + 2 -> {
                 val firstMove = solution?.getMovesList()?.firstOrNull()
                 if (firstMove != null) {
-                    val robotColor = getRobotColorName(firstMove.robotNumber)
-                    "Move the $robotColor robot first"
+                    val robotColor = getRobotColorNameDative(firstMove.robotNumber)
+                    stringProvider?.getString("pre_hint_first_move", robotColor)
+                        ?: "Move the $robotColor robot first"
                 } else {
-                    "Move the first robot"
+                    stringProvider?.getString("no_solution_found") ?: "No solution found"
                 }
             }
             else -> null
@@ -175,6 +188,7 @@ class HintManager {
         val hint = getRegularHint() ?: return null
         val colorName = getRobotColorName(hint.first)
         val directionName = getDirectionName(hint.second)
+        // Format: "Move <color> robot <direction>" — matches Android showNormalHint
         return "Move $colorName robot $directionName"
     }
 
@@ -266,11 +280,23 @@ class HintManager {
     }
 
     /**
-     * Get localized robot color name.
-     * TODO: Use StringProvider for localization
+     * Get localized robot color name (nominative form).
+     * Uses StringProvider if available, falls back to English.
      */
     private fun getRobotColorName(color: Int): String {
-        return when (color) {
+        val key = when (color) {
+            0 -> "color_red"
+            1 -> "color_green"
+            2 -> "color_blue"
+            3 -> "color_yellow"
+            4 -> "color_silver"
+            5 -> "color_pink"
+            6 -> "color_brown"
+            7 -> "color_orange"
+            8 -> "color_white"
+            else -> return "robot $color"
+        }
+        return stringProvider?.getString(key) ?: when (color) {
             0 -> "red"
             1 -> "green"
             2 -> "blue"
@@ -281,10 +307,51 @@ class HintManager {
     }
 
     /**
-     * Get direction name from direction constant.
+     * Get localized robot color name (dative form, used in "move the X robot first").
+     * Uses StringProvider if available, falls back to nominative form.
+     */
+    private fun getRobotColorNameDative(color: Int): String {
+        val key = when (color) {
+            0 -> "color_red_dative"
+            1 -> "color_green_dative"
+            2 -> "color_blue_dative"
+            3 -> "color_yellow_dative"
+            4 -> "color_silver_dative"
+            5 -> "color_pink_dative"
+            6 -> "color_brown_dative"
+            7 -> "color_orange_dative"
+            8 -> "color_white_dative"
+            else -> return getRobotColorName(color)
+        }
+        return stringProvider?.getString(key) ?: getRobotColorName(color)
+    }
+
+    /**
+     * Format a list of robot colors for the "involved robots" pre-hint.
+     * Matches Android GameFragment format: "red, blue and green" (with localized "and").
+     */
+    private fun formatRobotList(robots: List<String>, andWord: String): String {
+        return when {
+            robots.isEmpty() -> ""
+            robots.size == 1 -> robots[0]
+            robots.size == 2 -> "${robots[0]} $andWord ${robots[1]}"
+            else -> robots.dropLast(1).joinToString(", ") + " $andWord ${robots.last()}"
+        }
+    }
+
+    /**
+     * Get localized direction name (for regular hints).
+     * Uses StringProvider if available, falls back to English.
      */
     private fun getDirectionName(direction: Int): String {
-        return when (direction) {
+        val key = when (direction) {
+            Board.NORTH -> "direction_up"
+            Board.SOUTH -> "direction_down"
+            Board.EAST -> "direction_right"
+            Board.WEST -> "direction_left"
+            else -> return "unknown"
+        }
+        return stringProvider?.getString(key) ?: when (direction) {
             Board.NORTH -> "UP"
             Board.SOUTH -> "DOWN"
             Board.EAST -> "RIGHT"

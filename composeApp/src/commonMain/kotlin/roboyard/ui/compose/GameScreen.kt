@@ -7,6 +7,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -101,6 +102,7 @@ import roboyard.logic.core.PathTracker
 import roboyard.logic.core.HintManager
 import roboyard.logic.audio.SoundManager
 import roboyard.logic.audio.getSoundManager
+import roboyard.logic.ui.getStringProvider
 import roboyard.logic.core.serializeBoard
 import roboyard.logic.core.deserializeBoard
 import roboyard.logic.storage.PlatformStorage
@@ -276,11 +278,12 @@ fun GameScreen(
     val boardHistory = remember(board) { mutableListOf<Board>() }
     val gameController = remember(board) { GameController() }
     val pathTracker = remember(board) { PathTracker() }
-    val hintManager = remember(board) { HintManager() }
+    val hintManager = remember(board) { HintManager(getStringProvider()) }
     val soundManager = remember(board) { getSoundManager() }
     var elapsedTime by remember(board) { mutableLongStateOf(0L) }
     var timerRunning by remember(board) { mutableStateOf(false) }
-    var selectedRobotIndex by remember(board) { mutableIntStateOf(0) }
+    var selectedRobotIndex by remember(board) { mutableIntStateOf(-1) }
+    var selectedRobotHasMoved by remember(board) { mutableStateOf(false) }
     var accessibilityControlsVisible by remember(board) { mutableStateOf(false) }
     var hintsUsed by remember(board) { mutableIntStateOf(0) }
     var regenerationCount by remember(board) { mutableIntStateOf(0) }
@@ -824,6 +827,14 @@ fun GameScreen(
                 startBoard = startBoard,
                 pathTracker = pathTracker,
                 selectedRobotIndex = selectedRobotIndex,
+                selectedRobotHasMoved = selectedRobotHasMoved,
+                onRobotSelected = { robotIndex ->
+                    // When a robot is touched, select it and reset moved state
+                    if (selectedRobotIndex != robotIndex) {
+                        selectedRobotIndex = robotIndex
+                        selectedRobotHasMoved = false
+                    }
+                },
                 onRobotMove = { robotIndex, direction ->
                 if (!gameWon) {
                     val oldPos = currentBoard.robotPositions[robotIndex]
@@ -851,6 +862,8 @@ fun GameScreen(
                         
                         moveCount++
                         squaresMoved += distance
+                        // Mark that the selected robot has moved (for scale animation)
+                        selectedRobotHasMoved = true
                         
                         // Save history immediately on first move (same as main game)
                         if (wasFirstMove && !isHistorySaved) {
@@ -959,6 +972,7 @@ fun GameScreen(
                     color = FancyButtonColor.BLUE,
                     onClick = {
                         selectedRobotIndex = (selectedRobotIndex + 1) % currentBoard.robotPositions.size
+                        selectedRobotHasMoved = false
                     },
                     modifier = Modifier.weight(1f).padding(end = 4.dp)
                 )
@@ -1542,8 +1556,10 @@ fun BoardCanvas(
     board: Board,
     startBoard: Board,
     onRobotMove: (robotIndex: Int, direction: Int) -> Unit = { _, _ -> },
+    onRobotSelected: (robotIndex: Int) -> Unit = {},
     pathTracker: PathTracker? = null,
     selectedRobotIndex: Int = -1,
+    selectedRobotHasMoved: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val gameState = remember(board) { ComposeGameState(board) }
@@ -1601,6 +1617,81 @@ fun BoardCanvas(
                 contentDescription = "Game board with ${board.width}x${board.height} cells, ${board.robotPositions.size} robots, and ${board.goals.size} targets"
             }
             .pointerInput(Unit) {
+                // Tap-to-move: tap a robot to select it, then tap an empty cell to move
+                // Matches Android GameGridView.onTouchEvent ACTION_UP tap handling
+                detectTapGestures(
+                    onTap = { offset ->
+                        val cellSize = min(size.width, size.height) / maxOf(board.width, board.height).toFloat()
+                        val offsetX = (size.width - board.width * cellSize) / 2
+                        val offsetY = (size.height - board.height * cellSize) / 2
+                        val gridX = ((offset.x - offsetX) / cellSize).toInt()
+                        val gridY = ((offset.y - offsetY) / cellSize).toInt()
+
+                        // Bounds check
+                        if (gridX < 0 || gridX >= board.width || gridY < 0 || gridY >= board.height) return@detectTapGestures
+
+                        // Check if a robot is at the tap position
+                        var clickedRobot = -1
+                        for (i in board.robotPositions.indices) {
+                            val pos = board.robotPositions[i]
+                            if (pos % board.width == gridX && pos / board.width == gridY) {
+                                clickedRobot = i
+                                break
+                            }
+                        }
+
+                        if (clickedRobot >= 0) {
+                            // Tap on a robot — select it (matches Android: select robot on tap)
+                            if (selectedRobotIndex != clickedRobot) {
+                                onRobotSelected(clickedRobot)
+                            }
+                        } else if (selectedRobotIndex >= 0) {
+                            // Tap on empty cell with a robot selected — determine direction and move
+                            // Matches Android GameGridView.onTouchEvent lines 1456-1495
+                            val robotPos = board.robotPositions[selectedRobotIndex]
+                            val robotX = robotPos % board.width
+                            val robotY = robotPos / board.width
+                            var dx = 0
+                            var dy = 0
+
+                            if (robotX == gridX || robotY == gridY) {
+                                // Direct movement along row or column
+                                if (robotX == gridX) {
+                                    // Moving vertically
+                                    dy = if (gridY > robotY) 1 else -1
+                                } else {
+                                    // Moving horizontally
+                                    dx = if (gridX > robotX) 1 else -1
+                                }
+                            } else {
+                                // Diagonal tap — dominant axis wins
+                                val deltaX = gridX - robotX
+                                val deltaY = gridY - robotY
+                                if (kotlin.math.abs(deltaX) > kotlin.math.abs(deltaY)) {
+                                    dx = if (deltaX > 0) 1 else -1
+                                } else {
+                                    dy = if (deltaY > 0) 1 else -1
+                                }
+                            }
+
+                            if (dx != 0 || dy != 0) {
+                                // Convert to direction constant
+                                val direction = when {
+                                    dy < 0 -> Board.NORTH
+                                    dy > 0 -> Board.SOUTH
+                                    dx > 0 -> Board.EAST
+                                    dx < 0 -> Board.WEST
+                                    else -> -1
+                                }
+                                if (direction >= 0) {
+                                    onRobotMove(selectedRobotIndex, direction)
+                                }
+                            }
+                        }
+                    }
+                )
+            }
+            .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = { offset ->
                         val cellSize = min(size.width, size.height) / maxOf(board.width, board.height).toFloat()
@@ -1643,6 +1734,8 @@ fun BoardCanvas(
                                 touchedRobot = i
                                 foundRobot = true
                                 println("[UI] ACTION_DOWN - Robot $i touched at ($robotX, $robotY)")
+                                // Notify parent that a robot was selected (for scale animation)
+                                onRobotSelected(i)
                                 break
                             }
                         }
@@ -1951,15 +2044,24 @@ fun BoardCanvas(
         }
 
         // 6. Robots using the color sprites with selection scale (matches Android GameGridView)
-        // Android scales: 1.5x (initial click) → 1.3x (selected) → 1.1x (default)
+        // Android scales: 1.5x (initial click) → 1.3x (after first move) → 1.1x (default)
         val defaultRobotScale = 1.1f
+        val initialSelectedRobotScale = 1.5f
         val selectedRobotScale = 1.3f
         for (i in board.robotPositions.indices) {
             val position = board.robotPositions[i]
             val robotX = position % board.width
             val robotY = position / board.width
             val sprite = if (i in robotSprites.indices) robotSprites[i] else robotSprites.last()
-            val robotScale = if (i == selectedRobotIndex) selectedRobotScale else defaultRobotScale
+            // Match Android scale logic:
+            // - Selected and not moved yet: 1.5x (initial click pop)
+            // - Selected and has moved: 1.3x (regular selected scale)
+            // - Not selected: 1.1x (default)
+            val robotScale = when {
+                i == selectedRobotIndex && !selectedRobotHasMoved -> initialSelectedRobotScale
+                i == selectedRobotIndex && selectedRobotHasMoved -> selectedRobotScale
+                else -> defaultRobotScale
+            }
             val robotInset = (robotScale - 1f) * cellSize / 2f
             drawImageScaled(
                 sprite,
