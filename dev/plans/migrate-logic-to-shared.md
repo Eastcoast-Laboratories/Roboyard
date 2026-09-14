@@ -37,57 +37,73 @@ The Android app is the main app with all features working. The ComposeApp must l
 
 Full feature gap analysis completed. Priority order (most visible first):
 
-#### 6.5a: Path rendering — HIGHEST PRIORITY
+#### 6.5a: Path rendering — ✅ DONE
 - Android draws colored path lines per robot (50% alpha, cellSize*0.15 stroke)
 - Per-robot base offset + perpendicular offset for stacked segments
 - Undo removes last segment only (not all paths)
-- Starting position markers (ghost robots at 20% opacity)
-- ComposeApp: MISSING entirely
+- ComposeApp: Implemented via shared `PathTracker`
 
-#### 6.5b: Hint system
+#### 6.5b: Hint system — ✅ DONE
 - Pre-hints: 2-4 random + 3 fixed ("less than X", "exact solution", "involved robots", "move X first")
-- Prev/next hint buttons (currently empty onClick in ComposeApp)
-- Hint arrow on board (colored triangle next to hinted robot)
-- Auto-move modes (Full/Semi/Manual)
-- Live move counter toggle with eye-blink animation
+- Prev/next hint buttons (functional)
 - Level hint restrictions (1-10: 4 hints, >10: none)
-- Hint container slide animations
-- Color-coded hint backgrounds
-- ComposeApp: Basic hint only, no pre-hints, no arrows, no auto-move
+- Hint container slide animations (AnimatedVisibility)
+- Color-coded hint backgrounds (per robot color)
+- Close info button (✕)
+- ComposeApp: Implemented via shared `HintManager` with `StringProvider` localization
 
-#### 6.5c: Sound and haptics
-- SoundManager: move, hit_wall, hit_robot (25 robot-specific), win
-- Haptic feedback (50ms vibration on robot cycling)
-- ComposeApp: MISSING entirely
+#### 6.5c: Sound and haptics — ✅ DONE (Desktop no-op)
+- SoundManager: move, win
+- ComposeApp: Wired to shared SoundManager; Desktop is no-op until sound files added
 
-#### 6.5d: Animations
-- Robot scale: 1.5x (initial click) → 1.3x (selected) → 1.1x (default), 300ms
-- Robot movement: smooth slide (not instant teleport)
-- Hint container slide: 300ms down/up
-- Eye-blink on live solver toggle
-- Circular progress on long-press buttons
-- ComposeApp: NONE
+#### 6.5d: Animations — ✅ PARTIAL
+- Robot scale: 1.5x (initial click) → 1.3x (selected) → 1.1x (default) — ✅ DONE
+- Hint container slide: AnimatedVisibility expand/shrink — ✅ DONE
+- Robot movement: smooth slide — ⏳ PENDING
+- Eye-blink on live solver toggle — ⏳ PENDING
+- Circular progress on long-press buttons — ⏳ PENDING
 
-#### 6.5e: Accessibility
+#### 6.5e: Accessibility — ⏳ PENDING
 - TalkBack detection, auto-show controls
 - 3-row layout: Announce/North/Select, West/East, Selected Robot/South/Robot Goal
 - Hover announcements (cell content, possible moves)
 - High contrast mode
 - ComposeApp: Dead code (always hidden)
 
-#### 6.5f: Missing screens
+#### 6.5f: Missing screens — ⏳ PENDING
 - SettingsScreen: stub ("TODO")
 - AchievementsScreen: stub ("TODO")
 - DebugSettingsScreen: stub (not navigable)
 - LevelDesignEditorScreen: stub (not navigable)
 
-#### 6.5g: UI details
-- Move counter: relative size spans (1.5x number, 0.7x label)
-- Timer: hh:mm:ss format for 100+ minutes
-- Completion: inline status (not modal dialog)
-- Buttons: Dice, Layout toggle, Keep Map, Close (X)
-- Back button color logic (green/yellow/gray)
-- Long-press buttons (1.2s cooldown)
+#### 6.5g: UI details — ✅ MOSTLY DONE
+- Move counter: relative size spans (1.5x number, 0.7x label) — ✅ DONE
+- Timer: mm:ss format, 500ms update — ✅ DONE
+- Completion: inline status (not modal dialog) — ✅ DONE
+- Buttons: Dice (🎲), Close (✕) — ✅ DONE
+- Back button color logic (green/yellow) — ✅ DONE
+- Reset→Retry on completion — ✅ DONE
+- Direction buttons (color + text matching robot) — ✅ DONE
+- Hint button toggle (💡Hint / ❌ Hint) — ✅ DONE
+- Optimal moves button color cycling — ✅ DONE
+- Save Map button visibility (hidden in level games) — ✅ DONE
+- New Game button visibility (hidden in level games) — ✅ DONE
+- Long-press buttons (1.2s cooldown) — ⏳ PENDING
+- Layout toggle (landscape) — ⏳ PENDING
+- Keep Map button (solver restarts) — ⏳ PENDING
+- Live move counter toggle — ⏳ PENDING
+
+#### 6.5h: Tap-to-move — ✅ DONE
+- Tap robot to select, tap empty cell to move
+- Direction determined by tap position relative to robot
+- Diagonal axis priority (horizontal only if abs(dx) > abs(dy))
+
+#### 6.5i: Localization — ✅ DONE
+- StringProvider interface in shared
+- AndroidStringProvider (reads strings.xml)
+- DesktopStringProvider (reads strings.json)
+- HintManager uses localized strings
+- strings.json generated from Android strings.xml
 
 ## What was migrated (Phases 1-5, completed)
 
@@ -98,7 +114,7 @@ Full feature gap analysis completed. Priority order (most visible first):
 | `StreakManager.kt` | `app/` | `shared/commonMain` | Context→PlatformStorage, Timber→RLog, AchievementCallback interface, DateUtils expect/actual |
 | `AchievementManager.kt` | `app/` | `shared/commonMain` | Context→PlatformStorage, Toast→UiNotifier, Resources→StringProvider, BuildConfig→PlatformInfo, org.json→Gson, AchievementSyncClient/PlayGamesClient/StreakDataProvider interfaces |
 | `GameUtils.kt` | (new) | `shared/commonMain` | formatTime, formatElapsedTime, buildGameWinMessage — extracted from GameScreen.kt |
-| `BoardUtils.kt` | (new) | `shared/commonMain` | isBoardSolved, moveRobotOnBoard — extracted from GameScreen.kt (**NOTE: these are ComposeApp versions, need to be replaced with Android versions**)
+| `BoardUtils.kt` | (new) | `shared/commonMain` | isBoardSolved (✅ fixed to match Android areAllRobotsAtTargets), moveRobotOnBoard — extracted from GameScreen.kt |
 | `BoardSerializer.kt` | (new) | `shared/commonMain` | serializeBoard, deserializeBoard — extracted from GameScreen.kt (**NOTE: ComposeApp format, need to align with Android save format**)
 
 ## Problem identified after Phase 5
