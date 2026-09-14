@@ -50,7 +50,10 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -989,6 +992,81 @@ fun GameScreen(
         )
         }
 
+        // Hint container (between grid and info row, matches Android position)
+        if (hintMessage != null || solution != null) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xDD000000))
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Previous hint button
+                FancyButton(
+                    text = "◂",
+                    color = FancyButtonColor.HINT,
+                    onClick = {
+                        if (hintManager.hasPrevHint()) {
+                            hintManager.prevHint()
+                            hintMessage = hintManager.getFullHintText()
+                            // Update current hint robot/direction for auto-advance
+                            val regularHint = hintManager.getRegularHint()
+                            if (regularHint != null) {
+                                currentHintRobot = regularHint.first
+                                currentHintDirection = regularHint.second
+                            } else {
+                                currentHintRobot = -1
+                                currentHintDirection = -1
+                            }
+                        }
+                    },
+                    modifier = Modifier.height(32.dp)
+                )
+                // Hint text
+                Text(
+                    text = hintMessage ?: "",
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center
+                )
+                // Optimal moves button (shows when solution is available)
+                if (solution != null) {
+                    FancyButton(
+                        text = solution!!.size().toString(),
+                        color = FancyButtonColor.HINT,
+                        onClick = { },
+                        modifier = Modifier.height(32.dp).width(48.dp)
+                    )
+                }
+                // Next hint button
+                FancyButton(
+                    text = "▸",
+                    color = FancyButtonColor.HINT,
+                    onClick = {
+                        if (hintManager.hasNextHint()) {
+                            hintManager.nextHint()
+                            hintMessage = hintManager.getFullHintText()
+                            // Update current hint robot/direction for auto-advance
+                            val regularHint = hintManager.getRegularHint()
+                            if (regularHint != null) {
+                                currentHintRobot = regularHint.first
+                                currentHintDirection = regularHint.second
+                            } else {
+                                currentHintRobot = -1
+                                currentHintDirection = -1
+                            }
+                            // Save to history when a hint is shown
+                            maxHintUsed = maxOf(maxHintUsed, hintManager.getCurrentHintStep())
+                            saveToHistoryNow("hint_shown_${hintManager.getCurrentHintStep()}")
+                        }
+                    },
+                    modifier = Modifier.height(32.dp)
+                )
+            }
+        }
+
         // Game info row (move count, squares moved, timer)
         Row(
             modifier = Modifier
@@ -999,15 +1077,18 @@ fun GameScreen(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Moves: $moveCount",
-                color = Color.White,
-                fontSize = 14.sp,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                text = buildAnnotatedString {
+                    withStyle(SpanStyle(fontSize = 10.sp)) { append("Moves: ") }
+                    withStyle(SpanStyle(fontSize = 15.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)) { append("$moveCount") }
+                },
+                color = Color.White
             )
             Text(
-                text = "Squares: $squaresMoved",
-                color = Color.White,
-                fontSize = 14.sp
+                text = buildAnnotatedString {
+                    withStyle(SpanStyle(fontSize = 9.sp)) { append("Squares: ") }
+                    withStyle(SpanStyle(fontSize = 14.sp)) { append("$squaresMoved") }
+                },
+                color = Color.White
             )
             Text(
                 text = formatElapsedTime(elapsedTime),
@@ -1158,81 +1239,6 @@ fun GameScreen(
                         }
                     },
                     modifier = Modifier.weight(1f)
-                )
-            }
-        }
-
-        // Hint container (visible when hint is active)
-        if (hintMessage != null || solution != null) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xDD000000))
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                // Previous hint button
-                FancyButton(
-                    text = "◂",
-                    color = FancyButtonColor.HINT,
-                    onClick = {
-                        if (hintManager.hasPrevHint()) {
-                            hintManager.prevHint()
-                            hintMessage = hintManager.getFullHintText()
-                            // Update current hint robot/direction for auto-advance
-                            val regularHint = hintManager.getRegularHint()
-                            if (regularHint != null) {
-                                currentHintRobot = regularHint.first
-                                currentHintDirection = regularHint.second
-                            } else {
-                                currentHintRobot = -1
-                                currentHintDirection = -1
-                            }
-                        }
-                    },
-                    modifier = Modifier.height(32.dp)
-                )
-                // Hint text
-                Text(
-                    text = hintMessage ?: "",
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
-                )
-                // Optimal moves button (shows when solution is available)
-                if (solution != null) {
-                    FancyButton(
-                        text = solution!!.size().toString(),
-                        color = FancyButtonColor.HINT,
-                        onClick = { },
-                        modifier = Modifier.height(32.dp).width(48.dp)
-                    )
-                }
-                // Next hint button
-                FancyButton(
-                    text = "▸",
-                    color = FancyButtonColor.HINT,
-                    onClick = {
-                        if (hintManager.hasNextHint()) {
-                            hintManager.nextHint()
-                            hintMessage = hintManager.getFullHintText()
-                            // Update current hint robot/direction for auto-advance
-                            val regularHint = hintManager.getRegularHint()
-                            if (regularHint != null) {
-                                currentHintRobot = regularHint.first
-                                currentHintDirection = regularHint.second
-                            } else {
-                                currentHintRobot = -1
-                                currentHintDirection = -1
-                            }
-                            // Save to history when a hint is shown
-                            maxHintUsed = maxOf(maxHintUsed, hintManager.getCurrentHintStep())
-                            saveToHistoryNow("hint_shown_${hintManager.getCurrentHintStep()}")
-                        }
-                    },
-                    modifier = Modifier.height(32.dp)
                 )
             }
         }
