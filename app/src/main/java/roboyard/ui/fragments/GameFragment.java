@@ -1669,7 +1669,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                     if (isLongPressInProgress) {
                         isLongPressInProgress = false;
                         longPressHandler.removeCallbacksAndMessages(null);
-                        stopCircularProgressAnimation();
+                        // Don't stop immediately — let the circular progress
+                        // continue briefly and fade out so the user sees the
+                        // press was registered but canceled
+                        fadeOutCircularProgressAnimation();
                     }
                     return true;
             }
@@ -2264,6 +2267,49 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
         circularProgressAnimator.setDuration(BUTTON_COOLDOWN_MS);
         circularProgressAnimator.setInterpolator(new LinearInterpolator());
         circularProgressAnimator.start();
+    }
+
+    /**
+     * Fade out the circular progress animation smoothly when the user releases
+     * the button before the long-press completes. This gives visual feedback
+     * that the press was registered but canceled. Only the circular progress
+     * drawable fades out; the button itself stays fully visible.
+     */
+    private void fadeOutCircularProgressAnimation() {
+        if (newMapButton == null) {
+            stopCircularProgressAnimation();
+            return;
+        }
+
+        // Get the circular progress drawable from the LayerDrawable
+        Drawable current = newMapButton.getBackground();
+        if (!(current instanceof LayerDrawable)) {
+            stopCircularProgressAnimation();
+            return;
+        }
+        LayerDrawable layerDrawable = (LayerDrawable) current;
+        if (layerDrawable.getNumberOfLayers() < 2) {
+            stopCircularProgressAnimation();
+            return;
+        }
+        Drawable circularProgress = layerDrawable.getDrawable(1);
+
+        // Fade out only the circular progress drawable, not the button
+        ValueAnimator fadeAnimator = ValueAnimator.ofInt(255, 0);
+        fadeAnimator.setDuration(300);
+        fadeAnimator.addUpdateListener(animation -> {
+            int alpha = (int) animation.getAnimatedValue();
+            if (circularProgress != null) {
+                circularProgress.setAlpha(alpha);
+            }
+        });
+        fadeAnimator.addListener(new android.animation.AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(android.animation.Animator animation) {
+                stopCircularProgressAnimation();
+            }
+        });
+        fadeAnimator.start();
     }
 
     /**
