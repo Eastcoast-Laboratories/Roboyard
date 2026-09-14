@@ -37,6 +37,12 @@ class Solution(private val board: Board) : Comparable<Solution> {
         return this.movesList.size
     }
 
+    /**
+     * Get a copy of the moves list for hint systems.
+     * Used by HintManager to access individual moves by index.
+     */
+    fun getMovesList(): List<Move> = movesList.toList()
+
     val robotsMoved: MutableSet<Int>
         get() {
             val result = mutableSetOf<Int>()

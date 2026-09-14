@@ -183,6 +183,11 @@ class GameController {
     fun getPathHistorySize(): Int = pathHistory.size
 
     /**
+     * Get the path history list (for path tracking on undo).
+     */
+    fun getPathHistoryList(): List<IntArray> = pathHistory.toList()
+
+    /**
      * Check if a robot can move to a position (not blocked by walls or other robots).
      * Matches Android GameState.canRobotMoveTo logic.
      */
