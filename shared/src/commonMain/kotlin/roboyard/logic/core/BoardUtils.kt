@@ -8,18 +8,36 @@ import driftingdroids.model.Board
  */
 
 /**
- * Check if the board is in a solved state (goal robot is on the goal position).
+ * Check if the board is in a solved state.
+ * Matches Android app's GameState.areAllRobotsAtTargets() logic:
+ * - Checks ALL robots against ALL targets (not just the goal robot)
+ * - A robot is "at target" if it's on a target of matching color, or on a multi-color target
+ * - Game is complete when enough robots are at targets (min of robotCount and goals.size)
  * @param board The board to check
  * @return true if the board is solved, false otherwise
  */
 fun isBoardSolved(board: Board): Boolean {
-    val goal = board.getGoal() ?: return false
-    val goalRobot = goal.robotNumber
-    return if (goalRobot in board.robotPositions.indices) {
-        board.robotPositions[goalRobot] == goal.position
-    } else {
-        board.robotPositions.any { it == goal.position }
+    if (board.goals.isEmpty()) return false
+
+    var robotsAtTarget = 0
+    for (robotIndex in board.robotPositions.indices) {
+        val robotPos = board.robotPositions[robotIndex]
+        val robotX = robotPos % board.width
+        val robotY = robotPos / board.width
+
+        for (goal in board.goals) {
+            if (goal.x == robotX && goal.y == robotY) {
+                // Multi-color target (robotNumber < 0) matches any robot
+                if (goal.robotNumber < 0 || goal.robotNumber == robotIndex) {
+                    robotsAtTarget++
+                    break
+                }
+            }
+        }
     }
+
+    val requiredRobots = minOf(board.robotPositions.size, board.goals.size)
+    return robotsAtTarget >= requiredRobots
 }
 
 /**

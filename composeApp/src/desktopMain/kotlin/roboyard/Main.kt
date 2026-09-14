@@ -16,7 +16,7 @@ fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
         title = "Roboyard",
-        state = rememberWindowState(width = 400.dp, height = 700.dp)
+        state = rememberWindowState(width = 400.dp, height = 800.dp)
     ) {
         App()
     }
