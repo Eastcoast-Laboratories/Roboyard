@@ -1284,11 +1284,13 @@ fun GameScreen(
                     color = FancyButtonColor.HINT,
                     onClick = {
                         if (gameController.getPathHistorySize() > 0) {
+                            // Get the last path entry BEFORE undoing (undoLastMove removes it from history)
+                            val lastPathEntry = gameController.getPathHistoryList().lastOrNull()
                             // Undo last move using GameController (matches Android app behavior)
                             val undoneBoard = gameController.undoLastMove(currentBoard)
-                            if (undoneBoard != null) {
-                                // Undo last path segment (matches Android GameGridView.undoLastPathSegment)
-                                pathTracker.undoLastPathSegmentFromHistory(gameController.getPathHistoryList())
+                            if (undoneBoard != null && lastPathEntry != null) {
+                                // Undo last path segment for the correct robot (matches Android GameGridView.undoLastPathSegment)
+                                pathTracker.undoLastPathSegment(lastPathEntry[0])
                                 currentBoard = undoneBoard
                                 moveCount--
                                 squaresMoved = maxOf(0, squaresMoved - 1)
