@@ -66,13 +66,13 @@ check_length() {
 
 # German Changelog (for CHANGELOG_de.md - without link)
 DE_CHANGES=$(cat << EOF
-- Konvertierung aller Logik zu Kotlin
+- Next-Level-Button im Spiel
 EOF
 )
 
 # English Changelog (for CHANGELOG.md - without link)
 EN_CHANGES=$(cat << EOF
-- convert all logic to Kotlin
+- Next Level button in game
 EOF
 )
 
