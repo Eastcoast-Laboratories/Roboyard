@@ -106,6 +106,11 @@ public class RoboyardApplication extends Application implements Application.Acti
         PlatformStorage storage = AndroidStorage.getInstance(appContext);
         Preferences.INSTANCE.setStorageProvider(() -> storage);
 
+        // Set up StringProvider for shared module localization
+        roboyard.platform.StringProviderBridge.setStringProvider(
+            roboyard.platform.AndroidStringProvider.getInstance(appContext)
+        );
+
         // Initialize PlatformInfo with app version and Play Games flag
         roboyard.logic.platform.PlatformInfo.INSTANCE.init(
             appContext,

@@ -31,3 +31,8 @@ fun interface StringProvider {
         }
     }
 }
+
+/**
+ * Factory function to get the platform-specific string provider.
+ */
+expect fun getStringProvider(): StringProvider
