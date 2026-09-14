@@ -333,6 +333,22 @@ fun GameScreen(
             else -> FancyButtonColor.GRAY // silver/pink/brown/etc
         }
     }
+
+    // Helper: get hint container background color based on robot color (matches Android)
+    fun getHintBackgroundColor(robotColorIndex: Int): Color {
+        return when (robotColorIndex) {
+            0 -> Color(0xFFeb91ff) // pink
+            1 -> Color(0xFFb5f874) // green
+            2 -> Color(0xFF71a6ff) // blue
+            3 -> Color(0xFFfffe71) // yellow
+            4 -> Color(0xFFc0c0c0) // silver
+            5 -> Color(0xFFf77070) // red
+            6 -> Color(0xFFa0522d) // brown
+            7 -> Color(0xFFffa77f) // orange
+            8 -> Color(0xFFf0f0f0) // white
+            else -> Color(0xFF1976D2) // default blue
+        }
+    }
     val soundManager = remember(board) { getSoundManager() }
     var elapsedTime by remember(board) { mutableLongStateOf(0L) }
     var timerRunning by remember(board) { mutableStateOf(false) }
@@ -1006,10 +1022,12 @@ fun GameScreen(
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
+            // Background color based on current hint robot (matches Android color-coded backgrounds)
+            val hintBgColor = if (currentHintRobot >= 0) getHintBackgroundColor(currentHintRobot) else Color(0xFF1976D2)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xDD000000))
+                    .background(hintBgColor)
                     .padding(horizontal = 8.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -1045,10 +1063,10 @@ fun GameScreen(
                     },
                     modifier = Modifier.height(32.dp)
                 )
-                // Hint text
+                // Hint text — black text on colored background (matches Android)
                 Text(
                     text = hintMessage ?: "",
-                    color = Color.White,
+                    color = Color(0xFF1A1A1A),
                     fontSize = 12.sp,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
