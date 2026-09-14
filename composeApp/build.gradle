@@ -38,6 +38,7 @@ kotlin {
         commonTest {
             dependencies {
                 implementation kotlin("test")
+                implementation compose.uiTest
             }
         }
         androidMain {
@@ -56,6 +57,8 @@ kotlin {
         desktopTest {
             dependencies {
                 implementation kotlin("test")
+                implementation compose.uiTestJUnit4
+                implementation compose.desktop.currentOs
             }
         }
     }

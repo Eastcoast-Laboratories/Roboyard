@@ -82,7 +82,7 @@ def main():
     
     # Step 1: Click "New Random Game" button
     print("[TEST] Step 1: Clicking New Random Game button")
-    click_frac(0.5, 0.20, "New Random Game button", wait=0.5)
+    click_frac(0.5, 0.23, "New Random Game button", wait=0.5)
     take_screenshot("random_screenshot_1_after_random_game.png")
     
     # Wait for game to load and solver to run

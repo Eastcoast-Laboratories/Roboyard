@@ -16,6 +16,14 @@
 
   (`app/src/test/java/roboyard/eclabs/RoboyardSmokeTest.java` — covers GameElement, GameMove, LevelCompletionData, GridElement, MapObjects, Achievement*, Constants, save-data parsing, streak/sync logic, timestamp parsing, URL construction.)
 
+- After EVERY change that affects `composeApp/` or `shared/`, verify the ComposeApp still compiles and runs:
+
+  ```bash
+  ./gradlew :composeApp:compileKotlinDesktop
+  ./gradlew :composeApp:desktopTest --tests "roboyard.ui.compose.ComposeAppUiSmokeTest"
+  ```
+
+  The `ComposeAppUiSmokeTest` launches the app and clicks through main screens (MainMenu, Level Selection, Credits) to verify navigation works. If possible, also launch the desktop app briefly (`./gradlew :composeApp:run`) to confirm it starts without crashes.
 - Verify fixes yourself using unit tests and logcat. Do not write testing instructions for the user — run the tests, check the logs, and confirm the fix works end-to-end.
 - Document every new test (unit, Espresso, instrumented) in `dev/TESTSUITE.md` — the central source of truth for test status. Format: test name, type (Unit / E2E / Instrumented), status (✅ Passing / ❌ Failing / ⏳ Pending), description, tags.
 - For Espresso UI tests, use the `espresso-testing` skill: always reuse and extend `TestHelper` (`app/src/androidTest/java/roboyard/eclabs/ui/TestHelper.java`) instead of writing inline interactions.

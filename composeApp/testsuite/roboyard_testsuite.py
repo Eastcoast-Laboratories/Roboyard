@@ -4,7 +4,7 @@ Roboyard-specific Test Suite
 Functions specific to Roboyard app testing (robot movement, log parsing, etc.)
 """
 
-from testsuite.test_suite import WINDOW_BOUNDS, drag_from_to
+from testsuite import test_suite
 
 def move_robot(robot_color, direction, robot_positions, board_width, board_height, duration=0.5):
     """Move a robot by dragging from its current position to target position.
@@ -47,6 +47,8 @@ def move_robot(robot_color, direction, robot_positions, board_width, board_heigh
     
     # Convert board coordinates to screen coordinates
     # Board is displayed in the center of the window, need to calculate cell size
+    # Access WINDOW_BOUNDS as a module attribute (not imported by value) so we see updates from init_globals
+    WINDOW_BOUNDS = test_suite.WINDOW_BOUNDS
     if WINDOW_BOUNDS is None:
         print("[ROBOYARD_TEST_SUITE] ERROR: Window bounds not set")
         return False
@@ -73,7 +75,7 @@ def move_robot(robot_color, direction, robot_positions, board_width, board_heigh
     print(f"[ROBOYARD_TEST_SUITE] Screen coordinates: from ({from_x:.0f}, {from_y:.0f}) to ({to_x:.0f}, {to_y:.0f})")
     
     # Execute drag
-    return drag_from_to(int(from_x), int(from_y), int(to_x), int(to_y), f"Robot {robot_color} {direction}", duration)
+    return test_suite.drag_from_to(int(from_x), int(from_y), int(to_x), int(to_y), f"Robot {robot_color} {direction}", duration)
 
 def parse_solution_from_log(log_file=None):
     """Parse solver solution from app log file.
@@ -101,15 +103,14 @@ def parse_solution_from_log(log_file=None):
         moves_str = match.group(1)
         print(f"[ROBOYARD_TEST_SUITE] Found solution moves: {moves_str}")
         
-        # Parse moves
+        # Parse moves — format is space-separated 2-char pairs: "bN bE gS yE"
         moves = []
-        # Move format: 2 characters (color + direction)
-        for i in range(0, len(moves_str), 2):
-            if i + 1 >= len(moves_str):
-                break
+        for move_str in moves_str.split():
+            if len(move_str) < 2:
+                continue
             
-            color_char = moves_str[i].lower()
-            direction_char = moves_str[i + 1].upper()
+            color_char = move_str[0].lower()
+            direction_char = move_str[1].upper()
             
             # Map color char to robot color index (matches LevelLoader.parseColorChar)
             color_map = {'b': 0, 'g': 1, 'r': 2, 'y': 3, 's': 4}
@@ -133,7 +134,10 @@ def parse_robot_positions_from_log(log_file=None):
     """Parse robot start positions from app log file.
     
     Returns list of (x, y) tuples for all robots, or None if not found.
-    Format: "Robot positions: [x1,y1, x2,y2, ...]"
+    Supports three log formats:
+    - Old: "Robot positions: [x1,y1, x2,y2, ...]" (x,y pairs)
+    - Deserialize: "[DESERIALIZE] Board created: WxH, robots: p1,p2,p3,p4, goals: N" (linear positions)
+    - New game: "Added robot robot_red at position X,Y" (one line per robot)
     """
     from testsuite.test_suite import APP_LOG_FILE
     if log_file is None:
@@ -142,8 +146,43 @@ def parse_robot_positions_from_log(log_file=None):
         with open(log_file, 'r') as f:
             content = f.read()
         
-        # Find robot positions line
         import re
+        
+        # Try new-game format first: "Added robot robot_red at position X,Y"
+        # Only take the last group of 4 robots (most recent game)
+        added_pattern = r"Added robot \w+ at position (\d+),(\d+)"
+        matches = re.findall(added_pattern, content)
+        if matches:
+            # Take only the last 4 matches (most recent game's robots)
+            recent_matches = matches[-4:] if len(matches) >= 4 else matches
+            print(f"[ROBOYARD_TEST_SUITE] Found robot positions (new-game format): {len(recent_matches)} robots (from {len(matches)} total log entries)")
+            positions = [(int(x), int(y)) for x, y in recent_matches]
+            print(f"[ROBOYARD_TEST_SUITE] Robot positions: {positions}")
+            return positions
+        
+        # Try deserialize format: "[DESERIALIZE] Board created: WxH, robots: p1,p2,..."
+        deserialize_pattern = r"\[DESERIALIZE\] Board created: (\d+)x(\d+), robots: ([\d,]+)"
+        match = re.search(deserialize_pattern, content)
+        if match:
+            board_width = int(match.group(1))
+            board_height = int(match.group(2))
+            positions_str = match.group(3)
+            print(f"[ROBOYARD_TEST_SUITE] Found robot positions (deserialize format): {positions_str}")
+            
+            # Parse linear positions and convert to (x, y) tuples
+            positions = []
+            for pos_str in positions_str.split(','):
+                pos_str = pos_str.strip()
+                if pos_str:
+                    linear_pos = int(pos_str)
+                    x = linear_pos % board_width
+                    y = linear_pos // board_width
+                    positions.append((x, y))
+            
+            print(f"[ROBOYARD_TEST_SUITE] Total robot positions parsed: {len(positions)}")
+            return positions
+        
+        # Fall back to old format: "Robot positions: [x1,y1, x2,y2, ...]"
         positions_pattern = r"Robot positions: \[(.+?)\]"
         match = re.search(positions_pattern, content)
         
@@ -152,7 +191,7 @@ def parse_robot_positions_from_log(log_file=None):
             return None
         
         positions_str = match.group(1)
-        print(f"[ROBOYARD_TEST_SUITE] Found robot positions: {positions_str}")
+        print(f"[ROBOYARD_TEST_SUITE] Found robot positions (old format): {positions_str}")
         
         # Parse positions
         positions = []

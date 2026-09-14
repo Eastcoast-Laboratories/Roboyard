@@ -79,10 +79,10 @@ def main():
     take_screenshot("screenshot_0_initial.png")
     
     # Button layout (fractions of window): main menu buttons are in the upper portion.
-    # New Random Game ~0.20, Level Game ~0.29, Load Game ~0.38 of window height.
+    # New Random Game ~0.23, Level Game ~0.32, Load Game ~0.41 of window height.
     # Step 1: Click "Level Game" button
     print("[TEST] Step 1: Clicking Level Game button")
-    click_frac(0.5, 0.29, "Level Game button", wait=0.5)
+    click_frac(0.5, 0.32, "Level Game button", wait=0.5)
     take_screenshot("screenshot_1_after_level_game.png")
     
     # Step 2: Select Level 1
