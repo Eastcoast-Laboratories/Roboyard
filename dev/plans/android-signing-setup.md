@@ -154,3 +154,44 @@ Debug builds are automatically signed with `~/.android/debug.keystore`.
 5. Update `buildTypes.release` with the conditional `signingConfig`
 6. Ensure `.gitignore` excludes `keystore.properties` and keystore files
 7. Verify with `./gradlew signingReport`
+
+## Play Console Registration (package name + ADI token)
+
+When registering a package name in the Play Console for the first time, Google may
+require an **ADI (Android Developer Identity) registration token** to verify that
+you own the app. This is separate from signing.
+
+### Steps
+
+1. In the Play Console, start the package name registration flow.
+2. Google shows a unique token (e.g. `CSXXXXXXXXXXAAAAAAAAAAAAAA`). **This token is a secret — never commit it to git.** It is gitignored in `.gitignore`.
+3. Create a file `app/src/main/assets/adi-registration.properties` containing **only the token** as a single line:
+   ```
+   CSXXXXXXXXXXAAAAAAAAAAAAAA
+   ```
+   Do NOT use key-value format (`key=token`) — the Play Console rejects that as "invalid token file".
+4. Build a debug APK:
+   ```bash
+   ./gradlew clean assembleDebug
+   ```
+5. Upload the debug APK to the Play Console when prompted.
+6. Google verifies the token and registers the package name.
+
+### Signing key for initial upload
+
+If Google Play App Signing is not yet configured for the package name, the Play Console
+may reject your upload key. In that case, use the **debug signing key** for the initial
+upload (debug builds are automatically signed with `~/.android/debug.keystore`).
+
+When asked for a justification (because the debug key does not match Google's expected
+signing key), use:
+
+```
+This is my development/debug signing key from ~/.android/debug.keystore.
+I'm using it for the app because the main key you suggest is the F-Droid's
+build server signing key, so I cannot use that key for the Play Console.
+I will switch to my production upload key once App Signing is set up.
+```
+
+After the package name is registered, set up App Signing with your `upload_certificate.pem`
+so future releases can use your upload key.
