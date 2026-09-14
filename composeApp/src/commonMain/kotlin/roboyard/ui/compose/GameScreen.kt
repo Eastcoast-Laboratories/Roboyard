@@ -1,6 +1,11 @@
 package roboyard.ui.compose
 
 import roboyard.logic.core.calculateStars
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.material3.Button
 import androidx.compose.foundation.Canvas
@@ -140,6 +145,7 @@ fun GameScreen(
     val robotStartPositions = remember(board) { board.robotPositions.copyOf() }
     val startBoard = remember(board) { Board.Companion.createClone(board).also { it.setRobots(robotStartPositions) } }
     var hintMessage by remember(board) { mutableStateOf<String?>(null) }
+    var hintContainerVisible by remember(board) { mutableStateOf(false) }
     var gameWon by remember(board) { mutableStateOf(false) }
     var maxHintUsed by remember(board) { mutableIntStateOf(-1) } // Track max hint used this session
     var isHistorySaved by remember(board) { mutableStateOf(false) }
@@ -790,6 +796,7 @@ fun GameScreen(
             val optimalMoves = solution?.size() ?: 0
             val stars = calculateStars(moveCount, optimalMoves, maxHintUsed)
             val finalStars = if (stars < 1 && isLevelGame && levelId <= 10) 1 else stars
+            hintContainerVisible = true
             hintMessage = if (isLevelGame) {
                 val starStr = buildString { repeat(finalStars) { append("★ ") } }.trim()
                 if (starStr.isEmpty()) "Level $levelId Complete! ✓" else "Level $levelId Complete! $starStr"
@@ -993,15 +1000,30 @@ fun GameScreen(
         }
 
         // Hint container (between grid and info row, matches Android position)
-        if (hintMessage != null || solution != null) {
+        // Uses AnimatedVisibility for slide-down/slide-up animation (matches Android)
+        AnimatedVisibility(
+            visible = hintContainerVisible && (hintMessage != null || solution != null),
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color(0xDD000000))
-                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                // Close info button (X) — hides the hint container (matches Android game_info_close_button)
+                FancyButton(
+                    text = "✕",
+                    color = FancyButtonColor.GRAY,
+                    onClick = {
+                        hintContainerVisible = false
+                        hintMessage = null
+                    },
+                    modifier = Modifier.height(32.dp).width(32.dp).padding(end = 4.dp)
+                )
                 // Previous hint button
                 FancyButton(
                     text = "◂",
@@ -1320,6 +1342,7 @@ fun GameScreen(
                             println("[HINT] Solution is null, starting solver")
                             isSolverRunning = true
                             hintMessage = "Calculating solution..."
+                            hintContainerVisible = true
 
                             // Run solver in background thread
                             Thread {
@@ -1356,6 +1379,7 @@ fun GameScreen(
                         } else {
                             // Show next hint using HintManager
                             println("[HINT] Solution exists, showing next hint via HintManager")
+                            hintContainerVisible = true
                             if (hintManager.hasNextHint()) {
                                 hintManager.nextHint()
                                 hintMessage = hintManager.getFullHintText()
@@ -1432,6 +1456,7 @@ fun GameScreen(
                         moveCount = 0
                         squaresMoved = 0
                         hintMessage = null
+                        hintContainerVisible = false
                         gameWon = false
                         gameController.reset()
                         hintManager.reset()
