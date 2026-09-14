@@ -33,19 +33,61 @@ The Android app is the main app with all features working. The ComposeApp must l
 - Both apps use the same DriftingDroids solver algorithm
 - No behavioral difference — SolverDD is just a wrapper for GameState→Board conversion
 
-### Step 6.4: Save format alignment — ⏳ PENDING (larger refactor)
-- Android uses `GameState.serialize()` (mapData-based format)
-- ComposeApp uses custom format (Board-based)
-- Aligning requires either:
-  - Converting between Board and GameState for serialization, or
-  - Making ComposeApp use GameState internally (major refactor)
-- Current: each app can save/load its own format
-- TODO: align save formats for cross-app compatibility
+### Step 6.5: Remaining behavioral differences — IN PROGRESS
 
-### Step 6.5: Remaining behavioral differences — ⏳ PENDING
-- Sound/haptics
-- UI layout/appearance details
-- Hint system details
+Full feature gap analysis completed. Priority order (most visible first):
+
+#### 6.5a: Path rendering — HIGHEST PRIORITY
+- Android draws colored path lines per robot (50% alpha, cellSize*0.15 stroke)
+- Per-robot base offset + perpendicular offset for stacked segments
+- Undo removes last segment only (not all paths)
+- Starting position markers (ghost robots at 20% opacity)
+- ComposeApp: MISSING entirely
+
+#### 6.5b: Hint system
+- Pre-hints: 2-4 random + 3 fixed ("less than X", "exact solution", "involved robots", "move X first")
+- Prev/next hint buttons (currently empty onClick in ComposeApp)
+- Hint arrow on board (colored triangle next to hinted robot)
+- Auto-move modes (Full/Semi/Manual)
+- Live move counter toggle with eye-blink animation
+- Level hint restrictions (1-10: 4 hints, >10: none)
+- Hint container slide animations
+- Color-coded hint backgrounds
+- ComposeApp: Basic hint only, no pre-hints, no arrows, no auto-move
+
+#### 6.5c: Sound and haptics
+- SoundManager: move, hit_wall, hit_robot (25 robot-specific), win
+- Haptic feedback (50ms vibration on robot cycling)
+- ComposeApp: MISSING entirely
+
+#### 6.5d: Animations
+- Robot scale: 1.5x (initial click) → 1.3x (selected) → 1.1x (default), 300ms
+- Robot movement: smooth slide (not instant teleport)
+- Hint container slide: 300ms down/up
+- Eye-blink on live solver toggle
+- Circular progress on long-press buttons
+- ComposeApp: NONE
+
+#### 6.5e: Accessibility
+- TalkBack detection, auto-show controls
+- 3-row layout: Announce/North/Select, West/East, Selected Robot/South/Robot Goal
+- Hover announcements (cell content, possible moves)
+- High contrast mode
+- ComposeApp: Dead code (always hidden)
+
+#### 6.5f: Missing screens
+- SettingsScreen: stub ("TODO")
+- AchievementsScreen: stub ("TODO")
+- DebugSettingsScreen: stub (not navigable)
+- LevelDesignEditorScreen: stub (not navigable)
+
+#### 6.5g: UI details
+- Move counter: relative size spans (1.5x number, 0.7x label)
+- Timer: hh:mm:ss format for 100+ minutes
+- Completion: inline status (not modal dialog)
+- Buttons: Dice, Layout toggle, Keep Map, Close (X)
+- Back button color logic (green/yellow/gray)
+- Long-press buttons (1.2s cooldown)
 
 ## What was migrated (Phases 1-5, completed)
 

@@ -97,6 +97,10 @@ import roboyard.logic.core.buildGameWinMessage
 import roboyard.logic.core.isBoardSolved
 import roboyard.logic.core.moveRobotOnBoard
 import roboyard.logic.core.GameController
+import roboyard.logic.core.PathTracker
+import roboyard.logic.core.HintManager
+import roboyard.logic.audio.SoundManager
+import roboyard.logic.audio.getSoundManager
 import roboyard.logic.core.serializeBoard
 import roboyard.logic.core.deserializeBoard
 import roboyard.logic.storage.PlatformStorage
@@ -271,6 +275,9 @@ fun GameScreen(
     var isSolverRunning by remember(board) { mutableStateOf(false) }
     val boardHistory = remember(board) { mutableListOf<Board>() }
     val gameController = remember(board) { GameController() }
+    val pathTracker = remember(board) { PathTracker() }
+    val hintManager = remember(board) { HintManager() }
+    val soundManager = remember(board) { getSoundManager() }
     var elapsedTime by remember(board) { mutableLongStateOf(0L) }
     var timerRunning by remember(board) { mutableStateOf(false) }
     var selectedRobotIndex by remember(board) { mutableIntStateOf(0) }
@@ -815,6 +822,8 @@ fun GameScreen(
             BoardCanvas(
                 board = currentBoard,
                 startBoard = startBoard,
+                pathTracker = pathTracker,
+                selectedRobotIndex = selectedRobotIndex,
                 onRobotMove = { robotIndex, direction ->
                 if (!gameWon) {
                     val oldPos = currentBoard.robotPositions[robotIndex]
@@ -826,8 +835,17 @@ fun GameScreen(
                         val w = newBoard.width
                         val distance = kotlin.math.abs((newPos % w) - (oldPos % w)) +
                             kotlin.math.abs((newPos / w) - (oldPos / w))
+                        // Track path for rendering (matches Android GameGridView)
+                        pathTracker.addPathSegment(
+                            robotIndex,
+                            oldPos % w, oldPos / w,
+                            newPos % w, newPos / w
+                        )
                         currentBoard = newBoard
-                        
+
+                        // Play move sound (matches Android SoundManager)
+                        soundManager.playSound("move")
+
                         // Check if this is the first move (same as main game)
                         val wasFirstMove = (moveCount == 0)
                         
@@ -846,40 +864,27 @@ fun GameScreen(
                             }.start()
                         }
                         
-                        // Check if player followed the current hint
+                        // Check if player followed the current hint (auto-advance via HintManager)
                         if (hintMessage != null && robotIndex == currentHintRobot && direction == currentHintDirection) {
-                            // Player followed the hint, show next hint automatically
-                            val nextMove = solution?.getNextMove()
-                            if (nextMove != null) {
-                                // Update maxHintUsed when hint is shown
-                                maxHintUsed = maxOf(maxHintUsed, currentHintStep)
-                                hintsUsed++
-                                
-                                // Save to history immediately when a hint is shown (same as main game)
-                                saveToHistoryNow("hint_shown_$currentHintStep")
-                                val directionName = when (nextMove.direction) {
-                                    Board.NORTH -> "North"
-                                    Board.SOUTH -> "South"
-                                    Board.EAST -> "East"
-                                    Board.WEST -> "West"
-                                    else -> "Unknown"
+                            // Player followed the hint, show next hint automatically via HintManager
+                            if (hintManager.hasNextHint()) {
+                                hintManager.nextHint()
+                                hintMessage = hintManager.getFullHintText()
+                                val regularHint = hintManager.getRegularHint()
+                                if (regularHint != null) {
+                                    currentHintRobot = regularHint.first
+                                    currentHintDirection = regularHint.second
+                                } else {
+                                    currentHintRobot = -1
+                                    currentHintDirection = -1
                                 }
-                                val colorName = when (nextMove.robotNumber) {
-                                    0 -> "Pink"
-                                    1 -> "Green"
-                                    2 -> "Blue"
-                                    3 -> "Yellow"
-                                    4 -> "Silver"
-                                    else -> "Unknown"
-                                }
-                                hintMessage = "Hint ${currentHintStep + 1}: Move $colorName robot $directionName"
-                                currentHintRobot = nextMove.robotNumber
-                                currentHintDirection = nextMove.direction
-                                currentHintStep++
+                                maxHintUsed = maxOf(maxHintUsed, hintManager.getCurrentHintStep())
+                                saveToHistoryNow("hint_shown_${hintManager.getCurrentHintStep()}")
                             } else {
                                 hintMessage = "All hints shown"
                             }
-                        } else {
+                        } else if (hintMessage != null) {
+                            // Player made a different move, clear hint
                             hintMessage = null
                         }
                         
@@ -888,8 +893,8 @@ fun GameScreen(
                             gameWon = true
                             // Save to history immediately on completion (same as main game)
                             saveToHistoryNow("completed")
-                            // Play win sound and show completion message
-                            // Note: Sound playback is platform-specific and will be implemented separately
+                            // Play win sound (matches Android SoundManager)
+                            soundManager.playSound("win")
                             val optimalMoves = solution?.size() ?: 0
                             val stars = calculateStars(moveCount, optimalMoves, hintsUsed)
                             
@@ -1095,7 +1100,21 @@ fun GameScreen(
                 FancyButton(
                     text = "◂",
                     color = FancyButtonColor.HINT,
-                    onClick = { },
+                    onClick = {
+                        if (hintManager.hasPrevHint()) {
+                            hintManager.prevHint()
+                            hintMessage = hintManager.getFullHintText()
+                            // Update current hint robot/direction for auto-advance
+                            val regularHint = hintManager.getRegularHint()
+                            if (regularHint != null) {
+                                currentHintRobot = regularHint.first
+                                currentHintDirection = regularHint.second
+                            } else {
+                                currentHintRobot = -1
+                                currentHintDirection = -1
+                            }
+                        }
+                    },
                     modifier = Modifier.height(32.dp)
                 )
                 // Hint text
@@ -1119,7 +1138,24 @@ fun GameScreen(
                 FancyButton(
                     text = "▸",
                     color = FancyButtonColor.HINT,
-                    onClick = { },
+                    onClick = {
+                        if (hintManager.hasNextHint()) {
+                            hintManager.nextHint()
+                            hintMessage = hintManager.getFullHintText()
+                            // Update current hint robot/direction for auto-advance
+                            val regularHint = hintManager.getRegularHint()
+                            if (regularHint != null) {
+                                currentHintRobot = regularHint.first
+                                currentHintDirection = regularHint.second
+                            } else {
+                                currentHintRobot = -1
+                                currentHintDirection = -1
+                            }
+                            // Save to history when a hint is shown
+                            maxHintUsed = maxOf(maxHintUsed, hintManager.getCurrentHintStep())
+                            saveToHistoryNow("hint_shown_${hintManager.getCurrentHintStep()}")
+                        }
+                    },
                     modifier = Modifier.height(32.dp)
                 )
             }
@@ -1178,7 +1214,6 @@ fun GameScreen(
                     onClick = {
                         println("[HINT] Hint button clicked, isSolverRunning=$isSolverRunning, solution=${solution}")
                         if (isSolverRunning) {
-                            // Cancel solver (not implemented for now)
                             println("[HINT] Solver already running, returning")
                             return@FancyButton
                         }
@@ -1196,39 +1231,22 @@ fun GameScreen(
                                     val solutions = solver.execute()
                                     if (solutions.isNotEmpty() && solutions[0].size() > 0) {
                                         solution = solutions[0]
+                                        // Initialize HintManager with pre-hints (matches Android app)
+                                        hintManager.initialize(solution, isLevelGame, levelId)
                                         currentHintStep = 0
-                                        val firstMove = solution!!.getNextMove()
-                                        if (firstMove != null) {
-                                            println("[HINT] First hint found, currentHintStep=$currentHintStep")
-                                            // Update maxHintUsed when first hint is shown
-                                            maxHintUsed = maxOf(maxHintUsed, currentHintStep)
-                                            hintsUsed++
-                                            
-                                            // Save to history immediately when hint is shown
-                                            println("[HINT] Calling saveToHistoryNow for first hint")
-                                            saveToHistoryNow("hint_shown_$currentHintStep")
-                                            
-                                            val directionName = when (firstMove.direction) {
-                                                Board.NORTH -> "North"
-                                                Board.SOUTH -> "South"
-                                                Board.EAST -> "East"
-                                                Board.WEST -> "West"
-                                                else -> "Unknown"
-                                            }
-                                            val colorName = when (firstMove.robotNumber) {
-                                                0 -> "Pink"
-                                                1 -> "Green"
-                                                2 -> "Blue"
-                                                3 -> "Yellow"
-                                                4 -> "Silver"
-                                                else -> "Unknown"
-                                            }
-                                            hintMessage = "Hint: Move $colorName robot $directionName"
-                                            currentHintRobot = firstMove.robotNumber
-                                            currentHintDirection = firstMove.direction
+                                        // Show first hint (pre-hint or regular hint)
+                                        hintMessage = hintManager.getFullHintText()
+                                        // Update current hint robot/direction for auto-advance
+                                        val regularHint = hintManager.getRegularHint()
+                                        if (regularHint != null) {
+                                            currentHintRobot = regularHint.first
+                                            currentHintDirection = regularHint.second
                                         } else {
-                                            hintMessage = "Already at goal!"
+                                            currentHintRobot = -1
+                                            currentHintDirection = -1
                                         }
+                                        maxHintUsed = maxOf(maxHintUsed, 0)
+                                        saveToHistoryNow("hint_shown_0")
                                     } else {
                                         hintMessage = "No solution found"
                                     }
@@ -1239,37 +1257,21 @@ fun GameScreen(
                                 }
                             }.start()
                         } else {
-                            // Show next hint
-                            println("[HINT] Solution already exists, showing next hint")
-                            val nextMove = solution!!.getNextMove()
-                            if (nextMove != null) {
-                                // Update maxHintUsed when hint is shown
-                                maxHintUsed = maxOf(maxHintUsed, currentHintStep)
-                                hintsUsed++
-                                
-                                // Save to history immediately when a hint is shown
-                                println("[HINT] Calling saveToHistoryNow for next hint")
-                                saveToHistoryNow("hint_shown_$currentHintStep")
-                                
-                                val directionName = when (nextMove.direction) {
-                                    Board.NORTH -> "North"
-                                    Board.SOUTH -> "South"
-                                    Board.EAST -> "East"
-                                    Board.WEST -> "West"
-                                    else -> "Unknown"
+                            // Show next hint using HintManager
+                            println("[HINT] Solution exists, showing next hint via HintManager")
+                            if (hintManager.hasNextHint()) {
+                                hintManager.nextHint()
+                                hintMessage = hintManager.getFullHintText()
+                                val regularHint = hintManager.getRegularHint()
+                                if (regularHint != null) {
+                                    currentHintRobot = regularHint.first
+                                    currentHintDirection = regularHint.second
+                                } else {
+                                    currentHintRobot = -1
+                                    currentHintDirection = -1
                                 }
-                                val colorName = when (nextMove.robotNumber) {
-                                    0 -> "Pink"
-                                    1 -> "Green"
-                                    2 -> "Blue"
-                                    3 -> "Yellow"
-                                    4 -> "Silver"
-                                    else -> "Unknown"
-                                }
-                                hintMessage = "Hint ${currentHintStep + 1}: Move $colorName robot $directionName"
-                                currentHintRobot = nextMove.robotNumber
-                                currentHintDirection = nextMove.direction
-                                currentHintStep++
+                                maxHintUsed = maxOf(maxHintUsed, hintManager.getCurrentHintStep())
+                                saveToHistoryNow("hint_shown_${hintManager.getCurrentHintStep()}")
                             } else {
                                 hintMessage = "All hints shown"
                             }
@@ -1285,6 +1287,8 @@ fun GameScreen(
                             // Undo last move using GameController (matches Android app behavior)
                             val undoneBoard = gameController.undoLastMove(currentBoard)
                             if (undoneBoard != null) {
+                                // Undo last path segment (matches Android GameGridView.undoLastPathSegment)
+                                pathTracker.undoLastPathSegmentFromHistory(gameController.getPathHistoryList())
                                 currentBoard = undoneBoard
                                 moveCount--
                                 squaresMoved = maxOf(0, squaresMoved - 1)
@@ -1294,6 +1298,7 @@ fun GameScreen(
                                 // Fallback to board history if GameController undo fails
                                 if (boardHistory.isNotEmpty()) {
                                     val previousBoard = boardHistory.removeAt(boardHistory.size - 1)
+                                    pathTracker.clearPaths()
                                     currentBoard = previousBoard
                                     moveCount--
                                     squaresMoved = maxOf(0, squaresMoved - 1)
@@ -1329,6 +1334,9 @@ fun GameScreen(
                         squaresMoved = 0
                         hintMessage = null
                         gameWon = false
+                        gameController.reset()
+                        hintManager.reset()
+                        pathTracker.clearPaths()
                     },
                     modifier = Modifier.weight(1f)
                 )
@@ -1413,6 +1421,8 @@ fun GameScreen(
                         isSolverRunning = false
                         boardHistory.clear()
                         gameController.reset()
+                        hintManager.reset()
+                        pathTracker.clearPaths()
                         gameStartTime = System.currentTimeMillis()
                         totalPlayTime = 0
                         isHistorySaved = false
@@ -1530,6 +1540,8 @@ fun BoardCanvas(
     board: Board,
     startBoard: Board,
     onRobotMove: (robotIndex: Int, direction: Int) -> Unit = { _, _ -> },
+    pathTracker: PathTracker? = null,
+    selectedRobotIndex: Int = -1,
     modifier: Modifier = Modifier
 ) {
     val gameState = remember(board) { ComposeGameState(board) }
@@ -1883,14 +1895,70 @@ fun BoardCanvas(
             }
         }
 
-        // 5. Robots using the color sprites at DEFAULT_ROBOT_SCALE (1.1 * cellSize)
-        val robotScale = 1.1f
-        val robotInset = (robotScale - 1f) * cellSize / 2f
+        // 5. Robot movement paths (drawn under robots, above grid)
+        if (pathTracker != null && pathTracker.hasPaths()) {
+            val pathStrokeWidth = cellSize * PathTracker.PATH_STROKE_WIDTH_RATIO
+            val perpOffsetStep = cellSize * PathTracker.PERPENDICULAR_OFFSET_STEP_RATIO
+            val robotPaths = pathTracker.getRobotPaths()
+            for ((robotColor, path) in robotPaths) {
+                if (path.size < 2) continue
+                val baseOffset = pathTracker.getBaseOffset(robotColor)
+                val baseOffsetX = baseOffset[0] * cellSize
+                val baseOffsetY = baseOffset[1] * cellSize
+                // Robot path colors (50% alpha, matches Android GameGridView)
+                val pathColor = when (robotColor) {
+                    0 -> Color(0x80FF69B4.toInt()) // PINK (red)
+                    1 -> Color(0x8000B100.toInt()) // GREEN
+                    2 -> Color(0x800000FF.toInt()) // BLUE
+                    3 -> Color(0x80B1B100.toInt()) // YELLOW
+                    4 -> Color(0x80C0C0C0.toInt()) // SILVER
+                    else -> Color(0x80B1B1B1.toInt()) // default gray
+                }
+                for (i in 1 until path.size) {
+                    val pos = path[i]
+                    val prevPos = path[i - 1]
+                    val x = offsetX + (pos[0] * cellSize) + cellSize / 2
+                    val y = offsetY + (pos[1] * cellSize) + cellSize / 2
+                    val prevX = offsetX + (prevPos[0] * cellSize) + cellSize / 2
+                    val prevY = offsetY + (prevPos[1] * cellSize) + cellSize / 2
+                    // Calculate perpendicular offset for stacked segments
+                    val dx = x - prevX
+                    val dy = y - prevY
+                    val length = kotlin.math.sqrt(dx * dx + dy * dy)
+                    if (length > 0.001f) {
+                        val perpX = -dy / length
+                        val perpY = dx / length
+                        val count = pathTracker.getSegmentCount(robotColor, prevPos[0], prevPos[1], pos[0], pos[1])
+                        val perpOffset = (count - 1) * perpOffsetStep
+                        drawLine(
+                            color = pathColor,
+                            start = androidx.compose.ui.geometry.Offset(prevX + baseOffsetX + perpX * perpOffset, prevY + baseOffsetY + perpY * perpOffset),
+                            end = androidx.compose.ui.geometry.Offset(x + baseOffsetX + perpX * perpOffset, y + baseOffsetY + perpY * perpOffset),
+                            strokeWidth = pathStrokeWidth
+                        )
+                    } else {
+                        drawLine(
+                            color = pathColor,
+                            start = androidx.compose.ui.geometry.Offset(prevX + baseOffsetX, prevY + baseOffsetY),
+                            end = androidx.compose.ui.geometry.Offset(x + baseOffsetX, y + baseOffsetY),
+                            strokeWidth = pathStrokeWidth
+                        )
+                    }
+                }
+            }
+        }
+
+        // 6. Robots using the color sprites with selection scale (matches Android GameGridView)
+        // Android scales: 1.5x (initial click) → 1.3x (selected) → 1.1x (default)
+        val defaultRobotScale = 1.1f
+        val selectedRobotScale = 1.3f
         for (i in board.robotPositions.indices) {
             val position = board.robotPositions[i]
             val robotX = position % board.width
             val robotY = position / board.width
             val sprite = if (i in robotSprites.indices) robotSprites[i] else robotSprites.last()
+            val robotScale = if (i == selectedRobotIndex) selectedRobotScale else defaultRobotScale
+            val robotInset = (robotScale - 1f) * cellSize / 2f
             drawImageScaled(
                 sprite,
                 offsetX + robotX * cellSize - robotInset,
@@ -1902,6 +1970,8 @@ fun BoardCanvas(
 
         // 6. Semi-transparent robot start positions (ghost robots)
         val ghostAlpha = 0.3f
+        val ghostRobotScale = defaultRobotScale
+        val ghostRobotInset = (ghostRobotScale - 1f) * cellSize / 2f
         for (i in startBoard.robotPositions.indices) {
             val position = startBoard.robotPositions[i]
             val robotX = position % startBoard.width
@@ -1909,10 +1979,10 @@ fun BoardCanvas(
             val sprite = if (i in robotSprites.indices) robotSprites[i] else robotSprites.last()
             drawImageScaledWithAlpha(
                 sprite,
-                offsetX + robotX * cellSize - robotInset,
-                offsetY + robotY * cellSize - robotInset,
-                cellSize * robotScale,
-                cellSize * robotScale,
+                offsetX + robotX * cellSize - ghostRobotInset,
+                offsetY + robotY * cellSize - ghostRobotInset,
+                cellSize * ghostRobotScale,
+                cellSize * ghostRobotScale,
                 ghostAlpha
             )
         }
