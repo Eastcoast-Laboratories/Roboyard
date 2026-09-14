@@ -2,7 +2,7 @@ package roboyard.ui.compose
 
 import roboyard.logic.core.calculateStars
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -139,7 +138,6 @@ fun GameScreen(
     val startBoard = remember(board) { Board.Companion.createClone(board).also { it.setRobots(robotStartPositions) } }
     var hintMessage by remember(board) { mutableStateOf<String?>(null) }
     var gameWon by remember(board) { mutableStateOf(false) }
-    var showCompletionDialog by remember(board) { mutableStateOf(false) }
     var maxHintUsed by remember(board) { mutableIntStateOf(-1) } // Track max hint used this session
     var isHistorySaved by remember(board) { mutableStateOf(false) }
     var gameStartTime by remember(board) { mutableLongStateOf(System.currentTimeMillis()) }
@@ -785,7 +783,22 @@ fun GameScreen(
         gameController.isGameComplete = gameWon
         if (gameWon) {
             timerRunning = false
-            showCompletionDialog = true
+            // Show completion message inline (matches Android — no dialog)
+            val optimalMoves = solution?.size() ?: 0
+            val stars = calculateStars(moveCount, optimalMoves, maxHintUsed)
+            val finalStars = if (stars < 1 && isLevelGame && levelId <= 10) 1 else stars
+            hintMessage = if (isLevelGame) {
+                val starStr = buildString { repeat(finalStars) { append("★ ") } }.trim()
+                if (starStr.isEmpty()) "Level $levelId Complete! ✓" else "Level $levelId Complete! $starStr"
+            } else {
+                if (moveCount == optimalMoves && optimalMoves > 0) {
+                    "Perfect! You found the optimal solution!"
+                } else if (optimalMoves > 0) {
+                    "Completed in $moveCount moves (optimal: $optimalMoves)"
+                } else {
+                    "Completed in $moveCount moves!"
+                }
+            }
         }
     }
 
@@ -1262,15 +1275,18 @@ fun GameScreen(
                     .fillMaxWidth()
                     .padding(bottom = 3.dp)
             ) {
-                FancyButton(
-                    text = "Save Map",
-                    color = FancyButtonColor.RED,
-                    onClick = {
-                        // Navigate to SaveLoadScreen to select save slot
-                        onSaveLoad(currentBoard, startBoard)
-                    },
-                    modifier = Modifier.weight(1f).padding(end = 3.dp)
-                )
+                // Save Map button: hidden in level games, disabled during solver (matches Android)
+                if (!isLevelGame && !isSolverRunning) {
+                    FancyButton(
+                        text = "Save Map",
+                        color = FancyButtonColor.RED,
+                        onClick = {
+                            // Navigate to SaveLoadScreen to select save slot
+                            onSaveLoad(currentBoard, startBoard)
+                        },
+                        modifier = Modifier.weight(1f).padding(end = 3.dp)
+                    )
+                }
                 FancyButton(
                     text = if (hintMessage != null) "❌ Hint" else if (isSolverRunning) "Calculating..." else "💡Hint",
                     color = FancyButtonColor.HINT,
@@ -1406,9 +1422,15 @@ fun GameScreen(
                     modifier = Modifier.weight(1f)
                 )
                 FancyButton(
-                    text = "New Game",
+                    text = if (gameWon) {
+                        if (isLevelGame) "Next Level" else "New Random Game"
+                    } else "New Game",
                     color = FancyButtonColor.GREEN,
-                    onClick = onNewGame,
+                    onClick = {
+                        if (gameWon) {
+                            if (isLevelGame) onNextLevel() else onNewGame()
+                        } else onNewGame()
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -1417,98 +1439,8 @@ fun GameScreen(
     }
 
     // Completion dialog with retry button
-    if (showCompletionDialog) {
-        val optimalMoves = solution?.size() ?: 0
-        val stars = calculateStars(moveCount, optimalMoves, maxHintUsed)
-        val finalStars = if (stars < 1 && isLevelGame && levelId <= 10) {
-            1
-        } else {
-            stars
-        }
-
-        val title = if (isLevelGame) {
-            "Level Complete"
-        } else {
-            "Random Game Complete"
-        }
-
-        val message = buildString {
-            if (isLevelGame) {
-                append("Level $levelId completed in $moveCount moves.\n")
-                append("Stars: ")
-                repeat(finalStars) { append("★ ") }
-                if (finalStars == 0) append("✓")
-            } else {
-                append("Completed in $moveCount moves.\n")
-                if (moveCount == optimalMoves && optimalMoves > 0) {
-                    append("Perfect Solution!")
-                } else if (optimalMoves > 0) {
-                    append("Optimal: $optimalMoves moves")
-                }
-            }
-        }
-
-        val nextButtonText = if (isLevelGame) {
-            "Next Level"
-        } else {
-            "New Random Game"
-        }
-
-        AlertDialog(
-            onDismissRequest = { showCompletionDialog = false },
-            title = { Text(title) },
-            text = { Text(message) },
-            confirmButton = {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    // Menu button - return to main menu
-                    Button(onClick = {
-                        showCompletionDialog = false
-                        onBack()
-                    }) {
-                        Text("Menu")
-                    }
-                    // Retry button - reset board to start state
-                    Button(onClick = {
-                        showCompletionDialog = false
-                        currentBoard = Board.Companion.createClone(startBoard).also {
-                            it.setRobots(startBoard.robotPositions.copyOf())
-                        }
-                        moveCount = 0
-                        squaresMoved = 0
-                        gameWon = false
-                        timerRunning = false
-                        elapsedTime = 0L
-                        hintMessage = null
-                        maxHintUsed = -1
-                        hintsUsed = 0
-                        currentHintStep = 0
-                        solution = null
-                        isSolverRunning = false
-                        boardHistory.clear()
-                        gameController.reset()
-                        hintManager.reset()
-                        pathTracker.clearPaths()
-                        gameStartTime = System.currentTimeMillis()
-                        totalPlayTime = 0
-                        isHistorySaved = false
-                    }) {
-                        Text("Retry")
-                    }
-                    // Next Level / New Game button
-                    Button(onClick = {
-                        showCompletionDialog = false
-                        if (isLevelGame) {
-                            onNextLevel()
-                        } else {
-                            onNewGame()
-                        }
-                    }) {
-                        Text(nextButtonText)
-                    }
-                }
-            }
-        )
-    }
+    // Completion is shown inline via hintMessage (matches Android — no dialog)
+    // The bottom buttons (Menu/Retry/Next Level) handle navigation when game is won
 }
 
 /**
