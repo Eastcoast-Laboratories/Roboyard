@@ -96,6 +96,7 @@ import roboyard.logic.core.formatElapsedTime
 import roboyard.logic.core.buildGameWinMessage
 import roboyard.logic.core.isBoardSolved
 import roboyard.logic.core.moveRobotOnBoard
+import roboyard.logic.core.GameController
 import roboyard.logic.core.serializeBoard
 import roboyard.logic.core.deserializeBoard
 import roboyard.logic.storage.PlatformStorage
@@ -269,6 +270,7 @@ fun GameScreen(
     var currentHintDirection by remember(board) { mutableIntStateOf(-1) }
     var isSolverRunning by remember(board) { mutableStateOf(false) }
     val boardHistory = remember(board) { mutableListOf<Board>() }
+    val gameController = remember(board) { GameController() }
     var elapsedTime by remember(board) { mutableLongStateOf(0L) }
     var timerRunning by remember(board) { mutableStateOf(false) }
     var selectedRobotIndex by remember(board) { mutableIntStateOf(0) }
@@ -723,6 +725,7 @@ fun GameScreen(
 
     // Stop timer when game is won and show completion dialog
     LaunchedEffect(gameWon) {
+        gameController.isGameComplete = gameWon
         if (gameWon) {
             timerRunning = false
             showCompletionDialog = true
@@ -815,7 +818,7 @@ fun GameScreen(
                 onRobotMove = { robotIndex, direction ->
                 if (!gameWon) {
                     val oldPos = currentBoard.robotPositions[robotIndex]
-                    val newBoard = moveRobotOnBoard(currentBoard, robotIndex, direction)
+                    val newBoard = gameController.moveRobotWithCooldown(currentBoard, robotIndex, direction)
                     if (newBoard != null) {
                         // Save current board to history before move (for undo)
                         boardHistory.add(Board.Companion.createClone(currentBoard))
@@ -960,7 +963,7 @@ fun GameScreen(
                     color = FancyButtonColor.BLUE,
                     onClick = {
                         if (!gameWon) {
-                            val newBoard = moveRobotOnBoard(currentBoard, selectedRobotIndex, Board.NORTH)
+                            val newBoard = gameController.moveRobotWithCooldown(currentBoard, selectedRobotIndex, Board.NORTH)
                             if (newBoard != null) {
                                 boardHistory.add(Board.Companion.createClone(currentBoard))
                                 currentBoard = newBoard
@@ -990,7 +993,7 @@ fun GameScreen(
                     color = FancyButtonColor.BLUE,
                     onClick = {
                         if (!gameWon) {
-                            val newBoard = moveRobotOnBoard(currentBoard, selectedRobotIndex, Board.SOUTH)
+                            val newBoard = gameController.moveRobotWithCooldown(currentBoard, selectedRobotIndex, Board.SOUTH)
                             if (newBoard != null) {
                                 boardHistory.add(Board.Companion.createClone(currentBoard))
                                 currentBoard = newBoard
@@ -1020,7 +1023,7 @@ fun GameScreen(
                     color = FancyButtonColor.BLUE,
                     onClick = {
                         if (!gameWon) {
-                            val newBoard = moveRobotOnBoard(currentBoard, selectedRobotIndex, Board.EAST)
+                            val newBoard = gameController.moveRobotWithCooldown(currentBoard, selectedRobotIndex, Board.EAST)
                             if (newBoard != null) {
                                 boardHistory.add(Board.Companion.createClone(currentBoard))
                                 currentBoard = newBoard
@@ -1050,7 +1053,7 @@ fun GameScreen(
                     color = FancyButtonColor.BLUE,
                     onClick = {
                         if (!gameWon) {
-                            val newBoard = moveRobotOnBoard(currentBoard, selectedRobotIndex, Board.WEST)
+                            val newBoard = gameController.moveRobotWithCooldown(currentBoard, selectedRobotIndex, Board.WEST)
                             if (newBoard != null) {
                                 boardHistory.add(Board.Companion.createClone(currentBoard))
                                 currentBoard = newBoard
@@ -1275,18 +1278,29 @@ fun GameScreen(
                     modifier = Modifier.weight(1f).padding(end = 3.dp)
                 )
                 FancyButton(
-                    text = if (boardHistory.isNotEmpty()) "Undo" else "Back",
+                    text = if (gameController.getPathHistorySize() > 0) "Undo" else "Back",
                     color = FancyButtonColor.HINT,
                     onClick = {
-                        if (boardHistory.isNotEmpty()) {
-                            // Undo last move
-                            val previousBoard = boardHistory.removeAt(boardHistory.size - 1)
-                            currentBoard = previousBoard
-                            moveCount--
-                            // Recalculate squaresMoved (simplified - in fragment-app this is tracked in history)
-                            squaresMoved = maxOf(0, squaresMoved - 1)
-                            hintMessage = null
-                            gameWon = false
+                        if (gameController.getPathHistorySize() > 0) {
+                            // Undo last move using GameController (matches Android app behavior)
+                            val undoneBoard = gameController.undoLastMove(currentBoard)
+                            if (undoneBoard != null) {
+                                currentBoard = undoneBoard
+                                moveCount--
+                                squaresMoved = maxOf(0, squaresMoved - 1)
+                                hintMessage = null
+                                gameWon = false
+                            } else {
+                                // Fallback to board history if GameController undo fails
+                                if (boardHistory.isNotEmpty()) {
+                                    val previousBoard = boardHistory.removeAt(boardHistory.size - 1)
+                                    currentBoard = previousBoard
+                                    moveCount--
+                                    squaresMoved = maxOf(0, squaresMoved - 1)
+                                    hintMessage = null
+                                    gameWon = false
+                                }
+                            }
                         } else {
                             // No history, go back to menu
                             onBack()
@@ -1398,6 +1412,7 @@ fun GameScreen(
                         solution = null
                         isSolverRunning = false
                         boardHistory.clear()
+                        gameController.reset()
                         gameStartTime = System.currentTimeMillis()
                         totalPlayTime = 0
                         isHistorySaved = false

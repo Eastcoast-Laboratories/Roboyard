@@ -1,3 +1,6 @@
 25-09-14 02:53 "Does the compose app still run? Remember: always test if it still works when you changed something on the compose app"
 25-09-14 02:55 "Of course with the unit test that also clicks on it, we already created that somewhere"
 25-09-14 03:05 "Add here also what are UI and what are non-UI tests, the instructions how to start them not in the row, also add the new tests here, and how to start them"
+25-09-14 03:11 "I want the complex system from the Android app to be adopted into the Compose app, so that needs to be reworked. The Compose app should look and behave exactly like the finished Android app at the end, update the migration plan and then execute it"
+25-09-14 03:13 "Note: the Compose app should look and behave exactly like the finished Android app at the end, update the migration plan and execute it. Maybe we need to discard the current Compose app and start a new one that uses the same structures as the Android app, so everything can be shared. Or can we still save it and align the Compose app to the Android app in structure?"
+25-09-14 03:16 "The app always starts too small, the buttons at the bottom are not visible, it needs to start with more height, is that in the readme?"
