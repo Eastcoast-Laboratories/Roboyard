@@ -1281,6 +1281,18 @@ fun GameScreen(
                     .fillMaxWidth()
                     .padding(bottom = 3.dp)
             ) {
+                // Dice button: visible only when generateNewMapEachTime=false and not in level game (matches Android)
+                if (!isLevelGame && !Preferences.generateNewMapEachTime) {
+                    FancyButton(
+                        text = "🎲",
+                        color = FancyButtonColor.GRAY,
+                        onClick = {
+                            // Generate new map (matches Android dice button)
+                            onNewGame()
+                        },
+                        modifier = Modifier.weight(1f).padding(end = 3.dp)
+                    )
+                }
                 // Save Map button: hidden in level games, disabled during solver (matches Android)
                 if (!isLevelGame && !isSolverRunning) {
                     FancyButton(
@@ -1427,18 +1439,21 @@ fun GameScreen(
                     },
                     modifier = Modifier.weight(1f)
                 )
-                FancyButton(
-                    text = if (gameWon) {
-                        if (isLevelGame) "Next Level" else "New Random Game"
-                    } else "New Game",
-                    color = FancyButtonColor.GREEN,
-                    onClick = {
-                        if (gameWon) {
-                            if (isLevelGame) onNextLevel() else onNewGame()
-                        } else onNewGame()
-                    },
-                    modifier = Modifier.weight(1f)
-                )
+                // New Game button: hidden in level games (matches Android), shows "Next Level"/"New Random Game" on completion
+                if (!isLevelGame || gameWon) {
+                    FancyButton(
+                        text = if (gameWon) {
+                            if (isLevelGame) "Next Level" else "New Random Game"
+                        } else "New Game",
+                        color = FancyButtonColor.GREEN,
+                        onClick = {
+                            if (gameWon) {
+                                if (isLevelGame) onNextLevel() else onNewGame()
+                            } else onNewGame()
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
         }
     }
