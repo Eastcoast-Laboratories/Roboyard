@@ -50,7 +50,9 @@ android {
                     'proguard-android-optimize.txt'),
                     'proguard-rules.pro'
             buildConfigField "boolean", "ENABLE_PLAY_GAMES", "false"
-            signingConfig signingConfigs.uploadRelease
+            //signingConfig signingConfigs.uploadRelease
+            // Use debug signing for now (Play Console not yet set up for the release key)
+            signingConfig signingConfigs.debug
           }
     }
     

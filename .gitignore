@@ -3,6 +3,8 @@
 /keystore.properties
 *.keystore
 *.jks
+/adi-registration.properties
+app/src/main/assets/adi-registration.properties
 /.idea/workspace.xml
 /.idea/caches/*
 /.idea/libraries
