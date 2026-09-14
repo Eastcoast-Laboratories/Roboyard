@@ -1053,12 +1053,38 @@ fun GameScreen(
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
                 )
-                // Optimal moves button (shows when solution is available)
+                // Optimal moves button: color cycles based on move count (matches Android)
+                // Also acts as next-hint click target (matches Android)
                 if (solution != null) {
+                    val optMoves = solution!!.size()
+                    val optimalButtonColor = when (optMoves % 5) {
+                        0 -> FancyButtonColor.RED    // Red
+                        1 -> FancyButtonColor.GREEN   // Green
+                        2 -> FancyButtonColor.YELLOW  // Yellow (black text in Android)
+                        3 -> FancyButtonColor.BLUE    // Blue
+                        4 -> FancyButtonColor.GRAY    // Gray/Silver
+                        else -> FancyButtonColor.HINT
+                    }
                     FancyButton(
-                        text = solution!!.size().toString(),
-                        color = FancyButtonColor.HINT,
-                        onClick = { },
+                        text = optMoves.toString(),
+                        color = optimalButtonColor,
+                        onClick = {
+                            // Acts as next-hint click target (matches Android)
+                            if (hintManager.hasNextHint()) {
+                                hintManager.nextHint()
+                                hintMessage = hintManager.getFullHintText()
+                                val regularHint = hintManager.getRegularHint()
+                                if (regularHint != null) {
+                                    currentHintRobot = regularHint.first
+                                    currentHintDirection = regularHint.second
+                                } else {
+                                    currentHintRobot = -1
+                                    currentHintDirection = -1
+                                }
+                                maxHintUsed = maxOf(maxHintUsed, hintManager.getCurrentHintStep())
+                                saveToHistoryNow("hint_shown_${hintManager.getCurrentHintStep()}")
+                            }
+                        },
                         modifier = Modifier.height(32.dp).width(48.dp)
                     )
                 }
