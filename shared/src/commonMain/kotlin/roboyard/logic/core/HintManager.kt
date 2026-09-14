@@ -187,21 +187,52 @@ class HintManager(private val stringProvider: StringProvider? = null) {
     fun getRegularHintText(): String? {
         val hint = getRegularHint() ?: return null
         val colorName = getRobotColorName(hint.first)
-        val directionName = getDirectionName(hint.second)
-        // Format: "Move <color> robot <direction>" — matches Android showNormalHint
-        return "Move $colorName robot $directionName"
+        val directionArrow = getDirectionArrow(hint.second)
+        val hintIndex = currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS)
+
+        // Build hint text with abbreviated history (matches Android format)
+        val sb = StringBuilder()
+        sb.append(getDisplayHintNumber()).append(". ")
+
+        if (hintIndex == 0) {
+            // First hint: just show "ColorName ↑"
+            sb.append(colorName).append(" ").append(directionArrow)
+        } else {
+            // Subsequent hints: show abbreviated previous moves + current move
+            val startIndex = maxOf(0, hintIndex - MAX_HINT_HISTORY)
+            if (startIndex > 0) {
+                sb.append("...,")
+            }
+            var lastColorAbbrev: String? = null
+            for (i in startIndex until hintIndex) {
+                val moves = solution?.getMovesList() ?: break
+                if (i >= moves.size) break
+                val move = moves[i]
+                val prevColorAbbrev = getColorAbbreviation(getRobotColorName(move.robotNumber))
+                val prevArrow = getDirectionArrow(move.direction)
+                // Only add color abbreviation if color changed
+                if (lastColorAbbrev == null || prevColorAbbrev != lastColorAbbrev) {
+                    sb.append(prevColorAbbrev)
+                }
+                sb.append(prevArrow)
+                lastColorAbbrev = prevColorAbbrev
+                if (i < hintIndex - 1) {
+                    sb.append(",")
+                }
+            }
+            sb.append(", ").append(colorName).append(" ").append(directionArrow)
+        }
+
+        return sb.toString()
     }
 
     /**
      * Get the full hint text with numbering.
-     * @return Formatted hint text like "3/12: Move red robot UP"
+     * @return Formatted hint text like "3. P↑, G→, B↑" (matches Android format)
      */
     fun getFullHintText(): String? {
-        val total = getTotalPossibleHints()
-        val displayNum = getDisplayHintNumber()
-
         val hintText = getPreHintText() ?: getRegularHintText() ?: return null
-        return "$displayNum/$total: $hintText"
+        return hintText
     }
 
     /**
@@ -336,6 +367,49 @@ class HintManager(private val stringProvider: StringProvider? = null) {
             robots.size == 1 -> robots[0]
             robots.size == 2 -> "${robots[0]} $andWord ${robots[1]}"
             else -> robots.dropLast(1).joinToString(", ") + " $andWord ${robots.last()}"
+        }
+    }
+
+    /**
+     * Get direction arrow symbol (matches Android getDirectionArrow).
+     */
+    private fun getDirectionArrow(direction: Int): String {
+        return when (direction) {
+            Board.NORTH -> "↑"
+            Board.SOUTH -> "↓"
+            Board.EAST -> "→"
+            Board.WEST -> "←"
+            else -> "?"
+        }
+    }
+
+    /**
+     * Get color abbreviation (first letter, or 2 letters on conflict).
+     * Matches Android getColorAbbreviation.
+     */
+    private fun getColorAbbreviation(colorName: String): String {
+        if (colorName.isEmpty()) return "?"
+        // Get all color names to check for conflicts
+        val allColors = listOf(
+            stringProvider?.getString("color_pink") ?: "Pink",
+            stringProvider?.getString("color_blue") ?: "Blue",
+            stringProvider?.getString("color_green") ?: "Green",
+            stringProvider?.getString("color_yellow") ?: "Yellow",
+            stringProvider?.getString("color_silver") ?: "Silver",
+            stringProvider?.getString("color_red") ?: "Red",
+            stringProvider?.getString("color_brown") ?: "Brown",
+            stringProvider?.getString("color_orange") ?: "Orange",
+            stringProvider?.getString("color_white") ?: "White"
+        )
+        val firstLetter = colorName.first().uppercaseChar()
+        // Check if any other color starts with the same letter
+        val conflicting = allColors.filter { it.isNotEmpty() && it.first().uppercaseChar() == firstLetter }
+        return if (conflicting.size > 1 && colorName.length >= 2) {
+            // Conflict: use 2-letter abbreviation
+            colorName.first().uppercaseChar() + colorName.substring(1, 2).lowercase()
+        } else {
+            // No conflict: use 1-letter abbreviation
+            firstLetter.toString()
         }
     }
 
