@@ -281,6 +281,7 @@ fun GameScreen(
     var currentHintStep by remember(board) { mutableIntStateOf(0) }
     var currentHintRobot by remember(board) { mutableIntStateOf(-1) }
     var currentHintDirection by remember(board) { mutableIntStateOf(-1) }
+    var currentHintRobotColor by remember(board) { mutableIntStateOf(-1) } // Background color for hint container
     var isSolverRunning by remember(board) { mutableStateOf(false) }
     val boardHistory = remember(board) { mutableListOf<Board>() }
     val gameController = remember(board) { GameController() }
@@ -351,6 +352,28 @@ fun GameScreen(
         }
     }
     val soundManager = remember(board) { getSoundManager() }
+
+    // Helper: update hint display from HintManager (only GUI logic here, no hint logic)
+    fun updateHintDisplay() {
+        val hintData = hintManager.getHintForDisplay()
+        if (hintData != null) {
+            hintMessage = hintData.text
+            currentHintRobotColor = hintData.robotColorForBackground
+            val regularHint = hintManager.getRegularHint()
+            if (regularHint != null) {
+                currentHintRobot = regularHint.first
+                currentHintDirection = regularHint.second
+            } else {
+                currentHintRobot = -1
+                currentHintDirection = -1
+            }
+        } else {
+            hintMessage = null
+            currentHintRobotColor = -1
+            currentHintRobot = -1
+            currentHintDirection = -1
+        }
+    }
     var elapsedTime by remember(board) { mutableLongStateOf(0L) }
     var timerRunning by remember(board) { mutableStateOf(false) }
     var selectedRobotIndex by remember(board) { mutableIntStateOf(-1) }
@@ -779,19 +802,11 @@ fun GameScreen(
             delay(1000)
             if (hintManager.hasNextHint()) {
                 hintManager.nextHint()
-                hintMessage = hintManager.getFullHintText()
-                val regularHint = hintManager.getRegularHint()
-                if (regularHint != null) {
-                    currentHintRobot = regularHint.first
-                    currentHintDirection = regularHint.second
-                } else {
-                    currentHintRobot = -1
-                    currentHintDirection = -1
-                }
+                updateHintDisplay()
                 maxHintUsed = maxOf(maxHintUsed, hintManager.getCurrentHintStep())
                 saveToHistoryNow("hint_shown_${hintManager.getCurrentHintStep()}")
             } else {
-                hintMessage = "All hints shown"
+                hintMessage = stringProvider.getString("all_hints_shown") ?: "All hints shown"
             }
             pendingAutoAdvance = false
         }
@@ -905,6 +920,7 @@ fun GameScreen(
 
                         // Map is valid - accept it
                         solution = solutions[0]
+                        hintManager.initialize(solution, isLevelGame, levelId)
                         break
                     }
 
@@ -914,6 +930,7 @@ fun GameScreen(
                         val solutions = solver.execute()
                         if (solutions.isNotEmpty() && solutions[0].size() > 0) {
                             solution = solutions[0]
+                            hintManager.initialize(solution, isLevelGame, levelId)
                         }
                     }
                 } catch (e: Exception) {
@@ -1028,12 +1045,12 @@ fun GameScreen(
         // Hint container (between grid and info row, matches Android position)
         // Uses AnimatedVisibility for slide-down/slide-up animation (matches Android)
         AnimatedVisibility(
-            visible = hintContainerVisible && (hintMessage != null || solution != null),
+            visible = hintContainerVisible && hintMessage != null,
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
             // Background color based on current hint robot (matches Android color-coded backgrounds)
-            val hintBgColor = if (currentHintRobot >= 0) getHintBackgroundColor(currentHintRobot) else Color(0xFF1976D2)
+            val hintBgColor = if (currentHintRobotColor >= 0) getHintBackgroundColor(currentHintRobotColor) else Color(0xFF1976D2)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -1059,16 +1076,7 @@ fun GameScreen(
                     onClick = {
                         if (hintManager.hasPrevHint()) {
                             hintManager.prevHint()
-                            hintMessage = hintManager.getFullHintText()
-                            // Update current hint robot/direction for auto-advance
-                            val regularHint = hintManager.getRegularHint()
-                            if (regularHint != null) {
-                                currentHintRobot = regularHint.first
-                                currentHintDirection = regularHint.second
-                            } else {
-                                currentHintRobot = -1
-                                currentHintDirection = -1
-                            }
+                            updateHintDisplay()
                         }
                     },
                     modifier = Modifier.height(32.dp)
@@ -1100,15 +1108,7 @@ fun GameScreen(
                             // Acts as next-hint click target (matches Android)
                             if (hintManager.hasNextHint()) {
                                 hintManager.nextHint()
-                                hintMessage = hintManager.getFullHintText()
-                                val regularHint = hintManager.getRegularHint()
-                                if (regularHint != null) {
-                                    currentHintRobot = regularHint.first
-                                    currentHintDirection = regularHint.second
-                                } else {
-                                    currentHintRobot = -1
-                                    currentHintDirection = -1
-                                }
+                                updateHintDisplay()
                                 maxHintUsed = maxOf(maxHintUsed, hintManager.getCurrentHintStep())
                                 saveToHistoryNow("hint_shown_${hintManager.getCurrentHintStep()}")
                             }
@@ -1123,16 +1123,7 @@ fun GameScreen(
                     onClick = {
                         if (hintManager.hasNextHint()) {
                             hintManager.nextHint()
-                            hintMessage = hintManager.getFullHintText()
-                            // Update current hint robot/direction for auto-advance
-                            val regularHint = hintManager.getRegularHint()
-                            if (regularHint != null) {
-                                currentHintRobot = regularHint.first
-                                currentHintDirection = regularHint.second
-                            } else {
-                                currentHintRobot = -1
-                                currentHintDirection = -1
-                            }
+                            updateHintDisplay()
                             // Save to history when a hint is shown
                             maxHintUsed = maxOf(maxHintUsed, hintManager.getCurrentHintStep())
                             saveToHistoryNow("hint_shown_${hintManager.getCurrentHintStep()}")
@@ -1382,7 +1373,7 @@ fun GameScreen(
                     )
                 }
                 FancyButton(
-                    text = if (hintMessage != null) "❌ Hint" else if (isSolverRunning) "Calculating..." else "💡Hint",
+                    text = if (hintContainerVisible) "❌ Hint" else if (isSolverRunning) "Calculating..." else "💡Hint",
                     color = FancyButtonColor.HINT,
                     onClick = {
                         println("[HINT] Hint button clicked, isSolverRunning=$isSolverRunning, solution=${solution}")
@@ -1390,6 +1381,20 @@ fun GameScreen(
                             println("[HINT] Solver already running, returning")
                             return@FancyButton
                         }
+
+                        // If hint container is visible, toggle OFF (matches Android)
+                        if (hintContainerVisible) {
+                            hintContainerVisible = false
+                            hintMessage = null
+                            currentHintRobotColor = -1
+                            currentHintRobot = -1
+                            currentHintDirection = -1
+                            hintManager.resetStep()
+                            return@FancyButton
+                        }
+
+                        // Toggle ON: show hint container
+                        hintContainerVisible = true
 
                         if (solution == null) {
                             // Calculate solution using SolverIDDFS
@@ -1408,48 +1413,28 @@ fun GameScreen(
                                         // Initialize HintManager with pre-hints (matches Android app)
                                         hintManager.initialize(solution, isLevelGame, levelId)
                                         currentHintStep = 0
-                                        // Show first hint (pre-hint or regular hint)
-                                        hintMessage = hintManager.getFullHintText()
-                                        // Update current hint robot/direction for auto-advance
-                                        val regularHint = hintManager.getRegularHint()
-                                        if (regularHint != null) {
-                                            currentHintRobot = regularHint.first
-                                            currentHintDirection = regularHint.second
-                                        } else {
-                                            currentHintRobot = -1
-                                            currentHintDirection = -1
-                                        }
+                                        // Show first hint
+                                        updateHintDisplay()
                                         maxHintUsed = maxOf(maxHintUsed, 0)
                                         saveToHistoryNow("hint_shown_0")
                                     } else {
-                                        hintMessage = "No solution found"
+                                        hintMessage = stringProvider.getString("no_solution_found") ?: "No solution found"
                                     }
                                 } catch (e: Exception) {
-                                    hintMessage = "Solver error: ${e.message}"
+                                    hintMessage = stringProvider.getString("error_displaying_hint") ?: "Error displaying hint"
                                 } finally {
                                     isSolverRunning = false
                                 }
                             }.start()
                         } else {
-                            // Show next hint using HintManager
-                            println("[HINT] Solution exists, showing next hint via HintManager")
+                            // Solution exists — show current hint (matches Android toggle ON behavior)
+                            println("[HINT] Solution exists, showing current hint")
                             hintContainerVisible = true
-                            if (hintManager.hasNextHint()) {
-                                hintManager.nextHint()
-                                hintMessage = hintManager.getFullHintText()
-                                val regularHint = hintManager.getRegularHint()
-                                if (regularHint != null) {
-                                    currentHintRobot = regularHint.first
-                                    currentHintDirection = regularHint.second
-                                } else {
-                                    currentHintRobot = -1
-                                    currentHintDirection = -1
-                                }
-                                maxHintUsed = maxOf(maxHintUsed, hintManager.getCurrentHintStep())
-                                saveToHistoryNow("hint_shown_${hintManager.getCurrentHintStep()}")
-                            } else {
-                                hintMessage = "All hints shown"
+                            // Initialize hintManager if it doesn't have a solution yet
+                            if (!hintManager.hasSolution()) {
+                                hintManager.initialize(solution, isLevelGame, levelId)
                             }
+                            updateHintDisplay()
                         }
                     },
                     modifier = Modifier.weight(1f).padding(end = 3.dp)

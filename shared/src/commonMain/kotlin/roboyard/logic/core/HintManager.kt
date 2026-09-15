@@ -6,14 +6,32 @@ import roboyard.logic.ui.StringProvider
 import roboyard.logic.util.RLog
 
 /**
- * Shared hint manager for pre-hints and regular hints.
- * Matches Android GameFragment hint system:
- * - Pre-hints: 2-4 random "less than X" + 3 fixed (exact, involved robots, move first)
- * - Regular hints: each move with color + direction
- * - Hint numbering: displayHintNumber/totalPossibleHints
- * - Prev/next navigation
+ * Data class containing everything the UI needs to display a hint.
+ * The UI layer (Android/Compose) only needs to render this — no hint logic in the UI.
+ */
+data class HintDisplayData(
+    /** The hint text to display (includes number, arrows, abbreviated history) */
+    val text: String,
+    /** Robot color index for background color (-1 = default blue) */
+    val robotColorForBackground: Int,
+    /** Whether this is a pre-hint (not a move hint) */
+    val isPreHint: Boolean,
+    /** Robot color index to select on the board (-1 = none) */
+    val robotColorToSelect: Int,
+    /** Direction for hint arrow on board (-1 = none) */
+    val hintArrowDirection: Int
+)
+
+/**
+ * Shared hint manager — extracts ALL hint display logic from Android GameFragment.
+ * Both Android and ComposeApp use this class for identical hint behavior.
  *
- * Both Android and ComposeApp use this class for consistent hint behavior.
+ * The UI layer only needs to:
+ * 1. Call initialize() when a new game starts
+ * 2. Call getHintForDisplay() to get the current hint data
+ * 3. Call nextHint() / prevHint() for navigation
+ * 4. Render the HintDisplayData (text + background color + optional arrow)
+ *
  * Uses StringProvider for localization (reads from strings.xml on Android,
  * strings.json on Desktop).
  */
@@ -27,6 +45,9 @@ class HintManager(private val stringProvider: StringProvider? = null) {
 
         /** Maximum hints for levels 1-10 */
         const val MAX_HINTS_UP_TO_LEVEL_10 = 4
+
+        /** Level threshold for no hints */
+        const val LEVEL_10_THRESHOLD = 10
 
         /** Maximum hint history shown in hint text */
         const val MAX_HINT_HISTORY = 6
@@ -44,6 +65,22 @@ class HintManager(private val stringProvider: StringProvider? = null) {
     /** The solution to show hints for */
     private var solution: Solution? = null
 
+    /**
+     * Check if the hint manager has a solution set.
+     */
+    fun hasSolution(): Boolean = solution != null || testMoves != null
+
+    /**
+     * Get the moves list from solution or testMoves.
+     */
+    private fun getMoves(): List<Pair<Int, Int>>? {
+        testMoves?.let { return it }
+        solution?.getMovesList()?.let { moves ->
+            return moves.map { Pair(it.robotNumber, it.direction) }
+        }
+        return null
+    }
+
     /** Total moves in the solution */
     private var totalMoves: Int = 0
 
@@ -52,9 +89,6 @@ class HintManager(private val stringProvider: StringProvider? = null) {
 
     /** Maximum hints allowed (for level games 1-10) */
     private var maxHintsAllowed: Int = Int.MAX_VALUE
-
-    /** History of shown hints for display */
-    private val hintHistory: MutableList<String> = mutableListOf()
 
     /**
      * Initialize the hint manager for a new game.
@@ -68,13 +102,12 @@ class HintManager(private val stringProvider: StringProvider? = null) {
         this.numPreHints = (2..4).random()
         this.currentHintStep = 0
         this.showingPreHints = true
-        this.hintHistory.clear()
 
-        // Level hint restrictions
-        if (isLevelGame && levelId > 10) {
+        // Level hint restrictions (matches Android)
+        if (isLevelGame && levelId > LEVEL_10_THRESHOLD) {
             hintsRestricted = true
             maxHintsAllowed = 0
-        } else if (isLevelGame && levelId <= 10) {
+        } else if (isLevelGame && levelId <= LEVEL_10_THRESHOLD) {
             hintsRestricted = false
             maxHintsAllowed = MAX_HINTS_UP_TO_LEVEL_10
         } else {
@@ -86,10 +119,37 @@ class HintManager(private val stringProvider: StringProvider? = null) {
     }
 
     /**
+     * Test-only: initialize with a list of (robotNumber, direction) moves.
+     * Avoids creating a real Board/Solution for unit tests.
+     */
+    internal fun initializeForTest(moves: List<Pair<Int, Int>>, isLevelGame: Boolean, levelId: Int) {
+        this.testMoves = moves
+        this.totalMoves = moves.size
+        this.numPreHints = 3 // Fixed for deterministic tests
+        this.currentHintStep = 0
+        this.showingPreHints = true
+        this.solution = null // Use testMoves instead
+
+        if (isLevelGame && levelId > LEVEL_10_THRESHOLD) {
+            hintsRestricted = true
+            maxHintsAllowed = 0
+        } else if (isLevelGame && levelId <= LEVEL_10_THRESHOLD) {
+            hintsRestricted = false
+            maxHintsAllowed = MAX_HINTS_UP_TO_LEVEL_10
+        } else {
+            hintsRestricted = false
+            maxHintsAllowed = Int.MAX_VALUE
+        }
+    }
+
+    /** Test-only moves list (used when solution is null but testMoves is set) */
+    private var testMoves: List<Pair<Int, Int>>? = null
+
+    /**
      * Get the total number of possible hints (pre-hints + regular hints).
      */
     fun getTotalPossibleHints(): Int {
-        return numPreHints + NUM_FIXED_PRE_HINTS + (solution?.size() ?: 0)
+        return numPreHints + NUM_FIXED_PRE_HINTS + (getMoves()?.size ?: 0)
     }
 
     /**
@@ -118,121 +178,205 @@ class HintManager(private val stringProvider: StringProvider? = null) {
     fun isShowingPreHints(): Boolean = showingPreHints
 
     /**
-     * Get the current pre-hint text.
-     * @return Pre-hint text, or null if not a pre-hint step
+     * Get the current hint as display data. This is the MAIN method the UI calls.
+     * Extracts the complete showPreHint/showNormalHint logic from Android.
+     * @return HintDisplayData or null if no hint available
      */
-    fun getPreHintText(): String? {
-        if (currentHintStep >= numPreHints + NUM_FIXED_PRE_HINTS) return null
+    fun getHintForDisplay(): HintDisplayData? {
+        val moves = getMoves() ?: return null
+        if (moves.isEmpty()) return null
+
+        return if (showingPreHints && currentHintStep < (numPreHints + NUM_FIXED_PRE_HINTS)) {
+            showPreHint(moves, totalMoves, currentHintStep)
+        } else {
+            val normalHintIndex = currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS)
+            showNormalHint(moves, totalMoves, normalHintIndex)
+        }
+    }
+
+    /**
+     * Shows a pre-hint. Extracted from Android GameFragment.showPreHint.
+     * Returns HintDisplayData with text and robot color for background.
+     */
+    private fun showPreHint(moves: List<Pair<Int, Int>>, totalMoves: Int, currentHintStep: Int): HintDisplayData {
+        log.d("[HINT_SYSTEM] Showing pre-hint #${currentHintStep + 1} (total pre-hints: $numPreHints + $NUM_FIXED_PRE_HINTS)")
 
         val totalPreHints = numPreHints + NUM_FIXED_PRE_HINTS
+        val preHintText: String
+        var robotColorForBackground = -1
 
-        return when {
+        when {
             // Regular pre-hints: "less than X" (decreasing offset)
             currentHintStep < numPreHints -> {
                 val offset = numPreHints - currentHintStep
                 val hintValue = totalMoves + offset
-                if (hintValue <= 1) {
+                preHintText = if (hintValue <= 1) {
                     stringProvider?.getString("pre_hint_less_than_1") ?: "You found a better solution than the A.I.!"
                 } else {
                     stringProvider?.getString("pre_hint_less_than_x", hintValue)
                         ?: "The A.I. found a solution in less than $hintValue moves"
                 }
+                log.d("[HINT_SYSTEM] Showing regular pre-hint ${currentHintStep + 1}/$numPreHints: less than $hintValue moves")
             }
             // First fixed pre-hint: exact solution length
             currentHintStep == numPreHints -> {
-                stringProvider?.getString("pre_hint_exact_solution", totalMoves)
+                preHintText = stringProvider?.getString("pre_hint_exact_solution", totalMoves)
                     ?: "The A.I. found a solution in $totalMoves moves"
+                log.d("[HINT_SYSTEM] Showing exact solution length: $totalMoves moves")
             }
-            // Second fixed pre-hint: involved robots
+            // Second fixed pre-hint: involved robot colors
             currentHintStep == numPreHints + 1 -> {
-                val robots = getInvolvedRobots()
-                val prefix = stringProvider?.getString("pre_hint_involved_robots") ?: "Move the"
+                val displayHintNumber = currentHintStep + 1
+                val totalPossibleHints = numPreHints + NUM_FIXED_PRE_HINTS + moves.size
+                val sb = StringBuilder()
+                sb.append(displayHintNumber).append("/").append(totalPossibleHints).append(": ")
+                sb.append(stringProvider?.getString("pre_hint_involved_robots") ?: "Move the").append(" ")
+
+                // Analyze ALL moves to see which robots are involved
+                val robotsInvolved = mutableListOf<String>()
+                val uniqueColors = mutableListOf<Int>()
+                for (move in moves) {
+                    val colorName = getRobotColorName(move.first)
+                    if (!robotsInvolved.contains(colorName)) {
+                        robotsInvolved.add(colorName)
+                        uniqueColors.add(move.first)
+                    }
+                }
+
+                // Format the list with commas and "and" (matches Android)
                 val andWord = stringProvider?.getString("and") ?: "and"
-                val robotList = formatRobotList(robots, andWord)
-                "$prefix $robotList"
+                for (i in robotsInvolved.indices) {
+                    if (i == robotsInvolved.size - 1 && robotsInvolved.size > 1) {
+                        sb.append(andWord).append(" ").append(robotsInvolved[i])
+                        sb.append(if (robotsInvolved.size > 1) " robots" else " robot")
+                    } else if (i == robotsInvolved.size - 1) {
+                        sb.append(robotsInvolved[i])
+                        sb.append(" robot")
+                    } else if (i == robotsInvolved.size - 2) {
+                        sb.append(robotsInvolved[i]).append(" ")
+                    } else {
+                        sb.append(robotsInvolved[i]).append(", ")
+                    }
+                }
+
+                preHintText = sb.toString()
+                log.d("[HINT_SYSTEM] Showing involved robot colors: $preHintText")
+
+                // Only use color if exactly one robot is involved
+                if (uniqueColors.size == 1) {
+                    robotColorForBackground = uniqueColors[0]
+                }
             }
-            // Third fixed pre-hint: move first robot
+            // Last fixed pre-hint: which robot to move first
             currentHintStep == numPreHints + 2 -> {
-                val firstMove = solution?.getMovesList()?.firstOrNull()
-                if (firstMove != null) {
-                    val robotColor = getRobotColorNameDative(firstMove.robotNumber)
-                    stringProvider?.getString("pre_hint_first_move", robotColor)
-                        ?: "Move the $robotColor robot first"
+                if (moves.isNotEmpty()) {
+                    val firstMove = moves[0]
+                    val robotColorName = getRobotColorNameDative(firstMove.first)
+                    preHintText = stringProvider?.getString("pre_hint_first_move", robotColorName)
+                        ?: "Move the $robotColorName robot first"
+                    robotColorForBackground = firstMove.first
+                    log.d("[HINT_SYSTEM] Showing which robot to move first: $robotColorName")
                 } else {
-                    stringProvider?.getString("no_solution_found") ?: "No solution found"
+                    preHintText = stringProvider?.getString("no_solution_found") ?: "No solution found"
                 }
             }
-            else -> null
-        }
-    }
-
-    /**
-     * Get the current regular hint (move hint).
-     * @return Pair of (robotColorIndex, direction) or null if not a regular hint step
-     */
-    fun getRegularHint(): Pair<Int, Int>? {
-        val regularHintIndex = currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS)
-        if (regularHintIndex < 0) return null
-        val moves = solution?.getMovesList() ?: return null
-        if (regularHintIndex >= moves.size) return null
-
-        val move = moves[regularHintIndex]
-        return Pair(move.robotNumber, move.direction)
-    }
-
-    /**
-     * Get the regular hint text.
-     * @return Hint text like "Move red robot UP"
-     */
-    fun getRegularHintText(): String? {
-        val hint = getRegularHint() ?: return null
-        val colorName = getRobotColorName(hint.first)
-        val directionArrow = getDirectionArrow(hint.second)
-        val hintIndex = currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS)
-
-        // Build hint text with abbreviated history (matches Android format)
-        val sb = StringBuilder()
-        sb.append(getDisplayHintNumber()).append(". ")
-
-        if (hintIndex == 0) {
-            // First hint: just show "ColorName ↑"
-            sb.append(colorName).append(" ").append(directionArrow)
-        } else {
-            // Subsequent hints: show abbreviated previous moves + current move
-            val startIndex = maxOf(0, hintIndex - MAX_HINT_HISTORY)
-            if (startIndex > 0) {
-                sb.append("...,")
+            // Fallback
+            else -> {
+                preHintText = stringProvider?.getString("pre_hint_ready") ?: "Ready to show step-by-step hints"
             }
-            var lastColorAbbrev: String? = null
-            for (i in startIndex until hintIndex) {
-                val moves = solution?.getMovesList() ?: break
-                if (i >= moves.size) break
-                val move = moves[i]
-                val prevColorAbbrev = getColorAbbreviation(getRobotColorName(move.robotNumber))
-                val prevArrow = getDirectionArrow(move.direction)
-                // Only add color abbreviation if color changed
-                if (lastColorAbbrev == null || prevColorAbbrev != lastColorAbbrev) {
-                    sb.append(prevColorAbbrev)
-                }
-                sb.append(prevArrow)
-                lastColorAbbrev = prevColorAbbrev
-                if (i < hintIndex - 1) {
-                    sb.append(",")
-                }
-            }
-            sb.append(", ").append(colorName).append(" ").append(directionArrow)
         }
 
-        return sb.toString()
+        // Return robot color to select for "move X first" pre-hint
+        val robotColorToSelect = if (currentHintStep == numPreHints + 2 && moves.isNotEmpty()) {
+            moves[0].first
+        } else -1
+
+        return HintDisplayData(
+            text = preHintText,
+            robotColorForBackground = robotColorForBackground,
+            isPreHint = true,
+            robotColorToSelect = robotColorToSelect,
+            hintArrowDirection = -1
+        )
     }
 
     /**
-     * Get the full hint text with numbering.
-     * @return Formatted hint text like "3. P↑, G→, B↑" (matches Android format)
+     * Shows a normal hint. Extracted from Android GameFragment.showNormalHint.
+     * Returns HintDisplayData with text, robot color, and direction arrow.
      */
-    fun getFullHintText(): String? {
-        val hintText = getPreHintText() ?: getRegularHintText() ?: return null
-        return hintText
+    private fun showNormalHint(moves: List<Pair<Int, Int>>, totalMoves: Int, hintIndex: Int): HintDisplayData {
+        log.d("[HINT_SYSTEM] showNormalHint called with hintIndex: $hintIndex")
+
+        // Validate hint index
+        if (hintIndex < 0 || hintIndex >= totalMoves) {
+            log.e("[HINT_SYSTEM] Invalid hint index: $hintIndex (total moves: $totalMoves)")
+            return HintDisplayData(
+                text = stringProvider?.getString("all_hints_shown") ?: "All hints have been shown",
+                robotColorForBackground = -1,
+                isPreHint = false,
+                robotColorToSelect = -1,
+                hintArrowDirection = -1
+            )
+        }
+
+        return try {
+            val move = moves[hintIndex]
+            val robotColorName = getRobotColorName(move.first)
+            val directionArrow = getDirectionArrow(move.second)
+            val displayHintNumber = hintIndex + 1
+
+            log.d("[HINT_SYSTEM] Robot color: ${move.first}, Direction: ${move.second}")
+
+            val sb = StringBuilder()
+            sb.append(displayHintNumber).append(". ")
+
+            if (hintIndex == 0) {
+                // First hint: "ColorName ↑"
+                sb.append(robotColorName).append(" ").append(directionArrow)
+                log.d("[HINT_SYSTEM] First hint format: ${sb.toString()}")
+            } else {
+                // Subsequent hints: abbreviated previous moves + current move
+                val startIndex = maxOf(0, hintIndex - MAX_HINT_HISTORY)
+                if (startIndex > 0) {
+                    sb.append("...,")
+                }
+                var lastColorAbbrev: String? = null
+                for (i in startIndex until hintIndex) {
+                    if (i >= moves.size) break
+                    val prevMove = moves[i]
+                    val prevColorAbbrev = getColorAbbreviation(getRobotColorName(prevMove.first))
+                    val prevArrow = getDirectionArrow(prevMove.second)
+                    // Only add color abbreviation if color changed
+                    if (lastColorAbbrev == null || prevColorAbbrev != lastColorAbbrev) {
+                        sb.append(prevColorAbbrev)
+                    }
+                    sb.append(prevArrow)
+                    lastColorAbbrev = prevColorAbbrev
+                    if (i < hintIndex - 1) {
+                        sb.append(",")
+                    }
+                }
+                sb.append(", ").append(robotColorName).append(" ").append(directionArrow)
+                log.d("[HINT_SYSTEM] Subsequent hint format: ${sb.toString()}")
+            }
+
+            HintDisplayData(
+                text = sb.toString(),
+                robotColorForBackground = move.first,
+                isPreHint = false,
+                robotColorToSelect = move.first,
+                hintArrowDirection = move.second
+            )
+        } catch (e: Exception) {
+            log.e("[HINT_SYSTEM] Error displaying normal hint #${hintIndex + 1}: ${e.message}")
+            HintDisplayData(
+                text = stringProvider?.getString("error_displaying_hint") ?: "Error displaying hint",
+                robotColorForBackground = -1,
+                isPreHint = false,
+                robotColorToSelect = -1,
+                hintArrowDirection = -1
+            )
+        }
     }
 
     /**
@@ -242,23 +386,13 @@ class HintManager(private val stringProvider: StringProvider? = null) {
     fun nextHint(): Boolean {
         val total = getTotalPossibleHints()
         if (currentHintStep >= total - 1) return false
-        if (currentHintStep >= maxHintsAllowed + numPreHints + NUM_FIXED_PRE_HINTS - 1 && maxHintsAllowed != Int.MAX_VALUE) {
-            // Check if we've reached the max hints for level games
+        // Check level restrictions
+        if (maxHintsAllowed != Int.MAX_VALUE) {
             val regularHintsShown = currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS) + 1
-            if (regularHintsShown >= maxHintsAllowed) return false
+            if (regularHintsShown >= maxHintsAllowed && currentHintStep >= numPreHints + NUM_FIXED_PRE_HINTS) return false
         }
         currentHintStep++
         showingPreHints = currentHintStep < numPreHints + NUM_FIXED_PRE_HINTS
-
-        // Add to hint history
-        val hintText = getFullHintText()
-        if (hintText != null) {
-            hintHistory.add(hintText)
-            if (hintHistory.size > MAX_HINT_HISTORY) {
-                hintHistory.removeAt(0)
-            }
-        }
-
         log.d("[HINT_SYSTEM] Next hint: step=$currentHintStep, showingPreHints=$showingPreHints")
         return true
     }
@@ -294,20 +428,58 @@ class HintManager(private val stringProvider: StringProvider? = null) {
     fun hasPrevHint(): Boolean = currentHintStep > 0
 
     /**
-     * Get the hint history (last MAX_HINT_HISTORY hints).
+     * Get the current regular hint (robot color + direction).
+     * @return Pair of (robotColorIndex, direction) or null if not a regular hint step
      */
-    fun getHintHistory(): List<String> = hintHistory.toList()
+    fun getRegularHint(): Pair<Int, Int>? {
+        val regularHintIndex = currentHintStep - (numPreHints + NUM_FIXED_PRE_HINTS)
+        if (regularHintIndex < 0) return null
+        val moves = getMoves() ?: return null
+        if (regularHintIndex >= moves.size) return null
+        return moves[regularHintIndex]
+    }
 
     /**
-     * Get the involved robot colors from the solution.
+     * Get direction arrow symbol (matches Android getDirectionArrow).
      */
-    private fun getInvolvedRobots(): List<String> {
-        val moves = solution?.getMovesList() ?: return emptyList()
-        val robots = mutableSetOf<String>()
-        for (move in moves) {
-            robots.add(getRobotColorName(move.robotNumber))
+    private fun getDirectionArrow(direction: Int): String {
+        return when (direction) {
+            Board.NORTH -> "↑"
+            Board.SOUTH -> "↓"
+            Board.EAST -> "→"
+            Board.WEST -> "←"
+            else -> "?"
         }
-        return robots.toList()
+    }
+
+    /**
+     * Get color abbreviation (first letter, or 2 letters on conflict).
+     * Matches Android getColorAbbreviation.
+     */
+    private fun getColorAbbreviation(colorName: String): String {
+        if (colorName.isEmpty()) return "?"
+        // Get all color names to check for conflicts
+        val allColors = listOf(
+            stringProvider?.getString("color_pink") ?: "Pink",
+            stringProvider?.getString("color_blue") ?: "Blue",
+            stringProvider?.getString("color_green") ?: "Green",
+            stringProvider?.getString("color_yellow") ?: "Yellow",
+            stringProvider?.getString("color_silver") ?: "Silver",
+            stringProvider?.getString("color_red") ?: "Red",
+            stringProvider?.getString("color_brown") ?: "Brown",
+            stringProvider?.getString("color_orange") ?: "Orange",
+            stringProvider?.getString("color_white") ?: "White"
+        )
+        val firstLetter = colorName.first().uppercaseChar()
+        // Check if any other color starts with the same letter
+        val conflicting = allColors.filter { it.isNotEmpty() && it.first().uppercaseChar() == firstLetter }
+        return if (conflicting.size > 1 && colorName.length >= 2) {
+            // Conflict: use 2-letter abbreviation
+            colorName.first().uppercaseChar() + colorName.substring(1, 2).lowercase()
+        } else {
+            // No conflict: use 1-letter abbreviation
+            firstLetter.toString()
+        }
     }
 
     /**
@@ -358,80 +530,12 @@ class HintManager(private val stringProvider: StringProvider? = null) {
     }
 
     /**
-     * Format a list of robot colors for the "involved robots" pre-hint.
-     * Matches Android GameFragment format: "red, blue and green" (with localized "and").
+     * Reset only the hint step (used when toggling hints OFF then ON).
+     * Keeps the solution so hints can be shown again without re-solving.
      */
-    private fun formatRobotList(robots: List<String>, andWord: String): String {
-        return when {
-            robots.isEmpty() -> ""
-            robots.size == 1 -> robots[0]
-            robots.size == 2 -> "${robots[0]} $andWord ${robots[1]}"
-            else -> robots.dropLast(1).joinToString(", ") + " $andWord ${robots.last()}"
-        }
-    }
-
-    /**
-     * Get direction arrow symbol (matches Android getDirectionArrow).
-     */
-    private fun getDirectionArrow(direction: Int): String {
-        return when (direction) {
-            Board.NORTH -> "↑"
-            Board.SOUTH -> "↓"
-            Board.EAST -> "→"
-            Board.WEST -> "←"
-            else -> "?"
-        }
-    }
-
-    /**
-     * Get color abbreviation (first letter, or 2 letters on conflict).
-     * Matches Android getColorAbbreviation.
-     */
-    private fun getColorAbbreviation(colorName: String): String {
-        if (colorName.isEmpty()) return "?"
-        // Get all color names to check for conflicts
-        val allColors = listOf(
-            stringProvider?.getString("color_pink") ?: "Pink",
-            stringProvider?.getString("color_blue") ?: "Blue",
-            stringProvider?.getString("color_green") ?: "Green",
-            stringProvider?.getString("color_yellow") ?: "Yellow",
-            stringProvider?.getString("color_silver") ?: "Silver",
-            stringProvider?.getString("color_red") ?: "Red",
-            stringProvider?.getString("color_brown") ?: "Brown",
-            stringProvider?.getString("color_orange") ?: "Orange",
-            stringProvider?.getString("color_white") ?: "White"
-        )
-        val firstLetter = colorName.first().uppercaseChar()
-        // Check if any other color starts with the same letter
-        val conflicting = allColors.filter { it.isNotEmpty() && it.first().uppercaseChar() == firstLetter }
-        return if (conflicting.size > 1 && colorName.length >= 2) {
-            // Conflict: use 2-letter abbreviation
-            colorName.first().uppercaseChar() + colorName.substring(1, 2).lowercase()
-        } else {
-            // No conflict: use 1-letter abbreviation
-            firstLetter.toString()
-        }
-    }
-
-    /**
-     * Get localized direction name (for regular hints).
-     * Uses StringProvider if available, falls back to English.
-     */
-    private fun getDirectionName(direction: Int): String {
-        val key = when (direction) {
-            Board.NORTH -> "direction_up"
-            Board.SOUTH -> "direction_down"
-            Board.EAST -> "direction_right"
-            Board.WEST -> "direction_left"
-            else -> return "unknown"
-        }
-        return stringProvider?.getString(key) ?: when (direction) {
-            Board.NORTH -> "UP"
-            Board.SOUTH -> "DOWN"
-            Board.EAST -> "RIGHT"
-            Board.WEST -> "LEFT"
-            else -> "unknown"
-        }
+    fun resetStep() {
+        currentHintStep = 0
+        showingPreHints = true
     }
 
     /**
@@ -440,8 +544,8 @@ class HintManager(private val stringProvider: StringProvider? = null) {
     fun reset() {
         currentHintStep = 0
         showingPreHints = true
-        hintHistory.clear()
         solution = null
+        testMoves = null
         totalMoves = 0
     }
 }
