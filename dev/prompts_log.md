@@ -22,3 +22,7 @@
 25-09-14 04:40 "The hints still do not work, or the text is not visible? I do not know, I only see a blue bar without text."
 25-09-14 04:45 "No hint button appears at all now. Build a test that tests exactly this and do not stop until you find a hint container in the correct color like in the main app and with the same font color"
 25-09-14 04:50 "I mean no hint box appears when you press the button"
+25-09-14 04:55 "You did not follow the rule (commit message based only on uncommitted changes), explain why not"
+25-09-14 05:00 "Why did you forget the rule? Is it poorly worded? Or do you not always read the agents?"
+25-09-14 05:05 "I already have a message, is it not good? But explain to me what the cause always is when you do not follow rules, how does the process work? Is your Agents not good enough? Can I force you differently?"
+25-09-14 05:10 "Yes"
