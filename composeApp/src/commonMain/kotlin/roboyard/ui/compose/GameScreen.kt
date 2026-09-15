@@ -146,6 +146,7 @@ fun GameScreen(
     val startBoard = remember(board) { Board.Companion.createClone(board).also { it.setRobots(robotStartPositions) } }
     var hintMessage by remember(board) { mutableStateOf<String?>(null) }
     var hintContainerVisible by remember(board) { mutableStateOf(false) }
+    var pendingAutoAdvance by remember(board) { mutableStateOf(false) }
     var gameWon by remember(board) { mutableStateOf(false) }
     var maxHintUsed by remember(board) { mutableIntStateOf(-1) } // Track max hint used this session
     var isHistorySaved by remember(board) { mutableStateOf(false) }
@@ -772,6 +773,30 @@ fun GameScreen(
         }
     }
 
+    // Auto-advance hint after 1s delay when player follows the hint (matches Android)
+    LaunchedEffect(pendingAutoAdvance) {
+        if (pendingAutoAdvance) {
+            delay(1000)
+            if (hintManager.hasNextHint()) {
+                hintManager.nextHint()
+                hintMessage = hintManager.getFullHintText()
+                val regularHint = hintManager.getRegularHint()
+                if (regularHint != null) {
+                    currentHintRobot = regularHint.first
+                    currentHintDirection = regularHint.second
+                } else {
+                    currentHintRobot = -1
+                    currentHintDirection = -1
+                }
+                maxHintUsed = maxOf(maxHintUsed, hintManager.getCurrentHintStep())
+                saveToHistoryNow("hint_shown_${hintManager.getCurrentHintStep()}")
+            } else {
+                hintMessage = "All hints shown"
+            }
+            pendingAutoAdvance = false
+        }
+    }
+
     // Timer effect - runs every 500ms when timer is enabled (matches Android)
     LaunchedEffect(timerRunning) {
         if (timerRunning) {
@@ -965,23 +990,8 @@ fun GameScreen(
                         
                         // Check if player followed the current hint (auto-advance via HintManager)
                         if (hintMessage != null && robotIndex == currentHintRobot && direction == currentHintDirection) {
-                            // Player followed the hint, show next hint automatically via HintManager
-                            if (hintManager.hasNextHint()) {
-                                hintManager.nextHint()
-                                hintMessage = hintManager.getFullHintText()
-                                val regularHint = hintManager.getRegularHint()
-                                if (regularHint != null) {
-                                    currentHintRobot = regularHint.first
-                                    currentHintDirection = regularHint.second
-                                } else {
-                                    currentHintRobot = -1
-                                    currentHintDirection = -1
-                                }
-                                maxHintUsed = maxOf(maxHintUsed, hintManager.getCurrentHintStep())
-                                saveToHistoryNow("hint_shown_${hintManager.getCurrentHintStep()}")
-                            } else {
-                                hintMessage = "All hints shown"
-                            }
+                            // Player followed the hint — auto-advance after 1s delay (matches Android)
+                            pendingAutoAdvance = true
                         } else if (hintMessage != null) {
                             // Player made a different move, clear hint
                             hintMessage = null
