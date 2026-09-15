@@ -19,3 +19,6 @@
 25-09-14 04:25 "Commit that, then look again at what is still different and make everything in the compose app exactly like in Android, everything should really be exactly the same!"
 25-09-14 04:30 "Commit that, then look again at what is still different and make everything in the compose app exactly like in Android, everything should really be exactly the same!"
 25-09-14 04:35 "The hints do not work at all. Look again at what is still different and make everything in the compose app exactly like in Android, everything should really be exactly the same! Same colors of messages in hints, same order, extract the whole logic that is in displaying the hints from the Android game also into shared, so also the color selection and display of arrows in the message, everything in shared extract and only the real GUI commands then, and also the exact loop in which the hints are gone through and so in the respective app"
+25-09-14 04:40 "The hints still do not work, or the text is not visible? I do not know, I only see a blue bar without text."
+25-09-14 04:45 "No hint button appears at all now. Build a test that tests exactly this and do not stop until you find a hint container in the correct color like in the main app and with the same font color"
+25-09-14 04:50 "I mean no hint box appears when you press the button"
