@@ -45,5 +45,11 @@
 
 - Never run `git add` or `git commit` on your own — the user keeps full control over staging and committing. Only propose commit messages.
 - After EVERY code change, before sending your response, check `git status` and suggest a commit message if there are uncommitted changes. Do not wait to be asked. Do not wait for "end of session" — there is no clear session end.
-- Commit message proposals must be based only on actually uncommitted changes (`git status`, `git diff --stat`) — the user commits between sessions. Never include changes from earlier commits.
+- Before EVERY commit message proposal, you MUST do the following steps in order:
+  1. Run `git status --short` and show the output in your response
+  2. Run `git diff --stat` and show the output in your response
+  3. Read the full diff for every file listed (use `git diff <file>` or the read tool) to understand ALL uncommitted changes — not just the ones from the current turn
+  4. Only then propose the commit message, covering ALL changes shown in the diff — not just the latest incremental edits
+- The user commits between turns. Never assume a previous change was committed — always check `git status` first. If a file shows as modified, ALL its uncommitted changes must be reflected in the commit message, even if some were made in earlier turns.
+- Never include changes from earlier commits in the commit message.
 - In final commit messages, do not add lines like "update TESTSUITE.md with new test entry" or "all smoke tests passing (67 tests)" — they are redundant.
