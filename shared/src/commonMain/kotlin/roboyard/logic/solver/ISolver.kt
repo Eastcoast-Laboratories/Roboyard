@@ -8,20 +8,23 @@ import roboyard.logic.core.GridElement
  * Interface for puzzle solvers in the Roboyard game.
  * Defines the contract that any solver implementation must fulfill,
  * including initialization, solution finding, and status reporting.
- * 
+ *
  * This interface allows the game to use different solver implementations
  * while maintaining a consistent API. Currently implemented by SolverDD
  * which uses the DriftingDroids solver.
- * 
+ *
+ * Note: the original Android version extended java.lang.Runnable; the shared
+ * KMP version exposes run() directly so it stays platform-independent.
+ *
  * @author Pierre Michel
  * @since 15/04/2015
  * @see SolverDD
- * 
+ *
  * @see SolverStatus
  */
-interface ISolver : Runnable {
+interface ISolver {
     fun init(elements: ArrayList<GridElement>?)
-    override fun run()
+    fun run()
     fun getSolverStatus(): SolverStatus?
     fun getSolution(num: Int): GameSolution?
     fun getSolutionList(): MutableList<Solution>?

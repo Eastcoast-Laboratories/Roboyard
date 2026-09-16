@@ -16,6 +16,8 @@
 */
 package driftingdroids.model
 
+import kotlin.concurrent.Volatile
+
 abstract class Solver protected constructor(board: Board) {
     enum class SOLUTION_MODE(private val modeName: String, private val l10nKey: String) {
         MINIMUM("minimum", "solver.Minimum.text"),
@@ -65,7 +67,17 @@ abstract class Solver protected constructor(board: Board) {
    
     protected var optAllowRebounds: Boolean = true
 
-   
+    /**
+     * Cooperative cancellation flag. Platform code cannot interrupt threads in
+     * commonMain, so solvers poll this flag and abort the search gracefully.
+     */
+    @Volatile
+    var cancelRequested: Boolean = false
+
+    fun requestCancel() {
+        this.cancelRequested = true
+    }
+
     protected var lastResultSolutions: MutableList<Solution>? = null
    
     protected var solutionMilliSeconds: Long = 0

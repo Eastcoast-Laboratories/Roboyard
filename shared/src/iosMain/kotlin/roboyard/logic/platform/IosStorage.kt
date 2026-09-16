@@ -71,6 +71,11 @@ class IosStorage : PlatformStorage {
 
     override fun writeFile(fileName: String, content: String): Boolean {
         val filePath = getFilePath(fileName)
+        // Create parent directories for subdirectory paths like "saves/save_0.dat"
+        val parentPath = filePath.substringBeforeLast('/', "")
+        if (parentPath.isNotEmpty()) {
+            fileManager.createDirectoryAtPath(parentPath, withIntermediateDirectories = true, attributes = null, error = null)
+        }
         return content.encodeToByteArray().let { data ->
             val success = fileManager.createFileAtPath(filePath, data, null)
             if (success) {

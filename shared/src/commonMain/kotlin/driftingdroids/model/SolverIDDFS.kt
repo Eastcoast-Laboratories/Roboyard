@@ -210,9 +210,9 @@ class SolverIDDFS(board: Board) : Solver(board) {
 
         this.depthLimit = 2
         while (MAX_DEPTH > this.depthLimit) {
-            // Check for thread interruption to allow graceful cancellation
-            if (false) {
-                Logger.println("iddfs: Thread interrupted, stopping solver")
+            // Check for cooperative cancellation (threads cannot be interrupted in commonMain)
+            if (this.cancelRequested) {
+                Logger.println("iddfs: cancel requested, stopping solver")
                 throw Exception("Solver was cancelled")
             }
 
@@ -279,6 +279,10 @@ class SolverIDDFS(board: Board) : Solver(board) {
         }
         if (++this.recursionCounter >= this.memoryCheckInterval) {
             this.recursionCounter = 0
+            if (this.cancelRequested) {
+                Logger.println("iddfs: cancel requested, stopping solver")
+                throw Exception("Solver was cancelled")
+            }
             val memInfo = TimeProvider.getRuntimeMemoryInfo()
             val freeBytes = memInfo.maxMemory - memInfo.totalMemory + memInfo.freeMemory
             if (freeBytes < memInfo.maxMemory / 4) { // abort if less than 25% free
@@ -382,6 +386,10 @@ class SolverIDDFS(board: Board) : Solver(board) {
         }
         if (++this.recursionCounter >= this.memoryCheckInterval) {
             this.recursionCounter = 0
+            if (this.cancelRequested) {
+                Logger.println("iddfs: cancel requested, stopping solver")
+                throw Exception("Solver was cancelled")
+            }
             val memInfo = TimeProvider.getRuntimeMemoryInfo()
             val freeBytes = memInfo.maxMemory - memInfo.totalMemory + memInfo.freeMemory
             if (freeBytes < memInfo.maxMemory / 4) { // abort if less than 25% free

@@ -2,15 +2,15 @@ package roboyard.logic.solver
 
 import driftingdroids.model.Board
 import driftingdroids.model.Board.Goal
+import kotlin.math.max
 import roboyard.logic.core.Constants
 import roboyard.logic.core.GameLogic.Companion.getColor
 import roboyard.logic.core.GameLogic.Companion.getColorName
 import roboyard.logic.core.GridElement
+import roboyard.logic.core.Preferences
 import roboyard.logic.core.WallModel.Companion.fromGridElements
 import roboyard.logic.core.WallType
-import roboyard.ui.activities.MainActivity
-import timber.log.Timber
-import kotlin.math.max
+import roboyard.logic.util.RLog
 
 /**
  * Utility class for converting between Roboyard's game elements and DriftingDroids board format.
@@ -19,20 +19,26 @@ import kotlin.math.max
  * - Robot piece placement
  * - Wall and obstacle mapping
  * - target position translation
- * 
+ *
+ * Shared KMP version: logging via RLog; board size comes from Preferences
+ * instead of MainActivity.
+ *
  * @see Board
- * 
- * @see roboyard.eclabs.GridElement
+ *
+ * @see roboyard.logic.core.GridElement
  */
 object RRGetMap {
+    private val log = RLog.tag("RRGetMap")
+
     /**
      * Create a virtual world in memory for the DD solver (IDDFS)
      * adds all game elements to that virtual world so the solver can solve it with the current data
-     * 
+     *
      * @param gridElements game elements
      * @param pieces
      * @return
      */
+    @JvmStatic
     fun createDDWorld(gridElements: ArrayList<GridElement>, pieces: Array<RRPiece?>): Board? {
         // Find the board dimensions from the GridElements
         var maxX = 0
@@ -50,23 +56,22 @@ object RRGetMap {
 
 
         // Log the actual board dimensions we're using
-        Timber.d("[SOLUTION_SOLVER] createDDWorld: Using board dimensions " + boardWidth + "x" + boardHeight + " (MainActivity dimensions: " + MainActivity.boardSizeX + "x" + MainActivity.boardSizeY + "")
+        log.d("[SOLUTION_SOLVER] createDDWorld: Using board dimensions " + boardWidth + "x" + boardHeight + " (Preferences dimensions: " + Preferences.boardSizeWidth + "x" + Preferences.boardSizeHeight + ")")
 
         // Generate the ASCII map for debugging
         val asciiMap = generateAsciiMap(gridElements)
-        Timber.d(asciiMap)
+        log.d(asciiMap)
         // Create the board with dimensions from GridElements
-        // IMPORTANT: Use boardWidth/boardHeight calculated from GridElements, not MainActivity dimensions
+        // IMPORTANT: Use boardWidth/boardHeight calculated from GridElements, not Preferences dimensions
         // The GridElements may have coordinates up to boardWidth-1, so we need a board of that size
-        // Using MainActivity dimensions caused walls at x=12 to wrap around to x=0 of the next row
         val board = Board.createBoardFreestyle(null, boardWidth, boardHeight, Constants.NUM_ROBOTS)
         if (board == null) {
-            Timber.e("[SOLUTION_SOLVER] Failed to create board with dimensions %dx%d", boardWidth, boardHeight)
+            log.e("[SOLUTION_SOLVER] Failed to create board with dimensions %dx%d", boardWidth, boardHeight)
             return null
         }
         board!!.removeGoals()
 
-        Timber.d(
+        log.d(
             "[SOLUTION_SOLVER] Board created with width=%d, height=%d",
             board!!.width,
             board!!.height
@@ -128,12 +133,12 @@ object RRGetMap {
 
                 // Set this as the active target
                 board!!.setGoal(position)
-                Timber.d(
+                log.d(
                     "[SOLUTION_SOLVER_TARGET] Setting goal at position %d (%d,%d) for robot color %d",
                     position, x, y, targetColor
                 )
             } else if (type!!.startsWith("target_")) {
-                Timber.w("[SOLUTION_SOLVER_TARGET] Unknown target type: %s", type)
+                log.w("[SOLUTION_SOLVER_TARGET] Unknown target type: %s", type)
             }
 
 
@@ -160,13 +165,13 @@ object RRGetMap {
                     // This is a temporary solution - we log a warning to highlight the issue
                     // PINK = 0, GREEN = 1, BLUE = 2, YELLOW = 3, SILVER = 4
                     mappedIndex = robotCounter % Constants.NUM_ROBOTS
-                    Timber.w(
+                    log.w(
                         "[COLOR_MAPPING] Mapped non-standard robot color %d (%s) to standard color index %d",
                         colorIndex, getColorName(colorIndex, true), mappedIndex
                     )
                 }
 
-                Timber.d(
+                log.d(
                     "[HINT_SYSTEM] Creating robot piece for %s with colorIndex=%d (mapped to %d) with RGB color %d",
                     type, colorIndex, mappedIndex, getColor(type)
                 )
@@ -198,7 +203,7 @@ object RRGetMap {
                     true
                 ) // treated as "N" of the current field in driftingdroids solver
 
-                Timber.d(
+                log.d(
                     "[SOLUTION_SOLVER] Setting horizontal wall at position %d (x=%d, y=%d)",
                     position,
                     x,
@@ -211,7 +216,7 @@ object RRGetMap {
                     true
                 ) // treated as "W" of the current field in driftingdroids solver
 
-                Timber.d(
+                log.d(
                     "[SOLUTION_SOLVER] Setting vertical wall at position %d (x=%d, y=%d)",
                     position,
                     x,
@@ -230,7 +235,7 @@ object RRGetMap {
             val topPosition = 0 + x
             if (!board!!.isWall(topPosition, Constants.NORTH)) {
                 board!!.setWall(topPosition, "N", true)
-                Timber.w(
+                log.w(
                     "[SOLUTION_SOLVER][WALLS] Adding missing top horizontal border wall at position (%d,0)",
                     x
                 )
@@ -241,7 +246,7 @@ object RRGetMap {
             val bottomPosition = bottomWallY + x
             if (!board!!.isWall(bottomPosition, Constants.SOUTH)) {
                 board!!.setWall(bottomPosition, "N", true)
-                Timber.w(
+                log.w(
                     "[SOLUTION_SOLVER][WALLS] Adding missing bottom horizontal border wall at position (%d,%d)",
                     x,
                     board!!.height - 1
@@ -256,7 +261,7 @@ object RRGetMap {
             val leftPosition = 0 + verticalWallY
             if (!board!!.isWall(leftPosition, Constants.WEST)) {
                 board!!.setWall(leftPosition, "W", true)
-                Timber.w(
+                log.w(
                     "[SOLUTION_SOLVER][WALLS] Adding missing left vertical border wall at position (0,%d)",
                     y
                 )
@@ -267,7 +272,7 @@ object RRGetMap {
             val rightPosition = rightWallX + verticalWallY
             if (!board!!.isWall(rightPosition, Constants.EAST)) {
                 board!!.setWall(rightPosition, "W", true)
-                Timber.w(
+                log.w(
                     "[SOLUTION_SOLVER][WALLS] Adding missing right vertical border wall at position (%d,%d)",
                     board!!.width - 1,
                     y
@@ -277,7 +282,7 @@ object RRGetMap {
         }
 
         if (missingWallCountHorizontal > 0 || missingWallCountVertical > 0) {
-            Timber.w(
+            log.w(
                 "[SOLUTION_SOLVER][WALLS] Added %d missing outer walls to ensure solver stability, horizontal:%d, vertical:%d",
                 missingWallCountHorizontal + missingWallCountVertical,
                 missingWallCountHorizontal,
@@ -290,7 +295,7 @@ object RRGetMap {
         for (i in 0..<Constants.NUM_ROBOTS) {
             // Check if the piece exists at this position
             if (pieces[i] == null) {
-                Timber.e(
+                log.e(
                     "[ROBOT_MAPPING][ERRROR] Fatal: Missing robot at position %d. Creating a dummy robot at (0,0)",
                     i
                 )
@@ -300,7 +305,7 @@ object RRGetMap {
             }
 
             val position = pieces[i]!!.y * board!!.width + pieces[i]!!.x
-            Timber.d(
+            log.d(
                 "[ROBOT_MAPPING] Setting robot %d at board position %d (x=%d, y=%d)",
                 i, position, pieces[i]!!.x, pieces[i]!!.y
             )
@@ -308,7 +313,7 @@ object RRGetMap {
 
             // Verify that setRobot succeeded
             if (!board!!.setRobot(i, position, false)) {
-                Timber.e(
+                log.e(
                     "[ROBOT_MAPPING][ERRROR] FATAL: Could not set robot %d at position %d (%d,%d). Position may be occupied or invalid.",
                     i, position, pieces[i]!!.x, pieces[i]!!.y
                 )
@@ -328,7 +333,7 @@ object RRGetMap {
             for (info in targetInfoList) {
                 val color = info[1]
                 if (color == Constants.COLOR_MULTI) {
-                    Timber.e(
+                    log.e(
                         "[SOLUTION_SOLVER] Multi-colored target not allowed in multi-goal mode. " +
                                 "Each robot must have a specific colored target. It was added target with ID " + color
                     )
@@ -348,9 +353,9 @@ object RRGetMap {
             }
             if (activeGoals.size > 1) {
                 board!!.setActiveGoals(activeGoals)
-                Timber.d("[SOLUTION_SOLVER] Multi-goal mode: set %d active goals", activeGoals.size)
+                log.d("[SOLUTION_SOLVER] Multi-goal mode: set %d active goals", activeGoals.size)
                 for (g in activeGoals) {
-                    Timber.d(
+                    log.d(
                         "[SOLUTION_SOLVER]   Goal: robot=%d position=%d (%d,%d)",
                         g.robotNumber,
                         g.position,
@@ -369,6 +374,7 @@ object RRGetMap {
      * @param gridElements List of grid elements to represent
      * @return ASCII string representation of the board
      */
+    @JvmStatic
     fun generateAsciiMap(gridElements: ArrayList<GridElement>?): String {
         if (gridElements == null || gridElements.isEmpty()) {
             return "[ASCII_MAP] Empty or null grid elements provided."
@@ -520,14 +526,14 @@ object RRGetMap {
         // Add column headers (X coordinates)
         result.append("   ") // Space for row labels
         for (x in 0..<mapWidth) {
-            result.append(String.format("%2d", x))
+            result.append(x.toString().padStart(2))
         }
         result.append("\n")
 
 
         // Add each row with row header (Y coordinate)
         for (y in 0..<mapHeight) {
-            result.append(String.format("%2d ", y))
+            result.append(y.toString().padStart(2) + " ")
 
             for (x in 0..<mapWidth) {
                 // Add vertical wall or space
@@ -549,14 +555,14 @@ object RRGetMap {
      * Parse an ASCII map (as generated by generateAsciiMap) back into GridElement list.
      * Supports robots (r,g,b,y,p,s), targets (R,G,B,Y,P,S,M), walls (|,‾),
      * and combined robot/target + horizontal wall characters (e.g. r̅, G̅).
-     * 
+     *
      * @param asciiMap The ASCII map string (with or without the "[ASCII_MAP]" prefix)
      * @return ArrayList of GridElement, or null if parsing failed
      */
     @JvmStatic
     fun parseAsciiMap(asciiMap: String?): ArrayList<GridElement>? {
         if (asciiMap == null || asciiMap.isEmpty()) {
-            Timber.e("[ASCII_PARSE] Input is null or empty")
+            log.e("[ASCII_PARSE] Input is null or empty")
             return null
         }
 
@@ -597,11 +603,11 @@ object RRGetMap {
         }
 
         if (dataLines.isEmpty()) {
-            Timber.e("[ASCII_PARSE] No data lines found in ASCII map")
+            log.e("[ASCII_PARSE] No data lines found in ASCII map")
             return null
         }
 
-        Timber.d("[ASCII_PARSE] Found %d data lines", dataLines.size)
+        log.d("[ASCII_PARSE] Found %d data lines", dataLines.size)
 
         // Map characters to element types
         // Lowercase = robots, Uppercase = targets
@@ -657,7 +663,7 @@ object RRGetMap {
 
                 // Check for combining overline (U+0305) following the character
                 var hasOverline = false
-                if (i < cellData.length && cellData.get(i) == '\u0305') {
+                if (i < cellData.length && cellData.get(i) == '̅') {
                     hasOverline = true
                     i++ // consume the combining character
                 }
@@ -667,7 +673,7 @@ object RRGetMap {
                     elements.add(GridElement(x, y, "mh"))
                 }
 
-                if (cellChar == '\u203E' || cellChar == '‾') {
+                if (cellChar == '‾' || cellChar == '‾') {
                     // Standalone overline = horizontal wall only
                     elements.add(GridElement(x, y, "mh"))
                 } else if (robotMap.containsKey(cellChar)) {
@@ -686,7 +692,7 @@ object RRGetMap {
             }
         }
 
-        Timber.d("[ASCII_PARSE] Parsed %d elements from ASCII map", elements.size)
+        log.d("[ASCII_PARSE] Parsed %d elements from ASCII map", elements.size)
         return elements
     }
 }

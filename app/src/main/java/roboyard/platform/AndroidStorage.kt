@@ -136,6 +136,8 @@ class AndroidStorage(private val context: Context) : PlatformStorage {
     override fun writeFile(fileName: String, content: String): Boolean {
         return try {
             val file = context.getFileStreamPath(fileName)
+            // Create parent directories for subdirectory paths like "saves/save_0.dat"
+            file.parentFile?.mkdirs()
             val output = FileOutputStream(file)
             val writer = OutputStreamWriter(output, StandardCharsets.UTF_8)
             writer.write(content)
