@@ -30,3 +30,7 @@
 25-09-15 05:20 "The settings page does not work yet, only a black screen and nothing in the log. It must look exactly like the main game and provide exactly the same settings; we need exactly the same variables as in the main game, EVERYTHING! Make a plan for extracting the settings from the main app into shared so both stay synchronized, and then implement it immediately without asking."
 25-09-15 05:40 "Great, now: when I set Impossible with at least 17 moves, it generates and rejects many levels, but in the end I get one with 5 moves. That must not happen without a warning. If it could not generate a suitable one after 1000 attempts, it should accept the last one but show a popup saying that none could be found. Here it accepted a 5-move one."
 25-09-15 06:05 "Under difficult conditions it sometimes aborts with MAP_VALIDATION ERROR Index -1 out of bounds and then shows no solution found. Another time it rendered for a long time and discarded all maps until it hung and crashed with OutOfMemoryError in SolverIDDFS.buildSolution/Move."
+26-09-16 10:30 "Megaplan: what still needs to be taken over from the android app into the new one, what is still missing? Make a precise plan until all fine details from the android app are adopted"
+26-09-16 10:55 "Megaplan continue, I have not answered all the questions yet"
+26-09-16 13:10 "The community app runs with ./run.sh -d=r under http://127.0.0.1:8000 / http://localhost:8000 - test against the local app, build that into the megaplan"
+26-09-16 14:33 "continue"
