@@ -117,6 +117,15 @@ Full feature gap analysis completed. Priority order (most visible first):
 - Android-only account/login/data export-import/log actions intentionally remain
   platform-specific in `SettingsFragment` (not part of the shared preference model)
 
+#### 6.5k: Random map generation validation — ✅ DONE
+- `MapGenerationValidator` in shared tracks rejected candidates across board
+  replacements, caps retries at 1000, then accepts the last candidate as fallback
+  and shows a localized warning dialog
+- Compose `GameScreen` solver runs in a cancellation-aware coroutine; manual
+  new-game requests reset the validator, auto-retries preserve the attempt count
+- The Hint button no longer runs its own solver — hints can never bypass
+  difficulty validation
+
 ## What was migrated (Phases 1-5, completed)
 
 | File | From | To | Notes |

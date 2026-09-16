@@ -130,7 +130,11 @@
     "settings_import_failed": "Import failed: {0}",
     "settings_reset_confirm_title": "Reset All Data?",
     "settings_reset_confirm_message": "This will delete all your preferences, achievements, level progress, and save games. This action cannot be undone.",
-    "settings_reset_success": "All data has been reset. Please restart the app."
+    "settings_reset_success": "All data has been reset. Please restart the app.",
+    "map_generation_failed_title": "No suitable map found",
+    "map_generation_failed_min_message": "No map with at least {0} moves could be generated after {1} attempts. The last generated map ({2} moves) will be used.",
+    "map_generation_failed_range_message": "No map with {0} to {1} moves could be generated after {2} attempts. The last generated map ({3} moves) will be used.",
+    "map_generation_unknown_moves": "unknown"
   },
   "de": {
     "pre_hint_less_than_x": "Die KI hat eine Lösung mit weniger als {0} Zügen gefunden",
@@ -261,7 +265,11 @@
     "settings_hint_auto_move_semi_auto_a11y": "Automatischer Modus: Roboter bewegt sich, wenn Sie den Nächster-Tipp-Button klicken",
     "settings_logout_confirm_title": "Abmelden?",
     "settings_logout_confirm_message": "Das Abmelden löscht alle lokalen Achievements, Level-Fortschritte, Spielhistorie und Streaks von diesem Gerät. Ihre Daten sind auf dem Server gespeichert und werden beim nächsten Login wiederhergestellt.",
-    "settings_logging_out": "Abmelden…"
+    "settings_logging_out": "Abmelden…",
+    "map_generation_failed_title": "Keine passende Karte gefunden",
+    "map_generation_failed_min_message": "Nach {1} Versuchen konnte keine Karte mit mindestens {0} Zügen erzeugt werden. Die zuletzt erzeugte Karte ({2} Züge) wird verwendet.",
+    "map_generation_failed_range_message": "Nach {2} Versuchen konnte keine Karte mit {0} bis {1} Zügen erzeugt werden. Die zuletzt erzeugte Karte ({3} Züge) wird verwendet.",
+    "map_generation_unknown_moves": "unbekannt"
   },
   "fr": {
     "settings_a11y": "Paramètres",

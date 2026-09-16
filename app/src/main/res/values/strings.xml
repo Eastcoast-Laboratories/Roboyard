@@ -306,6 +306,10 @@
     <string name="pre_hint_first_move">Move the %1$s robot first</string>
     <string name="and">and</string>
     <string name="no_solution_found">No solution found</string>
+    <string name="map_generation_failed_title">No suitable map found</string>
+    <string name="map_generation_failed_min_message">No map with at least %1$d moves could be generated after %2$d attempts. The last generated map (%3$s moves) will be used.</string>
+    <string name="map_generation_failed_range_message">No map with %1$d to %2$d moves could be generated after %3$d attempts. The last generated map (%4$s moves) will be used.</string>
+    <string name="map_generation_unknown_moves">unknown</string>
     <string name="live_move_counter_label_a11y">Show remaining moves</string>
     <string name="live_move_counter_optimal">%1$d moves from here</string>
     <plurals name="live_move_counter_optimal_plural">
