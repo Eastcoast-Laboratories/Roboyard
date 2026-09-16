@@ -71,7 +71,7 @@ Full feature gap analysis completed. Priority order (most visible first):
 - ComposeApp: Dead code (always hidden)
 
 #### 6.5f: Missing screens — ⏳ PENDING
-- SettingsScreen: stub ("TODO")
+- SettingsScreen: ✅ DONE (see 6.5j)
 - AchievementsScreen: stub ("TODO")
 - DebugSettingsScreen: stub (not navigable)
 - LevelDesignEditorScreen: stub (not navigable)
@@ -101,9 +101,21 @@ Full feature gap analysis completed. Priority order (most visible first):
 #### 6.5i: Localization — ✅ DONE
 - StringProvider interface in shared
 - AndroidStringProvider (reads strings.xml)
-- DesktopStringProvider (reads strings.json)
+- DesktopStringProvider (reads strings.json, honors `Preferences.appLanguage` with English per-key fallback)
 - HintManager uses localized strings
 - strings.json generated from Android strings.xml
+
+#### 6.5j: Settings — ✅ DONE
+- `SettingsManager` + `SettingsState` in shared: single implementation of all game preference
+  variables and their transition rules (difficulty presets, beginner 12x14 board cap on
+  transition, game-mode/robot/target coupling, min/max move validation incl. infinity,
+  volume/hint-mode clamping, language validation, board-size ratio filter)
+- `SettingsFragment.java` delegates all preference changes to `SettingsManager`
+- Compose `SettingsScreen` implemented: same control order, strings and styling as Android,
+  driven by `SettingsManager` state; fullscreen callback updates desktop window placement
+- Settings strings merged into `strings.json` for all 9 supported languages
+- Android-only account/login/data export-import/log actions intentionally remain
+  platform-specific in `SettingsFragment` (not part of the shared preference model)
 
 ## What was migrated (Phases 1-5, completed)
 

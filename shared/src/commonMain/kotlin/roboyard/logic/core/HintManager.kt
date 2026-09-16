@@ -488,23 +488,27 @@ class HintManager(private val stringProvider: StringProvider? = null) {
      */
     private fun getRobotColorName(color: Int): String {
         val key = when (color) {
-            0 -> "color_red"
+            0 -> "color_pink"
             1 -> "color_green"
             2 -> "color_blue"
             3 -> "color_yellow"
             4 -> "color_silver"
-            5 -> "color_pink"
+            5 -> "color_red"
             6 -> "color_brown"
             7 -> "color_orange"
             8 -> "color_white"
             else -> return "robot $color"
         }
         return stringProvider?.getString(key) ?: when (color) {
-            0 -> "red"
-            1 -> "green"
-            2 -> "blue"
-            3 -> "yellow"
-            4 -> "silver"
+            0 -> "Pink"
+            1 -> "Green"
+            2 -> "Blue"
+            3 -> "Yellow"
+            4 -> "Silver"
+            5 -> "Red"
+            6 -> "Brown"
+            7 -> "Orange"
+            8 -> "White"
             else -> "robot $color"
         }
     }
@@ -515,12 +519,12 @@ class HintManager(private val stringProvider: StringProvider? = null) {
      */
     private fun getRobotColorNameDative(color: Int): String {
         val key = when (color) {
-            0 -> "color_red_dative"
+            0 -> "color_pink_dative"
             1 -> "color_green_dative"
             2 -> "color_blue_dative"
             3 -> "color_yellow_dative"
             4 -> "color_silver_dative"
-            5 -> "color_pink_dative"
+            5 -> "color_red_dative"
             6 -> "color_brown_dative"
             7 -> "color_orange_dative"
             8 -> "color_white_dative"

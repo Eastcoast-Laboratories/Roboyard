@@ -26,3 +26,5 @@
 25-09-14 05:00 "Why did you forget the rule? Is it poorly worded? Or do you not always read the agents?"
 25-09-14 05:05 "I already have a message, is it not good? But explain to me what the cause always is when you do not follow rules, how does the process work? Is your Agents not good enough? Can I force you differently?"
 25-09-14 05:10 "Yes"
+25-09-15 05:15 "The color for the hint box must be yellowish like in the main app, and the blue when the blue robot is involved a bit stronger, also the pink. When the red robot is mentioned, pink must always be displayed instead of red"
+25-09-15 05:20 "The settings page does not work yet, only a black screen and nothing in the log. It must look exactly like the main game and provide exactly the same settings; we need exactly the same variables as in the main game, EVERYTHING! Make a plan for extracting the settings from the main app into shared so both stay synchronized, and then implement it immediately without asking."

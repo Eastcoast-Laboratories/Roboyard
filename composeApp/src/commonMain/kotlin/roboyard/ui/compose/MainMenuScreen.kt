@@ -206,7 +206,7 @@ fun MainMenuScreen(
                         text = null,
                         color = CircularButtonColor.GRAY,
                         onClick = onSettings,
-                        modifier = Modifier.size(48.dp).padding(8.dp)
+                        modifier = Modifier.size(48.dp).padding(8.dp).semantics { testTag = "settingsButton" }
                     )
                 }
             }

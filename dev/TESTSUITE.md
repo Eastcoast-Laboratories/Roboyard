@@ -169,7 +169,7 @@ These tests run on the JVM without an Android device or emulator.
 
 | Class                         | Status    | Tests | Description                                                                                                                                                                                                        | Tags                                                                          |
 | ----------------------------- | --------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
-| `RoboyardSmokeTest`           | ✅ Passing | 67    | Comprehensive smoke test for all core game logic, data classes, and utility functions. Covers GameElement, GameMove, GridElement, MapObjects, Achievements, Constants, Save Data Parsing, Streak/Sync, Timestamps. | smoke-test, game-logic, data-classes, achievements, save-data, streak, sync   |
+| `RoboyardSmokeTest`           | ✅ Passing | 59    | Comprehensive smoke test for all core game logic, data classes, and utility functions. Covers GameElement, GameMove, GridElement, MapObjects, Achievements, Constants, Save Data Parsing, Streak/Sync, Timestamps. | smoke-test, game-logic, data-classes, achievements, save-data, streak, sync   |
 | `GameStateSaveLoadTest`       | ✅ Passing | 7     | Serialization of GameState to compact level format. Verifies robot positions (rr/rg/rb/ry), target positions (tr/tg/tb/ty), move counts, map name, board dimensions in metadata header.                            | save, load, serialization, compact-format, metadata, robots, targets          |
 | `LevelFormatParserTest`       | ✅ Passing | 7     | Parsing and serialization of level format entries: basic entries, comments (#), line breaks, empty content, legacy format (mh/mv/target_color/robot_color), compact format.                                        | level-format, parsing, serialization, comments, legacy-format, compact-format |
 | `MapSignatureTest`            | ✅ Passing | ~5    | Wall signatures, position signatures, and full map signatures for unique map tracking and achievement progress.                                                                                                    | map-signature, walls, positions, unique-map-tracking, achievements            |
@@ -184,7 +184,7 @@ These tests run on the JVM without an Android device or emulator.
 | `MultipleTargetsSolverTest`   | ✅ Passing | 3     | Multi-target solver support: single goal baseline, 2 goals (green+yellow robots verified at target positions), 3 goals (green+yellow+blue). Tests Board.activeGoals and SolverIDDFS multi-goal check.               | multi-target, solver, tdd, driftingdroids                                    |
 | `LevelCompletionDataTest`    | ✅ Passing | 22    | LevelCompletionData save/update logic: stars only improve, optimalMoves not overwritten with 0, hintsShown always updated, direct hint field sync (maxHintUsed, everUsedHints, solvedWithoutHints, timestamps), hintsShown derived from maxHintUsed, restore from server with metadata, full round-trip (save→upload→download→restore). | level-completion, stars, optimal-moves, hints, restore, sync, round-trip      |
 
-**Total unit tests: ~162 in 14 files, all passing.**
+**Total unit tests: ~154 in 14 files, all passing.**
 
 ---
 
@@ -262,7 +262,7 @@ These tests require a connected Android device or emulator.
 
 | Class | Status | Tests | Description | Tags |
 |-------|--------|-------|-------------|------|
-| `ComposeAppUiSmokeTest` | ✅ Passing | 4 | Compose UI smoke test: main menu visible, navigate to Level Selection, navigate to Credits, navigate to Credits and back. | compose, desktop, ui-test, smoke-test, navigation |
+| `ComposeAppUiSmokeTest` | ✅ Passing | 5 | Compose UI smoke test: main menu visible, navigate to Level Selection, navigate to Credits, navigate to Credits and back, Settings full rendering and back navigation. | compose, desktop, ui-test, smoke-test, navigation, settings |
 
 #### Compose Non-UI Unit Tests (logic only, no app launch)
 
@@ -271,6 +271,7 @@ These tests require a connected Android device or emulator.
 | `RobotMovementTest` | ✅ Passing | 8 | Robot movement logic (N/S/E/W, wall collision, robot blocking). Tests shared `moveRobotOnBoard`. | compose, desktop, unit-test, robot-movement |
 | `GameplayHistoryTest` | ✅ Passing | 1 | Integration test: play a complete game and verify history saving. Tests shared `isBoardSolved`, `moveRobotOnBoard`. | compose, desktop, integration-test, history |
 | `HistoryAutosaveTest` | ❌ Failing (2/9) | 9 | History autosave and hint tracking. 2 pre-existing failures (testGameHistoryEntryAchievementQualification, testHintTrackingAcrossSessions). | compose, desktop, history, autosave |
+| `SettingsManagerTest` | ✅ Passing | 10 | Shared `SettingsManager` transitions: currentState mirrors all 21 preference fields, difficulty presets (incl. impossible preserving new-map, beginner capping board to 12x14 only on transition), game-mode robot/target coupling, robot<=target and multi-target minimum 2, min/max move clamps and infinity, accessibility defaults, volume/hint-mode clamping, language validation, board-size ratio filter. Run via `:shared:desktopTest`. | shared, settings, preferences, unit-test |
 
 ### ComposeApp PyAutoGUI Tests (headed, real mouse clicks)
 

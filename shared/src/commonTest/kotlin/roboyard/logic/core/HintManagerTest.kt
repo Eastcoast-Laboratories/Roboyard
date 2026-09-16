@@ -107,10 +107,10 @@ class HintManagerTest {
         val hint = hintManager.getHintForDisplay()
         assertNotNull(hint)
         assertFalse(hint.isPreHint)
-        // Should contain "Red" and "↑"
-        assertTrue(hint.text.contains("Red"), "Hint text should contain 'Red': ${hint.text}")
+        // Color 0 = COLOR_PINK, so should show "Pink" and "↑"
+        assertTrue(hint.text.contains("Pink"), "Hint text should contain 'Pink': ${hint.text}")
         assertTrue(hint.text.contains("↑"), "Hint text should contain '↑': ${hint.text}")
-        // Background should be red (color index 0)
+        // Background should be pink (color index 0 = COLOR_PINK)
         assertEquals(0, hint.robotColorForBackground)
     }
 
@@ -132,8 +132,8 @@ class HintManagerTest {
         val hint = hintManager.getHintForDisplay()
         assertNotNull(hint)
         assertFalse(hint.isPreHint)
-        // Should contain abbreviated history: "R↑, Green →"
-        assertTrue(hint.text.contains("R"), "Hint should contain 'R' abbreviation: ${hint.text}")
+        // Color 0 = COLOR_PINK -> abbreviation "P", Color 1 = COLOR_GREEN -> "G"
+        assertTrue(hint.text.contains("P"), "Hint should contain 'P' abbreviation: ${hint.text}")
         assertTrue(hint.text.contains("↑"), "Hint should contain '↑': ${hint.text}")
         assertTrue(hint.text.contains("Green"), "Hint should contain 'Green': ${hint.text}")
         assertTrue(hint.text.contains("→"), "Hint should contain '→': ${hint.text}")
@@ -210,7 +210,7 @@ class HintManagerTest {
         hintManager.initializeForTest(
             moves = listOf(
                 Pair(2, Board.NORTH),  // Blue up (first move)
-                Pair(0, Board.EAST)    // Red right
+                Pair(0, Board.EAST)    // Pink right (color 0 = COLOR_PINK)
             ),
             isLevelGame = false, levelId = 0
         )

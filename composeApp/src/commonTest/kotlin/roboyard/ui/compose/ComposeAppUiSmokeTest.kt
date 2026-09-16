@@ -1,5 +1,7 @@
 package roboyard.ui.compose
 
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -60,6 +62,27 @@ class ComposeAppUiSmokeTest {
         composeRule.waitForIdle()
 
         // Should be back at main menu
+        composeRule.onNodeWithText("New Random Game").assertExists()
+    }
+
+    @Test
+    fun testNavigateToSettingsShowsFullSettings() {
+        roboyard.logic.core.Preferences.appLanguage = "en"
+
+        composeRule.setContent { App() }
+
+        composeRule.onNodeWithTag("settingsButton").performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithTag("settingsScreen").assertIsDisplayed()
+        composeRule.onNodeWithText("Settings").assertIsDisplayed()
+        composeRule.onNodeWithText("Board Size:", substring = true).assertIsDisplayed()
+        composeRule.onNodeWithText("Difficulty Level:", substring = true).assertExists()
+        composeRule.onNodeWithText("Num Moves:", substring = true).assertExists()
+        composeRule.onNodeWithTag("settingsBackButton").assertIsDisplayed()
+
+        composeRule.onNodeWithTag("settingsBackButton").performClick()
+        composeRule.waitForIdle()
         composeRule.onNodeWithText("New Random Game").assertExists()
     }
 }

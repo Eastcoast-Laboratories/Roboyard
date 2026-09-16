@@ -1,6 +1,7 @@
 package roboyard.logic.ui
 
 import java.io.InputStreamReader
+import roboyard.logic.core.Preferences
 
 /**
  * Desktop implementation of StringProvider.
@@ -105,12 +106,11 @@ object DesktopStringProvider : StringProvider {
     }
 
     private fun getCurrentLanguage(): String {
-        return java.util.Locale.getDefault().language
+        return Preferences.appLanguage ?: java.util.Locale.getDefault().language
     }
 
     override fun getString(name: String): String? {
         val lang = getCurrentLanguage()
-        val strings = stringsByLocale[lang] ?: stringsByLocale["en"] ?: return null
-        return strings[name]
+        return stringsByLocale[lang]?.get(name) ?: stringsByLocale["en"]?.get(name)
     }
 }
