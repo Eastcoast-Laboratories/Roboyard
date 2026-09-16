@@ -13,7 +13,7 @@ import driftingdroids.model.Board
 import roboyard.logic.core.MapGenerator
 import roboyard.logic.core.Preferences
 @Composable
-fun App() {
+fun App(onFullscreenChanged: (Boolean) -> Unit = {}) {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.MainMenu) }
     var board by remember { mutableStateOf<Board?>(null) }
     var startBoardForSaveLoad by remember { mutableStateOf<Board?>(null) }
@@ -127,7 +127,8 @@ fun App() {
                     SettingsScreen(
                         onBack = {
                             currentScreen = Screen.MainMenu
-                        }
+                        },
+                        onFullscreenChanged = onFullscreenChanged
                     )
                 }
                 Screen.Help -> {

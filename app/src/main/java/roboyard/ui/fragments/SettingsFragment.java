@@ -37,8 +37,11 @@ import roboyard.logic.managers.DataExportImportManager;
 import roboyard.logic.network.RoboyardApiClient;
 import roboyard.ui.RoboyardApplication;
 import roboyard.ui.activities.MainActivity;
+import roboyard.logic.core.BoardSizeOption;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.Preferences;
+import roboyard.logic.core.SettingsManager;
+import roboyard.logic.core.SettingsState;
 import timber.log.Timber;
 
 import java.util.Locale;
@@ -126,12 +129,14 @@ public class SettingsFragment extends Fragment {
     private Button resetDataButton;
     private Button viewLogsButton;
     
-    private List<int[]> validBoardSizes;
+    private List<BoardSizeOption> validBoardSizes;
     
     // Add a flag to track if this is the first selection event
     
     // Flag to prevent recursive updates
     private boolean isUpdatingUI = false;
+
+    private boolean difficultyHandledByCheckedChange = false;
     
     // Debug view
     private android.view.GestureDetector debugGestureDetector;
@@ -435,89 +440,58 @@ public class SettingsFragment extends Fragment {
             
             // Calculate device screen ratio
             float displayRatio = calculateDeviceRatio();
-            float maxBoardRatio = calculateMaxBoardRatio(displayRatio);
-            Timber.d("[RATIO] Display ratio: %f, Max board ratio: %f", displayRatio, maxBoardRatio);
-            
+            Timber.d("[RATIO] Display ratio: %f", displayRatio);
+
             // Check if device is in landscape mode
             int orientation = getResources().getConfiguration().orientation;
             boolean isLandscape = orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE;
             Timber.d("[RATIO] isLandscape=" + isLandscape);
-            
-            // Create list of valid board sizes
-            validBoardSizes = new ArrayList<>();
-            
-            // Define all possible board sizes - exactly as in the original game
-            int[][] boardSizes = {
-                    {8, 7}, // board ratio: 0.875
-                    {8, 8}, // board ratio: 1.0
-                    {8, 12}, // board ratio: 1.5
-                    {10, 8}, // board ratio: 0.8
-                    {10, 10}, // board ratio: 1.0
-                    {10, 12}, // board ratio: 1.2
-                    {10, 14}, // board ratio: 1.4
-                    {12, 12}, // board ratio: 1.0
-                    {12, 14}, {12, 16}, {12, 18},
-                    {14, 14}, // board ratio: 1.0
-                    {14, 16}, {14, 18},
-                    {16, 14},
-                    {16, 16}, // board ratio: 1.0
-                    {16, 18}, {16, 20}, {16, 22},
-                    {18, 18}, // board ratio: 1.0
-                    {18, 20}, {18, 22}
-            };
-            
+
             // Filter board sizes based on device ratio and orientation
-            for (int[] size : boardSizes) {
-                float boardRatio = (float) size[1] / size[0];
-                // In landscape mode, allow all ratios
-                // In portrait mode, only allow ratios that fit the device
-                if (isLandscape || boardRatio * 1.3 <= maxBoardRatio) {
-                    validBoardSizes.add(size);
-                }
-            }
-            
+            validBoardSizes = SettingsManager.validBoardSizes(displayRatio, isLandscape);
+
             // Create adapter for spinner
             ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            
+
             // Add board size options to adapter
-            for (int[] size : validBoardSizes) {
-                adapter.add(size[0] + "x" + size[1]);
+            for (BoardSizeOption size : validBoardSizes) {
+                adapter.add(size.toString());
             }
-            
+
             // Set adapter for spinner
             if (boardSizeSpinner != null) {
                 boardSizeSpinner.setAdapter(adapter);
-                
+
                 // Set current board size from preferences
                 // If not found, use default size (16x16)
                 int currentWidth = Preferences.boardSizeWidth;
                 int currentHeight = Preferences.boardSizeHeight;
-                
+
                 Timber.d("[BOARD_SIZE_DEBUG] Current board size from Preferences: %dx%d", currentWidth, currentHeight);
-                
+
                 // Find matching board size in validBoardSizes
                 boolean found = false;
                 for (int i = 0; i < validBoardSizes.size(); i++) {
-                    int[] size = validBoardSizes.get(i);
-                    if (size[0] == currentWidth && size[1] == currentHeight) {
+                    BoardSizeOption size = validBoardSizes.get(i);
+                    if (size.getWidth() == currentWidth && size.getHeight() == currentHeight) {
                         boardSizeSpinner.setSelection(i);
                         found = true;
                         break;
                     }
                 }
-                
+
                 // If no matching size found, default to 16x16 or the first available size
                 if (!found) {
                     for (int i = 0; i < validBoardSizes.size(); i++) {
-                        int[] size = validBoardSizes.get(i);
-                        if (size[0] == 16 && size[1] == 16) {
+                        BoardSizeOption size = validBoardSizes.get(i);
+                        if (size.getWidth() == 16 && size.getHeight() == 16) {
                             boardSizeSpinner.setSelection(i);
                             found = true;
                             break;
                         }
                     }
-                    
+
                     // If 16x16 not found, use the first size
                     if (!found && !validBoardSizes.isEmpty()) {
                         boardSizeSpinner.setSelection(0);
@@ -528,25 +502,6 @@ public class SettingsFragment extends Fragment {
             }
         } catch (Exception e) {
             Timber.e(e, "Error setting up board size options");
-        }
-    }
-    
-    /**
-     * Calculate maximum allowed board ratio based on display ratio.
-     * Same formula as in the original SettingsGameScreen.
-     */
-    private float calculateMaxBoardRatio(float displayRatio) {
-        // For display ratio 1.5 -> max board ratio 1.2
-        // For display ratio 2.0 -> max board ratio 1.8
-        // Linear interpolation between these points
-        if (displayRatio <= 1.5f) {
-            return 1.2f;
-        } else if (displayRatio >= 2.0f) {
-            return 1.8f;
-        } else {
-            // Linear interpolation
-            float factor = (displayRatio - 1.5f) / 0.5f; // 0.0 to 1.0
-            return 1.2f + factor * 0.6f;
         }
     }
     
@@ -616,13 +571,14 @@ public class SettingsFragment extends Fragment {
     private void loadSettings() {
         try {
             isUpdatingUI = true;
-            
-            // Get current values from static Preferences
-            int difficulty = Preferences.difficulty;
-            boolean generateNewMapEachTime = Preferences.generateNewMapEachTime;
-            boolean soundEnabled = Preferences.soundEnabled;
-            boolean accessibilityMode = Preferences.accessibilityMode;
-            boolean fullscreenEnabled = Preferences.fullscreenEnabled;
+
+            // Get current values from shared settings state
+            SettingsState settings = SettingsManager.currentState();
+            int difficulty = settings.getDifficulty();
+            boolean generateNewMapEachTime = settings.getGenerateNewMapEachTime();
+            boolean soundEnabled = settings.getSoundEnabled();
+            boolean accessibilityMode = settings.getAccessibilityMode();
+            boolean fullscreenEnabled = settings.getFullscreenEnabled();
             
             // Set difficulty radio buttons
             if (difficultyRadioGroup != null) {
@@ -692,11 +648,11 @@ public class SettingsFragment extends Fragment {
             if (hintAutoMoveRadioGroup != null) {
                 // Hide Full-Auto option unless it's already selected (only available in debug mode)
                 if (hintAutoMoveFullAuto != null) {
-                    boolean isFullAutoSelected = Preferences.hintAutoMoveMode == Preferences.HINT_AUTO_MOVE_FULL_AUTO;
+                    boolean isFullAutoSelected = settings.getHintAutoMoveMode() == Preferences.HINT_AUTO_MOVE_FULL_AUTO;
                     hintAutoMoveFullAuto.setVisibility(isFullAutoSelected ? View.VISIBLE : View.GONE);
                 }
-                
-                switch (Preferences.hintAutoMoveMode) {
+
+                switch (settings.getHintAutoMoveMode()) {
                     case Preferences.HINT_AUTO_MOVE_MANUAL:
                         if (hintAutoMoveManual != null) hintAutoMoveManual.setChecked(true);
                         break;
@@ -717,8 +673,8 @@ public class SettingsFragment extends Fragment {
             isUpdatingUI = false;
             
             // Load language settings
-            String appLanguage = Preferences.appLanguage;
-            String talkbackLanguage = Preferences.talkbackLanguage;
+            String appLanguage = settings.getAppLanguage();
+            String talkbackLanguage = settings.getTalkbackLanguage();
             
             // Set app language spinner selection
             int appLanguageIndex = 0; // Default to English
@@ -765,15 +721,15 @@ public class SettingsFragment extends Fragment {
             talkbackLanguageSpinner.setSelection(talkbackLanguageIndex);
             
             // Load robot count
-            int robotCount = Preferences.robotCount;
+            int robotCount = settings.getRobotCount();
             robotCountSpinner.setSelection(robotCount - 1); // Zero-based index
-            
+
             // Load target colors
-            int targetColors = Preferences.targetColors;
+            int targetColors = settings.getTargetColors();
             targetColorsSpinner.setSelection(targetColors - 1); // Zero-based index
-            
+
             // Load game mode
-            int gameMode = Preferences.gameMode;
+            int gameMode = settings.getGameMode();
             if (gameMode == Constants.GAME_MODE_STANDARD) {
                 if (standardGameModeButton != null) standardGameModeButton.setChecked(true);
                 if (targetCountContainer != null) targetCountContainer.setVisibility(View.GONE);
@@ -783,9 +739,9 @@ public class SettingsFragment extends Fragment {
             }
             
             // Load puzzle parameters
-            int minMoves = Preferences.minSolutionMoves;
-            int maxMoves = Preferences.maxSolutionMoves;
-            boolean allowMulticolor = Preferences.allowMulticolorTarget;
+            int minMoves = settings.getMinSolutionMoves();
+            int maxMoves = settings.getMaxSolutionMoves();
+            boolean allowMulticolor = settings.getAllowMulticolorTarget();
             
             if (minSolutionMovesInput != null) {
                 minSolutionMovesInput.setText(String.valueOf(minMoves));
@@ -802,7 +758,7 @@ public class SettingsFragment extends Fragment {
             }
             
             // Load high contrast mode
-            boolean highContrast = Preferences.highContrastMode;
+            boolean highContrast = settings.getHighContrastMode();
             if (highContrastModeRadioGroup != null) {
                 if (highContrast) {
                     if (highContrastModeYes != null) highContrastModeYes.setChecked(true);
@@ -813,12 +769,12 @@ public class SettingsFragment extends Fragment {
             
             // Set background sound volume seekbar
             if (backgroundSoundSeekbar != null) {
-                backgroundSoundSeekbar.setProgress(Preferences.backgroundSoundVolume);
+                backgroundSoundSeekbar.setProgress(settings.getBackgroundSoundVolume());
             }
-            
+
             // Set sound effects volume seekbar
             if (soundEffectsVolumeSeekbar != null) {
-                soundEffectsVolumeSeekbar.setProgress(Preferences.soundEffectsVolume);
+                soundEffectsVolumeSeekbar.setProgress(settings.getSoundEffectsVolume());
             }
             
             isUpdatingUI = false;
@@ -863,22 +819,20 @@ public class SettingsFragment extends Fragment {
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                     try {
                         int selectedRobotCount = position + 1; // +1 because index is 0-based
-                        
+
                         // Ensure robot count is never larger than target colors
-                        int currentTargetColors = Preferences.targetColors;
-                        if (selectedRobotCount > currentTargetColors) {
-                            // Adjust robot count to match target colors
-                            selectedRobotCount = currentTargetColors;
-                            robotCountSpinner.setSelection(selectedRobotCount - 1);
-                            
+                        if (selectedRobotCount > Preferences.targetColors) {
                             // Show a toast to inform the user
-                            Toast.makeText(requireContext(), 
-                                    "Robot count cannot exceed target colors", 
+                            Toast.makeText(requireContext(),
+                                    "Robot count cannot exceed target colors",
                                     Toast.LENGTH_SHORT).show();
                         }
-                        
-                        Preferences.setRobotCount(selectedRobotCount);
-                        Timber.d("[PREFERENCES] Robot count set to %d", selectedRobotCount);
+
+                        SettingsState state = SettingsManager.setRobotCount(selectedRobotCount);
+                        if (state.getRobotCount() != selectedRobotCount) {
+                            robotCountSpinner.setSelection(state.getRobotCount() - 1);
+                        }
+                        Timber.d("[PREFERENCES] Robot count set to %d", state.getRobotCount());
                     } catch (Exception e) {
                         Timber.e(e, "Error processing robot count selection");
                     }
@@ -930,34 +884,32 @@ public class SettingsFragment extends Fragment {
                     try {
                         int selectedTargetColors = position + 1; // +1 because index is 0-based
                         int currentRobotCount = Preferences.robotCount;
-                        
+
                         // In multi-target mode, enforce minimum of 2 targets
                         if (Preferences.gameMode == Constants.GAME_MODE_MULTI_TARGET && selectedTargetColors < 2) {
-                            selectedTargetColors = 2;
-                            targetColorsSpinner.setSelection(selectedTargetColors - 1);
-                            Toast.makeText(requireContext(), 
-                                    "Multi-target mode requires at least 2 targets", 
+                            Toast.makeText(requireContext(),
+                                    "Multi-target mode requires at least 2 targets",
                                     Toast.LENGTH_SHORT).show();
                         }
-                        
+
                         // If the selected target colors is less than the current robot count, adjust
                         if (selectedTargetColors < currentRobotCount) {
                             // Show a toast to inform the user
-                            Toast.makeText(requireContext(), 
-                                    "Reducing robot count to match target colors", 
+                            Toast.makeText(requireContext(),
+                                    "Reducing robot count to match target colors",
                                     Toast.LENGTH_SHORT).show();
-                            
-                            // Update the robot count
-                            Preferences.setRobotCount(selectedTargetColors);
-                            
-                            // Update the robot count spinner if available
-                            if (robotCountSpinner != null) {
-                                robotCountSpinner.setSelection(selectedTargetColors - 1);
-                            }
                         }
-                        
-                        Preferences.setTargetColors(selectedTargetColors);
-                        Timber.d("[PREFERENCES] Target colors set to %d", selectedTargetColors);
+
+                        SettingsState state = SettingsManager.setTargetColors(selectedTargetColors);
+
+                        // Update the robot count spinner if available
+                        if (state.getRobotCount() != currentRobotCount && robotCountSpinner != null) {
+                            robotCountSpinner.setSelection(state.getRobotCount() - 1);
+                        }
+                        if (state.getTargetColors() != selectedTargetColors) {
+                            targetColorsSpinner.setSelection(state.getTargetColors() - 1);
+                        }
+                        Timber.d("[PREFERENCES] Target colors set to %d", state.getTargetColors());
                     } catch (Exception e) {
                         Timber.e(e, "Error processing target colors selection");
                     }
@@ -1135,28 +1087,31 @@ public class SettingsFragment extends Fragment {
      */
     private void validateAndSaveMinMoves(int value) {
         try {
-            int currentMax = Preferences.maxSolutionMoves;
             int robotCount = Preferences.robotCount;
             int minimumRequired = robotCount + 1;
-            
+
             // Ensure minimum is at least robotCount + 1
             if (value < minimumRequired) {
-                value = minimumRequired;
-                minSolutionMovesInput.setText(String.valueOf(value));
-                Toast.makeText(requireContext(), 
-                    "Min moves must be at least " + minimumRequired + " (robot count + 1)", 
+                Toast.makeText(requireContext(),
+                    "Min moves must be at least " + minimumRequired + " (robot count + 1)",
                     Toast.LENGTH_SHORT).show();
-                Timber.d("[PREFERENCES] Min solution moves adjusted to %d (robot count: %d)", value, robotCount);
+                Timber.d("[PREFERENCES] Min solution moves adjusted to %d (robot count: %d)", minimumRequired, robotCount);
             }
-            
-            if (value > currentMax) {
-                Preferences.setMaxSolutionMoves(value);
-                maxSolutionMovesInput.setText(String.valueOf(value));
-                Timber.d("[PREFERENCES] Max solution moves adjusted to %d to match min moves", value);
+
+            int previousMax = Preferences.maxSolutionMoves;
+            SettingsState state = SettingsManager.setMinSolutionMoves(value);
+
+            if (minSolutionMovesInput != null) {
+                minSolutionMovesInput.setText(String.valueOf(state.getMinSolutionMoves()));
             }
-            
-            Preferences.setMinSolutionMoves(value);
-            Timber.d("[PREFERENCES] Min solution moves set to %d (robot count: %d)", value, robotCount);
+            if (state.getMaxSolutionMoves() != previousMax) {
+                if (maxSolutionMovesInput != null) {
+                    maxSolutionMovesInput.setText(String.valueOf(state.getMaxSolutionMoves()));
+                }
+                Timber.d("[PREFERENCES] Max solution moves adjusted to %d to match min moves", state.getMaxSolutionMoves());
+            }
+
+            Timber.d("[PREFERENCES] Min solution moves set to %d (robot count: %d)", state.getMinSolutionMoves(), robotCount);
         } catch (Exception e) {
             Timber.e(e, "Error validating and saving min moves");
         }
@@ -1168,27 +1123,16 @@ public class SettingsFragment extends Fragment {
     private void validateAndSaveMaxMoves(int value) {
         try {
             int currentMin = Preferences.minSolutionMoves;
-            
-            // If empty or 0, set to 99
-            if (value <= 0) {
-                value = 99;
-            }
-            
+
             // If less than min, set to min
-            if (value < currentMin) {
-                value = currentMin;
-                Toast.makeText(requireContext(), 
-                        "Max moves cannot be less than min moves", 
+            if (value > 0 && value < currentMin) {
+                Toast.makeText(requireContext(),
+                        "Max moves cannot be less than min moves",
                         Toast.LENGTH_SHORT).show();
             }
-            
-            // Show infinity if >= 40
-            if (value >= 40) {
-                value = 99;
-            }
-            
-            Preferences.setMaxSolutionMoves(value);
-            Timber.d("[PREFERENCES] Max solution moves set to %d", value);
+
+            SettingsState state = SettingsManager.setMaxSolutionMoves(value);
+            Timber.d("[PREFERENCES] Max solution moves set to %d", state.getMaxSolutionMoves());
         } catch (Exception e) {
             Timber.e(e, "Error validating and saving max moves");
         }
@@ -1290,7 +1234,7 @@ public class SettingsFragment extends Fragment {
         Timber.d("Applying language setting: %s", languageCode);
         
         // Save language preference using proper setter method that persists to SharedPreferences
-        Preferences.setAppLanguage(languageCode);
+        SettingsManager.setAppLanguage(languageCode);
         
         // Apply language change
         Locale locale = new Locale(languageCode);
@@ -1322,7 +1266,7 @@ public class SettingsFragment extends Fragment {
         Timber.d("Applying TalkBack language setting: %s", languageCode);
         
         // Save TalkBack language preference using proper setter method that persists to SharedPreferences
-        Preferences.setTalkbackLanguage(languageCode);
+        SettingsManager.setTalkbackLanguage(languageCode);
         
         // If set to "same", use app language
         String actualLanguageCode = languageCode.equals(getString(R.string.talkback_language_same_value)) ? Preferences.appLanguage : languageCode;
@@ -1399,14 +1343,14 @@ public class SettingsFragment extends Fragment {
      */
     private void showImpossibleDifficultyToast() {
         // Get current board size
-        int[] currentSize = null;
+        BoardSizeOption currentSize = null;
         int position = boardSizeSpinner.getSelectedItemPosition();
         if (position >= 0 && position < validBoardSizes.size()) {
             currentSize = validBoardSizes.get(position);
         }
-        
+
         // Only show toast for small boards (less than 16x16)
-        if (currentSize != null && (currentSize[0] < 16 || currentSize[1] < 16)) {
+        if (currentSize != null && (currentSize.getWidth() < 16 || currentSize.getHeight() < 16)) {
             // Get localized context
             Context localizedContext = roboyard.ui.RoboyardApplication.getAppContext();
             
@@ -1475,14 +1419,14 @@ public class SettingsFragment extends Fragment {
                             
                             // Get selected board size
                             if (position >= 0 && position < validBoardSizes.size()) {
-                                int[] selectedSize = validBoardSizes.get(position);
-                                int width = selectedSize[0];
-                                int height = selectedSize[1];
-                                
+                                BoardSizeOption selectedSize = validBoardSizes.get(position);
+                                int width = selectedSize.getWidth();
+                                int height = selectedSize.getHeight();
+
                                 Timber.d("[BOARD_SIZE] Selected board size: %dx%d", width, height);
-                                
+
                                 // Save board size to preferences
-                                Preferences.setBoardSize(width, height);
+                                SettingsManager.setBoardSize(width, height);
                                 
                                 // Check if difficult is set to impossible with a small board size
                                 if (difficultyRadioGroup.getCheckedRadioButtonId() == R.id.difficulty_impossible) {
@@ -1508,7 +1452,8 @@ public class SettingsFragment extends Fragment {
                 difficultyRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
                     try {
                         if (isUpdatingUI) return;
-                        
+                        difficultyHandledByCheckedChange = true;
+
                         int previousDifficulty = Preferences.difficulty;
                         int difficulty = Constants.DIFFICULTY_BEGINNER;
                         if (checkedId == R.id.difficulty_beginner) {
@@ -1520,50 +1465,34 @@ public class SettingsFragment extends Fragment {
                         } else if (checkedId == R.id.difficulty_impossible) {
                             difficulty = Constants.DIFFICULTY_IMPOSSIBLE;
                         }
-                        
-                        Preferences.setDifficulty(difficulty);
+
+                        SettingsState state = SettingsManager.setDifficulty(difficulty);
                         Timber.d("[PREFERENCES] Difficulty set to %d", difficulty);
-                        
+
                         // Automatically adjust board size only if switching TO beginner mode from another difficulty
                         if (difficulty == Constants.DIFFICULTY_BEGINNER && previousDifficulty != Constants.DIFFICULTY_BEGINNER) {
-                            adjustBoardSizeForBeginnerMode();
+                            adjustBoardSizeForBeginnerMode(state);
                         }
-                        
+
                         // Automatically adjust puzzle parameters based on difficulty
-                        adjustPuzzleParametersForDifficulty(difficulty);
+                        adjustPuzzleParametersForDifficulty(difficulty, state);
                     } catch (Exception e) {
                         Timber.e(e, "Error processing difficulty selection");
                     }
                 });
-                
+
                 // Add OnClickListener to detect repeated clicks on the same difficulty
                 if (difficultyBeginner != null) {
-                    difficultyBeginner.setOnClickListener(v -> {
-                        if (Preferences.difficulty == Constants.DIFFICULTY_BEGINNER) {
-                            resetPuzzleParametersForDifficulty(Constants.DIFFICULTY_BEGINNER);
-                        }
-                    });
+                    difficultyBeginner.setOnClickListener(v -> onDifficultyButtonClicked(Constants.DIFFICULTY_BEGINNER));
                 }
                 if (difficultyAdvanced != null) {
-                    difficultyAdvanced.setOnClickListener(v -> {
-                        if (Preferences.difficulty == Constants.DIFFICULTY_ADVANCED) {
-                            resetPuzzleParametersForDifficulty(Constants.DIFFICULTY_ADVANCED);
-                        }
-                    });
+                    difficultyAdvanced.setOnClickListener(v -> onDifficultyButtonClicked(Constants.DIFFICULTY_ADVANCED));
                 }
                 if (difficultyInsane != null) {
-                    difficultyInsane.setOnClickListener(v -> {
-                        if (Preferences.difficulty == Constants.DIFFICULTY_INSANE) {
-                            resetPuzzleParametersForDifficulty(Constants.DIFFICULTY_INSANE);
-                        }
-                    });
+                    difficultyInsane.setOnClickListener(v -> onDifficultyButtonClicked(Constants.DIFFICULTY_INSANE));
                 }
                 if (difficultyImpossible != null) {
-                    difficultyImpossible.setOnClickListener(v -> {
-                        if (Preferences.difficulty == Constants.DIFFICULTY_IMPOSSIBLE) {
-                            resetPuzzleParametersForDifficulty(Constants.DIFFICULTY_IMPOSSIBLE);
-                        }
-                    });
+                    difficultyImpossible.setOnClickListener(v -> onDifficultyButtonClicked(Constants.DIFFICULTY_IMPOSSIBLE));
                 }
             } else {
                 Timber.e("difficultyRadioGroup is null");
@@ -1576,8 +1505,8 @@ public class SettingsFragment extends Fragment {
                         if (isUpdatingUI) return;
                         
                         boolean generateNewMap = checkedId == R.id.new_map_yes; // Default to Yes
-                        
-                        Preferences.setGenerateNewMapEachTime(generateNewMap);
+
+                        SettingsManager.setGenerateNewMapEachTime(generateNewMap);
                         Timber.d("[PREFERENCES] Generate new map set to %b", generateNewMap);
                     } catch (Exception e) {
                         Timber.e(e, "Error processing new map selection");
@@ -1594,8 +1523,8 @@ public class SettingsFragment extends Fragment {
                         if (isUpdatingUI) return;
                         
                         boolean soundEnabled = checkedId == R.id.sound_on; // Default to On
-                        
-                        Preferences.setSoundEnabled(soundEnabled);
+
+                        SettingsManager.setSoundEnabled(soundEnabled);
                         Timber.d("[PREFERENCES] Sound enabled set to %b", soundEnabled);
                     } catch (Exception e) {
                         Timber.e(e, "Error processing sound selection");
@@ -1611,7 +1540,7 @@ public class SettingsFragment extends Fragment {
                     @Override
                     public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser) {
                         if (!fromUser || isUpdatingUI) return;
-                        Preferences.setBackgroundSoundVolume(progress);
+                        SettingsManager.setBackgroundSoundVolume(progress);
                         updateBackgroundSoundService(progress);
                         Timber.d("[PREFERENCES] Background sound volume set to %d", progress);
                     }
@@ -1630,7 +1559,7 @@ public class SettingsFragment extends Fragment {
                     @Override
                     public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser) {
                         if (!fromUser || isUpdatingUI) return;
-                        Preferences.setSoundEffectsVolume(progress);
+                        SettingsManager.setSoundEffectsVolume(progress);
                         Timber.d("[PREFERENCES] Sound effects volume set to %d", progress);
                     }
 
@@ -1652,8 +1581,8 @@ public class SettingsFragment extends Fragment {
                         if (isUpdatingUI) return;
                         
                         boolean accessibilityMode = checkedId == R.id.accessibility_on; // Default to Off
-                        
-                        Preferences.setAccessibilityMode(accessibilityMode);
+
+                        SettingsManager.setAccessibilityMode(accessibilityMode);
                         
                         // Update TalkBack language visibility
                         updateTalkbackLanguageVisibility(accessibilityMode);
@@ -1687,7 +1616,7 @@ public class SettingsFragment extends Fragment {
                             mode = Preferences.HINT_AUTO_MOVE_SEMI_AUTO;
                         }
                         
-                        Preferences.setHintAutoMoveMode(mode);
+                        SettingsManager.setHintAutoMoveMode(mode);
                         Timber.d("[SETTINGS] Hint auto-move mode set to %d", mode);
                     } catch (Exception e) {
                         Timber.e(e, "Error processing hint auto-move selection");
@@ -1708,7 +1637,7 @@ public class SettingsFragment extends Fragment {
                         // Check if the setting has actually changed
                         if (fullscreenMode != Preferences.fullscreenEnabled) {
                             // Update the preference
-                            Preferences.setFullscreenEnabled(fullscreenMode);
+                            SettingsManager.setFullscreenEnabled(fullscreenMode);
                             
                             Timber.d("[PREFERENCES] Fullscreen mode set to %b", fullscreenMode);
                             
@@ -1738,42 +1667,39 @@ public class SettingsFragment extends Fragment {
                         
                         if (checkedId == R.id.standard_game_mode) {
                             // Standard game mode - set robot count and target colors to 1
-                            Preferences.setGameMode(Constants.GAME_MODE_STANDARD);
-                            Preferences.setRobotCount(1);
-                            Preferences.setTargetColors(1);
-                            
+                            SettingsState state = SettingsManager.setGameMode(Constants.GAME_MODE_STANDARD);
+
                             // Update UI
                             if (robotCountSpinner != null) {
-                                robotCountSpinner.setSelection(0); // 1 robot (index 0)
+                                robotCountSpinner.setSelection(state.getRobotCount() - 1);
                             }
                             if (targetColorsSpinner != null) {
-                                targetColorsSpinner.setSelection(0); // 1 target color (index 0)
+                                targetColorsSpinner.setSelection(state.getTargetColors() - 1);
                             }
-                            
+
                             // Hide target count container
                             if (targetCountContainer != null) {
                                 targetCountContainer.setVisibility(View.GONE);
                             }
-                            
+
                             Timber.d("[GAME_MODE] Switched to Standard Game mode");
                         } else if (checkedId == R.id.multi_target_game_mode) {
                             // Multi-target mode - enforce minimum of 2 target colors
-                            Preferences.setGameMode(Constants.GAME_MODE_MULTI_TARGET);
-                            
-                            // Ensure at least 2 target colors
-                            int targetColors = Preferences.targetColors;
-                            if (targetColors < 2) {
-                                Preferences.setTargetColors(2);
-                                if (targetColorsSpinner != null) {
-                                    targetColorsSpinner.setSelection(1); // 2 target colors (index 1)
-                                }
+                            SettingsState state = SettingsManager.setGameMode(Constants.GAME_MODE_MULTI_TARGET);
+
+                            // Update UI
+                            if (targetColorsSpinner != null) {
+                                targetColorsSpinner.setSelection(state.getTargetColors() - 1);
                             }
-                            
+                            if (robotCountSpinner != null) {
+                                robotCountSpinner.setSelection(state.getRobotCount() - 1);
+                            }
+
                             // Show target count container
                             if (targetCountContainer != null) {
                                 targetCountContainer.setVisibility(View.VISIBLE);
                             }
-                            
+
                             Timber.d("[GAME_MODE] Switched to Multi-target mode");
                         }
                     } catch (Exception e) {
@@ -1791,8 +1717,8 @@ public class SettingsFragment extends Fragment {
                         if (isUpdatingUI) return;
                         
                         boolean allowMulticolor = checkedId == R.id.allow_multicolor_target_yes;
-                        
-                        Preferences.setAllowMulticolorTarget(allowMulticolor);
+
+                        SettingsManager.setAllowMulticolorTarget(allowMulticolor);
                         Timber.d("[PREFERENCES] Allow multicolor target set to %b", allowMulticolor);
                     } catch (Exception e) {
                         Timber.e(e, "Error processing allow multicolor target selection");
@@ -1809,8 +1735,8 @@ public class SettingsFragment extends Fragment {
                         if (isUpdatingUI) return;
                         
                         boolean highContrast = checkedId == R.id.high_contrast_mode_yes;
-                        
-                        Preferences.setHighContrastMode(highContrast);
+
+                        SettingsManager.setHighContrastMode(highContrast);
                         Timber.d("[PREFERENCES] High contrast mode set to %b", highContrast);
                     } catch (Exception e) {
                         Timber.e(e, "Error processing high contrast mode selection");
@@ -1855,37 +1781,27 @@ public class SettingsFragment extends Fragment {
      * Check if current board size needs to be adjusted for beginner difficulty.
      * If board size is larger than 12x14, automatically set it to 12x14.
      */
-    private void adjustBoardSizeForBeginnerMode() {
+    private void adjustBoardSizeForBeginnerMode(SettingsState settings) {
         try {
-            int currentWidth = Preferences.boardSizeWidth;
-            int currentHeight = Preferences.boardSizeHeight;
-            
-            // Check if current board size is larger than 12x14
-            if (currentWidth > 12 || currentHeight > 14) {
-                Timber.d("[BOARD_SIZE] Current size %dx%d is larger than 12x14, adjusting for beginner mode", 
-                        currentWidth, currentHeight);
-                
-                // Set board size to 12x14
-                isUpdatingUI = true; // Prevent recursive updates
-                Preferences.setBoardSize(12, 14);
-                
-                // Update the spinner UI to reflect the change
-                if (boardSizeSpinner != null && validBoardSizes != null) {
-                    for (int i = 0; i < validBoardSizes.size(); i++) {
-                        int[] size = validBoardSizes.get(i);
-                        if (size[0] == 12 && size[1] == 14) {
-                            boardSizeSpinner.setSelection(i);
-                            Timber.d("[BOARD_SIZE] Updated spinner to show 12x14 at position %d", i);
-                            break;
-                        }
+            int currentWidth = settings.getBoardSizeWidth();
+            int currentHeight = settings.getBoardSizeHeight();
+
+            isUpdatingUI = true; // Prevent recursive updates
+
+            // Update the spinner UI to reflect the current size
+            if (boardSizeSpinner != null && validBoardSizes != null) {
+                for (int i = 0; i < validBoardSizes.size(); i++) {
+                    BoardSizeOption size = validBoardSizes.get(i);
+                    if (size.getWidth() == currentWidth && size.getHeight() == currentHeight) {
+                        boardSizeSpinner.setSelection(i);
+                        Timber.d("[BOARD_SIZE] Updated spinner to show %dx%d at position %d", currentWidth, currentHeight, i);
+                        break;
                     }
                 }
-                isUpdatingUI = false;
-                
-                Timber.d("[BOARD_SIZE] Board size automatically adjusted to 12x14 for beginner difficulty");
-            } else {
-                Timber.d("[BOARD_SIZE] Current size %dx%d is suitable for beginner mode", currentWidth, currentHeight);
             }
+            isUpdatingUI = false;
+
+            Timber.d("[BOARD_SIZE] Board size after beginner adjustment: %dx%d", currentWidth, currentHeight);
         } catch (Exception e) {
             Timber.e(e, "Error adjusting board size for beginner mode");
             isUpdatingUI = false; // Reset flag in case of error
@@ -1896,9 +1812,21 @@ public class SettingsFragment extends Fragment {
      * Reset puzzle parameters to defaults for a specific difficulty
      * Called when the same difficulty is clicked again
      */
+    private void onDifficultyButtonClicked(int difficulty) {
+        if (difficultyHandledByCheckedChange) {
+            difficultyHandledByCheckedChange = false;
+            return;
+        }
+        if (Preferences.difficulty == difficulty) {
+            resetPuzzleParametersForDifficulty(difficulty);
+        }
+    }
+
     private void resetPuzzleParametersForDifficulty(int difficulty) {
         try {
-            adjustPuzzleParametersForDifficulty(difficulty);
+            SettingsState state = SettingsManager.setDifficulty(difficulty);
+            adjustBoardSizeForBeginnerMode(state);
+            adjustPuzzleParametersForDifficulty(difficulty, state);
             Timber.d("[DIFFICULTY] Same difficulty clicked again, reset to defaults");
         } catch (Exception e) {
             Timber.e(e, "Error resetting puzzle parameters");
@@ -1909,53 +1837,15 @@ public class SettingsFragment extends Fragment {
      * Adjust puzzle parameters (min/max moves and multicolor target) based on difficulty level
      * Mirrors the difficulty settings from README.md
      */
-    private void adjustPuzzleParametersForDifficulty(int difficulty) {
+    private void adjustPuzzleParametersForDifficulty(int difficulty, SettingsState settings) {
         try {
             isUpdatingUI = true;
-            
-            int minMoves = 4;
-            int maxMoves = 6;
-            boolean allowMulticolor = true;
-            boolean generateNewMapEachTime = true; // Default for beginner/advanced: new map each time
-            
-            switch (difficulty) {
-                case Constants.DIFFICULTY_BEGINNER:
-                    // Beginner: 4-6 moves, multicolor allowed, new map each time
-                    minMoves = 4;
-                    maxMoves = 6;
-                    allowMulticolor = true;
-                    generateNewMapEachTime = true; 
-                    break;
-                case Constants.DIFFICULTY_ADVANCED:
-                    // Advanced: 6-10 moves, no multicolor, new map each time
-                    minMoves = 6;
-                    maxMoves = 10;
-                    allowMulticolor = false;
-                    generateNewMapEachTime = true; 
-                    break;
-                case Constants.DIFFICULTY_INSANE:
-                    // Insane: 10+ moves, no multicolor, same map persists across restarts
-                    minMoves = 10;
-                    maxMoves = 99;
-                    allowMulticolor = false;
-                    generateNewMapEachTime = false; // Same map persists across restarts
-                    break;
-                case Constants.DIFFICULTY_IMPOSSIBLE:
-                    // Impossible: 17+ moves, no multicolor, max 99, don't change new_map setting
-                    minMoves = 17;
-                    maxMoves = 99;
-                    allowMulticolor = false;
-                    // Keep current generateNewMapEachTime setting for impossible difficulty
-                    generateNewMapEachTime = Preferences.generateNewMapEachTime;
-                    break;
-            }
-            
-            // Update preferences
-            Preferences.setMinSolutionMoves(minMoves);
-            Preferences.setMaxSolutionMoves(maxMoves);
-            Preferences.setAllowMulticolorTarget(allowMulticolor);
-            Preferences.setGenerateNewMapEachTime(generateNewMapEachTime);
-            
+
+            int minMoves = settings.getMinSolutionMoves();
+            int maxMoves = settings.getMaxSolutionMoves();
+            boolean allowMulticolor = settings.getAllowMulticolorTarget();
+            boolean generateNewMapEachTime = settings.getGenerateNewMapEachTime();
+
             // Update UI
             if (minSolutionMovesInput != null) {
                 minSolutionMovesInput.setText(String.valueOf(minMoves));
@@ -1977,10 +1867,10 @@ public class SettingsFragment extends Fragment {
                     if (newMapNo != null) newMapNo.setChecked(true);
                 }
             }
-            
-            Timber.d("[DIFFICULTY_PARAMS] Adjusted puzzle parameters for difficulty %d: min=%d, max=%d, allowMulticolor=%b, newMapEachTime=%b", 
+
+            Timber.d("[DIFFICULTY_PARAMS] Adjusted puzzle parameters for difficulty %d: min=%d, max=%d, allowMulticolor=%b, newMapEachTime=%b",
                     difficulty, minMoves, maxMoves, allowMulticolor, generateNewMapEachTime);
-            
+
             isUpdatingUI = false;
         } catch (Exception e) {
             Timber.e(e, "Error adjusting puzzle parameters for difficulty");

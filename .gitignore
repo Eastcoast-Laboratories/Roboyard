@@ -40,3 +40,4 @@ screenshot_*.png
 */__pycache__/*
 test_suite.cpython-*.pyc
 *_testsuite.cpython-*.pyc
+/.idea/modules.xml

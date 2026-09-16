@@ -339,16 +339,16 @@ fun GameScreen(
     // Helper: get hint container background color based on robot color (matches Android)
     fun getHintBackgroundColor(robotColorIndex: Int): Color {
         return when (robotColorIndex) {
-            0 -> Color(0xFFeb91ff) // pink
+            0 -> Color(0xFFff80e0) // pink — stronger
             1 -> Color(0xFFb5f874) // green
-            2 -> Color(0xFF71a6ff) // blue
+            2 -> Color(0xFF4080ff) // blue — stronger
             3 -> Color(0xFFfffe71) // yellow
             4 -> Color(0xFFc0c0c0) // silver
             5 -> Color(0xFFf77070) // red
             6 -> Color(0xFFa0522d) // brown
             7 -> Color(0xFFffa77f) // orange
             8 -> Color(0xFFf0f0f0) // white
-            else -> Color(0xFF1976D2) // default blue
+            else -> Color(0xFFfffe71) // default — yellowish like Android
         }
     }
     val soundManager = remember(board) { getSoundManager() }
@@ -1050,7 +1050,7 @@ fun GameScreen(
             exit = shrinkVertically() + fadeOut()
         ) {
             // Background color based on current hint robot (matches Android color-coded backgrounds)
-            val hintBgColor = if (currentHintRobotColor >= 0) getHintBackgroundColor(currentHintRobotColor) else Color(0xFF1976D2)
+            val hintBgColor = if (currentHintRobotColor >= 0) getHintBackgroundColor(currentHintRobotColor) else getHintBackgroundColor(-1)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

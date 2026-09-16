@@ -2,6 +2,7 @@ package roboyard
 
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import roboyard.ui.compose.App
@@ -13,11 +14,18 @@ fun main() = application {
     Preferences.storageProvider = { getPlatformStorage() }
     Preferences.initialize(getPlatformStorage())
 
+    val windowState = rememberWindowState(
+        placement = if (Preferences.fullscreenEnabled) WindowPlacement.Fullscreen else WindowPlacement.Floating,
+        width = 400.dp,
+        height = 800.dp
+    )
     Window(
         onCloseRequest = ::exitApplication,
         title = "Roboyard",
-        state = rememberWindowState(width = 400.dp, height = 800.dp)
+        state = windowState
     ) {
-        App()
+        App(onFullscreenChanged = { enabled ->
+            windowState.placement = if (enabled) WindowPlacement.Fullscreen else WindowPlacement.Floating
+        })
     }
 }
