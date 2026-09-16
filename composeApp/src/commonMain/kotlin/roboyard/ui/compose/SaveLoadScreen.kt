@@ -127,11 +127,11 @@ fun HistoryItem(
 
 @Composable
 fun SaveLoadScreen(
-    boardToSave: Board? = null,
-    startBoard: Board? = null,
+    session: roboyard.logic.managers.GameSession,
     isLevelGame: Boolean = false,
     onBack: () -> Unit = {},
-    onLoadGame: (Board) -> Unit = {}
+    onLoadGame: (Int) -> Unit = {},
+    onLoadHistory: (String) -> Unit = {}
 ) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Save", "Load", "History")
@@ -241,13 +241,9 @@ fun SaveLoadScreen(
                             stars = entry?.starsEarned ?: 0,
                             hintsUsed = entry?.isEverUsedHints() ?: false,
                             onClick = {
-                                // Load history entry
+                                // Load history entry via GameSession (Android behavior)
                                 println("[SAVE_LOAD_SCREEN] Loading history entry: $fileName")
-                                val saveData = storage.readFile(fileName)
-                                val loadedBoard = deserializeBoardFromMainGameFormat(saveData)
-                                if (loadedBoard != null) {
-                                    onLoadGame(loadedBoard)
-                                }
+                                onLoadHistory(fileName)
                             },
                             onInfoClick = {
                                 selectedEntry = entry
@@ -266,45 +262,21 @@ fun SaveLoadScreen(
                         slotNumber = slotNumber,
                         isEmpty = isEmpty,
                         onClick = {
-                            if (selectedTab == 0 && boardToSave != null) {
-                                // Save game to slot using Main Game format
+                            if (selectedTab == 0 && session.currentState.value != null) {
+                                // Save game to slot via GameSession (Android format incl. verification)
                                 println("[SAVE_LOAD_SCREEN] Saving game to slot $slotNumber")
-                                val fileName = "saves/save_$slotNumber.dat"
-                                
-                                // Serialize board to Main Game format (DRY - use startBoard for consistent signature)
-                                val saveData = serializeBoardToMainGameFormat(boardToSave, isLevelGame, startBoard)
-                                
-                                println("[SAVE_LOAD_SCREEN] Save data: $saveData")
-                                val result = storage.writeFile(fileName, saveData)
-                                println("[SAVE_LOAD_SCREEN] Write result: $result")
-                                
+                                val result = session.saveGame(slotNumber, isAutoSave = false)
+                                println("[SAVE_LOAD_SCREEN] Save result: $result")
                                 if (result) {
-                                    // Verify save file contains targets
-                                    val savedContent = storage.readFile(fileName)
-                                    if (!validateSaveContainsTargets(savedContent, fileName)) {
-                                        storage.writeFile(fileName, "") // Delete invalid save
-                                        println("[SAVE_LOAD_SCREEN] Save file validation failed: No targets found")
-                                    } else {
-                                        // Update slot state
-                                        val newSlotStates = slotStates.toMutableList()
-                                        newSlotStates[slotIndex] = true
-                                        slotStates = newSlotStates
-                                        println("[SAVE_LOAD_SCREEN] Game saved to slot $slotNumber")
-                                    }
+                                    val newSlotStates = slotStates.toMutableList()
+                                    newSlotStates[slotIndex] = true
+                                    slotStates = newSlotStates
+                                    println("[SAVE_LOAD_SCREEN] Game saved to slot $slotNumber")
                                 }
                             } else if (!isEmpty && selectedTab == 1) {
-                                // Load game from slot using Main Game format
+                                // Load game from slot via GameSession (Android behavior)
                                 println("[SAVE_LOAD_SCREEN] Loading game from slot $slotNumber")
-                                val fileName = "saves/save_$slotNumber.dat"
-                                val saveData = storage.readFile(fileName)
-                                println("[SAVE_LOAD_SCREEN] Save data: $saveData")
-                                
-                                val loadedBoard = deserializeBoardFromMainGameFormat(saveData)
-                                
-                                if (loadedBoard != null) {
-                                    println("[SAVE_LOAD_SCREEN] Board created successfully: ${loadedBoard.width}x${loadedBoard.height}")
-                                    onLoadGame(loadedBoard)
-                                }
+                                onLoadGame(slotNumber)
                             }
                         }
                     )

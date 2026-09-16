@@ -101,10 +101,37 @@ class GameSession(
     /** Reads a file by absolute path (history entries outside app storage). */
     var externalFileReader: ((String) -> String?)? = null
 
+    /**
+     * Called when map regeneration gave up after max attempts and the last
+     * (difficulty-violating) map was accepted — UI may show a warning dialog.
+     * Signature: (attempts, moveCount of accepted solution or null).
+     */
+    var onMapFallbackAccepted: ((Int, Int?) -> Unit)? = null
+
     // ── Observable state (mirrors Android LiveData) ───────────────────────
 
     private val _currentState = MutableStateFlow<GameState?>(null)
     val currentState = _currentState
+
+    /**
+     * Monotonic revision counter, bumped whenever the GameState object is
+     * (re-)assigned or mutated in place. StateFlow conflates identical
+     * instances, so observers that render the state must collect this flow.
+     * (Android LiveData re-emits on setValue(sameInstance); this preserves
+     * that behavior for Compose.)
+     */
+    private val _stateRevision = MutableStateFlow(0L)
+    val stateRevision = _stateRevision
+
+    /** Incremented on every new game / level / loaded state — UI key for per-game resets. */
+    private val _gameCounter = MutableStateFlow(0)
+    val gameCounter = _gameCounter
+
+    /** Assign a (possibly mutated) state and notify observers. */
+    private fun emitState(state: GameState?) {
+        _currentState.value = state
+        _stateRevision.value = _stateRevision.value + 1
+    }
 
     private val _moveCount = MutableStateFlow(0)
     val moveCount = _moveCount
@@ -165,9 +192,14 @@ class GameSession(
         private set
     private var startTime: Long = 0
 
-    // Solution state
-    var currentSolution: GameSolution? = null
-        private set
+    // Solution state — backed by a StateFlow so UIs can observe it
+    private val _currentSolution = MutableStateFlow<GameSolution?>(null)
+    val solutionFlow = _currentSolution
+    var currentSolution: GameSolution?
+        get() = _currentSolution.value
+        private set(value) {
+            _currentSolution.value = value
+        }
 
     /** The current solution step (hint number, 0-indexed). */
     var currentSolutionStep: Int = 0
@@ -345,7 +377,8 @@ class GameSession(
         state.setGameStateManager(this)
 
         // Set the current state
-        _currentState.value = state
+        emitState(state)
+        _gameCounter.value = _gameCounter.value + 1
         this.levelName = "Level-" + levelId
 
         // Reset move counts and history
@@ -400,7 +433,8 @@ class GameSession(
 
         newState.setGameStateManager(this)
 
-        _currentState.value = newState
+        emitState(newState)
+        _gameCounter.value = _gameCounter.value + 1
         _moveCount.value = 0
         _isGameComplete.value = false
 
@@ -529,7 +563,8 @@ class GameSession(
             log.d("[GAME_LOAD] Synchronized %d targets after loading", syncedTargets)
         }
 
-        _currentState.value = newState
+        emitState(newState)
+        _gameCounter.value = _gameCounter.value + 1
         _moveCount.value = newState.moveCount
         _isGameComplete.value = newState.isComplete
 
@@ -987,7 +1022,7 @@ class GameSession(
                         robotsUsed.add(touchedRobot.color)
                     }
 
-                    _currentState.value = state
+                    emitState(state)
                 } else if (selectedRobot != null) {
                     val robotX = selectedRobot.x
                     val robotY = selectedRobot.y
@@ -1231,7 +1266,7 @@ class GameSession(
                     _wrongRobotAtTarget.value = -1
                 }
 
-                _currentState.value = state
+                emitState(state)
 
                 triggerLiveSolver()
             }
@@ -1260,7 +1295,7 @@ class GameSession(
                     _wrongRobotAtTarget.value = -1
                 }
 
-                _currentState.value = state
+                emitState(state)
 
                 triggerLiveSolver()
             }
@@ -1334,6 +1369,49 @@ class GameSession(
     }
 
     /**
+     * Move the selected robot using a Board direction constant
+     * (Constants.NORTH/EAST/SOUTH/WEST). Convenience wrapper for UIs.
+     */
+    fun moveRobot(direction: Int): Boolean {
+        val dx: Int
+        val dy: Int
+        when (direction) {
+            Constants.NORTH -> { dx = 0; dy = -1 }
+            Constants.SOUTH -> { dx = 0; dy = 1 }
+            Constants.EAST -> { dx = 1; dy = 0 }
+            Constants.WEST -> { dx = -1; dy = 0 }
+            else -> return false
+        }
+        return moveRobotInDirection(dx, dy)
+    }
+
+    /**
+     * Select the robot with the given color index (0=red/pink, 1=green,
+     * 2=blue, 3=yellow, 4=silver — same order as Board.robotPositions).
+     * @return the selected robot element, or null if not found
+     */
+    fun selectRobotByColor(color: Int): GameElement? {
+        val state = _currentState.value ?: return null
+        val robot = state.gameElements.firstOrNull {
+            it.type == GameElement.TYPE_ROBOT && it.color == color
+        } ?: return null
+        state.setSelectedRobot(robot)
+        if (color >= 0) {
+            robotsUsed.add(color)
+        }
+        emitState(state)
+        return robot
+    }
+
+    /** The currently selected robot element, or null. */
+    fun getSelectedRobot(): GameElement? {
+        return _currentState.value?.getSelectedRobot()
+    }
+
+    /** True if at least one move can be undone. */
+    fun canUndo(): Boolean = stateHistory.isNotEmpty()
+
+    /**
      * Get a hint for the next move.
      * @return The next move according to the solver, or null if no solution exists
      */
@@ -1347,6 +1425,15 @@ class GameSession(
             }
             return null
         }
+
+    /**
+     * Record that a hint was shown to the player (completion stats +
+     * GameState session tracking). UI hint systems call this directly.
+     */
+    fun recordHintShown(hintIndex: Int) {
+        hintsShown++
+        _currentState.value?.recordHintUsed(hintIndex)
+    }
 
     // ── Path / starting position tracking ─────────────────────────────────
 
@@ -1399,7 +1486,7 @@ class GameSession(
                 _squaresMoved.value = previousSquaresMoved
             }
 
-            _currentState.value = previousState
+            emitState(previousState)
 
             _moveCount.value = max(0, _moveCount.value - 1)
 
@@ -2288,6 +2375,7 @@ class GameSession(
                     "[MAP_VALIDATION][ACCEPT] Map accepted: reached maximum regeneration attempts (%d)",
                     MAX_AUTO_REGENERATIONS
                 )
+                onMapFallbackAccepted?.invoke(MAX_AUTO_REGENERATIONS, moveCount)
                 regenerationCount = 0
             } else if (!allowRegeneration) {
                 log.d("[MAP_VALIDATION][ACCEPT] Map accepted: regeneration disabled")
@@ -2457,7 +2545,8 @@ class GameSession(
 
         val newState = createRandom()
 
-        _currentState.value = newState
+        emitState(newState)
+        _gameCounter.value = _gameCounter.value + 1
         _moveCount.value = 0
         _isGameComplete.value = false
 
@@ -2599,6 +2688,7 @@ class GameSession(
                         "[DifficultyValidationCallback]: No solution after %d attempts, accepting puzzle",
                         attemptCount
                     )
+                    onMapFallbackAccepted?.invoke(attemptCount, null)
                     validateDifficulty = true
                     solutionWasAccepted = true
                     _isSolverRunning.value = false
@@ -2620,6 +2710,13 @@ class GameSession(
                     createValidGame(width, height)
                     return
                 }
+            }
+
+            // Accepted despite violating difficulty limits (attempts exhausted)
+            if (!keepCurrentMapDespiteDifficulty && attemptCount >= MAX_ATTEMPTS &&
+                (moveCount < requiredMoves || moveCount > maxMoves)
+            ) {
+                onMapFallbackAccepted?.invoke(attemptCount, moveCount)
             }
 
             log.d(
@@ -2667,7 +2764,7 @@ class GameSession(
 
             robotsUsed.clear()
 
-            _currentState.value = currentGameState
+            emitState(currentGameState)
         }
 
         isResetting = false
@@ -2745,7 +2842,8 @@ class GameSession(
 
         state.setGameStateManager(this)
 
-        _currentState.value = state
+        emitState(state)
+        _gameCounter.value = _gameCounter.value + 1
 
         _moveCount.value = state.moveCount
 

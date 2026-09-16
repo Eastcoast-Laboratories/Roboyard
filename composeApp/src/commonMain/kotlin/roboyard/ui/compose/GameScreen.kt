@@ -31,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -109,6 +110,9 @@ import roboyard.logic.core.HintManager
 import roboyard.logic.core.MapGenerationDecision
 import roboyard.logic.core.MapGenerationRejectionReason
 import roboyard.logic.core.MapGenerationValidator
+import roboyard.logic.core.GameElement
+import roboyard.logic.managers.GameSession
+import roboyard.logic.solver.RRGameMove
 import roboyard.logic.audio.SoundManager
 import roboyard.logic.audio.getSoundManager
 import roboyard.logic.ui.getStringProvider
@@ -118,6 +122,17 @@ import roboyard.logic.storage.PlatformStorage
 
 // Compose App Version - increment after each session
 const val COMPOSE_APP_VERSION = "v1.9"
+
+/** Convert ERRGameMove bitmask directions (1/2/4/8) to Board direction constants (NORTH=0..WEST=3). */
+private fun errDirToBoardDir(direction: Int): Int {
+    return when (direction) {
+        1 -> Board.NORTH
+        2 -> Board.EAST
+        4 -> Board.SOUTH
+        8 -> Board.WEST
+        else -> Board.NORTH
+    }
+}
 
 // Helper function to handle game win logic (DRY - delegates to shared buildGameWinMessage)
 fun handleGameWin(
@@ -129,168 +144,121 @@ fun handleGameWin(
 
 @Composable
 fun GameScreen(
-    board: Board,
+    session: GameSession,
     isLevelGame: Boolean = false,
     isLoadedGame: Boolean = false,
     levelId: Int = 1,
     onBack: () -> Unit = {},
     onNewGame: () -> Unit = {},
-    onSaveLoad: (Board, Board) -> Unit = { _, _ -> },
+    onSaveLoad: () -> Unit = {},
     onNextLevel: () -> Unit = {}
 ) {
     val storage = remember { getPlatformStorage() }
-    val levelCompletionManager = remember { roboyard.logic.managers.LevelCompletionManager.getInstance() }
+    val stringProvider = remember { getStringProvider() }
+    val soundManager = remember { getSoundManager() }
+    val hintManager = remember { HintManager(stringProvider) }
+    val pathTracker = remember { PathTracker() }
 
-    var moveCount by remember(board) { mutableIntStateOf(0) }
-    var squaresMoved by remember(board) { mutableIntStateOf(0) }
-    var currentBoard by remember(board) { mutableStateOf(board) }
-    // Store robot start positions separately to ensure they don't change
-    val robotStartPositions = remember(board) { board.robotPositions.copyOf() }
-    val startBoard = remember(board) { Board.Companion.createClone(board).also { it.setRobots(robotStartPositions) } }
-    var hintMessage by remember(board) { mutableStateOf<String?>(null) }
-    var hintContainerVisible by remember(board) { mutableStateOf(false) }
-    var pendingAutoAdvance by remember(board) { mutableStateOf(false) }
-    var gameWon by remember(board) { mutableStateOf(false) }
-    var maxHintUsed by remember(board) { mutableIntStateOf(-1) } // Track max hint used this session
-    var isHistorySaved by remember(board) { mutableStateOf(false) }
-    var gameStartTime by remember(board) { mutableLongStateOf(System.currentTimeMillis()) }
-    var totalPlayTime by remember(board) { mutableIntStateOf(0) }
-    var lastAutosaveTime by remember(board) { mutableLongStateOf(0L) }
-    var autosaveRunning by remember(board) { mutableStateOf(false) }
-    
-    // Autosave interval (same as in main game)
-    val AUTOSAVE_INTERVAL_MS = 60 * 1000 // 60 seconds
-    
-    // Autosave functionality
+    // Session-observed state (StateFlow mirrors the Android LiveData fields)
+    val gameState by session.currentState.collectAsState()
+    val stateRevision by session.stateRevision.collectAsState()
+    val gameEpoch by session.gameCounter.collectAsState()
+    val moveCount by session.moveCount.collectAsState()
+    val squaresMoved by session.squaresMoved.collectAsState()
+    val gameWon by session.isGameComplete.collectAsState()
+    val isSolverRunning by session.isSolverRunning.collectAsState()
+    val sessionSolution by session.solutionFlow.collectAsState()
+    val wrongRobotAtTarget by session.wrongRobotAtTarget.collectAsState()
+
+    // Derived Board used purely as render model (least churn per plan)
+    val renderBoard = remember(stateRevision) {
+        gameState?.let { gridElementsToBoard(ArrayList(it.gridElements.filterNotNull()), it.width, it.height) }
+    }
+    val startBoard = remember(gameEpoch) {
+        renderBoard?.let { b ->
+            Board.createClone(b).also { clone ->
+                val posMap = gameState?.initialRobotPositions
+                if (posMap != null) {
+                    val arr = IntArray(b.robotPositions.size) { i ->
+                        val p = posMap[i]
+                        if (p != null) p[1] * b.width + p[0] else b.robotPositions[i]
+                    }
+                    clone.setRobots(arr)
+                }
+            }
+        }
+    }
+
+    var hintMessage by remember(gameEpoch) { mutableStateOf<String?>(null) }
+    var hintContainerVisible by remember(gameEpoch) { mutableStateOf(false) }
+    var pendingAutoAdvance by remember(gameEpoch) { mutableStateOf(false) }
+    var maxHintUsed by remember(gameEpoch) { mutableIntStateOf(-1) }
+    var elapsedTime by remember(gameEpoch) { mutableLongStateOf(0L) }
+    var timerRunning by remember(gameEpoch) { mutableStateOf(false) }
+    var selectedRobotHasMoved by remember(gameEpoch) { mutableStateOf(false) }
+    var accessibilityControlsVisible by remember { mutableStateOf(Preferences.accessibilityMode) }
+    var generationFallback by remember { mutableStateOf<MapGenerationDecision?>(null) }
+    var lastAutosaveTime by remember { mutableLongStateOf(0L) }
+    var autosaveRunning by remember { mutableStateOf(false) }
+
+    val selectedRobotIndex = gameState?.getSelectedRobot()?.color ?: -1
+
+    val AUTOSAVE_INTERVAL_MS = 60 * 1000 // 60 seconds (same as main game)
+
+    // Wire session hooks for Compose visuals (reverse-move undo, fallback dialog)
+    LaunchedEffect(session) {
+        session.onReverseMoveUndo = { _, undoneRobotColor ->
+            pathTracker.undoLastPathSegment(undoneRobotColor)
+        }
+        session.onMapFallbackAccepted = { attempts, moves ->
+            generationFallback = MapGenerationDecision(
+                accepted = true,
+                shouldRetry = false,
+                usedFallback = true,
+                attempt = attempts,
+                moveCount = moves,
+                rejectionReason = MapGenerationRejectionReason.NO_SOLUTION
+            )
+        }
+    }
+
+    // Autosave control: start on first move, stop on win (same as main game)
     LaunchedEffect(moveCount, gameWon) {
-        // Start autosave when game starts (after first move)
         if (moveCount > 0 && !autosaveRunning && !gameWon) {
             autosaveRunning = true
             lastAutosaveTime = System.currentTimeMillis()
         }
-        
-        // Stop autosave when game is won
         if (gameWon) {
             autosaveRunning = false
         }
     }
-    
-    // Autosave function
-    fun autosaveGame() {
-        // Only autosave if game is in progress, not solved, and NOT a level game
-        if (!gameWon && !isLevelGame) {
-            val storage = getPlatformStorage()
-            val saveData = buildString {
-                appendLine("#MAPNAME:Random")
-                appendLine(";TIME:$totalPlayTime")
-                appendLine(";MOVES:$moveCount")
-                appendLine(";DIFFICULTY:1")
-                appendLine(";SIZE:${currentBoard.width},${currentBoard.height}")
-                appendLine(";SOLVED:$gameWon")
-                appendLine(";MAX_HINT_USED:$maxHintUsed")
-                appendLine("WIDTH:${currentBoard.width};")
-                appendLine("HEIGHT:${currentBoard.height};")
-                
-                // Board data
-                for (y in 0 until currentBoard.height) {
-                    for (x in 0 until currentBoard.width) {
-                        if (x > 0) append(",")
-                        val position = y * currentBoard.width + x
-                        val hasRobot = currentBoard.robotPositions.contains(position)
-                        val goal = currentBoard.goals.find { it.position == position }
-                        when {
-                            hasRobot -> append(4)
-                            goal != null -> append(3).append(":").append(goal.robotNumber)
-                            else -> append(0)
-                        }
-                    }
-                    appendLine()
-                }
-                
-                // Targets
-                for (goal in currentBoard.goals) {
-                    val x = goal.position % currentBoard.width
-                    val y = goal.position / currentBoard.width
-                    val colorChar = when (goal.robotNumber) {
-                        0 -> 'b'
-                        1 -> 'g'
-                        2 -> 'r'
-                        3 -> 'y'
-                        4 -> 's'
-                        else -> 'm'
-                    }
-                    append("t").append(colorChar).append(x).append(",").append(y).append(";")
-                }
-                appendLine()
-                
-                // Walls
-                for (y in 0..currentBoard.height) {
-                    for (x in 0 until currentBoard.width) {
-                        val position = if (y < currentBoard.height) y * currentBoard.width + x else (currentBoard.height - 1) * currentBoard.width + x
-                        if (y < currentBoard.height && currentBoard.isWall(position, 2)) {
-                            append("h").append(x).append(",").append(y).append(";")
-                        }
-                    }
-                }
-                for (y in 0 until currentBoard.height) {
-                    for (x in 0..currentBoard.width) {
-                        val position = if (x < currentBoard.width) y * currentBoard.width + x else y * currentBoard.width + (currentBoard.width - 1)
-                        if (x < currentBoard.width && currentBoard.isWall(position, 1)) {
-                            append("v").append(x).append(",").append(y).append(";")
-                        }
-                    }
-                }
-                appendLine()
-                
-                // Robots
-                for (i in currentBoard.robotPositions.indices) {
-                    val position = currentBoard.robotPositions[i]
-                    val x = position % currentBoard.width
-                    val y = position / currentBoard.width
-                    val colorChar = when (i) {
-                        0 -> 'b'
-                        1 -> 'g'
-                        2 -> 'r'
-                        3 -> 'y'
-                        4 -> 's'
-                        else -> 'm'
-                    }
-                    append("r").append(colorChar).append(x).append(",").append(y).append(";")
-                }
-            }
-            
-            storage.writeFile("saves/save_0.dat", saveData)
-            println("[AUTOSAVE] Autosaved to slot 0 after ${AUTOSAVE_INTERVAL_MS / 1000} seconds")
-        }
-    }
-    
-    // Autosave timer effect - runs every second when autosave is enabled
+
+    // Autosave timer - writes via GameSession.saveGame (Android format, slot 0)
     LaunchedEffect(autosaveRunning) {
         if (autosaveRunning) {
             while (autosaveRunning) {
                 delay(1000)
-                if (autosaveRunning) {
-                    val currentTime = System.currentTimeMillis()
-                    // Check if we should perform autosave
-                    if (currentTime - lastAutosaveTime >= AUTOSAVE_INTERVAL_MS) {
-                        autosaveGame()
-                        lastAutosaveTime = currentTime
-                    }
+                if (autosaveRunning &&
+                    System.currentTimeMillis() - lastAutosaveTime >= AUTOSAVE_INTERVAL_MS
+                ) {
+                    session.saveGame(0, isAutoSave = true)
+                    println("[AUTOSAVE] Autosaved to slot 0")
+                    lastAutosaveTime = System.currentTimeMillis()
                 }
             }
         }
     }
-    var solution by remember(board) { mutableStateOf<driftingdroids.model.Solution?>(null) }
-    var currentHintStep by remember(board) { mutableIntStateOf(0) }
-    var currentHintRobot by remember(board) { mutableIntStateOf(-1) }
-    var currentHintDirection by remember(board) { mutableIntStateOf(-1) }
-    var currentHintRobotColor by remember(board) { mutableIntStateOf(-1) } // Background color for hint container
-    var isSolverRunning by remember(board) { mutableStateOf(false) }
-    val boardHistory = remember(board) { mutableListOf<Board>() }
-    val gameController = remember(board) { GameController() }
-    val pathTracker = remember(board) { PathTracker() }
-    val stringProvider = remember(board) { getStringProvider() }
-    val hintManager = remember(board) { HintManager(stringProvider) }
+
+    // Initialize HintManager when the session solver produced a solution
+    LaunchedEffect(sessionSolution) {
+        val sol = sessionSolution ?: return@LaunchedEffect
+        if (sol.moves.isNotEmpty()) {
+            val moves = sol.moves.mapNotNull { m ->
+                (m as? RRGameMove)?.let { Pair(it.color, errDirToBoardDir(it.direction)) }
+            }
+            hintManager.initialize(moves, isLevelGame, levelId)
+        }
+    }
 
     // Helper: get localized robot color name for button text (matches Android)
     fun getRobotColorName(colorIndex: Int): String {
@@ -354,7 +322,11 @@ fun GameScreen(
             else -> Color(0xFFfffe71) // default — yellowish like Android
         }
     }
-    val soundManager = remember(board) { getSoundManager() }
+
+    var currentHintStep by remember(gameEpoch) { mutableIntStateOf(0) }
+    var currentHintRobot by remember(gameEpoch) { mutableIntStateOf(-1) }
+    var currentHintDirection by remember(gameEpoch) { mutableIntStateOf(-1) }
+    var currentHintRobotColor by remember(gameEpoch) { mutableIntStateOf(-1) }
 
     // Helper: update hint display from HintManager (only GUI logic here, no hint logic)
     fun updateHintDisplay() {
@@ -377,451 +349,21 @@ fun GameScreen(
             currentHintDirection = -1
         }
     }
-    var elapsedTime by remember(board) { mutableLongStateOf(0L) }
-    var timerRunning by remember(board) { mutableStateOf(false) }
-    var selectedRobotIndex by remember(board) { mutableIntStateOf(-1) }
-    var selectedRobotHasMoved by remember(board) { mutableStateOf(false) }
-    var accessibilityControlsVisible by remember(board) { mutableStateOf(false) }
-    var hintsUsed by remember(board) { mutableIntStateOf(0) }
-    val mapGenerationValidator = remember { MapGenerationValidator() }
-    var generationFallback by remember { mutableStateOf<MapGenerationDecision?>(null) }
+
+    var hintsUsed by remember(gameEpoch) { mutableIntStateOf(0) }
+
+    // Record that a hint was shown (session stats + GameState tracking + history)
+    fun recordHintShown() {
+        val step = hintManager.getCurrentHintStep()
+        maxHintUsed = maxOf(maxHintUsed, step)
+        hintsUsed++
+        session.recordHintShown(step)
+        session.saveToHistoryNow("hint_shown_$step")
+    }
 
     fun requestManualNewGame() {
-        mapGenerationValidator.reset()
         generationFallback = null
         onNewGame()
-    }
-
-    fun applyMapGenerationDecision(decision: MapGenerationDecision, candidate: Solution?) {
-        when {
-            decision.shouldRetry -> {
-                println("[MAP_VALIDATION][DISCARD] attempt=${decision.attempt}/${MapGenerationValidator.MAX_GENERATION_ATTEMPTS} reason=${decision.rejectionReason} moves=${decision.moveCount} required=${Preferences.minSolutionMoves}..${Preferences.maxSolutionMoves}")
-                onNewGame()
-            }
-            decision.usedFallback -> {
-                if (candidate != null) {
-                    solution = candidate
-                    hintManager.initialize(candidate, isLevelGame, levelId)
-                }
-                generationFallback = decision
-                println("[MAP_VALIDATION][FALLBACK] attempts=${decision.attempt} reason=${decision.rejectionReason} moves=${decision.moveCount} required=${Preferences.minSolutionMoves}..${Preferences.maxSolutionMoves}")
-            }
-            decision.accepted && candidate != null -> {
-                solution = candidate
-                hintManager.initialize(candidate, isLevelGame, levelId)
-                println("[MAP_VALIDATION][ACCEPT] attempt=${decision.attempt} moves=${decision.moveCount} required=${Preferences.minSolutionMoves}..${Preferences.maxSolutionMoves}")
-            }
-        }
-    }
-
-    // Reset history tracking when board changes (new game started)
-    LaunchedEffect(board) {
-        isHistorySaved = false
-        gameStartTime = System.currentTimeMillis()
-        totalPlayTime = 0
-    }
-
-    // History save threshold (same as in main game)
-    val HISTORY_SAVE_THRESHOLD = 30 // seconds
-
-    // Get next available history index (simplified version)
-    fun getNextHistoryIndex(): Int {
-        val storage = Preferences.storageProvider?.invoke() ?: return 0
-        var maxIndex = 0
-        for (i in 0..1000) {
-            if (storage.fileExists("history_$i.txt")) {
-                maxIndex = i
-            }
-        }
-        return maxIndex + 1
-    }
-
-    // Save to history function using GameHistoryManager
-    fun saveToHistory() {
-        try {
-            val storage = Preferences.storageProvider?.invoke()
-            if (storage == null) {
-                println("[HISTORY] No storage available")
-                return
-            }
-            
-            // Initialize GameHistoryManager
-            roboyard.logic.managers.GameHistoryManager.initialize(storage)
-
-            // Generate map signatures for matching
-            val wallSig = roboyard.ui.compose.generateWallSignature(currentBoard)
-            val posSig = roboyard.ui.compose.generatePositionSignature(startBoard)
-            val mapSig = roboyard.ui.compose.generateMapSignature(currentBoard, startBoard)
-
-            println("[HISTORY] saveToHistory: wallSig=$wallSig")
-            println("[HISTORY] saveToHistory: posSig=$posSig")
-            println("[HISTORY] saveToHistory: mapSig=$mapSig")
-            
-            // Check if map already exists in history
-            val existingEntry = roboyard.logic.managers.GameHistoryManager.findByMapSignature(storage, mapSig)
-            
-            val historyFileName: String
-            val mapName: String
-            
-            if (existingEntry != null) {
-                // Map already exists - use existing file
-                historyFileName = existingEntry.getMapPath()
-                mapName = existingEntry.mapName ?: "Unknown Map"
-                println("[HISTORY] Map already exists in history, updating existing entry: $mapName")
-            } else {
-                // New map - get next available history index
-                val historyIndex = roboyard.logic.managers.GameHistoryManager.getNextHistoryIndex(storage)
-                historyFileName = roboyard.logic.managers.GameHistoryManager.indexToPath(historyIndex)
-                
-                // Generate map name (DRY - use generateMapNameFromSignature)
-                mapName = generateMapNameFromSignature(mapSig, isLevelGame, if (isLevelGame) levelId else null)
-                println("[HISTORY] New map, creating history entry: $mapName")
-            }
-            
-            // Serialize board to Main Game format (DRY - use startBoard for consistent signature)
-            val saveData = serializeBoardToMainGameFormat(currentBoard, isLevelGame, startBoard)
-            
-            // Write to history file
-            val result = storage.writeFile(historyFileName, saveData)
-            
-            if (result) {
-                println("[HISTORY] Saved game to history: $historyFileName")
-                
-                // Create or update history entry
-                val entry: roboyard.logic.core.GameHistoryEntry
-                val actualMoveCount = if (gameWon) moveCount else 0
-                val optMoves = solution?.size() ?: 0
-                
-                if (existingEntry != null) {
-                    // Update existing entry
-                    entry = existingEntry
-                    
-                    // Update completion data if game is complete
-                    if (gameWon) {
-                        // Calculate stars for this completion using StarRating.kt (DRY)
-                        val currentAttemptStars = calculateStars(actualMoveCount, optMoves, maxHintUsed)
-                        
-                        // For beginner levels (1-10), always earn at least 1 star
-                        val finalStars = if (currentAttemptStars < 1 && isLevelGame && levelId <= 10) {
-                            1
-                        } else {
-                            currentAttemptStars
-                        }
-                        
-                        println("[HISTORY] Calculated stars: $finalStars (moves=$actualMoveCount, optimal=$optMoves, hints=$maxHintUsed)")
-                        
-                        entry.recordCompletion(
-                            ((System.currentTimeMillis() - gameStartTime) / 1000).toInt(),
-                            actualMoveCount,
-                            finalStars
-                        )
-                        
-                        // If completed without hints, record the no-hints timestamp
-                        if (maxHintUsed < 0 && actualMoveCount > 0) {
-                            val isOptimal = optMoves > 0 && actualMoveCount == optMoves
-                            entry.recordSolvedWithoutHints(isOptimal)
-                        }
-                    }
-                    
-                    // Update hint tracking
-                    if (maxHintUsed >= 0) {
-                        entry.recordHintUsed(maxHintUsed)
-                        entry.markEverUsedHints()
-                    }
-                    
-                    println("[HISTORY] Updated existing history entry: $mapName")
-                } else {
-                    // Create new entry
-                    entry = roboyard.logic.core.GameHistoryEntry(
-                        historyFileName,
-                        mapName,
-                        System.currentTimeMillis(),
-                        totalPlayTime,
-                        actualMoveCount,
-                        optMoves,
-                        "${currentBoard.width}x${currentBoard.height}",
-                        null
-                    )
-                    
-                    // Set difficulty
-                    entry.difficulty = 1 // Default to beginner for now
-                    
-                    // Set map signatures for unique map tracking
-                    entry.wallSignature = wallSig
-                    entry.positionSignature = posSig
-                    entry.mapSignature = mapSig
-                    
-                    // Set hint tracking
-                    entry.maxHintUsed = maxHintUsed
-                    entry.setSolvedWithoutHints(maxHintUsed < 0)
-                    if (maxHintUsed >= 0) {
-                        entry.markEverUsedHints()
-                    }
-                    
-                    // If game is complete, calculate and record stars
-                    if (gameWon) {
-                        // Calculate stars for this completion using StarRating.kt (DRY)
-                        val currentAttemptStars = calculateStars(actualMoveCount, optMoves, maxHintUsed)
-                        
-                        // For beginner levels (1-10), always earn at least 1 star
-                        val finalStars = if (currentAttemptStars < 1 && isLevelGame && levelId <= 10) {
-                            1
-                        } else {
-                            currentAttemptStars
-                        }
-                        
-                        println("[HISTORY] Calculated stars for new entry: $finalStars (moves=$actualMoveCount, optimal=$optMoves, hints=$maxHintUsed)")
-                        
-                        entry.recordCompletion(
-                            ((System.currentTimeMillis() - gameStartTime) / 1000).toInt(),
-                            actualMoveCount,
-                            finalStars
-                        )
-                        
-                        // If completed without hints, record the timestamp
-                        if (maxHintUsed < 0 && actualMoveCount > 0) {
-                            val isOptimal = optMoves > 0 && actualMoveCount == optMoves
-                            entry.recordSolvedWithoutHints(isOptimal)
-                        }
-                    }
-
-                    println("[HISTORY] Created new history entry: $mapName")
-                }
-
-                // Save the entry directly using addHistoryEntry (handles both new and updated entries)
-                // This ensures recordCompletion changes are persisted
-                println("[HISTORY] Calling addHistoryEntry: mapName=${entry.mapName}, movesMade=${entry.movesMade}, bestMoves=${entry.bestMoves}, bestTime=${entry.bestTime}, completionCount=${entry.completionCount}")
-                val saved = roboyard.logic.managers.GameHistoryManager.addHistoryEntry(storage, entry)
-                if (saved) {
-                    println("[HISTORY] Saved history entry: ${entry.mapName}")
-                } else {
-                    println("[HISTORY] Failed to save history entry")
-                }
-            } else {
-                println("[HISTORY] Failed to save game to history: $historyFileName")
-            }
-        } catch (e: Exception) {
-            println("[HISTORY] Error saving to history: ${e.message}")
-            e.printStackTrace()
-        }
-    }
-
-    /**
-     * Update hint tracking in the existing history entry for the current map.
-     * Called when hint status changes after the initial history save.
-     * Also updates move count if game is completed after hints were shown.
-     */
-    fun updateHintTrackingInHistory() {
-        try {
-            val storage = Preferences.storageProvider?.invoke()
-            if (storage == null) {
-                println("[HISTORY] No storage available for updateHintTrackingInHistory")
-                return
-            }
-
-            // Generate map signature
-            val mapSig = roboyard.ui.compose.generateMapSignature(currentBoard, startBoard)
-            println("[HISTORY] updateHintTrackingInHistory: mapSig=$mapSig, isComplete=$gameWon")
-
-            if (mapSig.isEmpty()) {
-                println("[HISTORY] Map signature is empty, cannot update hint tracking")
-                return
-            }
-
-            // Load the full list once - we will modify it in-place and save it back
-            // Reload index to ensure newly created entries are found
-            roboyard.logic.managers.GameHistoryManager.initialize(storage)
-            val allEntries = roboyard.logic.managers.GameHistoryManager.getHistoryEntries(storage)
-            var existing: roboyard.logic.core.GameHistoryEntry? = null
-            for (e in allEntries) {
-                if (mapSig == e.mapSignature) {
-                    existing = e
-                    break
-                }
-            }
-
-            if (existing == null) {
-                println("[HISTORY] updateHintTracking: Map signature not found in history: $mapSig")
-                return
-            }
-
-            println("[HISTORY] Found existing entry: ${existing.mapName}")
-
-            // Update hint tracking if hints were used
-            if (!existing.hasUsedHints() && maxHintUsed >= 0) {
-                existing.recordHintUsed(maxHintUsed)
-                println("[HISTORY] Updated hint tracking in existing entry: maxHintUsed=$maxHintUsed")
-            }
-
-            // Update completion data if game is complete
-            if (gameWon) {
-                val actualMoveCount = moveCount
-                val optMoves = solution?.size() ?: 0
-                
-                // Calculate stars for this completion
-                val currentAttemptStars = if (optMoves > 0) {
-                    when {
-                        actualMoveCount <= optMoves -> 3
-                        actualMoveCount <= optMoves * 2 -> 2
-                        else -> 1
-                    }
-                } else {
-                    1
-                }
-
-                existing.recordCompletion(
-                    ((System.currentTimeMillis() - gameStartTime) / 1000).toInt(),
-                    actualMoveCount,
-                    currentAttemptStars
-                )
-                println("[HISTORY] Updated completion: moves=$actualMoveCount, stars=$currentAttemptStars")
-
-                // If completed without hints, record the no-hints timestamp
-                if (maxHintUsed < 0 && actualMoveCount > 0) {
-                    val isOptimal = optMoves > 0 && actualMoveCount == optMoves
-                    existing.recordSolvedWithoutHints(isOptimal)
-                    println("[HISTORY] recordSolvedWithoutHints: isOptimal=$isOptimal, moves=$actualMoveCount, optimal=$optMoves")
-                }
-            }
-
-            // Mark everUsedHints if hints were used
-            if (maxHintUsed >= 0) {
-                existing.markEverUsedHints()
-            }
-
-            // Save the same list we modified (not a freshly-read copy from disk)
-            roboyard.logic.managers.GameHistoryManager.saveHistoryIndex(storage, allEntries)
-            println("[HISTORY] Saved updated history entry: completionCount=${existing.completionCount}, maxHintUsed=${existing.maxHintUsed}, everUsedHints=${existing.isEverUsedHints()}")
-        } catch (e: Exception) {
-            println("[HISTORY] Error updating hint tracking: ${e.message}")
-            e.printStackTrace()
-        }
-    }
-
-    // Save to history immediately, bypassing the time threshold (same as main game)
-    // Called when a hint is shown, live move counter is activated, or map is completed
-    fun saveToHistoryNow(reason: String) {
-        println("[HISTORY] saveToHistoryNow called: reason=$reason, isHistorySaved=$isHistorySaved, maxHintUsed=$maxHintUsed")
-        if (!isHistorySaved) {
-            // Immediate save triggered by: reason
-            println("[HISTORY] First save triggered by: $reason")
-            saveToHistory()
-            isHistorySaved = true
-        } else {
-            // Already saved - just update hint tracking in existing entry
-            println("[HISTORY] Already saved, updating hint tracking for: $reason")
-            updateHintTrackingInHistory()
-        }
-    }
-
-    // Save game to slot function (same as main game)
-    fun saveGame(slotId: Int): Boolean {
-        try {
-            val storage = Preferences.storageProvider?.invoke()
-            if (storage == null) {
-                println("[SAVE_GAME] ERROR: storage is null")
-                return false
-            }
-            
-            // Save slot file name (same as main game)
-            val saveFileName = "saves/save_$slotId.dat"
-            println("[SAVE_GAME] Attempting to save to: $saveFileName")
-            
-            // Serialize board to save data format
-            val saveData = buildString {
-                appendLine("width:${currentBoard.width}")
-                appendLine("height:${currentBoard.height}")
-                appendLine("robots:${currentBoard.robotPositions.joinToString(",")}")
-                for (goal in currentBoard.goals) {
-                    appendLine("goal:${goal.position},${goal.robotNumber}")
-                }
-                appendLine("moveCount:$moveCount")
-                appendLine("isLevelGame:$isLevelGame")
-                appendLine("timestamp:${System.currentTimeMillis()}")
-                appendLine("gameWon:$gameWon")
-            }
-            
-            println("[SAVE_GAME] Save data: $saveData")
-            val result = storage.writeFile(saveFileName, saveData)
-            println("[SAVE_GAME] Write result: $result")
-            println("[SAVE_GAME] File exists after write: ${storage.fileExists(saveFileName)}")
-            return result
-        } catch (e: Exception) {
-            println("[SAVE_GAME] ERROR: ${e.message}")
-            e.printStackTrace()
-            return false
-        }
-    }
-
-    // Load game from slot function (same as main game)
-    fun loadGame(slotId: Int): Boolean {
-        try {
-            val storage = Preferences.storageProvider?.invoke()
-            if (storage == null) {
-                println("[LOAD_GAME] ERROR: storage is null")
-                return false
-            }
-            
-            // Save slot file name (same as main game)
-            val saveFileName = "saves/save_$slotId.dat"
-            println("[LOAD_GAME] Attempting to load from: $saveFileName")
-            
-            if (!storage.fileExists(saveFileName)) {
-                println("[LOAD_GAME] ERROR: File does not exist: $saveFileName")
-                return false
-            }
-            
-            println("[LOAD_GAME] File exists, reading...")
-            val saveData = storage.readFile(saveFileName)
-            println("[LOAD_GAME] Save data: $saveData")
-            val lines = saveData.lines()
-            println("[LOAD_GAME] Number of lines: ${lines.size}")
-            
-            var width = 0
-            var height = 0
-            var robots = ""
-            var moveCount = 0
-            var isLevelGame = false
-            var gameWon = false
-            
-            for (line in lines) {
-                println("[LOAD_GAME] Processing line: $line")
-                when {
-                    line.startsWith("width:") -> width = line.substringAfter("width:").toInt()
-                    line.startsWith("height:") -> height = line.substringAfter("height:").toInt()
-                    line.startsWith("robots:") -> robots = line.substringAfter("robots:")
-                    line.startsWith("moveCount:") -> moveCount = line.substringAfter("moveCount:").toInt()
-                    line.startsWith("isLevelGame:") -> isLevelGame = line.substringAfter("isLevelGame:").toBoolean()
-                    line.startsWith("gameWon:") -> gameWon = line.substringAfter("gameWon:").toBoolean()
-                }
-            }
-            
-            println("[LOAD_GAME] Parsed: width=$width, height=$height, robots=$robots, moveCount=$moveCount, isLevelGame=$isLevelGame, gameWon=$gameWon")
-            
-            // Reconstruct board from save data using createBoardFreestyle
-            val robotPositions = robots.split(",").map { it.toInt() }
-            val numRobots = robotPositions.size
-            println("[LOAD_GAME] Creating board with $numRobots robots")
-            val newBoard = Board.createBoardFreestyle(null, width, height, numRobots)
-            
-            if (newBoard == null) {
-                println("[LOAD_GAME] ERROR: Board creation failed")
-                return false
-            }
-            
-            // Set robot positions
-            for (i in robotPositions.indices) {
-                newBoard.robotPositions[i] = robotPositions[i]
-            }
-            
-            println("[LOAD_GAME] Board created successfully: ${newBoard.width}x${newBoard.height}")
-            currentBoard = newBoard
-            return true
-        } catch (e: Exception) {
-            println("[LOAD_GAME] ERROR: ${e.message}")
-            e.printStackTrace()
-            return false
-        }
     }
 
     // Auto-advance hint after 1s delay when player follows the hint (matches Android)
@@ -831,8 +373,7 @@ fun GameScreen(
             if (hintManager.hasNextHint()) {
                 hintManager.nextHint()
                 updateHintDisplay()
-                maxHintUsed = maxOf(maxHintUsed, hintManager.getCurrentHintStep())
-                saveToHistoryNow("hint_shown_${hintManager.getCurrentHintStep()}")
+                recordHintShown()
             } else {
                 hintMessage = stringProvider.getString("all_hints_shown") ?: "All hints shown"
             }
@@ -847,18 +388,8 @@ fun GameScreen(
                 delay(500)
                 if (timerRunning) {
                     elapsedTime += 500
-                    
-                    // Update totalPlayTime (same as main game)
-                    val elapsedSeconds = ((System.currentTimeMillis() - gameStartTime) / 1000).toInt()
-                    totalPlayTime = elapsedSeconds
-                    
-                    // Check for history save threshold (same as main game)
-                    if (!isHistorySaved) {
-                        if (totalPlayTime >= HISTORY_SAVE_THRESHOLD) {
-                            isHistorySaved = true
-                            saveToHistory()
-                        }
-                    }
+                    // Session handles history threshold + view_1_hour achievement
+                    session.updateGameTimer()
                 }
             }
         }
@@ -871,19 +402,19 @@ fun GameScreen(
         }
     }
 
-    // Stop timer when game is won and show completion dialog
+    // Stop timer when game is won and show completion message (matches Android)
     LaunchedEffect(gameWon) {
-        gameController.isGameComplete = gameWon
         if (gameWon) {
             timerRunning = false
-            // Show completion message inline (matches Android — no dialog)
-            val optimalMoves = solution?.size() ?: 0
+            session.saveToHistoryNow("completed")
+            soundManager.playSound("win")
+            val optimalMoves = sessionSolution?.moves?.size ?: 0
             val stars = calculateStars(moveCount, optimalMoves, maxHintUsed)
             val finalStars = if (stars < 1 && isLevelGame && levelId <= 10) 1 else stars
             hintContainerVisible = true
             hintMessage = if (isLevelGame) {
-                val starStr = buildString { repeat(finalStars) { append("★ ") } }.trim()
-                if (starStr.isEmpty()) "Level $levelId Complete! ✓" else "Level $levelId Complete! $starStr"
+                val starStr = buildString { repeat(finalStars) { append("\u2605 ") } }.trim()
+                if (starStr.isEmpty()) "Level $levelId Complete!" else "Level $levelId Complete! $starStr"
             } else {
                 if (moveCount == optimalMoves && optimalMoves > 0) {
                     "Perfect! You found the optimal solution!"
@@ -896,59 +427,21 @@ fun GameScreen(
         }
     }
 
-    // Start solver automatically when game starts (to calculate optimal moves)
-    LaunchedEffect(board) {
-        if (solution != null || isSolverRunning) return@LaunchedEffect
-        isSolverRunning = true
-        try {
-            val solutions = withContext(Dispatchers.Default) {
-                driftingdroids.model.SolverIDDFS(currentBoard).execute()
-            }
-            val candidate = solutions.firstOrNull()?.takeIf { it.size() > 0 }
-            if (isLevelGame || isLoadedGame) {
-                if (candidate != null) {
-                    solution = candidate
-                    hintManager.initialize(candidate, isLevelGame, levelId)
-                }
-                return@LaunchedEffect
-            }
-            val decision = mapGenerationValidator.evaluate(
-                moveCount = candidate?.size(),
-                isTrivial = currentBoard.isTrivialPuzzle(),
-                minMoves = Preferences.minSolutionMoves,
-                maxMoves = Preferences.maxSolutionMoves
+    val board = renderBoard
+    val startB = startBoard
+    if (board == null || startB == null) {
+        // Map is still being generated / loaded
+        Box(
+            modifier = Modifier.fillMaxSize().background(Color.Black),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringProvider.getString("ai_calculating") ?: "Calculating...",
+                color = Color.White,
+                fontSize = 18.sp
             )
-            applyMapGenerationDecision(decision, candidate)
-        } catch (e: CancellationException) {
-            throw e
-        } catch (oom: OutOfMemoryError) {
-            println("[MAP_VALIDATION][MEMORY_ABORT] solver aborted by OutOfMemoryError")
-            generationFallback = MapGenerationDecision(
-                accepted = true,
-                shouldRetry = false,
-                usedFallback = true,
-                attempt = mapGenerationValidator.currentAttemptCount() + 1,
-                moveCount = null,
-                rejectionReason = MapGenerationRejectionReason.NO_SOLUTION
-            )
-            mapGenerationValidator.reset()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            if (isLevelGame || isLoadedGame) {
-                println("[MAP_VALIDATION][ERROR] ${e.message}")
-            } else {
-                val decision = mapGenerationValidator.evaluate(
-                    moveCount = null,
-                    isTrivial = false,
-                    minMoves = Preferences.minSolutionMoves,
-                    maxMoves = Preferences.maxSolutionMoves
-                )
-                println("[MAP_VALIDATION][SOLVER_ERROR] attempt=${decision.attempt} error=$e")
-                applyMapGenerationDecision(decision, null)
-            }
-        } finally {
-            isSolverRunning = false
         }
+        return
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -958,107 +451,61 @@ fun GameScreen(
             .background(Color.Black)
     ) {
         // Game grid at top, full width, maintaining square aspect ratio
-        androidx.compose.runtime.key(currentBoard.robotPositions.contentHashCode()) {
+        androidx.compose.runtime.key(board.robotPositions.contentHashCode()) {
             BoardCanvas(
-                board = currentBoard,
-                startBoard = startBoard,
+                board = board,
+                startBoard = startB,
                 pathTracker = pathTracker,
                 selectedRobotIndex = selectedRobotIndex,
                 selectedRobotHasMoved = selectedRobotHasMoved,
                 onRobotSelected = { robotIndex ->
-                    // When a robot is touched, select it and reset moved state
-                    if (selectedRobotIndex != robotIndex) {
-                        selectedRobotIndex = robotIndex
-                        selectedRobotHasMoved = false
-                    }
+                    session.selectRobotByColor(robotIndex)
+                    selectedRobotHasMoved = false
                 },
                 onRobotMove = { robotIndex, direction ->
-                if (!gameWon) {
-                    val oldPos = currentBoard.robotPositions[robotIndex]
-                    val newBoard = gameController.moveRobotWithCooldown(currentBoard, robotIndex, direction)
-                    if (newBoard != null) {
-                        // Save current board to history before move (for undo)
-                        boardHistory.add(Board.Companion.createClone(currentBoard))
-                        val newPos = newBoard.robotPositions[robotIndex]
-                        val w = newBoard.width
-                        val distance = kotlin.math.abs((newPos % w) - (oldPos % w)) +
-                            kotlin.math.abs((newPos / w) - (oldPos / w))
-                        // Track path for rendering (matches Android GameGridView)
-                        pathTracker.addPathSegment(
-                            robotIndex,
-                            oldPos % w, oldPos / w,
-                            newPos % w, newPos / w
-                        )
-                        currentBoard = newBoard
-
-                        // Play move sound (matches Android SoundManager)
-                        soundManager.playSound("move")
-
-                        // Check if this is the first move (same as main game)
-                        val wasFirstMove = (moveCount == 0)
-                        
-                        moveCount++
-                        squaresMoved += distance
-                        // Mark that the selected robot has moved (for scale animation)
-                        selectedRobotHasMoved = true
-                        
-                        // Save history immediately on first move (same as main game)
-                        if (wasFirstMove && !isHistorySaved) {
-                            isHistorySaved = true
-                            Thread {
-                                try {
-                                    saveToHistory()
-                                } catch (e: Exception) {
-                                    // Error saving history on first move
+                    val pathSizeBefore = session.pathHistory.size
+                    val robot = session.selectRobotByColor(robotIndex)
+                    if (robot != null) {
+                        val oldX = robot.x
+                        val oldY = robot.y
+                        if (session.moveRobot(direction)) {
+                            if (session.pathHistory.size == pathSizeBefore) {
+                                // Forward move — UI owns path rendering
+                                val moved = session.currentState.value?.gameElements
+                                    ?.firstOrNull { it.type == GameElement.TYPE_ROBOT && it.color == robotIndex }
+                                if (moved != null) {
+                                    pathTracker.addPathSegment(robotIndex, oldX, oldY, moved.x, moved.y)
+                                    session.addPathToHistory(robotIndex, oldX, oldY, moved.x, moved.y)
                                 }
-                            }.start()
-                        }
-                        
-                        // Check if player followed the current hint (auto-advance via HintManager)
-                        if (hintMessage != null && robotIndex == currentHintRobot && direction == currentHintDirection) {
-                            // Player followed the hint — auto-advance after 1s delay (matches Android)
-                            pendingAutoAdvance = true
-                        } else if (hintMessage != null) {
-                            // Player made a different move, clear hint
-                            hintMessage = null
-                        }
-                        
-                        // [GAME_WIN] Check if the goal robot reached its target
-                        if (newBoard.goals.isNotEmpty() && isBoardSolved(newBoard)) {
-                            gameWon = true
-                            // Save to history immediately on completion (same as main game)
-                            saveToHistoryNow("completed")
-                            // Play win sound (matches Android SoundManager)
-                            soundManager.playSound("win")
-                            val optimalMoves = solution?.size() ?: 0
-                            val stars = calculateStars(moveCount, optimalMoves, hintsUsed)
-                            
-                            // Save level completion data if this is a level game
-                            if (isLevelGame) {
-                                roboyard.logic.core.saveLevelCompletion(levelCompletionManager, levelId, moveCount, hintsUsed, optimalMoves, stars, squaresMoved, elapsedTime)
+                                // Play move sound (matches Android SoundManager)
+                                soundManager.playSound("move")
+                                selectedRobotHasMoved = true
+
+                                // Check if player followed the current hint (auto-advance)
+                                if (hintMessage != null && robotIndex == currentHintRobot && direction == currentHintDirection) {
+                                    pendingAutoAdvance = true
+                                } else if (hintMessage != null) {
+                                    hintMessage = null
+                                }
                             }
-                            
-                            val completionMessage = handleGameWin(moveCount, isLevelGame = isLevelGame, optimalMoves = optimalMoves, stars = stars)
-                            hintMessage = completionMessage
+                            // else: reverse-move undo — session popped pathHistory
+                            // and onReverseMoveUndo updated the pathTracker
                         }
                     }
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(board.width.toFloat() / board.height.toFloat())
-                .shadow(elevation = 20.dp, shape = RoundedCornerShape(0.dp))
-        )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(board.width.toFloat() / board.height.toFloat())
+                    .shadow(elevation = 20.dp, shape = RoundedCornerShape(0.dp))
+            )
         }
 
         // Hint container (between grid and info row, matches Android position)
-        // Uses AnimatedVisibility for slide-down/slide-up animation (matches Android)
         AnimatedVisibility(
             visible = hintContainerVisible && hintMessage != null,
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
-            // Background color based on current hint robot (matches Android color-coded backgrounds)
             val hintBgColor = if (currentHintRobotColor >= 0) getHintBackgroundColor(currentHintRobotColor) else getHintBackgroundColor(-1)
             Row(
                 modifier = Modifier
@@ -1068,9 +515,8 @@ fun GameScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Close info button (X) — hides the hint container (matches Android game_info_close_button)
                 FancyButton(
-                    text = "✕",
+                    text = "\u2715",
                     color = FancyButtonColor.GRAY,
                     onClick = {
                         hintContainerVisible = false
@@ -1078,9 +524,8 @@ fun GameScreen(
                     },
                     modifier = Modifier.height(32.dp).width(32.dp).padding(end = 4.dp)
                 )
-                // Previous hint button
                 FancyButton(
-                    text = "◂",
+                    text = "\u25C2",
                     color = FancyButtonColor.HINT,
                     onClick = {
                         if (hintManager.hasPrevHint()) {
@@ -1090,7 +535,6 @@ fun GameScreen(
                     },
                     modifier = Modifier.height(32.dp)
                 )
-                // Hint text — black text on colored background (matches Android)
                 Text(
                     text = hintMessage ?: "",
                     color = Color(0xFF1A1A1A),
@@ -1098,44 +542,37 @@ fun GameScreen(
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
                 )
-                // Optimal moves button: color cycles based on move count (matches Android)
-                // Also acts as next-hint click target (matches Android)
-                if (solution != null) {
-                    val optMoves = solution!!.size()
+                val optMoves = sessionSolution?.moves?.size ?: 0
+                if (optMoves > 0) {
                     val optimalButtonColor = when (optMoves % 5) {
-                        0 -> FancyButtonColor.RED    // Red
-                        1 -> FancyButtonColor.GREEN   // Green
-                        2 -> FancyButtonColor.YELLOW  // Yellow (black text in Android)
-                        3 -> FancyButtonColor.BLUE    // Blue
-                        4 -> FancyButtonColor.GRAY    // Gray/Silver
+                        0 -> FancyButtonColor.RED
+                        1 -> FancyButtonColor.GREEN
+                        2 -> FancyButtonColor.YELLOW
+                        3 -> FancyButtonColor.BLUE
+                        4 -> FancyButtonColor.GRAY
                         else -> FancyButtonColor.HINT
                     }
                     FancyButton(
                         text = optMoves.toString(),
                         color = optimalButtonColor,
                         onClick = {
-                            // Acts as next-hint click target (matches Android)
                             if (hintManager.hasNextHint()) {
                                 hintManager.nextHint()
                                 updateHintDisplay()
-                                maxHintUsed = maxOf(maxHintUsed, hintManager.getCurrentHintStep())
-                                saveToHistoryNow("hint_shown_${hintManager.getCurrentHintStep()}")
+                                recordHintShown()
                             }
                         },
                         modifier = Modifier.height(32.dp).width(48.dp)
                     )
                 }
-                // Next hint button
                 FancyButton(
-                    text = "▸",
+                    text = "\u25B8",
                     color = FancyButtonColor.HINT,
                     onClick = {
                         if (hintManager.hasNextHint()) {
                             hintManager.nextHint()
                             updateHintDisplay()
-                            // Save to history when a hint is shown
-                            maxHintUsed = maxOf(maxHintUsed, hintManager.getCurrentHintStep())
-                            saveToHistoryNow("hint_shown_${hintManager.getCurrentHintStep()}")
+                            recordHintShown()
                         }
                     },
                     modifier = Modifier.height(32.dp)
@@ -1183,167 +620,47 @@ fun GameScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Select robot button
                 val robotColorName = if (selectedRobotIndex >= 0) getRobotColorName(selectedRobotIndex) else "Robot"
                 val robotButtonColor = if (selectedRobotIndex >= 0) getRobotButtonColor(selectedRobotIndex) else FancyButtonColor.BLUE
                 FancyButton(
                     text = robotColorName,
                     color = robotButtonColor,
                     onClick = {
-                        selectedRobotIndex = (selectedRobotIndex + 1) % currentBoard.robotPositions.size
+                        val robotCount = gameState?.getRobotCount() ?: 4
+                        session.selectRobotByColor((selectedRobotIndex + 1) % robotCount)
                         selectedRobotHasMoved = false
                     },
                     modifier = Modifier.weight(1f).padding(end = 4.dp)
                 )
-                // Direction buttons (text shows "ColorName DirectionName" like Android)
                 FancyButton(
                     text = "$robotColorName ${getDirectionName(Board.NORTH)}",
                     color = robotButtonColor,
-                    onClick = {
-                        if (!gameWon) {
-                            val newBoard = gameController.moveRobotWithCooldown(currentBoard, selectedRobotIndex, Board.NORTH)
-                            if (newBoard != null) {
-                                boardHistory.add(Board.Companion.createClone(currentBoard))
-                                currentBoard = newBoard
-                                moveCount++
-                                squaresMoved++
-                                hintMessage = null
-                                if (newBoard.goals.isNotEmpty() && isBoardSolved(newBoard)) {
-                                    gameWon = true
-                                    val optimalMoves = solution?.size() ?: 0
-                                    val stars = roboyard.logic.core.calculateStars(moveCount, optimalMoves, hintsUsed)
-                                    
-                                    // Save level completion data if this is a level game
-                                    if (isLevelGame) {
-                                        roboyard.logic.core.saveLevelCompletion(levelCompletionManager, levelId, moveCount, hintsUsed, optimalMoves, stars, squaresMoved, elapsedTime)
-                                    }
-                                    
-                                    val completionMessage = handleGameWin(moveCount, isLevelGame = isLevelGame, optimalMoves = optimalMoves, stars = stars)
-                                    hintMessage = completionMessage
-                                }
-                            }
-                        }
-                    },
+                    onClick = { session.moveRobot(Board.NORTH) },
                     modifier = Modifier.weight(1f).padding(end = 4.dp)
                 )
                 FancyButton(
                     text = "$robotColorName ${getDirectionName(Board.SOUTH)}",
                     color = robotButtonColor,
-                    onClick = {
-                        if (!gameWon) {
-                            val newBoard = gameController.moveRobotWithCooldown(currentBoard, selectedRobotIndex, Board.SOUTH)
-                            if (newBoard != null) {
-                                boardHistory.add(Board.Companion.createClone(currentBoard))
-                                currentBoard = newBoard
-                                moveCount++
-                                squaresMoved++
-                                hintMessage = null
-                                if (newBoard.goals.isNotEmpty() && isBoardSolved(newBoard)) {
-                                    gameWon = true
-                                    val optimalMoves = solution?.size() ?: 0
-                                    val stars = roboyard.logic.core.calculateStars(moveCount, optimalMoves, hintsUsed)
-                                    
-                                    // Save level completion data if this is a level game
-                                    if (isLevelGame) {
-                                        roboyard.logic.core.saveLevelCompletion(levelCompletionManager, levelId, moveCount, hintsUsed, optimalMoves, stars, squaresMoved, elapsedTime)
-                                    }
-                                    
-                                    val completionMessage = handleGameWin(moveCount, isLevelGame = isLevelGame, optimalMoves = optimalMoves, stars = stars)
-                                    hintMessage = completionMessage
-                                }
-                            }
-                        }
-                    },
+                    onClick = { session.moveRobot(Board.SOUTH) },
                     modifier = Modifier.weight(1f).padding(end = 4.dp)
                 )
                 FancyButton(
                     text = "$robotColorName ${getDirectionName(Board.EAST)}",
                     color = robotButtonColor,
-                    onClick = {
-                        if (!gameWon) {
-                            val newBoard = gameController.moveRobotWithCooldown(currentBoard, selectedRobotIndex, Board.EAST)
-                            if (newBoard != null) {
-                                boardHistory.add(Board.Companion.createClone(currentBoard))
-                                currentBoard = newBoard
-                                moveCount++
-                                squaresMoved++
-                                hintMessage = null
-                                if (newBoard.goals.isNotEmpty() && isBoardSolved(newBoard)) {
-                                    gameWon = true
-                                    val optimalMoves = solution?.size() ?: 0
-                                    val stars = roboyard.logic.core.calculateStars(moveCount, optimalMoves, hintsUsed)
-                                    
-                                    // Save level completion data if this is a level game
-                                    if (isLevelGame) {
-                                        roboyard.logic.core.saveLevelCompletion(levelCompletionManager, levelId, moveCount, hintsUsed, optimalMoves, stars, squaresMoved, elapsedTime)
-                                    }
-                                    
-                                    val completionMessage = handleGameWin(moveCount, isLevelGame = isLevelGame, optimalMoves = optimalMoves, stars = stars)
-                                    hintMessage = completionMessage
-                                }
-                            }
-                        }
-                    },
+                    onClick = { session.moveRobot(Board.EAST) },
                     modifier = Modifier.weight(1f).padding(end = 4.dp)
                 )
                 FancyButton(
                     text = "$robotColorName ${getDirectionName(Board.WEST)}",
                     color = robotButtonColor,
-                    onClick = {
-                        if (!gameWon) {
-                            val newBoard = gameController.moveRobotWithCooldown(currentBoard, selectedRobotIndex, Board.WEST)
-                            if (newBoard != null) {
-                                boardHistory.add(Board.Companion.createClone(currentBoard))
-                                currentBoard = newBoard
-                                moveCount++
-                                squaresMoved++
-                                hintMessage = null
-                                if (newBoard.goals.isNotEmpty() && isBoardSolved(newBoard)) {
-                                    gameWon = true
-                                    val optimalMoves = solution?.size() ?: 0
-                                    val stars = roboyard.logic.core.calculateStars(moveCount, optimalMoves, hintsUsed)
-                                    
-                                    // Save level completion data if this is a level game
-                                    if (isLevelGame) {
-                                        roboyard.logic.core.saveLevelCompletion(levelCompletionManager, levelId, moveCount, hintsUsed, optimalMoves, stars, squaresMoved, elapsedTime)
-                                    }
-                                    
-                                    val completionMessage = handleGameWin(moveCount, isLevelGame = isLevelGame, optimalMoves = optimalMoves, stars = stars)
-                                    hintMessage = completionMessage
-                                }
-                            }
-                        }
-                    },
+                    onClick = { session.moveRobot(Board.WEST) },
                     modifier = Modifier.weight(1f)
                 )
             }
         }
 
-        // Game info card below the board
-        GameInfoCard(
-            moveCount = moveCount,
-            squaresMoved = squaresMoved,
-            difficulty = "Beginner",
-            timer = formatElapsedTime(elapsedTime),
-            hintMessage = hintMessage
-        )
-
         // Flexible space pushes the buttons to the bottom
         Spacer(modifier = Modifier.weight(1f))
-
-        // Accessibility section (hidden by default)
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(0.dp)
-                .background(Color(0xFF303030))
-                .shadow(elevation = 10.dp, shape = RoundedCornerShape(0.dp))
-        ) {
-            // Accessibility controls placeholder
-            // Top row: Announce, North, Select
-            // Middle row: West, East
-            // Bottom row: Selected Robot, South, Robot Goal
-        }
 
         // Bottom button container (two rows of fancy buttons)
         Column(
@@ -1360,10 +677,9 @@ fun GameScreen(
                 // Dice button: visible only when generateNewMapEachTime=false and not in level game (matches Android)
                 if (!isLevelGame && !Preferences.generateNewMapEachTime) {
                     FancyButton(
-                        text = "🎲",
+                        text = "\uD83C\uDFB2",
                         color = FancyButtonColor.GRAY,
                         onClick = {
-                            // Generate new map (matches Android dice button)
                             requestManualNewGame()
                         },
                         modifier = Modifier.weight(1f).padding(end = 3.dp)
@@ -1375,17 +691,16 @@ fun GameScreen(
                         text = "Save Map",
                         color = FancyButtonColor.RED,
                         onClick = {
-                            // Navigate to SaveLoadScreen to select save slot
-                            onSaveLoad(currentBoard, startBoard)
+                            onSaveLoad()
                         },
                         modifier = Modifier.weight(1f).padding(end = 3.dp)
                     )
                 }
                 FancyButton(
-                    text = if (hintContainerVisible) "❌ Hint" else if (isSolverRunning) "Calculating..." else "💡Hint",
+                    text = if (hintContainerVisible) "\u274C Hint" else if (isSolverRunning) "Calculating..." else "\uD83D\uDCA1Hint",
                     color = FancyButtonColor.HINT,
                     onClick = {
-                        println("[HINT] Hint button clicked, isSolverRunning=$isSolverRunning, solution=${solution}")
+                        println("[HINT] Hint button clicked, isSolverRunning=$isSolverRunning, solution=$sessionSolution")
 
                         // If hint container is visible, toggle OFF (matches Android)
                         if (hintContainerVisible) {
@@ -1401,19 +716,20 @@ fun GameScreen(
                         // Toggle ON: show hint container
                         hintContainerVisible = true
 
-                        if (solution == null) {
+                        if (sessionSolution == null || sessionSolution!!.moves.isEmpty()) {
                             hintMessage = if (isSolverRunning) {
                                 stringProvider.getString("ai_calculating") ?: "Calculating..."
                             } else {
                                 stringProvider.getString("no_solution_found") ?: "No solution found"
                             }
                         } else {
-                            // Solution exists — show current hint (matches Android toggle ON behavior)
                             println("[HINT] Solution exists, showing current hint")
                             hintContainerVisible = true
-                            // Initialize hintManager if it doesn't have a solution yet
                             if (!hintManager.hasSolution()) {
-                                hintManager.initialize(solution, isLevelGame, levelId)
+                                val moves = sessionSolution!!.moves.mapNotNull { m ->
+                                    (m as? RRGameMove)?.let { Pair(it.color, errDirToBoardDir(it.direction)) }
+                                }
+                                hintManager.initialize(moves, isLevelGame, levelId)
                             }
                             updateHintDisplay()
                         }
@@ -1421,36 +737,16 @@ fun GameScreen(
                     modifier = Modifier.weight(1f).padding(end = 3.dp)
                 )
                 FancyButton(
-                    text = if (gameController.getPathHistorySize() > 0) "Undo" else "Back",
-                    color = if (gameController.getPathHistorySize() > 0) FancyButtonColor.YELLOW else FancyButtonColor.GREEN,
+                    text = if (session.canUndo()) "Undo" else "Back",
+                    color = if (session.canUndo()) FancyButtonColor.YELLOW else FancyButtonColor.GREEN,
                     onClick = {
-                        if (gameController.getPathHistorySize() > 0) {
-                            // Get the last path entry BEFORE undoing (undoLastMove removes it from history)
-                            val lastPathEntry = gameController.getPathHistoryList().lastOrNull()
-                            // Undo last move using GameController (matches Android app behavior)
-                            val undoneBoard = gameController.undoLastMove(currentBoard)
-                            if (undoneBoard != null && lastPathEntry != null) {
-                                // Undo last path segment for the correct robot (matches Android GameGridView.undoLastPathSegment)
-                                pathTracker.undoLastPathSegment(lastPathEntry[0])
-                                currentBoard = undoneBoard
-                                moveCount--
-                                squaresMoved = maxOf(0, squaresMoved - 1)
+                        if (session.canUndo()) {
+                            val lastPathEntry = session.removeLastPathFromHistory()
+                            if (session.undoLastMove()) {
+                                lastPathEntry?.let { pathTracker.undoLastPathSegment(it[0]) }
                                 hintMessage = null
-                                gameWon = false
-                            } else {
-                                // Fallback to board history if GameController undo fails
-                                if (boardHistory.isNotEmpty()) {
-                                    val previousBoard = boardHistory.removeAt(boardHistory.size - 1)
-                                    pathTracker.clearPaths()
-                                    currentBoard = previousBoard
-                                    moveCount--
-                                    squaresMoved = maxOf(0, squaresMoved - 1)
-                                    hintMessage = null
-                                    gameWon = false
-                                }
                             }
                         } else {
-                            // No history, go back to menu
                             onBack()
                         }
                     },
@@ -1470,17 +766,13 @@ fun GameScreen(
                     text = if (gameWon) "Retry" else "Reset",
                     color = FancyButtonColor.BLUE,
                     onClick = {
-                        currentBoard = Board.Companion.createClone(startBoard).also {
-                            it.setRobots(startBoard.robotPositions.copyOf())
-                        }
-                        moveCount = 0
-                        squaresMoved = 0
+                        session.resetGame()
+                        pathTracker.clearPaths()
+                        session.clearPathHistory()
+                        hintManager.reset()
                         hintMessage = null
                         hintContainerVisible = false
-                        gameWon = false
-                        gameController.reset()
-                        hintManager.reset()
-                        pathTracker.clearPaths()
+                        selectedRobotHasMoved = false
                     },
                     modifier = Modifier.weight(1f)
                 )
@@ -1514,10 +806,10 @@ fun GameScreen(
         )
     }
 
-    // Completion dialog with retry button
     // Completion is shown inline via hintMessage (matches Android — no dialog)
     // The bottom buttons (Menu/Retry/Next Level) handle navigation when game is won
 }
+
 
 @Composable
 internal fun MapGenerationFallbackDialog(

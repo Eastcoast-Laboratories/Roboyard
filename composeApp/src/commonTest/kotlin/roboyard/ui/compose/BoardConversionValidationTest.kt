@@ -45,7 +45,7 @@ class BoardConversionValidationTest {
             GridElement(2, 2, "robot_green"),
             GridElement(3, 3, "robot_blue")
         )
-        assertNull(gridElementsToBoard(grid))
+        assertNull(gridElementsToBoard(grid, 12, 14))
     }
 
     @Test
@@ -57,7 +57,7 @@ class BoardConversionValidationTest {
             GridElement(1, 1, "robot_blue"),
             GridElement(3, 3, "robot_yellow")
         )
-        assertNull(gridElementsToBoard(grid))
+        assertNull(gridElementsToBoard(grid, 12, 14))
     }
 
     @Test
@@ -68,7 +68,7 @@ class BoardConversionValidationTest {
             GridElement(3, 3, "robot_blue"),
             GridElement(4, 4, "robot_yellow")
         )
-        assertNull(gridElementsToBoard(grid))
+        assertNull(gridElementsToBoard(grid, 12, 14))
     }
 
     @Test
@@ -81,7 +81,7 @@ class BoardConversionValidationTest {
             GridElement(4, 4, "robot_yellow"),
             GridElement(6, 6, "robot_silver")
         )
-        assertNull(gridElementsToBoard(grid))
+        assertNull(gridElementsToBoard(grid, 12, 14))
     }
 
     @Test
@@ -93,7 +93,7 @@ class BoardConversionValidationTest {
             GridElement(3, 3, "robot_blue"),
             GridElement(4, 4, "robot_yellow")
         )
-        val board = gridElementsToBoard(grid)
+        val board = gridElementsToBoard(grid, 12, 14)
         assertNotNull(board)
         assertEquals(4, board.robotPositions.size)
         for (pos in board.robotPositions) {
