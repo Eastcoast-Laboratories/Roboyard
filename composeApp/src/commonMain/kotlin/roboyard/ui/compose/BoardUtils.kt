@@ -2,17 +2,14 @@ package roboyard.ui.compose
 
 import driftingdroids.model.Board
 import roboyard.logic.core.GridElement
-import roboyard.logic.core.Preferences
 import roboyard.logic.storage.PlatformStorage
 
 /**
  * Converts a GridElement list (from GameLogic) to a Board instance.
- * Used for random game generation with MapGenerator.
+ * Width/height must come from the GameState — level games can differ
+ * from the Preferences board size.
  */
-fun gridElementsToBoard(gridElements: ArrayList<GridElement>): Board? {
-    // Use Preferences for board dimensions
-    val width = Preferences.boardSizeWidth
-    val height = Preferences.boardSizeHeight
+fun gridElementsToBoard(gridElements: ArrayList<GridElement>, width: Int, height: Int): Board? {
 
     val board = Board.createBoardFreestyle(null, width, height, 4) ?: return null
     val numRobots = 4

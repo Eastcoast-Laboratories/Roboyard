@@ -33,6 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -197,6 +199,7 @@ fun LevelItem(
             .padding(4.dp)
             .aspectRatio(1f)
             .background(backgroundColor, RoundedCornerShape(8.dp))
+            .semantics { testTag = "levelItem_$levelId" }
             .clickable(enabled = isUnlocked, onClick = onClick),
         contentAlignment = Alignment.Center
     ) {

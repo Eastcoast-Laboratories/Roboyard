@@ -34,3 +34,5 @@
 26-09-16 10:55 "Megaplan continue, I have not answered all the questions yet"
 26-09-16 13:10 "The community app runs with ./run.sh -d=r under http://127.0.0.1:8000 / http://localhost:8000 - test against the local app, build that into the megaplan"
 26-09-16 14:33 "continue"
+26-09-16 15:15 "committed! [Megaplan file attached] Is everything in the plan implemented? If not, continue. For example you still cannot log in, which is actually the button in the top right of my menu"
+26-09-16 21:38 "commit that, then implement all phases of the plan, do not stop until everything is implemented"

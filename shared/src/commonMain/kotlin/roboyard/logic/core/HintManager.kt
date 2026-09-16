@@ -103,25 +103,29 @@ class HintManager(private val stringProvider: StringProvider? = null) {
         this.currentHintStep = 0
         this.showingPreHints = true
 
-        // Level hint restrictions (matches Android)
-        if (isLevelGame && levelId > LEVEL_10_THRESHOLD) {
-            hintsRestricted = true
-            maxHintsAllowed = 0
-        } else if (isLevelGame && levelId <= LEVEL_10_THRESHOLD) {
-            hintsRestricted = false
-            maxHintsAllowed = MAX_HINTS_UP_TO_LEVEL_10
-        } else {
-            hintsRestricted = false
-            maxHintsAllowed = Int.MAX_VALUE
-        }
+        applyLevelRestrictions(isLevelGame, levelId)
 
         log.d("[HINT_SYSTEM] Initialized: numPreHints=$numPreHints, totalMoves=$totalMoves, isLevelGame=$isLevelGame, levelId=$levelId, restricted=$hintsRestricted")
     }
 
     /**
-     * Test-only: initialize with a list of (robotNumber, direction) moves.
-     * Avoids creating a real Board/Solution for unit tests.
+     * Initialize with a list of (robotNumber, direction) moves — e.g. from a
+     * GameSolution produced by the shared GameSession solver path.
      */
+    fun initialize(moves: List<Pair<Int, Int>>, isLevelGame: Boolean, levelId: Int) {
+        this.testMoves = moves
+        this.totalMoves = moves.size
+        this.numPreHints = (2..4).random()
+        this.currentHintStep = 0
+        this.showingPreHints = true
+        this.solution = null // Use testMoves instead
+
+        applyLevelRestrictions(isLevelGame, levelId)
+
+        log.d("[HINT_SYSTEM] Initialized from move list: numPreHints=$numPreHints, totalMoves=$totalMoves, isLevelGame=$isLevelGame, levelId=$levelId, restricted=$hintsRestricted")
+    }
+
+    /** Test-only: initialize with a list of (robotNumber, direction) moves. */
     internal fun initializeForTest(moves: List<Pair<Int, Int>>, isLevelGame: Boolean, levelId: Int) {
         this.testMoves = moves
         this.totalMoves = moves.size
@@ -130,6 +134,11 @@ class HintManager(private val stringProvider: StringProvider? = null) {
         this.showingPreHints = true
         this.solution = null // Use testMoves instead
 
+        applyLevelRestrictions(isLevelGame, levelId)
+    }
+
+    /** Level hint restrictions (matches Android). */
+    private fun applyLevelRestrictions(isLevelGame: Boolean, levelId: Int) {
         if (isLevelGame && levelId > LEVEL_10_THRESHOLD) {
             hintsRestricted = true
             maxHintsAllowed = 0

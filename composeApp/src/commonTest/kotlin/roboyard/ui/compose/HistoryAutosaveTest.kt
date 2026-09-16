@@ -88,25 +88,36 @@ class HistoryAutosaveTest {
         // Set optimal moves
         entry.optimalMoves = 5
         entry.movesMade = 5
-        
-        // Without hints
+
+        // Clean solve: flag + timestamp recording (mirrors GameSession usage)
         entry.setSolvedWithoutHints(true)
+        entry.recordSolvedWithoutHints(true)
         assertTrue(entry.qualifiesForNoHintsAchievement())
         assertTrue(entry.qualifiesForPerfectNoHintsAchievement())
-        
-        // With hints (solvedWithoutHints = false)
+
+        // Hints used AFTER a recorded clean solve must not revoke qualification
+        // (chronological rule: only hints before the first clean solve disqualify)
         entry.setSolvedWithoutHints(false)
         entry.markEverUsedHints()
-        assertFalse(entry.qualifiesForNoHintsAchievement())
-        assertFalse(entry.qualifiesForPerfectNoHintsAchievement())
-        
-        // Test that everUsedHints is tracked separately
         assertTrue(entry.isEverUsedHints())
-        
-        // Reset to solved without hints
-        entry.setSolvedWithoutHints(true)
         assertTrue(entry.qualifiesForNoHintsAchievement())
         assertTrue(entry.qualifiesForPerfectNoHintsAchievement())
+
+        // Once everUsedHints is set, recordSolvedWithoutHints must not set new timestamps
+        val tsBefore = entry.lastSolvedWithoutHints
+        val perfectTsBefore = entry.lastPerfectlySolvedWithoutHints
+        entry.recordSolvedWithoutHints(true)
+        assertEquals(tsBefore, entry.lastSolvedWithoutHints)
+        assertEquals(perfectTsBefore, entry.lastPerfectlySolvedWithoutHints)
+
+        // Hints before the first clean solve permanently disqualify
+        val entry2 = GameHistoryEntry("history_1.txt", "Test Map", System.currentTimeMillis(), 0, 0, 0, "12x14", null)
+        entry2.optimalMoves = 5
+        entry2.movesMade = 5
+        entry2.markEverUsedHints()
+        entry2.recordSolvedWithoutHints(true)
+        assertFalse(entry2.qualifiesForNoHintsAchievement())
+        assertFalse(entry2.qualifiesForPerfectNoHintsAchievement())
     }
     
     /**
@@ -397,18 +408,19 @@ class HistoryAutosaveTest {
         
         // Session 1: No hints used
         entry.setSolvedWithoutHints(true)
+        entry.recordSolvedWithoutHints(true)
         entry.recordCompletion(30, 10, 3)
         assertTrue(entry.qualifiesForNoHintsAchievement())
         assertFalse(entry.isEverUsedHints())
-        
+
         // Session 2: Hints used (simulating a later session)
         entry.recordHintUsed(2)
         entry.markEverUsedHints()
         entry.setSolvedWithoutHints(false) // Explicitly set to false when hints are used
         entry.recordCompletion(40, 15, 2)
-        
-        // After hints used, should not qualify for no hints achievement
-        assertFalse(entry.qualifiesForNoHintsAchievement())
+
+        // Qualification persists: a clean solve was already recorded in session 1
+        assertTrue(entry.qualifiesForNoHintsAchievement())
         assertTrue(entry.isEverUsedHints())
         assertEquals(2, entry.maxHintUsed)
         

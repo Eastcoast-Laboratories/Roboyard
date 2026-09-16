@@ -7,38 +7,31 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import driftingdroids.model.Board
-import roboyard.logic.core.MapGenerator
-import roboyard.logic.core.Preferences
+import roboyard.logic.managers.GameSession
+import roboyard.logic.storage.getPlatformStorage
+
 @Composable
 fun App(onFullscreenChanged: (Boolean) -> Unit = {}) {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.MainMenu) }
-    var board by remember { mutableStateOf<Board?>(null) }
-    var startBoardForSaveLoad by remember { mutableStateOf<Board?>(null) }
     var selectedLevelId by remember { mutableStateOf(1) }
     var isLevelGame by remember { mutableStateOf(false) }
     var isLoadedGame by remember { mutableStateOf(false) }
+
+    // Single shared game session for the whole app (mirrors Android GameStateManager)
+    val appScope = rememberCoroutineScope()
+    val session = remember { GameSession(getPlatformStorage(), appScope) }
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
             when (currentScreen) {
                 Screen.MainMenu -> MainMenuScreen(
                     onNewRandomGame = {
-                        // Use MapGenerator to generate random game map (same as fragment-app)
-                        val mapGenerator = MapGenerator()
-                        mapGenerator.robotCount = Preferences.robotCount
-                        mapGenerator.targetColors = Preferences.targetColors
-                        val gridElements = mapGenerator.generatedGameMap
-                        board = if (gridElements != null) {
-                            gridElementsToBoard(gridElements)
-                        } else {
-                            // Fallback to standard random board if MapGenerator fails
-                            Board.createBoardRandom(4)
-                        }
+                        session.startNewGame()
                         isLevelGame = false
-                        isLoadedGame = false // Not a loaded game
+                        isLoadedGame = false
                         currentScreen = Screen.Game
                     },
                     onLevelSelection = {
@@ -61,43 +54,31 @@ fun App(onFullscreenChanged: (Boolean) -> Unit = {}) {
                     }
                 )
                 Screen.Game -> {
-                    board?.let { currentBoard ->
-                        GameScreen(
-                            board = currentBoard,
-                            isLevelGame = isLevelGame,
-                            isLoadedGame = isLoadedGame,
-                            levelId = selectedLevelId,
-                            onBack = {
-                                currentScreen = Screen.MainMenu
-                                board = null
-                                isLoadedGame = false
-                            },
-                            onNewGame = {
-                                // Use MapGenerator to generate random game map (same as fragment-app)
-                                val mapGenerator = MapGenerator()
-                                mapGenerator.robotCount = Preferences.robotCount
-                                mapGenerator.targetColors = Preferences.targetColors
-                                val gridElements = mapGenerator.generatedGameMap
-                                board = if (gridElements != null) {
-                                    gridElementsToBoard(gridElements)
-                                } else {
-                                    // Fallback to standard random board if MapGenerator fails
-                                    Board.createBoardRandom(4)
-                                }
-                                isLoadedGame = false // Not a loaded game
-                            },
-                            onSaveLoad = { currentBoardParam, startBoardParam ->
-                                board = currentBoardParam
-                                startBoardForSaveLoad = startBoardParam
-                                currentScreen = Screen.SaveLoad
-                            },
-                            onNextLevel = {
-                                // Load next level
-                                selectedLevelId++
-                                currentScreen = Screen.Loading
-                            }
-                        )
-                    }
+                    GameScreen(
+                        session = session,
+                        isLevelGame = isLevelGame,
+                        isLoadedGame = isLoadedGame,
+                        levelId = selectedLevelId,
+                        onBack = {
+                            session.stopRegeneration()
+                            currentScreen = Screen.MainMenu
+                            isLoadedGame = false
+                        },
+                        onNewGame = {
+                            session.startNewGame()
+                            isLevelGame = false
+                            isLoadedGame = false
+                        },
+                        onSaveLoad = {
+                            currentScreen = Screen.SaveLoad
+                        },
+                        onNextLevel = {
+                            selectedLevelId++
+                            session.startLevelGame(selectedLevelId)
+                            isLevelGame = true
+                            isLoadedGame = false
+                        }
+                    )
                 }
                 Screen.LevelSelection -> {
                     LevelSelectionScreen(
@@ -106,20 +87,10 @@ fun App(onFullscreenChanged: (Boolean) -> Unit = {}) {
                         },
                         onLevelSelected = { levelId: Int ->
                             selectedLevelId = levelId
-                            currentScreen = Screen.Loading
-                        }
-                    )
-                }
-                Screen.Loading -> {
-                    LoadingScreen(
-                        levelId = selectedLevelId,
-                        onLoadComplete = { loadedBoard: Board ->
-                            board = loadedBoard
+                            session.startLevelGame(levelId)
                             isLevelGame = true
+                            isLoadedGame = false
                             currentScreen = Screen.Game
-                        },
-                        onBack = {
-                            currentScreen = Screen.MainMenu
                         }
                     )
                 }
@@ -147,18 +118,26 @@ fun App(onFullscreenChanged: (Boolean) -> Unit = {}) {
                 }
                 Screen.SaveLoad -> {
                     SaveLoadScreen(
-                        boardToSave = board,
-                        startBoard = startBoardForSaveLoad,
+                        session = session,
                         isLevelGame = isLevelGame,
                         onBack = {
-                            currentScreen = Screen.MainMenu
-                            startBoardForSaveLoad = null
+                            // Return to the running game if one is active, else main menu
+                            currentScreen = if (session.currentState.value != null) {
+                                Screen.Game
+                            } else {
+                                Screen.MainMenu
+                            }
                         },
-                        onLoadGame = { loadedBoard ->
-                            board = loadedBoard
-                            startBoardForSaveLoad = loadedBoard // Loaded board contains start positions
-                            isLevelGame = false // Default to false for loaded games
-                            isLoadedGame = true // Mark as loaded game
+                        onLoadGame = { slotId ->
+                            session.loadGame(slotId)
+                            isLevelGame = false
+                            isLoadedGame = true
+                            currentScreen = Screen.Game
+                        },
+                        onLoadHistory = { path ->
+                            session.loadHistoryEntry(path)
+                            isLevelGame = false
+                            isLoadedGame = true
                             currentScreen = Screen.Game
                         }
                     )
@@ -178,7 +157,6 @@ enum class Screen {
     MainMenu,
     Game,
     LevelSelection,
-    Loading,
     Settings,
     Help,
     Credits,
