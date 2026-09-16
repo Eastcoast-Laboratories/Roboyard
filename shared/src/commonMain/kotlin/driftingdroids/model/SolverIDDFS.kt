@@ -150,12 +150,14 @@ class SolverIDDFS(board: Board) : Solver(board) {
             Logger.println("goalWildcard=" + this.isBoardGoalWildcard)
             Logger.println(this.knownStates!!.info)
 
-            this.iddfs()
-
-            if (this.knownStates != null) {
-                this.solutionStoredStates = this.knownStates!!.size()
-                this.solutionMemoryMegabytes = this.knownStates!!.megaBytesAllocated
-                this.knownStates = null //allow garbage collection
+            try {
+                this.iddfs()
+            } finally {
+                if (this.knownStates != null) {
+                    this.solutionStoredStates = this.knownStates!!.size()
+                    this.solutionMemoryMegabytes = this.knownStates!!.megaBytesAllocated
+                    this.knownStates = null //allow garbage collection
+                }
             }
         }
         this.sortSolutions()
@@ -226,7 +228,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
                 } else {
                     this.dfsRecursion(1, -1, -1, this.states[0], this.directions[0])
                 }
-            } catch (oom: Exception) {
+            } catch (oom: OutOfMemoryError) {
                 // Emergency: free knownStates immediately to reclaim memory
                 this.knownStates = null
                 // Do NOT call System.gc() here - it can trigger GcWatcher.finalize() timeout on Android
@@ -277,12 +279,9 @@ class SolverIDDFS(board: Board) : Solver(board) {
         }
         if (++this.recursionCounter >= this.memoryCheckInterval) {
             this.recursionCounter = 0
-            if (false) {
-                throw Exception("Solver was cancelled")
-            }
-            // Runtime not available in commonMain
-            val freeBytes = Long.MAX_VALUE
-            if (false) { // abort if less than 50% free
+            val memInfo = TimeProvider.getRuntimeMemoryInfo()
+            val freeBytes = memInfo.maxMemory - memInfo.totalMemory + memInfo.freeMemory
+            if (freeBytes < memInfo.maxMemory / 4) { // abort if less than 25% free
                 this.memoryLow = true
                 return
             }
@@ -383,12 +382,9 @@ class SolverIDDFS(board: Board) : Solver(board) {
         }
         if (++this.recursionCounter >= this.memoryCheckInterval) {
             this.recursionCounter = 0
-            if (false) {
-                throw Exception("Solver was cancelled")
-            }
-            // Runtime not available in commonMain
-            val freeBytes = Long.MAX_VALUE
-            if (false) { // abort if less than 50% free
+            val memInfo = TimeProvider.getRuntimeMemoryInfo()
+            val freeBytes = memInfo.maxMemory - memInfo.totalMemory + memInfo.freeMemory
+            if (freeBytes < memInfo.maxMemory / 4) { // abort if less than 25% free
                 this.memoryLow = true
                 return
             }
@@ -493,7 +489,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
                         }
                     }
                     //the robot has arrived at the goal
-                    if ((this.goalPosition == newRoboPos) && hasPerpendicularMove(
+                    if (oldRoboPos != newRoboPos && (this.goalPosition == newRoboPos) && hasPerpendicularMove(
                             depth,
                             robo,
                             dir
@@ -543,7 +539,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
                     }
                 }
                 //the robot has arrived at the goal
-                if (this.goalPosition == newRoboPos) {
+                if (oldRoboPos != newRoboPos && this.goalPosition == newRoboPos) {
                     oldState.copyInto(this.states[depth], 0, 0, oldState.size)
                     this.states[depth][this.goalRobot] = newRoboPos
                     this.buildSolution(depth)
@@ -728,7 +724,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
                 val added = this.allKeys.add(state, depth)
                 if (added) stateCount++
                 return added
-            } catch (oom: Exception) {
+            } catch (oom: OutOfMemoryError) {
                 Logger.println("[MEMORY] OOM in knownStates.add() at " + stateCount + " states - aborting search")
                 memoryLow = true
                 return false

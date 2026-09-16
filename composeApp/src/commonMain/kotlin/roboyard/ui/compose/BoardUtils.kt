@@ -75,14 +75,45 @@ fun gridElementsToBoard(gridElements: ArrayList<GridElement>): Board? {
                 robotPositions[3] = pos
             }
             "robot_silver" -> {
+                if (robotPositions.size <= 4) {
+                    println("[BOARD_CONVERSION][INVALID] Silver robot cannot fit in $numRobots-robot board")
+                    return null
+                }
                 val pos = x + y * width
                 robotPositions[4] = pos
             }
         }
     }
 
-    board.setRobots(robotPositions)
+    for (pos in robotPositions) {
+        if (pos !in 0 until board.size) {
+            println("[BOARD_CONVERSION][INVALID] robotPositions=${robotPositions.contentToString()} boardSize=${board.size}")
+            return null
+        }
+    }
+    if (robotPositions.distinct().size != robotPositions.size) {
+        println("[BOARD_CONVERSION][INVALID] robotPositions=${robotPositions.contentToString()} boardSize=${board.size}")
+        return null
+    }
+    if (!board.setRobots(robotPositions)) {
+        println("[BOARD_CONVERSION][INVALID] setRobots failed robotPositions=${robotPositions.contentToString()} boardSize=${board.size}")
+        return null
+    }
+    if (board.goals.isEmpty()) {
+        println("[BOARD_CONVERSION][INVALID] no goals on board boardSize=${board.size}")
+        return null
+    }
     board.setGoalRandom()
+    val activeGoals = board.getActiveGoals()
+    if (activeGoals.isEmpty() || activeGoals.any { goal ->
+            goal == null ||
+                goal.position !in 0 until board.size ||
+                (goal.robotNumber != -1 && goal.robotNumber !in robotPositions.indices)
+        }
+    ) {
+        println("[BOARD_CONVERSION][INVALID] activeGoals=${activeGoals.map { goal -> "${goal?.position}:${goal?.robotNumber}" }} boardSize=${board.size}")
+        return null
+    }
     return board
 }
 
