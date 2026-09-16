@@ -107,6 +107,7 @@ import roboyard.logic.core.GameController
 import roboyard.logic.core.PathTracker
 import roboyard.logic.core.HintManager
 import roboyard.logic.core.MapGenerationDecision
+import roboyard.logic.core.MapGenerationRejectionReason
 import roboyard.logic.core.MapGenerationValidator
 import roboyard.logic.audio.SoundManager
 import roboyard.logic.audio.getSoundManager
@@ -389,6 +390,28 @@ fun GameScreen(
         mapGenerationValidator.reset()
         generationFallback = null
         onNewGame()
+    }
+
+    fun applyMapGenerationDecision(decision: MapGenerationDecision, candidate: Solution?) {
+        when {
+            decision.shouldRetry -> {
+                println("[MAP_VALIDATION][DISCARD] attempt=${decision.attempt}/${MapGenerationValidator.MAX_GENERATION_ATTEMPTS} reason=${decision.rejectionReason} moves=${decision.moveCount} required=${Preferences.minSolutionMoves}..${Preferences.maxSolutionMoves}")
+                onNewGame()
+            }
+            decision.usedFallback -> {
+                if (candidate != null) {
+                    solution = candidate
+                    hintManager.initialize(candidate, isLevelGame, levelId)
+                }
+                generationFallback = decision
+                println("[MAP_VALIDATION][FALLBACK] attempts=${decision.attempt} reason=${decision.rejectionReason} moves=${decision.moveCount} required=${Preferences.minSolutionMoves}..${Preferences.maxSolutionMoves}")
+            }
+            decision.accepted && candidate != null -> {
+                solution = candidate
+                hintManager.initialize(candidate, isLevelGame, levelId)
+                println("[MAP_VALIDATION][ACCEPT] attempt=${decision.attempt} moves=${decision.moveCount} required=${Preferences.minSolutionMoves}..${Preferences.maxSolutionMoves}")
+            }
+        }
     }
 
     // Reset history tracking when board changes (new game started)
@@ -895,29 +918,34 @@ fun GameScreen(
                 minMoves = Preferences.minSolutionMoves,
                 maxMoves = Preferences.maxSolutionMoves
             )
-            when {
-                decision.shouldRetry -> {
-                    println("[MAP_VALIDATION][DISCARD] attempt=${decision.attempt}/${MapGenerationValidator.MAX_GENERATION_ATTEMPTS} reason=${decision.rejectionReason} moves=${decision.moveCount} required=${Preferences.minSolutionMoves}..${Preferences.maxSolutionMoves}")
-                    onNewGame()
-                }
-                decision.usedFallback -> {
-                    if (candidate != null) {
-                        solution = candidate
-                        hintManager.initialize(candidate, isLevelGame, levelId)
-                    }
-                    generationFallback = decision
-                    println("[MAP_VALIDATION][FALLBACK] attempts=${decision.attempt} reason=${decision.rejectionReason} moves=${decision.moveCount} required=${Preferences.minSolutionMoves}..${Preferences.maxSolutionMoves}")
-                }
-                decision.accepted && candidate != null -> {
-                    solution = candidate
-                    hintManager.initialize(candidate, isLevelGame, levelId)
-                    println("[MAP_VALIDATION][ACCEPT] attempt=${decision.attempt} moves=${decision.moveCount} required=${Preferences.minSolutionMoves}..${Preferences.maxSolutionMoves}")
-                }
-            }
+            applyMapGenerationDecision(decision, candidate)
         } catch (e: CancellationException) {
             throw e
+        } catch (oom: OutOfMemoryError) {
+            println("[MAP_VALIDATION][MEMORY_ABORT] solver aborted by OutOfMemoryError")
+            generationFallback = MapGenerationDecision(
+                accepted = true,
+                shouldRetry = false,
+                usedFallback = true,
+                attempt = mapGenerationValidator.currentAttemptCount() + 1,
+                moveCount = null,
+                rejectionReason = MapGenerationRejectionReason.NO_SOLUTION
+            )
+            mapGenerationValidator.reset()
         } catch (e: Exception) {
-            println("[MAP_VALIDATION][ERROR] ${e.message}")
+            e.printStackTrace()
+            if (isLevelGame || isLoadedGame) {
+                println("[MAP_VALIDATION][ERROR] ${e.message}")
+            } else {
+                val decision = mapGenerationValidator.evaluate(
+                    moveCount = null,
+                    isTrivial = false,
+                    minMoves = Preferences.minSolutionMoves,
+                    maxMoves = Preferences.maxSolutionMoves
+                )
+                println("[MAP_VALIDATION][SOLVER_ERROR] attempt=${decision.attempt} error=$e")
+                applyMapGenerationDecision(decision, null)
+            }
         } finally {
             isSolverRunning = false
         }

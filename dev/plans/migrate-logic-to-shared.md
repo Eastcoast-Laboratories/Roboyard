@@ -123,8 +123,17 @@ Full feature gap analysis completed. Priority order (most visible first):
   and shows a localized warning dialog
 - Compose `GameScreen` solver runs in a cancellation-aware coroutine; manual
   new-game requests reset the validator, auto-retries preserve the attempt count
+- Solver exceptions count as retry attempts; a real OutOfMemoryError aborts to
+  the fallback warning instead of crashing
 - The Hint button no longer runs its own solver — hints can never bypass
   difficulty validation
+- `gridElementsToBoard` rejects invalid boards (missing/duplicate/out-of-bounds
+  robots, missing or unusable goals) instead of letting the solver index
+  position -1
+- `Move` path construction is bounded and rejects zero-length/non-aligned moves;
+  `SolverIDDFS` no longer builds final moves when the goal robot did not move,
+  frees `knownStates` in `finally`, catches `OutOfMemoryError`, and aborts on
+  <25% free heap (same fixes applied to upstream `/var/www/DriftingDroids`)
 
 ## What was migrated (Phases 1-5, completed)
 

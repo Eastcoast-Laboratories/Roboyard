@@ -83,6 +83,20 @@ class MapGenerationValidatorTest {
     }
 
     @Test
+    fun test_repeatedNoSolution_reachesFallback() {
+        val validator = MapGenerationValidator(maxAttempts = 3)
+        validator.evaluate(moveCount = null, isTrivial = false, minMoves = 17, maxMoves = 99)
+        validator.evaluate(moveCount = null, isTrivial = false, minMoves = 17, maxMoves = 99)
+        val third = validator.evaluate(moveCount = null, isTrivial = false, minMoves = 17, maxMoves = 99)
+        assertTrue(third.accepted)
+        assertFalse(third.shouldRetry)
+        assertTrue(third.usedFallback)
+        assertEquals(3, third.attempt)
+        assertEquals(MapGenerationRejectionReason.NO_SOLUTION, third.rejectionReason)
+        assertEquals(0, validator.currentAttemptCount())
+    }
+
+    @Test
     fun test_reset_clearsAttempts() {
         val validator = MapGenerationValidator(maxAttempts = 3)
         validator.evaluate(moveCount = 5, isTrivial = false, minMoves = 17, maxMoves = 99)

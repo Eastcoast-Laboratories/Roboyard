@@ -45,35 +45,43 @@ class Move(
     }
 
     init {
-        var robotNum = 0
-        var oldPos = 0
-        var newPos = 0
-        for (robo in oldPositions.indices) {
-            if (oldPositions[robo] != newPositions[robo]) {
-                robotNum = robo
-                oldPos = oldPositions[robo]
-                newPos = newPositions[robo]
-                break
-            }
+        require(oldPositions.size == newPositions.size) { "Move states must have equal robot counts" }
+        require(oldPositions.size == board.numRobots) {
+            "Move state robot count must match board: state=${oldPositions.size} board=${board.numRobots}"
         }
+        val changedRobots = oldPositions.indices.filter { oldPositions[it] != newPositions[it] }
+        require(changedRobots.size == 1) { "A move must change exactly one robot, changed=${changedRobots.size}" }
+        val robotNum = changedRobots.single()
+        val oldPos = oldPositions[robotNum]
+        val newPos = newPositions[robotNum]
+        require(oldPos in 0 until board.size && newPos in 0 until board.size) {
+            "Move positions must be on the board: old=$oldPos new=$newPos size=${board.size}"
+        }
+        val diffPos = newPos - oldPos
+        val direction = board.getDirection(diffPos)
+        val aligned = when (direction) {
+            Board.EAST, Board.WEST -> oldPos / board.width == newPos / board.width
+            Board.NORTH, Board.SOUTH -> oldPos % board.width == newPos % board.width
+            else -> false
+        }
+        require(aligned) { "Move positions must be aligned: old=$oldPos new=$newPos" }
+        val posIncr = board.directionIncrement[direction]
+        require(diffPos % posIncr == 0) { "Move does not follow direction increment" }
+        val stepCount = diffPos / posIncr
+        require(stepCount > 0) { "Move must advance at least one cell" }
         this.robotNumber = robotNum
         this.oldPosition = oldPos
         this.newPosition = newPos
+        this.direction = direction
 
         this.pathMap = HashMap()
-        val diffPos = newPos - oldPos
-        this.direction = board.getDirection(diffPos)
-        val pathStart = 1 shl this.direction
+        val pathStart = 1 shl direction
         val pathEnd = 1 shl board.getDirection(-diffPos)
-        val posIncr = board.directionIncrement[this.direction]
-        var i = oldPos
-        this.pathMap[i] = pathStart
-        i += posIncr
-        while (i != newPos) {
-            this.pathMap[i] = pathStart + pathEnd
-            i += posIncr
+        this.pathMap[oldPos] = pathStart
+        for (step in 1 until stepCount) {
+            this.pathMap[oldPos + step * posIncr] = pathStart + pathEnd
         }
-        this.pathMap[i] = pathEnd
+        this.pathMap[newPos] = pathEnd
 
         var oldPosLong = 0L
         for (pos in oldPositions) {
