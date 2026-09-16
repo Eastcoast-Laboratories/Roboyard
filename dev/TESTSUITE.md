@@ -263,6 +263,7 @@ These tests require a connected Android device or emulator.
 | Class | Status | Tests | Description | Tags |
 |-------|--------|-------|-------------|------|
 | `ComposeAppUiSmokeTest` | ✅ Passing | 5 | Compose UI smoke test: main menu visible, navigate to Level Selection, navigate to Credits, navigate to Credits and back, Settings full rendering and back navigation. | compose, desktop, ui-test, smoke-test, navigation, settings |
+| `MapGenerationFallbackDialogTest` | ✅ Passing | 1 | Fallback dialog shown after exhausting map generation attempts: title, localized message with min moves/attempts/actual moves, OK dismisses. Run via `:composeApp:desktopTest --tests "roboyard.ui.compose.MapGenerationFallbackDialogTest"`. | compose, desktop, ui-test, map-generation, dialog |
 
 #### Compose Non-UI Unit Tests (logic only, no app launch)
 
@@ -272,6 +273,7 @@ These tests require a connected Android device or emulator.
 | `GameplayHistoryTest` | ✅ Passing | 1 | Integration test: play a complete game and verify history saving. Tests shared `isBoardSolved`, `moveRobotOnBoard`. | compose, desktop, integration-test, history |
 | `HistoryAutosaveTest` | ❌ Failing (2/9) | 9 | History autosave and hint tracking. 2 pre-existing failures (testGameHistoryEntryAchievementQualification, testHintTrackingAcrossSessions). | compose, desktop, history, autosave |
 | `SettingsManagerTest` | ✅ Passing | 10 | Shared `SettingsManager` transitions: currentState mirrors all 21 preference fields, difficulty presets (incl. impossible preserving new-map, beginner capping board to 12x14 only on transition), game-mode robot/target coupling, robot<=target and multi-target minimum 2, min/max move clamps and infinity, accessibility defaults, volume/hint-mode clamping, language validation, board-size ratio filter. Run via `:shared:desktopTest`. | shared, settings, preferences, unit-test |
+| `MapGenerationValidatorTest` | ✅ Passing | 5 | Shared `MapGenerationValidator` retry/fallback decisions: accept valid, TOO_EASY/TOO_HARD/NO_SOLUTION/TRIVIAL rejection reasons, retry until maxAttempts then accepted fallback, attempt counting and reset, positive maxAttempts requirement. Run via `:shared:desktopTest --tests "roboyard.logic.core.MapGenerationValidatorTest"`. | shared, map-generation, unit-test |
 
 ### ComposeApp PyAutoGUI Tests (headed, real mouse clicks)
 

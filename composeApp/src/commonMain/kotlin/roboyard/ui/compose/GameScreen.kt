@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -71,7 +72,6 @@ import roboyard.logic.core.LevelLoader
 import roboyard.logic.core.LevelFormatParser
 import roboyard.logic.core.ComposeGameState
 import roboyard.logic.storage.getPlatformStorage
-import driftingdroids.model.SolverIDDFS
 import driftingdroids.model.Solution
 import org.jetbrains.compose.resources.imageResource
 import roboyard.composeapp.generated.resources.Res
@@ -106,6 +106,8 @@ import roboyard.logic.core.moveRobotOnBoard
 import roboyard.logic.core.GameController
 import roboyard.logic.core.PathTracker
 import roboyard.logic.core.HintManager
+import roboyard.logic.core.MapGenerationDecision
+import roboyard.logic.core.MapGenerationValidator
 import roboyard.logic.audio.SoundManager
 import roboyard.logic.audio.getSoundManager
 import roboyard.logic.ui.getStringProvider
@@ -380,19 +382,22 @@ fun GameScreen(
     var selectedRobotHasMoved by remember(board) { mutableStateOf(false) }
     var accessibilityControlsVisible by remember(board) { mutableStateOf(false) }
     var hintsUsed by remember(board) { mutableIntStateOf(0) }
-    var regenerationCount by remember(board) { mutableIntStateOf(0) }
-    var allowRegeneration by remember(board) { mutableStateOf(true) }
-    
+    val mapGenerationValidator = remember { MapGenerationValidator() }
+    var generationFallback by remember { mutableStateOf<MapGenerationDecision?>(null) }
+
+    fun requestManualNewGame() {
+        mapGenerationValidator.reset()
+        generationFallback = null
+        onNewGame()
+    }
+
     // Reset history tracking when board changes (new game started)
     LaunchedEffect(board) {
         isHistorySaved = false
         gameStartTime = System.currentTimeMillis()
         totalPlayTime = 0
     }
-    
-    // Maximum auto-regeneration attempts (same as in main game)
-    val MAX_AUTO_REGENERATIONS = 999
-    
+
     // History save threshold (same as in main game)
     val HISTORY_SAVE_THRESHOLD = 30 // seconds
 
@@ -870,75 +875,51 @@ fun GameScreen(
 
     // Start solver automatically when game starts (to calculate optimal moves)
     LaunchedEffect(board) {
-        if (solution == null && !isSolverRunning) {
-            isSolverRunning = true
-            Thread {
-                try {
-                    var currentRegenerationCount = 0
-                    val minRequiredMoves = Preferences.minSolutionMoves
-                    val maxRequiredMoves = Preferences.maxSolutionMoves
-
-                    // Only validate difficulty for random games (not level games or loaded games)
-                    val shouldValidateDifficulty = !isLevelGame && !isLoadedGame
-
-                    while (currentRegenerationCount <= MAX_AUTO_REGENERATIONS && allowRegeneration && shouldValidateDifficulty) {
-                        val solver = driftingdroids.model.SolverIDDFS(currentBoard)
-                        val solutions = solver.execute()
-
-                        if (solutions.isEmpty() || solutions[0].size() <= 0) {
-                            // No solution found - regenerate map
-                            currentRegenerationCount++
-                            if (currentRegenerationCount <= MAX_AUTO_REGENERATIONS) {
-                                onNewGame()
-                                return@Thread
-                            }
-                            break
-                        }
-
-                        val moveCount = solutions[0].size()
-
-                        // Quick check for trivial puzzles (1 move or already solved) before difficulty validation
-                        if (currentBoard.isTrivialPuzzle()) {
-                            println("[TRIVIAL_CHECK] Detected trivial puzzle, regenerating without running solver")
-                            currentRegenerationCount++
-                            if (currentRegenerationCount <= MAX_AUTO_REGENERATIONS) {
-                                onNewGame()
-                                return@Thread
-                            }
-                            break
-                        }
-
-                        // Check if solution is too easy or too hard
-                        if (moveCount < minRequiredMoves || moveCount > maxRequiredMoves) {
-                            currentRegenerationCount++
-                            if (currentRegenerationCount <= MAX_AUTO_REGENERATIONS) {
-                                onNewGame()
-                                return@Thread
-                            }
-                            break
-                        }
-
-                        // Map is valid - accept it
-                        solution = solutions[0]
-                        hintManager.initialize(solution, isLevelGame, levelId)
-                        break
-                    }
-
-                    // For level games or loaded games, just accept the solution without validation
-                    if (!shouldValidateDifficulty && solution == null) {
-                        val solver = driftingdroids.model.SolverIDDFS(currentBoard)
-                        val solutions = solver.execute()
-                        if (solutions.isNotEmpty() && solutions[0].size() > 0) {
-                            solution = solutions[0]
-                            hintManager.initialize(solution, isLevelGame, levelId)
-                        }
-                    }
-                } catch (e: Exception) {
-                    // Solver error - ignore, hints will still work
-                } finally {
-                    isSolverRunning = false
+        if (solution != null || isSolverRunning) return@LaunchedEffect
+        isSolverRunning = true
+        try {
+            val solutions = withContext(Dispatchers.Default) {
+                driftingdroids.model.SolverIDDFS(currentBoard).execute()
+            }
+            val candidate = solutions.firstOrNull()?.takeIf { it.size() > 0 }
+            if (isLevelGame || isLoadedGame) {
+                if (candidate != null) {
+                    solution = candidate
+                    hintManager.initialize(candidate, isLevelGame, levelId)
                 }
-            }.start()
+                return@LaunchedEffect
+            }
+            val decision = mapGenerationValidator.evaluate(
+                moveCount = candidate?.size(),
+                isTrivial = currentBoard.isTrivialPuzzle(),
+                minMoves = Preferences.minSolutionMoves,
+                maxMoves = Preferences.maxSolutionMoves
+            )
+            when {
+                decision.shouldRetry -> {
+                    println("[MAP_VALIDATION][DISCARD] attempt=${decision.attempt}/${MapGenerationValidator.MAX_GENERATION_ATTEMPTS} reason=${decision.rejectionReason} moves=${decision.moveCount} required=${Preferences.minSolutionMoves}..${Preferences.maxSolutionMoves}")
+                    onNewGame()
+                }
+                decision.usedFallback -> {
+                    if (candidate != null) {
+                        solution = candidate
+                        hintManager.initialize(candidate, isLevelGame, levelId)
+                    }
+                    generationFallback = decision
+                    println("[MAP_VALIDATION][FALLBACK] attempts=${decision.attempt} reason=${decision.rejectionReason} moves=${decision.moveCount} required=${Preferences.minSolutionMoves}..${Preferences.maxSolutionMoves}")
+                }
+                decision.accepted && candidate != null -> {
+                    solution = candidate
+                    hintManager.initialize(candidate, isLevelGame, levelId)
+                    println("[MAP_VALIDATION][ACCEPT] attempt=${decision.attempt} moves=${decision.moveCount} required=${Preferences.minSolutionMoves}..${Preferences.maxSolutionMoves}")
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            println("[MAP_VALIDATION][ERROR] ${e.message}")
+        } finally {
+            isSolverRunning = false
         }
     }
 
@@ -1355,7 +1336,7 @@ fun GameScreen(
                         color = FancyButtonColor.GRAY,
                         onClick = {
                             // Generate new map (matches Android dice button)
-                            onNewGame()
+                            requestManualNewGame()
                         },
                         modifier = Modifier.weight(1f).padding(end = 3.dp)
                     )
@@ -1377,10 +1358,6 @@ fun GameScreen(
                     color = FancyButtonColor.HINT,
                     onClick = {
                         println("[HINT] Hint button clicked, isSolverRunning=$isSolverRunning, solution=${solution}")
-                        if (isSolverRunning) {
-                            println("[HINT] Solver already running, returning")
-                            return@FancyButton
-                        }
 
                         // If hint container is visible, toggle OFF (matches Android)
                         if (hintContainerVisible) {
@@ -1397,35 +1374,11 @@ fun GameScreen(
                         hintContainerVisible = true
 
                         if (solution == null) {
-                            // Calculate solution using SolverIDDFS
-                            println("[HINT] Solution is null, starting solver")
-                            isSolverRunning = true
-                            hintMessage = "Calculating solution..."
-                            hintContainerVisible = true
-
-                            // Run solver in background thread
-                            Thread {
-                                try {
-                                    val solver = driftingdroids.model.SolverIDDFS(currentBoard)
-                                    val solutions = solver.execute()
-                                    if (solutions.isNotEmpty() && solutions[0].size() > 0) {
-                                        solution = solutions[0]
-                                        // Initialize HintManager with pre-hints (matches Android app)
-                                        hintManager.initialize(solution, isLevelGame, levelId)
-                                        currentHintStep = 0
-                                        // Show first hint
-                                        updateHintDisplay()
-                                        maxHintUsed = maxOf(maxHintUsed, 0)
-                                        saveToHistoryNow("hint_shown_0")
-                                    } else {
-                                        hintMessage = stringProvider.getString("no_solution_found") ?: "No solution found"
-                                    }
-                                } catch (e: Exception) {
-                                    hintMessage = stringProvider.getString("error_displaying_hint") ?: "Error displaying hint"
-                                } finally {
-                                    isSolverRunning = false
-                                }
-                            }.start()
+                            hintMessage = if (isSolverRunning) {
+                                stringProvider.getString("ai_calculating") ?: "Calculating..."
+                            } else {
+                                stringProvider.getString("no_solution_found") ?: "No solution found"
+                            }
                         } else {
                             // Solution exists — show current hint (matches Android toggle ON behavior)
                             println("[HINT] Solution exists, showing current hint")
@@ -1512,8 +1465,8 @@ fun GameScreen(
                         color = FancyButtonColor.GREEN,
                         onClick = {
                             if (gameWon) {
-                                if (isLevelGame) onNextLevel() else onNewGame()
-                            } else onNewGame()
+                                if (isLevelGame) onNextLevel() else requestManualNewGame()
+                            } else requestManualNewGame()
                         },
                         modifier = Modifier.weight(1f)
                     )
@@ -1523,9 +1476,57 @@ fun GameScreen(
     }
     }
 
+    generationFallback?.let { decision ->
+        MapGenerationFallbackDialog(
+            minMoves = Preferences.minSolutionMoves,
+            maxMoves = Preferences.maxSolutionMoves,
+            actualMoves = decision.moveCount,
+            attempts = decision.attempt,
+            onDismiss = { generationFallback = null }
+        )
+    }
+
     // Completion dialog with retry button
     // Completion is shown inline via hintMessage (matches Android — no dialog)
     // The bottom buttons (Menu/Retry/Next Level) handle navigation when game is won
+}
+
+@Composable
+internal fun MapGenerationFallbackDialog(
+    minMoves: Int,
+    maxMoves: Int,
+    actualMoves: Int?,
+    attempts: Int,
+    onDismiss: () -> Unit
+) {
+    val stringProvider = getStringProvider()
+    val unknownText = stringProvider.getString("map_generation_unknown_moves") ?: "unknown"
+    val actualText = actualMoves?.toString() ?: unknownText
+    val title = stringProvider.getString("map_generation_failed_title") ?: "No suitable map found"
+    val message = if (maxMoves >= 99) {
+        stringProvider.getString("map_generation_failed_min_message", minMoves, attempts, actualText)
+            ?: "No map with at least {0} moves could be generated after {1} attempts. The last generated map ({2} moves) will be used."
+                .replace("{0}", minMoves.toString())
+                .replace("{1}", attempts.toString())
+                .replace("{2}", actualText)
+    } else {
+        stringProvider.getString("map_generation_failed_range_message", minMoves, maxMoves, attempts, actualText)
+            ?: "No map with {0} to {1} moves could be generated after {2} attempts. The last generated map ({3} moves) will be used."
+                .replace("{0}", minMoves.toString())
+                .replace("{1}", maxMoves.toString())
+                .replace("{2}", attempts.toString())
+                .replace("{3}", actualText)
+    }
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = { Text(message) },
+        confirmButton = {
+            Button(onClick = onDismiss) {
+                Text("OK")
+            }
+        }
+    )
 }
 
 /**
