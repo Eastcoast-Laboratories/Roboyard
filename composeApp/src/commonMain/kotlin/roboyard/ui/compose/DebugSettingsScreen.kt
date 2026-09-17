@@ -545,33 +545,7 @@ fun DebugSettingsScreen(
     }
 
     if (showLogViewer) {
-        AlertDialog(
-            onDismissRequest = { showLogViewer = false },
-            title = { Text("Logs (last ${roboyard.logic.util.LogBuffer.getLines().size} lines)") },
-            text = {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    val lines = roboyard.logic.util.LogBuffer.getLines()
-                    if (lines.isEmpty()) {
-                        Text("No log entries yet", color = Color.Gray, fontSize = 12.sp)
-                    } else {
-                        Text(
-                            text = lines.joinToString("\n"),
-                            fontSize = 10.sp,
-                            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
-                        )
-                    }
-                }
-            },
-            confirmButton = {
-                Row {
-                    TextButton(onClick = {
-                        roboyard.logic.util.LogBuffer.clear()
-                        showLogViewer = false
-                    }) { Text("Clear") }
-                    TextButton(onClick = { showLogViewer = false }) { Text("Close") }
-                }
-            }
-        )
+        LogViewerDialog(onDismiss = { showLogViewer = false })
     }
 
     // Toast overlay

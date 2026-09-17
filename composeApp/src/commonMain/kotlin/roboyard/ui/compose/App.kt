@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import roboyard.logic.managers.GameSession
 import roboyard.logic.managers.SyncManager
 import roboyard.logic.network.RoboyardApiClient
+import roboyard.logic.platform.openAutoLoginUrl
 import roboyard.logic.platform.openUrl
 import roboyard.logic.storage.getPlatformStorage
 import roboyard.logic.ui.getStringProvider
@@ -56,7 +57,7 @@ fun App(
     val apiClient = RoboyardApiClient.getInstance(storage)
     val openProfilePage: () -> Unit = {
         if (apiClient.isLoggedIn) {
-            openUrl(apiClient.buildAutoLoginUrl(apiClient.baseUrl + "/profile"))
+            openAutoLoginUrl(apiClient.buildAutoLoginUrl(apiClient.baseUrl + "/profile"))
         } else {
             showAuthDialog = true
         }
@@ -147,6 +148,9 @@ fun App(
                     },
                     onAchievements = {
                         currentScreen = Screen.Achievements
+                    },
+                    onLevelEditor = {
+                        currentScreen = Screen.LevelDesignEditor
                     },
                     onProfile = openProfilePage,
                     profileInitial = profileInitial

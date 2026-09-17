@@ -106,6 +106,38 @@ class IosStorage : PlatformStorage {
         return documentsDirectory?.path + "/$fileName"
     }
 
+    override fun getFileTimestamp(fileName: String): Long? {
+        val attrs = fileManager.attributesOfItemAtPath(getFilePath(fileName), null) ?: return null
+        val date = attrs[platform.Foundation.NSFileModificationDate] as? platform.Foundation.NSDate
+        return date?.timeIntervalSince1970?.toLong()?.times(1000)
+    }
+
+    override fun hasSavedGames(): Boolean {
+        return listFilesInDir("saves").isNotEmpty()
+    }
+
+    override fun listFiles(prefix: String, suffix: String): List<String> {
+        val urls = fileManager.URLsForDirectory(NSDocumentDirectory, NSUserDomainMask)
+        val docs = (urls.firstOrNull() as? NSURL)?.path ?: return emptyList()
+        val contents = fileManager.contentsOfDirectoryAtPath(docs, null) ?: return emptyList()
+        return contents.filterIsInstance<String>()
+            .filter { it.startsWith(prefix) && it.endsWith(suffix) }
+            .sorted()
+    }
+
+    override fun listFilesInDir(dirName: String): List<String> {
+        val dirPath = getFilePath(dirName)
+        val contents = fileManager.contentsOfDirectoryAtPath(dirPath, null) ?: return emptyList()
+        return contents.filterIsInstance<String>()
+    }
+
+    override fun listAssetFiles(dirName: String): List<String> {
+        val bundlePath = platform.Foundation.NSBundle.mainBundle.resourcePath ?: return emptyList()
+        val dirPath = "$bundlePath/$dirName"
+        val contents = fileManager.contentsOfDirectoryAtPath(dirPath, null) ?: return emptyList()
+        return contents.filterIsInstance<String>()
+    }
+
     // Bitmap operations (placeholder for iOS)
     override fun readBitmap(fileName: String): Any? {
         // TODO: Implement UIImage loading when needed

@@ -95,3 +95,81 @@ fun moveRobotOnBoard(board: Board, robotIndex: Int, direction: Int): Board? {
     newBoard.setRobots(newRobots)
     return newBoard
 }
+
+/**
+ * Build the "possible moves" accessibility announcement for a robot — a full
+ * port of Android GameFragment.announcePossibleMoves. For each direction it
+ * reports how far the robot can slide and what stops it (edge, wall, or
+ * another robot, optionally at its target).
+ *
+ * @param state Current game state
+ * @param robot The robot to describe
+ * @param stringProvider Localized strings (a11y keys)
+ * @param colorName Robot color name lookup (e.g. HintManager/GameFragment style)
+ * @return The announcement text, or null if no robot/state
+ */
+fun buildPossibleMovesAnnouncement(
+    state: GameState?,
+    robot: GameElement?,
+    stringProvider: roboyard.logic.ui.StringProvider?,
+    colorName: (Int) -> String
+): String? {
+    if (state == null || robot == null) return null
+    fun s(key: String, fallback: String) = stringProvider?.getString(key) ?: fallback
+
+    val x = robot.x
+    val y = robot.y
+    val sb = StringBuilder()
+    sb.append(s("possible_moves_a11y", "Possible moves")).append(": ")
+
+    // Per direction: dx, dy, distance-key, no-movement-key
+    val dirs = listOf(
+        intArrayOf(1, 0) to ("squares_east" to "no_movement_east"),
+        intArrayOf(-1, 0) to ("squares_west" to "no_movement_west"),
+        intArrayOf(0, -1) to ("squares_north" to "no_movement_north"),
+        intArrayOf(0, 1) to ("squares_south" to "no_movement_south")
+    )
+
+    val edgeText = s("edge_a11y", "the edge")
+    val wallText = s("wall_a11y", "a wall")
+
+    for ((dxy, keys) in dirs) {
+        var distance = 0
+        var obstacle = edgeText
+        var i = x + dxy[0]
+        var j = y + dxy[1]
+        while (i in 0 until state.width && j in 0 until state.height) {
+            if (state.canRobotMoveTo(robot, i, j)) {
+                distance++
+            } else {
+                val blocker = state.getRobotAt(i, j)
+                obstacle = if (blocker != null) {
+                    var name = colorName(blocker.color)
+                    if (state.isRobotAtTarget(blocker)) {
+                        name += " " + s("target_reached_a11y", "at its target")
+                    }
+                    name
+                } else {
+                    wallText
+                }
+                break
+            }
+            i += dxy[0]
+            j += dxy[1]
+        }
+        if (distance > 0) {
+            val untilString = when (obstacle) {
+                edgeText -> s("until_masculine", "until")
+                wallText -> s("until_feminine", "until")
+                else -> s("until", "until")
+            }
+            sb.append(distance).append(" ")
+                .append(s(keys.first, "squares")).append(" ")
+                .append(untilString).append(" ").append(obstacle).append(", ")
+        } else {
+            sb.append(s(keys.second, "no movement")).append(", ")
+        }
+    }
+    // Android ends the announcement with a period, not a trailing comma
+    return sb.toString().trimEnd(',', ' ') + "."
+}

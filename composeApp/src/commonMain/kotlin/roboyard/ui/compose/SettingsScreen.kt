@@ -70,8 +70,19 @@ fun SettingsScreen(
 ) {
     var settings by remember { mutableStateOf(SettingsManager.currentState()) }
     val stringProvider = remember { getStringProvider() }
+    var toastMessage by remember { mutableStateOf<String?>(null) }
 
     fun s(key: String, fallback: String): String = stringProvider.getString(key) ?: fallback
+
+    // Android showImpossibleDifficultyToast: warn when a small board is picked
+    // while Impossible difficulty is selected
+    fun maybeShowImpossibleWarning() {
+        if (settings.difficulty == Constants.DIFFICULTY_IMPOSSIBLE &&
+            (settings.boardSizeWidth < 16 || settings.boardSizeHeight < 16)) {
+            toastMessage = s("impossible_small_board_warning",
+                "Impossible on small boards may take several minutes to generate a fitting map")
+        }
+    }
 
     LaunchedEffect(Unit) {
         println("[SETTINGS_SCREEN] Opened with state=$settings")
@@ -157,7 +168,10 @@ fun SettingsScreen(
                     options = boardSizes,
                     selectedLabel = "${settings.boardSizeWidth}x${settings.boardSizeHeight}",
                     optionLabel = { it.toString() },
-                    onSelect = { settings = SettingsManager.setBoardSize(it.width, it.height) }
+                    onSelect = {
+                        settings = SettingsManager.setBoardSize(it.width, it.height)
+                        maybeShowImpossibleWarning()
+                    }
                 )
 
                 SettingsLabel(s("settings_difficulty", "Difficulty Level:"))
@@ -367,6 +381,30 @@ fun SettingsScreen(
                 }
             }
         }
+
+        // Toast overlay — Android Toast equivalent (auto-dismiss like LENGTH_LONG)
+        LaunchedEffect(toastMessage) {
+            if (toastMessage != null) {
+                kotlinx.coroutines.delay(3500)
+                toastMessage = null
+            }
+        }
+        toastMessage?.let { msg ->
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = msg,
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .background(Color(0xCC333333), androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+                        .padding(horizontal = 24.dp, vertical = 12.dp)
+                )
+            }
+        }
     }
 }
 
@@ -469,6 +507,10 @@ private fun DataManagementSection(s: (String, String) -> String) {
     var showResetConfirm by remember { mutableStateOf(false) }
     var statusMessage by remember { mutableStateOf<String?>(null) }
     var exportedData by remember { mutableStateOf<String?>(null) }
+    var showLogViewer by remember { mutableStateOf(false) }
+    if (showLogViewer) {
+        LogViewerDialog(onDismiss = { showLogViewer = false })
+    }
 
     val scope = rememberCoroutineScope()
 
@@ -509,6 +551,11 @@ private fun DataManagementSection(s: (String, String) -> String) {
         Spacer(modifier = Modifier.width(8.dp))
         Button(onClick = { showResetConfirm = true }) {
             Text(s("settings_reset_data", "Reset All Data"))
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        // View Logs — desktop equivalent of Android's logcat viewer (LogBuffer)
+        Button(onClick = { showLogViewer = true }) {
+            Text(s("settings_view_logs", "View Error Logs"))
         }
     }
 

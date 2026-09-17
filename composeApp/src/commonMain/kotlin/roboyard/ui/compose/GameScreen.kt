@@ -15,7 +15,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.Arrangement
@@ -38,12 +43,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -84,7 +91,16 @@ import roboyard.logic.core.ComposeGameState
 import roboyard.logic.storage.getPlatformStorage
 import driftingdroids.model.Solution
 import org.jetbrains.compose.resources.imageResource
+import org.jetbrains.compose.resources.painterResource
 import roboyard.composeapp.generated.resources.Res
+import roboyard.composeapp.generated.resources.ic_alt_back
+import roboyard.composeapp.generated.resources.ic_alt_forward
+import roboyard.composeapp.generated.resources.ic_alt_hint
+import roboyard.composeapp.generated.resources.ic_alt_menu
+import roboyard.composeapp.generated.resources.ic_alt_profile
+import roboyard.composeapp.generated.resources.ic_alt_replay
+import roboyard.composeapp.generated.resources.ic_alt_save
+import roboyard.composeapp.generated.resources.ic_alt_save_add
 import roboyard.composeapp.generated.resources.grid_tiles
 import roboyard.composeapp.generated.resources.roboyard
 import roboyard.composeapp.generated.resources.mh
@@ -290,9 +306,16 @@ fun GameScreen(
     var hintMessage by remember(gameEpoch) { mutableStateOf<String?>(null) }
     var hintContainerVisible by remember(gameEpoch) { mutableStateOf(false) }
     var pendingAutoAdvance by remember(gameEpoch) { mutableStateOf(false) }
+    var hintArrowActive by remember(gameEpoch) { mutableStateOf(false) }
     var maxHintUsed by remember(gameEpoch) { mutableIntStateOf(-1) }
-    var elapsedTime by remember(gameEpoch) { mutableLongStateOf(0L) }
+    var elapsedTime by remember(gameEpoch) { mutableLongStateOf(session.uiTimerElapsedMs) }
     var timerRunning by remember(gameEpoch) { mutableStateOf(false) }
+
+    // Android onPause: persist the UI timer into the session so it survives
+    // leaving and re-entering the game screen
+    DisposableEffect(gameEpoch) {
+        onDispose { session.saveUiTimerElapsed(elapsedTime) }
+    }
     var selectedRobotHasMoved by remember(gameEpoch) { mutableStateOf(false) }
     var accessibilityControlsVisible by remember { mutableStateOf(Preferences.accessibilityMode) }
     var generationFallback by remember { mutableStateOf<MapGenerationDecision?>(null) }
@@ -330,6 +353,60 @@ fun GameScreen(
             delay(2500)
             announcement = null
         }
+    }
+
+    // Helper: get localized robot color name for button text (matches Android)
+    // Robot color key — matches Android getLocalizedRobotColorNameByGridElement:
+    // 0=pink, 1=green, 2=blue, 3=yellow, 4=silver, 5=red, 6=brown, 7=orange, 8=white
+    fun getRobotColorKey(colorIndex: Int): String? = when (colorIndex) {
+        0 -> "pink"; 1 -> "green"; 2 -> "blue"; 3 -> "yellow"; 4 -> "silver"
+        5 -> "red"; 6 -> "brown"; 7 -> "orange"; 8 -> "white"
+        else -> null
+    }
+
+    fun getRobotColorName(colorIndex: Int): String {
+        val colorKey = getRobotColorKey(colorIndex) ?: return "Robot"
+        val key = "color_$colorKey"
+        return stringProvider.getString(key) ?: when (colorIndex) {
+            0 -> "Pink"; 1 -> "Green"; 2 -> "Blue"; 3 -> "Yellow"; 4 -> "Silver"
+            else -> "Robot"
+        }
+    }
+
+
+    // Move via accessibility direction button — announces failure like Android
+    // moveRobotInDirection ("cannot move in this direction"); success is
+    // announced in onRobotMoveCompleted via the robot description
+    fun a11yMove(direction: Int) {
+        if (!session.moveRobot(direction)) {
+            announce(stringProvider.getString("cannot_move_in_this_direction") ?: "Cannot move in this direction")
+        }
+    }
+
+    // Android announceGameStart: target + selected robot position + adjacent walls
+    fun buildGameStartAnnouncement(): String {
+        val st = gameState ?: return ""
+        val sb = StringBuilder()
+        st.gameElements.firstOrNull { it.type == GameElement.TYPE_TARGET }
+            ?.let { target ->
+                sb.append(getRobotColorName(target.color)).append(" ")
+                    .append(stringProvider.getString("target_a11y", target.x + 1, target.y + 1)
+                        ?: "Goal at position ${target.x + 1}, ${target.y + 1}")
+                    .append(". ")
+            }
+        val robot = st.getSelectedRobot()
+        if (robot != null) {
+            sb.append(getRobotColorName(robot.color))
+                .append(" robot ${robot.x + 1},${robot.y + 1}")
+            val walls = mutableListOf<String>()
+            if (!st.canRobotMoveTo(robot, robot.x + 1, robot.y) && robot.x + 1 < st.width && st.getRobotAt(robot.x + 1, robot.y) == null) walls.add("east")
+            if (!st.canRobotMoveTo(robot, robot.x - 1, robot.y) && robot.x - 1 >= 0 && st.getRobotAt(robot.x - 1, robot.y) == null) walls.add("west")
+            if (!st.canRobotMoveTo(robot, robot.x, robot.y - 1) && robot.y - 1 >= 0 && st.getRobotAt(robot.x, robot.y - 1) == null) walls.add("north")
+            if (!st.canRobotMoveTo(robot, robot.x, robot.y + 1) && robot.y + 1 < st.height && st.getRobotAt(robot.x, robot.y + 1) == null) walls.add("south")
+            if (walls.isNotEmpty()) sb.append(", walls ").append(walls.joinToString(", "))
+            sb.append(".")
+        }
+        return sb.toString()
     }
 
     // Wire session hooks for Compose visuals — mirrors Android GameFragment/GameGridView wiring
@@ -375,6 +452,31 @@ fun GameScreen(
                 session.lastMoveHitWall -> soundManager.playSound("hit_wall")
                 else -> soundManager.playSound("move")
             }
+            // Announce robot position after every move (Android GameGridView
+            // announceForAccessibility(getRobotDescription)) — only in accessibility mode
+            if (Preferences.accessibilityMode) {
+                // German uses adjective color forms (color_*_adj), matching Android
+                val colorWord = if (Preferences.appLanguage == "de") {
+                    stringProvider.getString("color_${getRobotColorKey(robot.color)}_adj")
+                        ?: getRobotColorName(robot.color)
+                } else getRobotColorName(robot.color)
+                val desc = StringBuilder()
+                    .append(colorWord).append(" ")
+                    .append(stringProvider.getString("robot_position_a11y") ?: "robot at position")
+                    .append(" ").append(robot.x + 1).append(",").append(robot.y + 1)
+                state.gameElements.firstOrNull {
+                    it.type == GameElement.TYPE_TARGET && it.color == robot.color
+                }?.let { target ->
+                    desc.append(". ")
+                        .append(stringProvider.getString("target_position_a11y") ?: "Its goal is at position")
+                        .append(" ").append(target.x + 1).append(",").append(target.y + 1)
+                }
+                // announcePossibleMoves — free distance + obstacle per direction
+                roboyard.logic.core.buildPossibleMovesAnnouncement(
+                    state, robot, stringProvider
+                ) { getRobotColorName(it) }?.let { desc.append(". ").append(it) }
+                announce(desc.toString())
+            }
             // checkIfMoveMatchesHint — auto-advance in Manual/Full-Auto, not in Semi-Auto
             if (hintContainerVisible && Preferences.hintAutoMoveMode != Preferences.HINT_AUTO_MOVE_SEMI_AUTO) {
                 val movedDir = state.lastMoveDirection
@@ -382,6 +484,8 @@ fun GameScreen(
                 if (movedDir != null && movedDir >= 0 && regularHint != null &&
                     robot.color == regularHint.first &&
                     errDirToBoardDir(movedDir) == regularHint.second) {
+                    // Clear the arrow immediately — a new one appears after the 1s delay
+                    hintArrowActive = false
                     pendingAutoAdvance = true
                 }
             }
@@ -414,10 +518,33 @@ fun GameScreen(
                 if (autosaveRunning &&
                     System.currentTimeMillis() - lastAutosaveTime >= AUTOSAVE_INTERVAL_MS
                 ) {
-                    session.saveGame(0, isAutoSave = true)
-                    println("[AUTOSAVE] Autosaved to slot 0")
+                    // Android autosave(): skip level games (levelId > 0)
+                    if ((gameState?.levelId ?: 0) <= 0) {
+                        session.saveGame(0, isAutoSave = true)
+                        println("[AUTOSAVE] Autosaved to slot 0")
+                    }
                     lastAutosaveTime = System.currentTimeMillis()
                 }
+            }
+        }
+    }
+
+    // Android onViewCreated/onResume: rebuild drawn robot paths from the session
+    // path history (reconstructPathsFromHistory) and auto-select the robot
+    // matching the target color (selectRobotWithTargetColor)
+    LaunchedEffect(gameEpoch, gameState != null) {
+        if (gameState != null) {
+            pathTracker.clearPaths()
+            session.pathHistory.forEach { entry ->
+                if (entry.size >= 5) {
+                    pathTracker.addPathSegment(entry[0], entry[1], entry[2], entry[3], entry[4])
+                }
+            }
+            session.selectRobotWithTargetColor()
+            // Android onResume: announceGameStart — visual toast only in
+            // accessibility mode (TalkBack equivalent on desktop)
+            if (Preferences.accessibilityMode) {
+                announce(buildGameStartAnnouncement())
             }
         }
     }
@@ -430,26 +557,6 @@ fun GameScreen(
                 (m as? RRGameMove)?.let { Pair(it.color, errDirToBoardDir(it.direction)) }
             }
             hintManager.initialize(moves, isLevelGame, levelId)
-        }
-    }
-
-    // Helper: get localized robot color name for button text (matches Android)
-    fun getRobotColorName(colorIndex: Int): String {
-        val key = when (colorIndex) {
-            0 -> "color_red"
-            1 -> "color_green"
-            2 -> "color_blue"
-            3 -> "color_yellow"
-            4 -> "color_silver"
-            5 -> "color_pink"
-            6 -> "color_brown"
-            7 -> "color_orange"
-            8 -> "color_white"
-            else -> return "Robot"
-        }
-        return stringProvider.getString(key) ?: when (colorIndex) {
-            0 -> "Red"; 1 -> "Green"; 2 -> "Blue"; 3 -> "Yellow"; 4 -> "Silver"
-            else -> "Robot"
         }
     }
 
@@ -502,24 +609,38 @@ fun GameScreen(
     var currentHintRobotColor by remember(gameEpoch) { mutableIntStateOf(-1) }
 
     // Helper: update hint display from HintManager (only GUI logic here, no hint logic)
-    fun updateHintDisplay() {
+    // fromAutoAdvance: true when reached via auto-advance after a matching move —
+    // Android shows the direction arrow for the first regular hint or after
+    // auto-advance; manual navigation clears it, and it never shows in Semi-Auto mode.
+    fun updateHintDisplay(fromAutoAdvance: Boolean = false) {
         val hintData = hintManager.getHintForDisplay()
         if (hintData != null) {
             hintMessage = hintData.text
             currentHintRobotColor = hintData.robotColorForBackground
+            // Select the hinted robot on the board (matches Android selectRobotByColor)
+            if (hintData.robotColorToSelect >= 0) {
+                session.selectRobotByColor(hintData.robotColorToSelect)
+                selectedRobotHasMoved = false
+            }
             val regularHint = hintManager.getRegularHint()
             if (regularHint != null) {
                 currentHintRobot = regularHint.first
                 currentHintDirection = regularHint.second
+                val regularIndex = hintManager.getCurrentHintStep() - hintManager.getTotalPreHintSteps()
+                hintArrowActive = (regularIndex == 0 || fromAutoAdvance) &&
+                    Preferences.hintAutoMoveMode != Preferences.HINT_AUTO_MOVE_SEMI_AUTO &&
+                    !session.isGameComplete.value
             } else {
                 currentHintRobot = -1
                 currentHintDirection = -1
+                hintArrowActive = false
             }
         } else {
             hintMessage = null
             currentHintRobotColor = -1
             currentHintRobot = -1
             currentHintDirection = -1
+            hintArrowActive = false
         }
     }
 
@@ -692,7 +813,7 @@ fun GameScreen(
             delay(1000)
             if (hintManager.hasNextHint()) {
                 hintManager.nextHint()
-                updateHintDisplay()
+                updateHintDisplay(fromAutoAdvance = true)
                 recordHintShown()
             } else {
                 hintMessage = stringProvider.getString("all_hints_shown") ?: "All hints shown"
@@ -861,13 +982,19 @@ fun GameScreen(
         return
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-    ) {
-        // Game grid at top, full width, maintaining square aspect ratio
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    // Landscape layout like Android layout-land: grid on one side, controls on the other.
+    // gridOnLeft persists via the same "landscape_grid_left" pref key Android uses.
+    val isLandscapeLayout = maxWidth > maxHeight
+    var gridOnLeft by remember { mutableStateOf(storage.getBoolean("landscape_grid_left", true)) }
+    // Android fragment_game_alt: icon-based portrait layout toggled via debug settings
+    val useAltLayout = remember { storage.getBoolean("use_alternative_layout", false) }
+    // Android game_info_close_button: hides the game info row until the screen is recreated
+    var gameInfoVisible by remember { mutableStateOf(true) }
+
+    @Composable
+    fun boardArea(boardModifier: Modifier) {
+        // Game grid maintaining aspect ratio
         androidx.compose.runtime.key(board.robotPositions.contentHashCode()) {
             BoardCanvas(
                 board = board,
@@ -889,13 +1016,41 @@ fun GameScreen(
                     }
                 },
                 robotMoveAnim = robotMoveAnim,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(board.width.toFloat() / board.height.toFloat())
+                hintRobotColor = if (hintArrowActive && hintContainerVisible) currentHintRobot else -1,
+                hintDirection = if (hintArrowActive && hintContainerVisible) currentHintDirection else -1,
+                modifier = boardModifier
                     .shadow(elevation = 20.dp, shape = RoundedCornerShape(0.dp))
             )
         }
+    }
 
+    @Composable
+    fun altIconButton(
+        icon: org.jetbrains.compose.resources.DrawableResource,
+        contentDescription: String,
+        onClick: () -> Unit,
+        modifier: Modifier = Modifier,
+        active: Boolean = false
+    ) {
+        Box(
+            modifier = modifier
+                .height(64.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(if (active) Color(0xFFFFEB3B) else Color.Transparent)
+                .clickable(onClick = onClick)
+                .semantics { this.contentDescription = contentDescription },
+            contentAlignment = Alignment.Center
+        ) {
+            androidx.compose.foundation.Image(
+                painter = painterResource(icon),
+                contentDescription = contentDescription,
+                modifier = Modifier.size(36.dp)
+            )
+        }
+    }
+
+    @Composable
+    fun ColumnScope.controlsArea(altLayout: Boolean = false) {
         // Hint container (matches Android: prev ◂ | status text | 👁 live toggle | ▸ next)
         // Visible when the hint toggle is checked OR the live move counter is enabled
         val liveOnlyMode = liveCounterEnabled && !hintContainerVisible
@@ -965,6 +1120,51 @@ fun GameScreen(
             }
         }
 
+        if (altLayout) {
+            // Alt layout info bar (fragment_game_alt): [moves column] [optimal] [timer]
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFF111111))
+                    .padding(4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "$squaresMoved",
+                        color = Color(0xFFEEEEEE),
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = stringProvider.getString("moves_label") ?: "Moves",
+                        color = Color(0xFFAAAAAA),
+                        fontSize = 12.sp
+                    )
+                }
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    val optMoves = sessionSolution?.moves?.size ?: 0
+                    if (hintContainerVisible && hintManager.isExactSolutionHintStep() && optMoves > 0) {
+                        FancyButton(
+                            text = optMoves.toString(),
+                            color = FancyButtonColor.GREEN,
+                            onClick = { showNextHint() },
+                            modifier = Modifier.height(32.dp).width(48.dp)
+                        )
+                    }
+                }
+                Text(
+                    text = formatElapsedTime(elapsedTime),
+                    color = Color(0xFFEEEEEE),
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.weight(1f).padding(end = 8.dp)
+                )
+            }
+        } else if (gameInfoVisible) {
         // Game info row — Android 3-block layout: left (Moves/Squares/Difficulty),
         // center (optimal moves button, shown from exact-solution hint), right (Timer, MapID, Dice)
         Row(
@@ -1052,6 +1252,43 @@ fun GameScreen(
                     )
                 }
             }
+            // Layout direction toggle — landscape only (Android layout_toggle_button, ⇄/⇆)
+            if (isLandscapeLayout) {
+                Text(
+                    text = if (gridOnLeft) "⇄" else "⇆",
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    modifier = Modifier
+                        .padding(start = 4.dp)
+                        .clickable {
+                            gridOnLeft = !gridOnLeft
+                            storage.putBoolean("landscape_grid_left", gridOnLeft)
+                        }
+                )
+            }
+            // Android game_info_close_button: 16dp ✕ hides the info row and
+            // also closes the hint container + unchecks the hint toggle
+            Text(
+                text = "✕",
+                color = Color.White,
+                fontSize = 10.sp,
+                modifier = Modifier
+                    .padding(start = 4.dp)
+                    .clickable {
+                        gameInfoVisible = false
+                        if (hintContainerVisible) {
+                            hintContainerVisible = false
+                            hintMessage = null
+                            currentHintRobotColor = -1
+                            currentHintRobot = -1
+                            currentHintDirection = -1
+                            hintArrowActive = false
+                            hintManager.resetStep()
+                        }
+                    }
+                    .semantics { contentDescription = "Hide game info" }
+            )
+        }
         }
 
         // Accessibility controls — Android accessibility_controls.xml 3-row layout:
@@ -1091,49 +1328,41 @@ fun GameScreen(
                     FancyButton(
                         text = stringProvider.getString("announce") ?: "Announce",
                         color = FancyButtonColor.HINT,
-                        onClick = {
-                            // announceGameStart: target + selected robot position + adjacent walls
-                            val st = gameState ?: return@FancyButton
-                            val sb = StringBuilder()
-                            st.gameElements.firstOrNull { it.type == GameElement.TYPE_TARGET }
-                                ?.let { target ->
-                                    sb.append(getRobotColorName(target.color)).append(" ")
-                                        .append(stringProvider.getString("target_a11y", target.x + 1, target.y + 1)
-                                            ?: "Goal at position ${target.x + 1}, ${target.y + 1}")
-                                        .append(". ")
-                                }
-                            val robot = st.getSelectedRobot()
-                            if (robot != null) {
-                                sb.append(getRobotColorName(robot.color))
-                                    .append(" robot ${robot.x + 1},${robot.y + 1}")
-                                val walls = mutableListOf<String>()
-                                if (!st.canRobotMoveTo(robot, robot.x + 1, robot.y) && robot.x + 1 < st.width && st.getRobotAt(robot.x + 1, robot.y) == null) walls.add("east")
-                                if (!st.canRobotMoveTo(robot, robot.x - 1, robot.y) && robot.x - 1 >= 0 && st.getRobotAt(robot.x - 1, robot.y) == null) walls.add("west")
-                                if (!st.canRobotMoveTo(robot, robot.x, robot.y - 1) && robot.y - 1 >= 0 && st.getRobotAt(robot.x, robot.y - 1) == null) walls.add("north")
-                                if (!st.canRobotMoveTo(robot, robot.x, robot.y + 1) && robot.y + 1 < st.height && st.getRobotAt(robot.x, robot.y + 1) == null) walls.add("south")
-                                if (walls.isNotEmpty()) sb.append(", walls ").append(walls.joinToString(", "))
-                                sb.append(".")
-                            }
-                            announce(sb.toString())
-                        },
+                        onClick = { announce(buildGameStartAnnouncement()) },
                         modifier = Modifier.weight(1f).padding(end = 4.dp)
                     )
                     FancyButton(
                         text = if (selectedRobotIndex >= 0) "$robotColorName ${getDirectionName(Board.NORTH)}" else getDirectionName(Board.NORTH),
                         color = robotButtonColor,
-                        onClick = { session.moveRobot(Board.NORTH) },
+                        onClick = { a11yMove(Board.NORTH) },
                         modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
                     )
                     FancyButton(
                         text = stringProvider.getString("next_robot") ?: "Next Robot",
                         color = FancyButtonColor.HINT,
                         onClick = {
+                            // cycleThroughRobots — announce selection + goal + possible moves (Android parity)
                             val robotCount = gameState?.getRobotCount() ?: 4
-                            session.selectRobotByColor((selectedRobotIndex + 1) % robotCount)
+                            val nextIndex = (selectedRobotIndex + 1) % robotCount
+                            val nextRobot = session.selectRobotByColor(nextIndex)
                             selectedRobotHasMoved = false
-                            if (selectedRobotIndex >= 0) {
-                                announce(stringProvider.getString("robot_selected_a11y", robotColorName)
-                                    ?: "$robotColorName robot selected")
+                            if (nextRobot != null) {
+                                val name = getRobotColorName(nextIndex)
+                                val sb = StringBuilder(
+                                    stringProvider.getString("robot_selected_a11y", name)
+                                        ?: "$name robot selected"
+                                ).append(". ")
+                                val st = session.currentState.value
+                                st?.gameElements?.firstOrNull {
+                                    it.type == GameElement.TYPE_TARGET && it.color == nextRobot.color
+                                }?.let { target ->
+                                    sb.append(stringProvider.getString("target_a11y", target.x + 1, target.y + 1)
+                                        ?: "Goal at ${target.x + 1},${target.y + 1}").append(". ")
+                                }
+                                roboyard.logic.core.buildPossibleMovesAnnouncement(
+                                    st, nextRobot, stringProvider
+                                ) { getRobotColorName(it) }?.let { sb.append(it) }
+                                announce(sb.toString())
                             }
                         },
                         modifier = Modifier.weight(1f).padding(start = 4.dp)
@@ -1147,13 +1376,13 @@ fun GameScreen(
                     FancyButton(
                         text = if (selectedRobotIndex >= 0) "$robotColorName ${getDirectionName(Board.WEST)}" else getDirectionName(Board.WEST),
                         color = robotButtonColor,
-                        onClick = { session.moveRobot(Board.WEST) },
+                        onClick = { a11yMove(Board.WEST) },
                         modifier = Modifier.weight(1f).padding(end = 4.dp)
                     )
                     FancyButton(
                         text = if (selectedRobotIndex >= 0) "$robotColorName ${getDirectionName(Board.EAST)}" else getDirectionName(Board.EAST),
                         color = robotButtonColor,
-                        onClick = { session.moveRobot(Board.EAST) },
+                        onClick = { a11yMove(Board.EAST) },
                         modifier = Modifier.weight(1f).padding(start = 4.dp)
                     )
                 }
@@ -1172,7 +1401,7 @@ fun GameScreen(
                     FancyButton(
                         text = if (selectedRobotIndex >= 0) "$robotColorName ${getDirectionName(Board.SOUTH)}" else getDirectionName(Board.SOUTH),
                         color = robotButtonColor,
-                        onClick = { session.moveRobot(Board.SOUTH) },
+                        onClick = { a11yMove(Board.SOUTH) },
                         modifier = Modifier.weight(1f)
                     )
                     Text(
@@ -1189,6 +1418,129 @@ fun GameScreen(
         // Flexible space pushes the buttons to the bottom
         Spacer(modifier = Modifier.weight(1f))
 
+        // Shared button actions — used by both the text-button layout and the alt icon bar
+        val hintToggleAction = {
+            if (hintContainerVisible) {
+                // Toggle OFF (matches Android unchecking the toggle)
+                hintContainerVisible = false
+                hintMessage = null
+                currentHintRobotColor = -1
+                currentHintRobot = -1
+                currentHintDirection = -1
+                hintArrowActive = false
+                hintManager.resetStep()
+            } else {
+                hintContainerVisible = true
+                if (sessionSolution == null || sessionSolution!!.moves.isEmpty()) {
+                    hintMessage = if (isSolverRunning) {
+                        stringProvider.getString("ai_calculating") ?: "Calculating..."
+                    } else {
+                        stringProvider.getString("no_solution_found") ?: "No solution found"
+                    }
+                } else {
+                    if (!hintManager.hasSolution()) {
+                        val moves = sessionSolution!!.moves.mapNotNull { m ->
+                            (m as? RRGameMove)?.let { Pair(it.color, errDirToBoardDir(it.direction)) }
+                        }
+                        hintManager.initialize(moves, isLevelGame, levelId)
+                    }
+                    updateHintDisplay()
+                    maybeAutoMoveHint()
+                }
+            }
+            Unit
+        }
+        val resetAction = {
+            session.resetGame()
+            pathTracker.clearPaths()
+            session.clearPathHistory()
+            hintManager.reset()
+            hintMessage = null
+            hintContainerVisible = false
+            selectedRobotHasMoved = false
+            elapsedTime = 0
+            // Android reset button: move sound + accessibility announcement
+            soundManager.playSound("move")
+            if (Preferences.accessibilityMode) {
+                announce(stringProvider.getString("robots_reset") ?: "Robots reset to starting positions")
+            }
+        }
+        val solverRegenerating = isSolverRunning && sessionSolution == null
+
+        if (altLayout) {
+            // Alt bottom bar (fragment_game_alt): icon buttons — hint, back, new map, save, reset
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Black)
+                    .padding(4.dp)
+            ) {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    altIconButton(
+                        icon = Res.drawable.ic_alt_hint,
+                        contentDescription = stringProvider.getString("hint_button_a11y") ?: "Hint",
+                        onClick = { if (!solverRegenerating) hintToggleAction() },
+                        modifier = Modifier.weight(1f),
+                        active = hintContainerVisible
+                    )
+                    val atStart = moveCount == 0
+                    val backNeedsCooldown = atStart && !isLevelGame &&
+                        !session.isLoadedFromHistory && !session.isLoadedFromSave
+                    if (backNeedsCooldown) {
+                        CooldownFancyButton(
+                            text = "◂",
+                            color = FancyButtonColor.HINT,
+                            cooldown = true,
+                            onClick = { handleBackButtonClick() },
+                            modifier = Modifier.weight(1f).height(64.dp)
+                        )
+                    } else {
+                        altIconButton(
+                            icon = Res.drawable.ic_alt_back,
+                            contentDescription = stringProvider.getString("back_description") ?: "Back",
+                            onClick = { handleBackButtonClick() },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    if (!isLevelGame) {
+                        val isHistoryGame = session.isLoadedFromHistory
+                        val hasNext = isHistoryGame && session.hasNextHistoryEntry()
+                        CooldownFancyButton(
+                            text = "▸",
+                            color = FancyButtonColor.GREEN,
+                            enabled = !isHistoryGame || hasNext,
+                            cooldown = true,
+                            onClick = { handleNewMapButtonClick() },
+                            modifier = Modifier.weight(1f).height(64.dp)
+                        )
+                        altIconButton(
+                            icon = Res.drawable.ic_alt_save_add,
+                            contentDescription = stringProvider.getString("save_map_button_a11y") ?: "Save map",
+                            onClick = { if (!isSolverRunning) onSaveLoad() },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    altIconButton(
+                        icon = Res.drawable.ic_alt_replay,
+                        contentDescription = stringProvider.getString("restart_button_a11y") ?: "Restart",
+                        onClick = { resetAction() },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                if (gameWon && pendingAchievements.isEmpty()) {
+                    FancyButton(
+                        text = if (isLevelGame) {
+                            stringProvider.getString("next_level") ?: "Next Level"
+                        } else {
+                            stringProvider.getString("new_random_game_button") ?: "New Random Game"
+                        },
+                        color = FancyButtonColor.GREEN,
+                        onClick = { handleNewMapButtonClick() },
+                        modifier = Modifier.fillMaxWidth().padding(top = 3.dp)
+                    )
+                }
+            }
+        } else {
         // Bottom button container — matches Android layout:
         // Row 1: [Save Map] [Hint] [Back]  Row 2: [Menu] [Reset] [New Map]
         // Row 3 (completion only): full-width Next Level / New Random Game
@@ -1214,44 +1566,17 @@ fun GameScreen(
                     )
                 }
                 // Hint toggle button (Android ToggleButton: 💡Hint / ❌ Hint);
-                // disabled while the solver is generating a map with no solution yet
+                // disabled while the solver is generating a map with no solution yet;
+                // Android forces the toggle checked with "Cancel" text during regeneration
                 FancyButton(
-                    enabled = !isSolverRunning || sessionSolution != null,
-                    text = if (hintContainerVisible) {
+                    enabled = !solverRegenerating,
+                    text = if (hintContainerVisible || solverRegenerating) {
                         stringProvider.getString("hint_cancel_button") ?: "\u274C Hint"
                     } else {
                         stringProvider.getString("hint_button") ?: "\uD83D\uDCA1Hint"
                     },
                     color = FancyButtonColor.HINT,
-                    onClick = {
-                        if (hintContainerVisible) {
-                            // Toggle OFF (matches Android unchecking the toggle)
-                            hintContainerVisible = false
-                            hintMessage = null
-                            currentHintRobotColor = -1
-                            currentHintRobot = -1
-                            currentHintDirection = -1
-                            hintManager.resetStep()
-                            return@FancyButton
-                        }
-                        hintContainerVisible = true
-                        if (sessionSolution == null || sessionSolution!!.moves.isEmpty()) {
-                            hintMessage = if (isSolverRunning) {
-                                stringProvider.getString("ai_calculating") ?: "Calculating..."
-                            } else {
-                                stringProvider.getString("no_solution_found") ?: "No solution found"
-                            }
-                        } else {
-                            if (!hintManager.hasSolution()) {
-                                val moves = sessionSolution!!.moves.mapNotNull { m ->
-                                    (m as? RRGameMove)?.let { Pair(it.color, errDirToBoardDir(it.direction)) }
-                                }
-                                hintManager.initialize(moves, isLevelGame, levelId)
-                            }
-                            updateHintDisplay()
-                            maybeAutoMoveHint()
-                        }
-                    },
+                    onClick = { hintToggleAction() },
                     modifier = Modifier.weight(1f).padding(end = 3.dp)
                 )
                 // Back button — text always "Back"; color encodes the action (Android updateBackButtonColor)
@@ -1289,16 +1614,7 @@ fun GameScreen(
                         stringProvider.getString("button_reset") ?: "Reset"
                     },
                     color = FancyButtonColor.BLUE,
-                    onClick = {
-                        session.resetGame()
-                        pathTracker.clearPaths()
-                        session.clearPathHistory()
-                        hintManager.reset()
-                        hintMessage = null
-                        hintContainerVisible = false
-                        selectedRobotHasMoved = false
-                        elapsedTime = 0
-                    },
+                    onClick = { resetAction() },
                     modifier = Modifier.weight(1f).padding(end = 3.dp)
                 )
                 // New Map button: hidden in level games (Android sets GONE);
@@ -1334,6 +1650,117 @@ fun GameScreen(
                     modifier = Modifier.fillMaxWidth().padding(top = 3.dp)
                 )
             }
+        }
+        }
+    }
+
+    // Alt top bar (fragment_game_alt): menu/save icons, green move counter,
+    // live-move toggle, profile icon — all 48dp on a #222222 bar
+    @Composable
+    fun altTopBar() {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFF222222))
+                .padding(4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            altIconButton(
+                icon = Res.drawable.ic_alt_menu,
+                contentDescription = stringProvider.getString("menu_button_a11y") ?: "Menu",
+                onClick = onBack,
+                modifier = Modifier.height(48.dp)
+            )
+            altIconButton(
+                icon = Res.drawable.ic_alt_save,
+                contentDescription = stringProvider.getString("save_map_button_a11y") ?: "Save map",
+                onClick = { if (!isSolverRunning) onSaveLoad() },
+                modifier = Modifier.height(48.dp)
+            )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp)
+                    .padding(horizontal = 4.dp)
+                    .background(Color(0xFF2E7D32)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "$moveCount",
+                    color = Color.White,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            // Live move counter toggle (LiveModeToggleButtonAlt — always visible in alt layout)
+            if (!isLevelGame) {
+                Text(
+                    text = if (liveCounterEnabled) "👁" else "👁‍🗨",
+                    fontSize = 20.sp,
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp)
+                        .clickable {
+                            val checked = !liveCounterEnabled
+                            liveCounterEnabled = checked
+                            session.setLiveMoveCounterEnabled(checked)
+                            if (checked) {
+                                gameState?.recordHintUsed(0)
+                                session.saveToHistoryNow("live_move")
+                                session.triggerLiveSolver()
+                            }
+                        }
+                        .semantics {
+                            contentDescription = stringProvider.getString("live_move_counter_label_a11y") ?: "Show remaining moves"
+                        }
+                )
+            }
+            altIconButton(
+                icon = Res.drawable.ic_alt_profile,
+                contentDescription = "Profile",
+                onClick = onProfile,
+                modifier = Modifier.height(48.dp)
+            )
+        }
+    }
+
+    // Layout dispatch — portrait: board above controls (Android layout-port);
+    // alt portrait (fragment_game_alt): icon top bar + board + icon bottom bar;
+    // landscape: board and controls side-by-side, side chosen by gridOnLeft
+    // (Android layout-land / layout-land grid_left variants)
+    if (isLandscapeLayout) {
+        Row(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+            val boardModifier = Modifier.aspectRatio(board.width.toFloat() / board.height.toFloat())
+            if (gridOnLeft) {
+                Box(modifier = Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.Center) {
+                    boardArea(boardModifier)
+                }
+                Column(modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState())) {
+                    controlsArea()
+                }
+            } else {
+                Column(modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState())) {
+                    controlsArea()
+                }
+                Box(modifier = Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.Center) {
+                    boardArea(boardModifier)
+                }
+            }
+        }
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black)
+        ) {
+            if (useAltLayout) {
+                altTopBar()
+            }
+            boardArea(
+                Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(board.width.toFloat() / board.height.toFloat())
+            )
+            controlsArea(altLayout = useAltLayout)
         }
     }
     }
@@ -1566,12 +1993,20 @@ fun BoardCanvas(
     selectedRobotIndex: Int = -1,
     selectedRobotHasMoved: Boolean = false,
     robotMoveAnim: RobotMoveAnim? = null,
+    hintRobotColor: Int = -1,
+    hintDirection: Int = -1,
     modifier: Modifier = Modifier
 ) {
     val gameState = remember(board) { ComposeGameState(board) }
     // Use the board parameter directly - it will be updated by the parent
     // Since board is passed as a parameter, Compose will recompose when it changes
     val currentBoard = board
+
+    // Gesture handlers run in long-lived pointerInput coroutines keyed on Unit;
+    // always read the latest board/selection via rememberUpdatedState so taps and
+    // drags never see stale robot positions or a stale selection.
+    val gestureBoard by rememberUpdatedState(board)
+    val gestureSelectedRobot by rememberUpdatedState(selectedRobotIndex)
 
     // Tracking variables matching fragment-app GameGridView
     var hasMovedRobotInCurrentGesture by remember { mutableStateOf(false) }
@@ -1627,20 +2062,22 @@ fun BoardCanvas(
                 // Matches Android GameGridView.onTouchEvent ACTION_UP tap handling
                 detectTapGestures(
                     onTap = { offset ->
-                        val cellSize = min(size.width, size.height) / maxOf(board.width, board.height).toFloat()
-                        val offsetX = (size.width - board.width * cellSize) / 2
-                        val offsetY = (size.height - board.height * cellSize) / 2
+                        val tapBoard = gestureBoard
+                        val tapSelected = gestureSelectedRobot
+                        val cellSize = min(size.width, size.height) / maxOf(tapBoard.width, tapBoard.height).toFloat()
+                        val offsetX = (size.width - tapBoard.width * cellSize) / 2
+                        val offsetY = (size.height - tapBoard.height * cellSize) / 2
                         val gridX = ((offset.x - offsetX) / cellSize).toInt()
                         val gridY = ((offset.y - offsetY) / cellSize).toInt()
 
                         // Bounds check
-                        if (gridX < 0 || gridX >= board.width || gridY < 0 || gridY >= board.height) return@detectTapGestures
+                        if (gridX < 0 || gridX >= tapBoard.width || gridY < 0 || gridY >= tapBoard.height) return@detectTapGestures
 
                         // Check if a robot is at the tap position
                         var clickedRobot = -1
-                        for (i in board.robotPositions.indices) {
-                            val pos = board.robotPositions[i]
-                            if (pos % board.width == gridX && pos / board.width == gridY) {
+                        for (i in tapBoard.robotPositions.indices) {
+                            val pos = tapBoard.robotPositions[i]
+                            if (pos % tapBoard.width == gridX && pos / tapBoard.width == gridY) {
                                 clickedRobot = i
                                 break
                             }
@@ -1648,15 +2085,15 @@ fun BoardCanvas(
 
                         if (clickedRobot >= 0) {
                             // Tap on a robot — select it (matches Android: select robot on tap)
-                            if (selectedRobotIndex != clickedRobot) {
+                            if (tapSelected != clickedRobot) {
                                 onRobotSelected(clickedRobot)
                             }
-                        } else if (selectedRobotIndex >= 0) {
+                        } else if (tapSelected >= 0) {
                             // Tap on empty cell with a robot selected — determine direction and move
                             // Matches Android GameGridView.onTouchEvent lines 1456-1495
-                            val robotPos = board.robotPositions[selectedRobotIndex]
-                            val robotX = robotPos % board.width
-                            val robotY = robotPos / board.width
+                            val robotPos = tapBoard.robotPositions[tapSelected]
+                            val robotX = robotPos % tapBoard.width
+                            val robotY = robotPos / tapBoard.width
                             var dx = 0
                             var dy = 0
 
@@ -1690,7 +2127,7 @@ fun BoardCanvas(
                                     else -> -1
                                 }
                                 if (direction >= 0) {
-                                    onRobotMove(selectedRobotIndex, direction)
+                                    onRobotMove(tapSelected, direction)
                                 }
                             }
                         }
@@ -1700,9 +2137,10 @@ fun BoardCanvas(
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = { offset ->
-                        val cellSize = min(size.width, size.height) / maxOf(board.width, board.height).toFloat()
-                        val offsetX = (size.width - board.width * cellSize) / 2
-                        val offsetY = (size.height - board.height * cellSize) / 2
+                        val dragBoard = gestureBoard
+                        val cellSize = min(size.width, size.height) / maxOf(dragBoard.width, dragBoard.height).toFloat()
+                        val offsetX = (size.width - dragBoard.width * cellSize) / 2
+                        val offsetY = (size.height - dragBoard.height * cellSize) / 2
 
                         // ACTION_DOWN logic from fragment-app
                         hasMovedRobotInCurrentGesture = false
@@ -1721,50 +2159,40 @@ fun BoardCanvas(
                         touchStartGridY = gridY
 
                         println("[UI] ACTION_DOWN - Start touch: ($startTouchX, $startTouchY), Grid: ($gridX, $gridY)")
-                        println("[UI] ACTION_DOWN - Robot positions: ${board.robotPositions.map { "${it % board.width},${it / board.width}" }}")
+                        println("[UI] ACTION_DOWN - Robot positions: ${dragBoard.robotPositions.map { "${it % dragBoard.width},${it / dragBoard.width}" }}")
 
-                        // Check if a robot was touched at the start (matching fragment-app)
-                        var foundRobot = false
-                        for (i in board.robotPositions.indices) {
-                            val position = board.robotPositions[i]
-                            val robotX = position % board.width
-                            val robotY = position / board.width
-                            val centerX = offsetX + robotX * cellSize + cellSize / 2
-                            val centerY = offsetY + robotY * cellSize + cellSize / 2
-                            val radius = cellSize * 0.35f
-
-                            println("[UI] ACTION_DOWN - Checking robot $i at ($robotX, $robotY), center: ($centerX, $centerY), radius: $radius, touch: ($startTouchX, $startTouchY)")
-
-                            if (offset.x >= centerX - radius && offset.x <= centerX + radius &&
-                                offset.y >= centerY - radius && offset.y <= centerY + radius) {
+                        // Check if a robot was touched at the start — cell-based hit
+                        // test matching Android GameGridView.getRobotAt(gridX, gridY)
+                        touchedRobot = null
+                        for (i in dragBoard.robotPositions.indices) {
+                            val position = dragBoard.robotPositions[i]
+                            if (position % dragBoard.width == gridX && position / dragBoard.width == gridY) {
                                 touchedRobot = i
-                                foundRobot = true
-                                println("[UI] ACTION_DOWN - Robot $i touched at ($robotX, $robotY)")
+                                println("[UI] ACTION_DOWN - Robot $i touched at ($gridX, $gridY)")
                                 // Notify parent that a robot was selected (for scale animation)
                                 onRobotSelected(i)
                                 break
                             }
                         }
-                        // If no robot was found, ensure touchedRobot is null (matching fragment-app)
-                        if (!foundRobot) {
-                            touchedRobot = null
+                        if (touchedRobot == null) {
                             println("[UI] ACTION_DOWN - No robot touched")
                         }
                     },
                     onDrag = { change, dragAmount ->
-                        val cellSize = min(size.width, size.height) / maxOf(board.width, board.height).toFloat()
-                        val offsetX = (size.width - board.width * cellSize) / 2
-                        val offsetY = (size.height - board.height * cellSize) / 2
+                        val dragBoard = gestureBoard
+                        val cellSize = min(size.width, size.height) / maxOf(dragBoard.width, dragBoard.height).toFloat()
+                        val offsetX = (size.width - dragBoard.width * cellSize) / 2
+                        val offsetY = (size.height - dragBoard.height * cellSize) / 2
                         val gridX = ((change.position.x - offsetX) / cellSize).toInt()
                         val gridY = ((change.position.y - offsetY) / cellSize).toInt()
 
                         // ACTION_MOVE logic from fragment-app
                         // Check if we just moved over a robot and none was selected before
                         var robotAtCurrentPos: Int? = null
-                        for (i in board.robotPositions.indices) {
-                            val position = board.robotPositions[i]
-                            val robotX = position % board.width
-                            val robotY = position / board.width
+                        for (i in dragBoard.robotPositions.indices) {
+                            val position = dragBoard.robotPositions[i]
+                            val robotX = position % dragBoard.width
+                            val robotY = position / dragBoard.width
                             if (robotX == gridX && robotY == gridY) {
                                 robotAtCurrentPos = i
                                 break
@@ -2088,6 +2516,51 @@ fun BoardCanvas(
                 cellSize * robotScale,
                 cellSize * robotScale
             )
+        }
+
+        // 7. Hint direction arrow next to the hinted robot (Android GameGridView.drawHintArrow)
+        if (hintRobotColor >= 0 && hintDirection >= 0 && hintRobotColor in board.robotPositions.indices) {
+            val hintPos = board.robotPositions[hintRobotColor]
+            val robotX = hintPos % board.width
+            val robotY = hintPos / board.width
+            val cx = offsetX + robotX * cellSize + cellSize / 2f
+            val cy = offsetY + robotY * cellSize + cellSize / 2f
+            val r = cellSize * 0.28f   // triangle size (matches Android)
+            val gap = cellSize * 0.9f  // distance from robot center to triangle center
+            val arrowColor = when (hintRobotColor) {
+                0 -> Color(0xDCFF69B4.toInt()) // pink (red)
+                1 -> Color(0xDC00B100.toInt()) // green
+                2 -> Color(0xDC0000FF.toInt()) // blue
+                3 -> Color(0xDCB1B100.toInt()) // yellow
+                4 -> Color(0xDCC0C0C0.toInt()) // silver
+                else -> Color(0xDCFFFFFF.toInt())
+            }
+            val tri = androidx.compose.ui.graphics.Path()
+            // Board direction encoding: NORTH=0, EAST=1, SOUTH=2, WEST=3
+            when (hintDirection) {
+                driftingdroids.model.Board.EAST -> { // right
+                    tri.moveTo(cx + gap + r, cy)
+                    tri.lineTo(cx + gap - r, cy - r)
+                    tri.lineTo(cx + gap - r, cy + r)
+                }
+                driftingdroids.model.Board.WEST -> { // left
+                    tri.moveTo(cx - gap - r, cy)
+                    tri.lineTo(cx - gap + r, cy - r)
+                    tri.lineTo(cx - gap + r, cy + r)
+                }
+                driftingdroids.model.Board.NORTH -> { // up
+                    tri.moveTo(cx, cy - gap - r)
+                    tri.lineTo(cx - r, cy - gap + r)
+                    tri.lineTo(cx + r, cy - gap + r)
+                }
+                driftingdroids.model.Board.SOUTH -> { // down
+                    tri.moveTo(cx, cy + gap + r)
+                    tri.lineTo(cx - r, cy + gap - r)
+                    tri.lineTo(cx + r, cy + gap - r)
+                }
+            }
+            tri.close()
+            drawPath(tri, arrowColor)
         }
 
         // Note: Ghost robots (semi-transparent start positions) are NOT drawn.

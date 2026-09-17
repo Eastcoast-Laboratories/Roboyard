@@ -13,4 +13,9 @@ object StringProviderBridge {
     fun setStringProvider(provider: StringProvider) {
         setStringProviderKt(provider)
     }
+
+    @JvmStatic
+    fun getStringProvider(): StringProvider {
+        return roboyard.logic.ui.getStringProvider()
+    }
 }

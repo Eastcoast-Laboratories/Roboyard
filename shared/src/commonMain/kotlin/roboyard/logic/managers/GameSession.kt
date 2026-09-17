@@ -1440,6 +1440,24 @@ class GameSession(
         return robot
     }
 
+    /**
+     * Find and select a robot matching the color of the first target —
+     * Android GameFragment.selectRobotWithTargetColor, called when the game
+     * screen is shown (onViewCreated/onResume), independent of accessibility mode.
+     * @return true if a matching robot was found and selected
+     */
+    fun selectRobotWithTargetColor(): Boolean {
+        val state = _currentState.value ?: return false
+        val target = state.gameElements.firstOrNull { it.type == GameElement.TYPE_TARGET }
+            ?: return false
+        val robot = state.gameElements.firstOrNull {
+            it.isRobot && it.color == target.color
+        } ?: return false
+        state.setSelectedRobot(robot)
+        emitState(state)
+        return true
+    }
+
     /** The currently selected robot element, or null. */
     fun getSelectedRobot(): GameElement? {
         return _currentState.value?.getSelectedRobot()

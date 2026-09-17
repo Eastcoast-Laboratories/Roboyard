@@ -2477,173 +2477,18 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
      * Announce the possible moves for the selected robot in each direction
      * @param robot The selected robot
      */
+    /**
+     * Announce possible moves for a robot (delegates to shared implementation — DRY).
+     * Kept public: called from GameGridView after moves.
+     */
     public void announcePossibleMoves(GameElement robot) {
-        if (robot == null) {
-            return;
-        }
-        
-        Timber.d("Announcing possible moves for %s robot", getLocalizedRobotColorNameByGridElement(robot));
-        
         GameState state = gameStateManager.getCurrentState().getValue();
-        if (state == null) {
-            return;
+        String message = roboyard.logic.core.BoardUtilsKt.buildPossibleMovesAnnouncement(
+                state, robot, roboyard.platform.StringProviderBridge.getStringProvider(),
+                color -> getLocalizedRobotColorName(color));
+        if (message != null) {
+            announceAccessibility(message);
         }
-        
-        int x = robot.x;
-        int y = robot.y;
-        
-        // Build the announcement message with detailed information about possible moves
-        StringBuilder announcement = new StringBuilder();
-        announcement.append(getString(R.string.possible_moves_a11y)).append(": ");
-        
-        // Check east movement (right)
-        int eastDistance = 0;
-        String eastObstacle = getString(R.string.edge_a11y);
-        int obstacleX = x;
-        for (int i = x + 1; i < state.width; i++) {
-            if (state.canRobotMoveTo(robot, i, y)) {
-                eastDistance++;
-                obstacleX = i;
-            } else {
-                // Found an obstacle
-                GameElement robotAtPosition = state.getRobotAt(i, y);
-                if (robotAtPosition != null) {
-                    eastObstacle = getLocalizedRobotColorNameByGridElement(robotAtPosition);
-                    
-                    // Check if the robot is at its target
-                    if (state.isRobotAtTarget(robotAtPosition)) {
-                        eastObstacle += " " + getString(R.string.target_reached_a11y);
-                    }
-                } else {
-                    eastObstacle = getString(R.string.wall_a11y);
-                }
-                break;
-            }
-        }
-        if (eastDistance > 0) {
-            String untilString;
-            if (eastObstacle.equals(getString(R.string.edge_a11y))) {
-                untilString = getString(R.string.until_masculine);
-            } else if (eastObstacle.equals(getString(R.string.wall_a11y))) {
-                untilString = getString(R.string.until_feminine);
-            } else {
-                untilString = getString(R.string.until);
-            }
-            announcement.append(eastDistance).append(" ").append(getString(R.string.squares_east)).append(" ").append(untilString).append(" ").append(eastObstacle).append(", ");
-        } else {
-            announcement.append(getString(R.string.no_movement_east)).append(", ");
-        }
-        
-        // Check west movement (left)
-        int westDistance = 0;
-        String westObstacle = getString(R.string.edge_a11y);
-        for (int i = x - 1; i >= 0; i--) {
-            if (state.canRobotMoveTo(robot, i, y)) {
-                westDistance++;
-            } else {
-                // Found an obstacle
-                GameElement robotAtPosition = state.getRobotAt(i, y);
-                if (robotAtPosition != null) {
-                    westObstacle = getLocalizedRobotColorNameByGridElement(robotAtPosition);
-                    
-                    // Check if the robot is at its target
-                    if (state.isRobotAtTarget(robotAtPosition)) {
-                        westObstacle += " " + getString(R.string.target_reached_a11y);
-                    }
-                } else {
-                    westObstacle = getString(R.string.wall_a11y);
-                }
-                break;
-            }
-        }
-        if (westDistance > 0) {
-            String untilString;
-            if (westObstacle.equals(getString(R.string.edge_a11y))) {
-                untilString = getString(R.string.until_masculine);
-            } else if (westObstacle.equals(getString(R.string.wall_a11y))) {
-                untilString = getString(R.string.until_feminine);
-            } else {
-                untilString = getString(R.string.until);
-            }
-            announcement.append(westDistance).append(" ").append(getString(R.string.squares_west)).append(" ").append(untilString).append(" ").append(westObstacle).append(", ");
-        } else {
-            announcement.append(getString(R.string.no_movement_west)).append(", ");
-        }
-        
-        // Check north movement (up)
-        int northDistance = 0;
-        String northObstacle = getString(R.string.edge_a11y);
-        for (int i = y - 1; i >= 0; i--) {
-            if (state.canRobotMoveTo(robot, x, i)) {
-                northDistance++;
-            } else {
-                // Check if we hit a robot or a wall
-                GameElement robotAtPosition = state.getRobotAt(x, i);
-                if (robotAtPosition != null) {
-                    northObstacle = getLocalizedRobotColorNameByGridElement(robotAtPosition);
-                    
-                    // Check if the robot is at its target
-                    if (state.isRobotAtTarget(robotAtPosition)) {
-                        northObstacle += " " + getString(R.string.target_reached_a11y);
-                    }
-                } else {
-                    northObstacle = getString(R.string.wall_a11y);
-                }
-                break;
-            }
-        }
-        if (northDistance > 0) {
-            String untilString;
-            if (northObstacle.equals(getString(R.string.edge_a11y))) {
-                untilString = getString(R.string.until_masculine);
-            } else if (northObstacle.equals(getString(R.string.wall_a11y))) {
-                untilString = getString(R.string.until_feminine);
-            } else {
-                untilString = getString(R.string.until);
-            }
-            announcement.append(northDistance).append(" ").append(getString(R.string.squares_north)).append(" ").append(untilString).append(" ").append(northObstacle).append(", ");
-        } else {
-            announcement.append(getString(R.string.no_movement_north)).append(", ");
-        }
-        
-        // Check south movement (down)
-        int southDistance = 0;
-        String southObstacle = getString(R.string.edge_a11y);
-        for (int i = y + 1; i < state.height; i++) {
-            if (state.canRobotMoveTo(robot, x, i)) {
-                southDistance++;
-            } else {
-                // Check if we hit a robot or a wall
-                GameElement robotAtPosition = state.getRobotAt(x, i);
-                if (robotAtPosition != null) {
-                    southObstacle = getLocalizedRobotColorNameByGridElement(robotAtPosition);
-                    
-                    // Check if the robot is at its target
-                    if (state.isRobotAtTarget(robotAtPosition)) {
-                        southObstacle += " " + getString(R.string.target_reached_a11y);
-                    }
-                } else {
-                    southObstacle = getString(R.string.wall_a11y);
-                }
-                break;
-            }
-        }
-        if (southDistance > 0) {
-            String untilString;
-            if (southObstacle.equals(getString(R.string.edge_a11y))) {
-                untilString = getString(R.string.until_masculine);
-            } else if (southObstacle.equals(getString(R.string.wall_a11y))) {
-                untilString = getString(R.string.until_feminine);
-            } else {
-                untilString = getString(R.string.until);
-            }
-            announcement.append(southDistance).append(" ").append(getString(R.string.squares_south)).append(" ").append(untilString).append(" ").append(southObstacle).append(".");
-        } else {
-            announcement.append(getString(R.string.no_movement_south));
-        }
-        
-        // Announce the message
-        announceAccessibility(announcement.toString());
     }
     
     /**
