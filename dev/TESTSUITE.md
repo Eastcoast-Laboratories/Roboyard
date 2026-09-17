@@ -297,6 +297,7 @@ python3 history_info_button_headed_test.py
 |------|--------|-------------|------|
 | `random_game_test.py` | ✅ Passing | Starts ComposeApp, clicks "New Random Game", parses robot positions and solver solution from log, executes first move, verifies history update. | compose, desktop, pyautogui, headed, random-game, mouse, drag |
 | `history_info_button_headed_test.py | ✅ Passing | Starts ComposeApp, clicks "Level Game", selects Level 1, moves robots to complete level, verifies completion dialog, navigates to history, clicks info button, verifies bestTime/bestMoves. | compose, desktop, pyautogui, headed, level-game, history, mouse, drag |
+| `help_scroll_test.py` | ✅ Passing | Starts ComposeApp, opens Help screen (verifies `[HELP] Opened`), performs a held mouse drag and mouse wheel, asserts live `[AWT_SCROLL]` deltas and positive scroll values during the drag (not only at release), and screenshot-compares the content region. Diagnoses the desktop drag-event batching workaround. | compose, desktop, pyautogui, headed, scroll, help, mouse, drag, wheel |
 
 ### Non-UI Instrumented Tests
 

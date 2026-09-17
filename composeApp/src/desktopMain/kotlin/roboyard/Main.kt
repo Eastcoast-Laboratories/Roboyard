@@ -75,6 +75,46 @@ fun main(args: Array<String>) = application {
         title = "Roboyard",
         state = windowState
     ) {
+        // Desktop drag-scroll driver: this runtime does not deliver pointer
+        // move events to Compose handlers while a mouse button is held —
+        // they arrive coalesced at release. Raw AWT MOUSE_DRAGGED events do
+        // arrive continuously, so we apply drag deltas to the ScrollState
+        // that the pressed scrollable registered in DesktopDragScroll, and
+        // force a synchronous repaint so the content moves visibly per event.
+        androidx.compose.runtime.DisposableEffect(Unit) {
+            var lastY: Int? = null
+            val awtListener = java.awt.event.AWTEventListener { e ->
+                if (e !is java.awt.event.MouseEvent) return@AWTEventListener
+                when (e.id) {
+                    java.awt.event.MouseEvent.MOUSE_PRESSED -> lastY = e.y
+                    java.awt.event.MouseEvent.MOUSE_DRAGGED -> {
+                        val state = roboyard.ui.compose.DesktopDragScroll.activeState
+                        val y = e.y
+                        val prev = lastY
+                        lastY = y
+                        if (state != null && prev != null && y != prev) {
+                            val consumed = state.dispatchRawDelta(-(y - prev).toFloat())
+                            if (consumed != 0f) {
+                                println("[AWT_SCROLL] dy=${y - prev} scroll=${state.value}")
+                                (e.component as? javax.swing.JComponent)
+                                    ?.paintImmediately(0, 0, e.component.width, e.component.height)
+                            }
+                        }
+                    }
+                    java.awt.event.MouseEvent.MOUSE_RELEASED -> {
+                        lastY = null
+                        roboyard.ui.compose.DesktopDragScroll.activeState = null
+                    }
+                }
+            }
+            java.awt.Toolkit.getDefaultToolkit().addAWTEventListener(
+                awtListener,
+                java.awt.AWTEvent.MOUSE_EVENT_MASK or java.awt.AWTEvent.MOUSE_MOTION_EVENT_MASK
+            )
+            onDispose {
+                java.awt.Toolkit.getDefaultToolkit().removeAWTEventListener(awtListener)
+            }
+        }
         // Android parity: SoundService pauses background music when the app
         // loses focus (Activity onPause) and resumes on onResume
         androidx.compose.runtime.DisposableEffect(windowState) {

@@ -31,6 +31,7 @@ fun HelpScreen(
     val stringProvider = getStringProvider()
     fun s(key: String, fallback: String): String =
         stringProvider.getString(key) ?: fallback
+    androidx.compose.runtime.LaunchedEffect(Unit) { println("[HELP] Opened") }
 
     Column(
         modifier = Modifier
