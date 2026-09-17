@@ -67,3 +67,5 @@
 26-09-17 14:20 "When changing the effects level in Settings, a green robot-wall sound should be played once at the new volume."
 26-09-17 14:35 "Increase the Compose app version number to 60, then create a build script for iOS with the new Compose app, for Desktop, and for the Compose app as an Android APK — if possible in one sh script, with options, defaulting to all three; they should be published in three subfolders in the Downloads folder, with Roboyard, version number, and platform in the filename."
 26-09-17 16:50 "Remember: do not call the Android app 'Legacy' — it is still being actively developed."
+26-09-17 17:10 "It works, but the whole display must be filled with black bars on the right and left as long as we have no landscape layout, so that the visible width is at most height x 0.7."
+26-09-17 17:15 "No, the height should be stretchable as before — only in width may black bars appear on the right and left."
