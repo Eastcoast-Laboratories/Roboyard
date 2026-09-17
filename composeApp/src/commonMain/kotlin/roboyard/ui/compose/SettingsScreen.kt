@@ -325,6 +325,11 @@ fun SettingsScreen(
                 Slider(
                     value = settings.soundEffectsVolume.toFloat(),
                     onValueChange = { settings = SettingsManager.setSoundEffectsVolume(it.roundToInt()) },
+                    onValueChangeFinished = {
+                        // Android parity: playSfxPreview plays once when the
+                        // drag ends — green robot wall sound at the new volume
+                        getSoundManager().playSound("preview")
+                    },
                     valueRange = 0f..100f,
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
