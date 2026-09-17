@@ -9,6 +9,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -444,19 +445,25 @@ fun LevelDesignEditorScreen(
         s("editor_pattern_scatter", "Scatter")
     )
 
-    Column(
+    // Explicit shared scroll state so a visible VerticalScrollbar can be
+    // attached — on Desktop, mouse drags do not scroll the content
+    val editorScrollState = rememberScrollState()
+    androidx.compose.runtime.LaunchedEffect(editorScrollState.value) {
+        if (editorScrollState.value > 0) {
+            println("[LEVEL_EDITOR] Scrolled to ${editorScrollState.value}/${editorScrollState.maxValue}")
+        }
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
             .padding(8.dp)
     ) {
-        // Explicit shared scroll state so a visible VerticalScrollbar can be
-        // attached — on Desktop, mouse drags do not scroll the content
-        val editorScrollState = rememberScrollState()
-        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .padding(end = 12.dp)
                 .verticalScroll(editorScrollState)
         ) {
             // Title + current map name
@@ -530,7 +537,7 @@ fun LevelDesignEditorScreen(
             }
 
             // Edit mode radio group
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            FlowRow(modifier = Modifier.fillMaxWidth()) {
                 listOf(
                     EDIT_MODE_ROBOT to s("editor_mode_robot", "Robot"),
                     EDIT_MODE_TARGET to s("editor_mode_target", "Goal"),
@@ -661,19 +668,17 @@ fun LevelDesignEditorScreen(
                     modifier = Modifier.weight(1f).padding(2.dp).height(44.dp)
                 )
             }
+            FancyButton(
+                text = "◂ " + s("back_button", "Back"),
+                color = FancyButtonColor.GRAY,
+                onClick = onBack,
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp).height(44.dp)
+            )
         }
 
         androidx.compose.foundation.VerticalScrollbar(
             adapter = androidx.compose.foundation.rememberScrollbarAdapter(editorScrollState),
             modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight()
-        )
-        }
-
-        FancyButton(
-            text = "◂ " + s("back_button", "Back"),
-            color = FancyButtonColor.GRAY,
-            onClick = onBack,
-            modifier = Modifier.fillMaxWidth().padding(top = 4.dp).height(44.dp)
         )
     }
 
@@ -961,7 +966,7 @@ private fun EditorColorRow(
     selected: Int,
     onSelect: (Int) -> Unit
 ) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    FlowRow(modifier = Modifier.fillMaxWidth()) {
         colors.forEach { (color, name) ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
