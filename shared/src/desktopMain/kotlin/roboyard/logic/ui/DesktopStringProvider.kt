@@ -35,6 +35,9 @@ object DesktopStringProvider : StringProvider {
     private fun parseJson(content: String, result: MutableMap<String, Map<String, String>>) {
         var i = 0
         val len = content.length
+        // Skip everything up to and including the root object's opening brace
+        while (i < len && content[i] != '{') i++
+        i++
         while (i < len) {
             val langKey = readString(content, i) ?: return
             i = langKey.second
