@@ -64,3 +64,5 @@
 26-09-17 13:25 "The copyright icon in the credits button in the main menu must be a bit higher; the icons inside the other three bottom buttons are correct. But the bottom buttons should all be a bit bigger with a small padding built in, except for the credits button."
 26-09-17 13:40 "When pressing Next Level, the drawn robot trails are not cleared yet."
 26-09-17 14:10 "The sound setting in Settings still has no effect — lowering the background volume should make it quieter, likewise the robot sounds."
+26-09-17 14:20 "When changing the effects level in Settings, a green robot-wall sound should be played once at the new volume."
+26-09-17 14:35 "Increase the Compose app version number to 60, then create a build script for iOS with the new Compose app, for Desktop, and for the Compose app as an Android APK — if possible in one sh script, with options, defaulting to all three; they should be published in three subfolders in the Downloads folder, with Roboyard, version number, and platform in the filename."

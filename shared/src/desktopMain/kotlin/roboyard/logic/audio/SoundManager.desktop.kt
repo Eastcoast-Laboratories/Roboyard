@@ -43,7 +43,10 @@ class DesktopSoundManager : SoundManager {
     }
 
     override fun playSound(soundId: String, attackerRobotId: Int, targetRobotId: Int) {
-        if (!isSoundEnabled()) return
+        // "preview" bypasses the enabled gate — the settings volume preview
+        // must stay audible while game sounds are off (Android parity:
+        // playSfxPreview uses MediaPlayer directly, no enabled check)
+        if (soundId != "preview" && !isSoundEnabled()) return
         val resourceName = resolveSoundName(soundId, attackerRobotId, targetRobotId) ?: return
         val decoded = load(resourceName) ?: run {
             System.err.println("[SOUND] Missing sound resource: $resourceName")
@@ -77,6 +80,7 @@ class DesktopSoundManager : SoundManager {
             "hit_wall", "lose" -> "robot_hit_wall"
             "hit_robot" -> "robot_hit_robot"
             "win" -> "robot_win"
+            "preview" -> "robot_1_hit_wall" // green robot wall sound (settings preview)
             "none" -> null
             else -> {
                 System.err.println("[SOUND] Unknown sound type: $soundId")
