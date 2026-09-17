@@ -448,6 +448,9 @@ fun LevelDesignEditorScreen(
     // Explicit shared scroll state so a visible VerticalScrollbar can be
     // attached — on Desktop, mouse drags do not scroll the content
     val editorScrollState = rememberScrollState()
+    androidx.compose.runtime.LaunchedEffect(editorScrollState.maxValue) {
+        println("[LEVEL_EDITOR] Scroll range: 0/${editorScrollState.maxValue}")
+    }
     androidx.compose.runtime.LaunchedEffect(editorScrollState.value) {
         if (editorScrollState.value > 0) {
             println("[LEVEL_EDITOR] Scrolled to ${editorScrollState.value}/${editorScrollState.maxValue}")
@@ -459,6 +462,7 @@ fun LevelDesignEditorScreen(
             .fillMaxSize()
             .background(Color.Black)
             .padding(8.dp)
+            .desktopScrollable(editorScrollState)
     ) {
         Column(
             modifier = Modifier

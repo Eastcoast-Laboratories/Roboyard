@@ -14,6 +14,8 @@ What this test verifies:
 - Robot can be moved by tap-select + tap on empty cell in the same row/column
 - The "Level Design Editor" button in the main menu opens the editor screen
   (verified via the editor's log marker and a changed screenshot)
+- The editor content scrolls vertically so lower controls are reachable
+  (verified via the "[LEVEL_EDITOR] Scrolled to N/max" log marker)
 """
 
 import sys
@@ -92,6 +94,23 @@ def _probe(sx, sy):
     return None
 
 
+ROBOTS_RE = re.compile(r"ACTION_DOWN - Robot positions: \[([^\]]+)\]")
+
+
+def current_robot_positions():
+    """Robots as the app currently sees them: the most recent
+    'ACTION_DOWN - Robot positions: [x,y, ...]' line. Needed because probe
+    drags can register as taps and move a selected robot."""
+    content = log_content()
+    last = None
+    for m in ROBOTS_RE.finditer(content):
+        last = m
+    if not last:
+        return None
+    coords = re.findall(r"(\d+),(\d+)", last.group(1))
+    return [(int(x), int(y)) for x, y in coords]
+
+
 def calibrate_board():
     """Two probe drags -> solve the affine screen->canvas transform, then
     return a function mapping board grid cells to screen coordinates."""
@@ -160,11 +179,15 @@ def main():
     time.sleep(2)  # let the board fully render
     take_screenshot("gf_1_game.png")
 
-    # Calibrate the screen->canvas transform via probe drags
+    # Calibrate the screen->canvas transform via probe drags.
+    # Probes may register as taps and move a selected robot, so re-read
+    # the robot positions from the app's own ACTION_DOWN log afterwards.
     board_box = calibrate_board()
     if not board_box:
         print("[TEST] FAIL: could not calibrate board coordinates")
         sys.exit(1)
+    robots = current_robot_positions() or robots
+    print(f"[TEST] Robots after calibration: {robots}")
 
     # Marker: current log length, so we only inspect NEW output
     log_len_before = len(log_content())
@@ -190,16 +213,17 @@ def main():
     else:
         print("[TEST] PASS: drag initiated a move")
 
-    # Tap-to-move: tap robot, then tap an empty cell in its row
+    # Tap-to-move: tap robot, then tap an empty cell in its row.
+    # Re-read positions — the drag may already have moved robot 0.
     log_len_before = len(log_content())
-    board2 = parse_board_and_robots(log_content())
-    robots2 = board2[2] if board2 else robots
+    robots2 = current_robot_positions() or robots
     rx, ry = robots2[0]
     tapx, tapy = cell_to_screen(rx, ry, board_box)
     print(f"[TEST] Step 3: tap robot 0 at ({tapx},{tapy})")
     click_at_coordinates(tapx, tapy, "tap robot 0", wait=0.4)
-    # Tap an empty cell on the same row
-    empty_x = bw - 1 if rx < bw - 2 else 0
+    # Tap an empty cell on the same row (stay inside the board: column 1,
+    # the outer ring is wall)
+    empty_x = 1 if rx != 1 else 2
     ex, ey = cell_to_screen(empty_x, ry, board_box)
     click_at_coordinates(ex, ey, "tap empty cell same row", wait=0.8)
     new_log = log_content()[log_len_before:]
@@ -230,6 +254,24 @@ def main():
         print("[TEST] FAIL: editor log marker missing after button click")
     else:
         print("[TEST] PASS: level editor opened")
+
+    # Scroll the editor content — lower controls must be reachable
+    if editor_opened:
+        import pyautogui
+        log_len_before = len(log_content())
+        b = test_suite.WINDOW_BOUNDS
+        pyautogui.moveTo(b["x"] + int(b["width"] * 0.5),
+                         b["y"] + int(b["height"] * 0.5))
+        pyautogui.scroll(-12)
+        time.sleep(1.5)
+        take_screenshot("gf_5_editor_scrolled.png")
+        m = re.search(r"\[LEVEL_EDITOR\] Scrolled to (\d+)/",
+                      log_content()[log_len_before:])
+        if m and int(m.group(1)) > 0:
+            print(f"[TEST] PASS: level editor scrolled to {m.group(1)}")
+        else:
+            FAILED.append("level editor did not scroll")
+            print("[TEST] FAIL: no positive 'Scrolled to' marker after wheel scroll")
 
     print("\n[TEST] ===== RESULT =====")
     if FAILED:

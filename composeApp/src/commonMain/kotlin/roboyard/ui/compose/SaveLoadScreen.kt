@@ -260,7 +260,7 @@ fun SaveLoadScreen(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
+                .desktopVerticalScroll()
                 .padding(top = 8.dp)
         ) {
             if (selectedTab == 1) {

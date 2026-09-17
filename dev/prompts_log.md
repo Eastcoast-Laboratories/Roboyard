@@ -45,3 +45,4 @@
 26-09-17 10:58 "Scrolling still does not work; I tested it myself. Also, the word 'Wall' must be removed from both radio buttons, otherwise Erase no longer fits within the width."
 26-09-17 10:58 "The Red, Green, ... Silver buttons must wrap when they do not fit within the width, as must the radio buttons above them."
 26-09-17 10:58 "Scrolling still does not work; I interrupted it earlier. Fix it first, then test again."
+26-09-17 11:05 "I interrupted. The radio-button positions are correct, but scrolling still does not work."

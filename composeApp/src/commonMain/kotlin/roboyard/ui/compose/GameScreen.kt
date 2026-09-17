@@ -1736,11 +1736,11 @@ fun GameScreen(
                 Box(modifier = Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.Center) {
                     boardArea(boardModifier)
                 }
-                Column(modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState())) {
+                Column(modifier = Modifier.weight(1f).fillMaxHeight().desktopVerticalScroll()) {
                     controlsArea()
                 }
             } else {
-                Column(modifier = Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState())) {
+                Column(modifier = Modifier.weight(1f).fillMaxHeight().desktopVerticalScroll()) {
                     controlsArea()
                 }
                 Box(modifier = Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.Center) {
