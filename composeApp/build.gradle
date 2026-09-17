@@ -5,6 +5,9 @@ plugins {
     id 'com.android.kotlin.multiplatform.library'
 }
 
+// Version of the Compose Multiplatform app (mirrors composeAndroidApp versionName)
+version = '60'
+
 kotlin {
     jvmToolchain(17)
 
@@ -19,9 +22,12 @@ kotlin {
 
     jvm("desktop")
 
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
+    [iosX64(), iosArm64(), iosSimulatorArm64()].each { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = 'Roboyard'
+            isStatic = false
+        }
+    }
 
     sourceSets {
         commonMain {
@@ -67,5 +73,8 @@ kotlin {
 compose.desktop {
     application {
         mainClass = 'roboyard.MainKt'
+        nativeDistributions {
+            packageVersion = '60'
+        }
     }
 }
