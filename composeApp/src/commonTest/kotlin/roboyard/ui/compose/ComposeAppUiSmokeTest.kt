@@ -5,6 +5,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.junit4.createComposeRule
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -19,13 +20,20 @@ class ComposeAppUiSmokeTest {
     @get:Rule
     val composeRule = createComposeRule()
 
+    @Before
+    fun setUp() {
+        // Assertions check English strings; without a stored preference the
+        // provider now falls back to the system locale (de on this machine)
+        roboyard.logic.core.Preferences.appLanguage = "en"
+    }
+
     @Test
     fun testMainMenuVisible() {
         composeRule.setContent { App() }
 
-        // Main menu should show its three primary buttons
-        composeRule.onNodeWithText("New Random Game").assertExists()
-        composeRule.onNodeWithText("Level Game").assertExists()
+        // Main menu should show its three primary buttons (Android strings: Play / Levels / Load Game)
+        composeRule.onNodeWithText("Play").assertExists()
+        composeRule.onNodeWithText("Levels").assertExists()
         composeRule.onNodeWithText("Load Game").assertExists()
     }
 
@@ -33,7 +41,7 @@ class ComposeAppUiSmokeTest {
     fun testNavigateToLevelSelection() {
         composeRule.setContent { App() }
 
-        composeRule.onNodeWithText("Level Game").performClick()
+        composeRule.onNodeWithText("Levels").performClick()
         composeRule.waitForIdle()
 
         // Level selection screen should show its title
@@ -62,13 +70,11 @@ class ComposeAppUiSmokeTest {
         composeRule.waitForIdle()
 
         // Should be back at main menu
-        composeRule.onNodeWithText("New Random Game").assertExists()
+        composeRule.onNodeWithText("Play").assertExists()
     }
 
     @Test
     fun testNavigateToSettingsShowsFullSettings() {
-        roboyard.logic.core.Preferences.appLanguage = "en"
-
         composeRule.setContent { App() }
 
         composeRule.onNodeWithTag("settingsButton").performClick()
@@ -83,6 +89,6 @@ class ComposeAppUiSmokeTest {
 
         composeRule.onNodeWithTag("settingsBackButton").performClick()
         composeRule.waitForIdle()
-        composeRule.onNodeWithText("New Random Game").assertExists()
+        composeRule.onNodeWithText("Play").assertExists()
     }
 }

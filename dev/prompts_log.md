@@ -69,3 +69,4 @@
 26-09-17 16:50 "Remember: do not call the Android app 'Legacy' — it is still being actively developed."
 26-09-17 17:10 "It works, but the whole display must be filled with black bars on the right and left as long as we have no landscape layout, so that the visible width is at most height x 0.7."
 26-09-17 17:15 "No, the height should be stretchable as before — only in width may black bars appear on the right and left."
+26-09-17 17:35 "The multilingual support still does not work; everything is always displayed in English, regardless of what is selected in Settings."
