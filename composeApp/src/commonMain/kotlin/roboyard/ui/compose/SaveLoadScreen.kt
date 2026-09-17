@@ -47,6 +47,7 @@ import roboyard.logic.managers.GameHistoryManager
 import roboyard.logic.managers.GameSession
 import roboyard.logic.managers.ShareMapHelper
 import roboyard.logic.network.RoboyardApiClient
+import roboyard.logic.platform.openAutoLoginUrl
 import roboyard.logic.platform.openUrl
 import roboyard.logic.storage.PlatformStorage
 import roboyard.logic.storage.getPlatformStorage
@@ -923,7 +924,7 @@ private fun shareToAccount(
                 if (result.isDuplicate) "Map already exists"
                 else s("share_success", "Map shared successfully", emptyArray())
             )
-            result.shareUrl?.let { openUrl(apiClient.buildAutoLoginUrl(it)) }
+            result.shareUrl?.let { openAutoLoginUrl(apiClient.buildAutoLoginUrl(it)) }
         }
 
         override fun onError(error: String?) {
@@ -954,6 +955,6 @@ private fun shareViaUrl(
         return
     }
     val shareUrl = ShareMapHelper.buildShareUrl(apiClient.baseUrl, result.formattedData)
-    openUrl(apiClient.buildAutoLoginUrl(shareUrl))
+    openAutoLoginUrl(apiClient.buildAutoLoginUrl(shareUrl))
     onMessage("Opening share URL in browser")
 }

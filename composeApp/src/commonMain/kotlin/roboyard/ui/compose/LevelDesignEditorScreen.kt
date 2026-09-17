@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
+import roboyard.logic.platform.openAutoLoginUrl
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -98,6 +99,10 @@ fun LevelDesignEditorScreen(
     val uriHandler = LocalUriHandler.current
 
     fun s(key: String, fallback: String): String = stringProvider.getString(key) ?: fallback
+
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        println("[LEVEL_EDITOR] Opened")
+    }
 
     // ---- Editor state ----
     var currentState by remember { mutableStateOf<GameState?>(null) }
@@ -685,6 +690,56 @@ fun LevelDesignEditorScreen(
                             .fillMaxWidth()
                             .height(200.dp)
                     )
+                    // Save to Sourcecode — POST to the local level_receiver.py
+                    // (desktop loopback 127.0.0.1:8787; Android uses 10.0.2.2).
+                    // Button only visible when the receiver answers GET /ping.
+                    var receiverReachable by remember { mutableStateOf(false) }
+                    var savedToSource by remember { mutableStateOf(false) }
+                    androidx.compose.runtime.LaunchedEffect(Unit) {
+                        launch(Dispatchers.IO) {
+                            try {
+                                val (code, _) = roboyard.logic.network.PlatformHttp.request(
+                                    "GET", "http://127.0.0.1:8787/ping", emptyMap(), null
+                                )
+                                if (code == 200) receiverReachable = true
+                            } catch (_: Exception) {}
+                        }
+                    }
+                    if (receiverReachable) {
+                        FancyButton(
+                            text = if (savedToSource) "✓ Saved to Sourcecode"
+                                else "💾 " + s("editor_save_to_sourcecode", "Save to Sourcecode"),
+                            color = FancyButtonColor.BLUE,
+                            onClick = {
+                                scope.launch(Dispatchers.IO) {
+                                    try {
+                                        val escaped = levelText
+                                            .replace("\\", "\\\\").replace("\"", "\\\"")
+                                            .replace("\n", "\\n").replace("\r", "\\r")
+                                            .replace("\t", "\\t")
+                                        val body = "{\"level_id\":$currentLevelId,\"level_data\":\"$escaped\"}"
+                                        val (code, resp) = roboyard.logic.network.PlatformHttp.request(
+                                            "POST", "http://127.0.0.1:8787/save-level",
+                                            mapOf("Content-Type" to "application/json"), body
+                                        )
+                                        launch(Dispatchers.Main) {
+                                            if (code in 200..299) {
+                                                savedToSource = true
+                                                toast("Level $currentLevelId saved to sourcecode!")
+                                            } else {
+                                                toast("Save failed: $resp")
+                                            }
+                                        }
+                                    } catch (e: Exception) {
+                                        launch(Dispatchers.Main) {
+                                            toast("Connection failed. Is level_receiver.py running?")
+                                        }
+                                    }
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).height(40.dp)
+                        )
+                    }
                     FancyButton(
                         text = s("editor_copied_to_clipboard", "Copy to Clipboard"),
                         color = FancyButtonColor.BLUE,
@@ -725,7 +780,7 @@ fun LevelDesignEditorScreen(
                                         s("share_success", "Map shared successfully")
                                 )
                                 result.shareUrl?.let {
-                                    try { uriHandler.openUri(apiClient.buildAutoLoginUrl(it)) } catch (_: Exception) {}
+                                    openAutoLoginUrl(apiClient.buildAutoLoginUrl(it))
                                 }
                             }
 
@@ -738,7 +793,7 @@ fun LevelDesignEditorScreen(
                         if (shareName.isNotBlank()) {
                             url += "&name=" + URLEncoder.encode(shareName.trim(), "UTF-8")
                         }
-                        try { uriHandler.openUri(apiClient.buildAutoLoginUrl(url)) } catch (_: Exception) {}
+                        openAutoLoginUrl(apiClient.buildAutoLoginUrl(url))
                         toast(s("editor_opening_share_url", "Opening share URL in browser"))
                     }
                     showExportDialog = false

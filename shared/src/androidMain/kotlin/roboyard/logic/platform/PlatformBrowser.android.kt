@@ -21,3 +21,9 @@ actual fun openUrl(url: String): Boolean {
 
 /** Set by the app module (RoboyardApplication) so shared code can launch intents. */
 var appContextProvider: (() -> android.content.Context)? = null
+
+/**
+ * Android implementation: browser intents can only issue GET requests, so the
+ * pre-built GET auto-login URL is opened directly (unchanged behavior).
+ */
+actual fun openAutoLoginUrl(autoLoginUrl: String): Boolean = openUrl(autoLoginUrl)

@@ -16,3 +16,9 @@ actual fun openUrl(url: String): Boolean {
         false
     }
 }
+
+/**
+ * iOS implementation: browsers can only open GET URLs, so the pre-built
+ * auto-login URL is opened directly (same limitation as Android).
+ */
+actual fun openAutoLoginUrl(autoLoginUrl: String): Boolean = openUrl(autoLoginUrl)
