@@ -60,3 +60,6 @@
 26-09-17 12:30 "Do not run your own tests for now, just adjust the source code so it should work; I will test myself."
 26-09-17 12:50 "Unchanged! Fix the Help screen first; it has exactly the same issue. The content should scroll during dragging and the mouse wheel should also work. Continue now with a unit test so you can find this out yourself, initially only the Help screen. Do not stop until you successfully see the log messages and it is fixed. So you should test again; I will not do anything at the computer."
 26-09-17 13:10 "Everything works, commit message"
+26-09-17 13:20 "The copyright icon in the main menu button must be a bit higher; the icons inside the other three bottom buttons slightly smaller, but the button size should stay the same — so add padding."
+26-09-17 13:25 "The copyright icon in the credits button in the main menu must be a bit higher; the icons inside the other three bottom buttons are correct. But the bottom buttons should all be a bit bigger with a small padding built in, except for the credits button."
+26-09-17 13:40 "When pressing Next Level, the drawn robot trails are not cleared yet."

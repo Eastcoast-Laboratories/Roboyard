@@ -347,6 +347,9 @@ class GameSession(
         resetGameTimer()
         startGameTimer()
 
+        // New game starts with no moves — clear robot trail history
+        pathHistory.clear()
+
         // Create a new valid game (will regenerate if solution is too simple)
         createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight)
 
@@ -400,6 +403,11 @@ class GameSession(
         currentSolutionStep = 0
         loadedSolutions = null
         preCompRobotOrder.clear()
+
+        // A new level starts with no moves — drop the previous game's path
+        // history so UIs do not redraw stale robot trails (Android clears it
+        // via GameGridView.clearRobotPaths on every level change)
+        pathHistory.clear()
 
         // Load level: custom level file in private storage takes precedence over
         // bundled assets (custom_level_N.txt is written by the level editor).
@@ -2833,6 +2841,7 @@ class GameSession(
         setGameComplete(false)
         stateHistory.clear()
         squaresMovedHistory.clear()
+        pathHistory.clear()
         clearNextMovesCache()
         isCompletionRecorded = false
     }
