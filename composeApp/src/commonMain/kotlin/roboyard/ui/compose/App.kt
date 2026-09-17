@@ -1,8 +1,12 @@
 package roboyard.ui.compose
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -94,7 +98,14 @@ fun App(
     }
 
     MaterialTheme {
-        Surface(modifier = Modifier.fillMaxSize()) {
+        // No landscape layout yet: keep the visible area portrait
+        // (width <= height * 0.7) and fill the sides with black bars
+        BoxWithConstraints(
+            modifier = Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color.Black),
+            contentAlignment = androidx.compose.ui.Alignment.Center
+        ) {
+        val contentWidth = minOf(maxWidth, maxHeight * 0.7f)
+        Surface(modifier = Modifier.fillMaxHeight().width(contentWidth)) {
             when (currentScreen) {
                 Screen.MainMenu -> MainMenuScreen(
                     session = session,
@@ -331,6 +342,7 @@ fun App(
                     )
                 }
             }
+        }
         }
     }
 }
