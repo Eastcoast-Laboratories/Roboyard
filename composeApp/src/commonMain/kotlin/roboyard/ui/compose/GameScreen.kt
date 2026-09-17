@@ -12,7 +12,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -69,6 +70,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
@@ -2064,7 +2066,9 @@ fun BoardCanvas(
                     onTap = { offset ->
                         val tapBoard = gestureBoard
                         val tapSelected = gestureSelectedRobot
-                        val cellSize = min(size.width, size.height) / maxOf(tapBoard.width, tapBoard.height).toFloat()
+                        // Android GameGridView.onMeasure: cellSize = min(cellWidth, cellHeight)
+                        // so the board always fills the full canvas extent
+                        val cellSize = min(size.width / tapBoard.width, size.height / tapBoard.height).toFloat()
                         val offsetX = (size.width - tapBoard.width * cellSize) / 2
                         val offsetY = (size.height - tapBoard.height * cellSize) / 2
                         val gridX = ((offset.x - offsetX) / cellSize).toInt()
@@ -2135,10 +2139,17 @@ fun BoardCanvas(
                 )
             }
             .pointerInput(Unit) {
-                detectDragGestures(
-                    onDragStart = { offset ->
+                // Raw touch handling matching Android GameGridView.onTouchEvent:
+                // awaitFirstDown reports the true ACTION_DOWN position, whereas
+                // detectDragGestures.onDragStart only fires after the touch slop
+                // is crossed and reports a slop-shifted position (which pushed
+                // the robot hit test off by up to a full cell).
+                awaitEachGesture {
+                    val down = awaitFirstDown(requireUnconsumed = false)
+                    run {
+                        val offset = down.position
                         val dragBoard = gestureBoard
-                        val cellSize = min(size.width, size.height) / maxOf(dragBoard.width, dragBoard.height).toFloat()
+                        val cellSize = min(size.width / dragBoard.width, size.height / dragBoard.height).toFloat()
                         val offsetX = (size.width - dragBoard.width * cellSize) / 2
                         val offsetY = (size.height - dragBoard.height * cellSize) / 2
 
@@ -2158,7 +2169,7 @@ fun BoardCanvas(
                         touchStartGridX = gridX
                         touchStartGridY = gridY
 
-                        println("[UI] ACTION_DOWN - Start touch: ($startTouchX, $startTouchY), Grid: ($gridX, $gridY)")
+                        println("[UI] ACTION_DOWN - Start touch: ($startTouchX, $startTouchY), Grid: ($gridX, $gridY), canvas=(${size.width}x${size.height}), cell=$cellSize, offset=($offsetX, $offsetY)")
                         println("[UI] ACTION_DOWN - Robot positions: ${dragBoard.robotPositions.map { "${it % dragBoard.width},${it / dragBoard.width}" }}")
 
                         // Check if a robot was touched at the start — cell-based hit
@@ -2177,10 +2188,19 @@ fun BoardCanvas(
                         if (touchedRobot == null) {
                             println("[UI] ACTION_DOWN - No robot touched")
                         }
-                    },
-                    onDrag = { change, dragAmount ->
+                    }
+
+                    // ACTION_MOVE — process every position change of the tracked
+                    // pointer, matching Android onTouchEvent (no touch slop)
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                        println("[UI] RAW_EVENT - id=${change.id} pressed=${change.pressed} pos=${change.position} posChanged=${change.positionChanged()}")
+                        if (!change.pressed) break
+                        if (!change.positionChanged()) continue
+                        run {
                         val dragBoard = gestureBoard
-                        val cellSize = min(size.width, size.height) / maxOf(dragBoard.width, dragBoard.height).toFloat()
+                        val cellSize = min(size.width / dragBoard.width, size.height / dragBoard.height).toFloat()
                         val offsetX = (size.width - dragBoard.width * cellSize) / 2
                         val offsetY = (size.height - dragBoard.height * cellSize) / 2
                         val gridX = ((change.position.x - offsetX) / cellSize).toInt()
@@ -2216,7 +2236,7 @@ fun BoardCanvas(
                             println("[UI] ACTION_MOVE - Robot $touchedRobot activated by swipe at ($gridX, $gridY)")
 
                             // Return without movement - require additional swiping to move
-                            return@detectDragGestures
+                            return@run
                         }
 
                         // If we have a touched/selected robot, calculate the movement direction
@@ -2280,37 +2300,30 @@ fun BoardCanvas(
                                 }
                             }
                         }
-                    },
-                    onDragEnd = {
-                        val cellSize = min(size.width, size.height) / maxOf(board.width, board.height).toFloat()
-                        val offsetX = (size.width - board.width * cellSize) / 2
-                        val offsetY = (size.height - board.height * cellSize) / 2
-
-                        // ACTION_UP logic from fragment-app
-                        println("[UI] ACTION_UP - touchedRobot: $touchedRobot, hasMovedRobotInCurrentGesture: $hasMovedRobotInCurrentGesture")
-
-                        // Check if this was a tap (no significant movement)
-                        // We need to store the initial touch position to calculate the distance
-                        // For now, we'll just reset all tracking variables
-                        // The tap logic will be implemented in a future iteration
-
-                        // Reset all tracking variables (matching fragment-app ACTION_UP)
-                        touchedRobot = null
-                        startTouchX = -1f
-                        startTouchY = -1f
-                        touchStartGridX = -1
-                        touchStartGridY = -1
-                        pendingMoveDirectionX = 0
-                        pendingMoveDirectionY = 0
-                        robotActivatedBySwipe = false
-                        robotMoveInitiated = false
-
-                        println("[UI] ACTION_UP - Tracking variables reset")
+                        }
                     }
-                )
+
+                    // ACTION_UP — reset all tracking variables (matching
+                    // fragment-app onTouchEvent ACTION_UP)
+                    println("[UI] ACTION_UP - touchedRobot: $touchedRobot, hasMovedRobotInCurrentGesture: $hasMovedRobotInCurrentGesture")
+
+                    touchedRobot = null
+                    startTouchX = -1f
+                    startTouchY = -1f
+                    touchStartGridX = -1
+                    touchStartGridY = -1
+                    pendingMoveDirectionX = 0
+                    pendingMoveDirectionY = 0
+                    robotActivatedBySwipe = false
+                    robotMoveInitiated = false
+
+                    println("[UI] ACTION_UP - Tracking variables reset")
+                }
             }
     ) {
-        val cellSize = min(size.width, size.height) / maxOf(board.width, board.height).toFloat()
+        // Android GameGridView.onMeasure: cellSize = min(cellWidth, cellHeight)
+        // so the board always fills the full canvas extent
+        val cellSize = min(size.width / board.width, size.height / board.height).toFloat()
         val offsetX = (size.width - board.width * cellSize) / 2
         val offsetY = (size.height - board.height * cellSize) / 2
 

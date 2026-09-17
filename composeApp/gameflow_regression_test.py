@@ -76,68 +76,55 @@ def parse_board_and_robots(content):
     return bw, bh, positions
 
 
-def _find_color_blob(im, match, min_pixels=30):
-    """Find the largest cluster of pixels matching `match(r,g,b)` in the
-    window region. Returns (cx, cy) screen coords of the cluster centroid.
-    Pixels are binned into coarse cells to cluster nearby hits."""
+TOUCH_RE = re.compile(
+    r"ACTION_DOWN - Start touch: \(([\d.]+), ([\d.]+)\), Grid: \((-?\d+), (-?\d+)\), "
+    r"canvas=\((\d+)x(\d+)\), cell=([\d.]+), offset=\(([\d.]+), ([\d.]+)\)"
+)
+
+
+def _probe(sx, sy):
+    """Tiny drag at screen (sx, sy); returns the canvas coords the app reported."""
+    before = len(log_content())
+    test_suite.drag_from_to(sx, sy, sx + 20, sy, "probe", duration=0.3)
+    time.sleep(0.6)
+    for m in TOUCH_RE.finditer(log_content()[before:]):
+        return float(m.group(1)), float(m.group(2)), m
+    return None
+
+
+def calibrate_board():
+    """Two probe drags -> solve the affine screen->canvas transform, then
+    return a function mapping board grid cells to screen coordinates."""
     b = test_suite.WINDOW_BOUNDS
-    hits = []
-    # The board occupies the upper part of the window; the bottom area has
-    # buttons/icons that can contain similar colors (pink-ish save button etc.)
-    y_max = b["y"] + int(b["height"] * 0.65)
-    for y in range(b["y"], y_max, 2):
-        for x in range(b["x"], b["x"] + b["width"], 2):
-            if match(*im.getpixel((x, y))):
-                hits.append((x, y))
-    if not hits:
+    p1 = _probe(b["x"] + int(b["width"] * 0.35), b["y"] + int(b["height"] * 0.30))
+    p2 = _probe(b["x"] + int(b["width"] * 0.60), b["y"] + int(b["height"] * 0.42))
+    if not p1 or not p2:
+        print("[TEST] calibration probes produced no ACTION_DOWN logs")
         return None
-    # Bin into 20px buckets; the densest bucket neighborhood is the sprite
-    from collections import defaultdict
-    bins = defaultdict(list)
-    for x, y in hits:
-        bins[(x // 20, y // 20)].append((x, y))
-    # Merge: pick the bucket with most hits plus its 8 neighbors
-    key = max(bins, key=lambda k: len(bins[k]))
-    kx, ky = key
-    pts = []
-    for dx in (-1, 0, 1):
-        for dy in (-1, 0, 1):
-            pts += bins.get((kx + dx, ky + dy), [])
-    if len(pts) < min_pixels:
-        return None
-    return (sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts))
-
-
-def find_board_on_screen(robots):
-    """Locate the board by finding the pink (index 0) and green (index 1)
-    robot sprites, then derive board origin + cell size from their known
-    grid positions. Returns (left, top, cell_px) in screen coords."""
-    from PIL import Image
-    test_suite.take_screenshot("_board_scan.png")
-    im = Image.open("/tmp/python_testsuite_screenshots/_board_scan.png").convert("RGB")
-
-    pink = _find_color_blob(im, lambda r, g, b: r > 220 and 110 < g < 190 and b > 160)
-    green = _find_color_blob(im, lambda r, g, b: r < 80 and 140 < g < 215 and 40 < b < 120)
-    if not pink or not green:
-        print(f"[TEST] Robot blobs not found: pink={pink} green={green}")
-        return None
-    rx0, ry0 = robots[0]  # pink grid cell
-    rx1, ry1 = robots[1]  # green grid cell
-    dxg, dyg = rx1 - rx0, ry1 - ry0
-    if dxg == 0 or dyg == 0:
-        print("[TEST] Robot cells not distinct enough for calibration")
-        return None
-    cell_x = (green[0] - pink[0]) / dxg
-    cell_y = (green[1] - pink[1]) / dyg
-    cell = (cell_x + cell_y) / 2
-    left = pink[0] - (rx0 + 0.5) * cell
-    top = pink[1] - (ry0 + 0.5) * cell
-    print(f"[TEST] Calibrated: pink@({pink[0]:.0f},{pink[1]:.0f}) green@({green[0]:.0f},{green[1]:.0f}) -> origin=({left:.0f},{top:.0f}) cell={cell:.1f}px")
+    c1x, c1y, m1 = p1
+    c2x, c2y, m2 = p2
+    s1x = b["x"] + b["width"] * 0.35
+    s1y = b["y"] + b["height"] * 0.30
+    s2x = b["x"] + b["width"] * 0.60
+    s2y = b["y"] + b["height"] * 0.42
+    # canvas = (screen - T) / d  ->  screen = T + d * canvas
+    dx = (s2x - s1x) / (c2x - c1x)
+    dy = (s2y - s1y) / (c2y - c1y)
+    tx = s1x - dx * c1x
+    ty = s1y - dy * c1y
+    cell_canvas = float(m2.group(7))
+    offx = float(m2.group(8))
+    offy = float(m2.group(9))
+    cell = cell_canvas * (dx + dy) / 2
+    left = tx + dx * offx
+    top = ty + dy * offy
+    print(f"[TEST] Calibrated: scale=({dx:.3f},{dy:.3f}) T=({tx:.0f},{ty:.0f}) "
+          f"board origin=({left:.0f},{top:.0f}) cell={cell:.1f}px")
     return left, top, cell
 
 
 def cell_to_screen(cx, cy, board):
-    """Convert board cell to absolute screen coords using the detected board box."""
+    """Convert board cell to absolute screen coords using the calibrated box."""
     left, top, cell = board
     return (int(left + cx * cell + cell / 2), int(top + cy * cell + cell / 2))
 
@@ -173,10 +160,10 @@ def main():
     time.sleep(2)  # let the board fully render
     take_screenshot("gf_1_game.png")
 
-    # Locate the rendered board precisely via the robot sprite colors
-    board_box = find_board_on_screen(robots)
+    # Calibrate the screen->canvas transform via probe drags
+    board_box = calibrate_board()
     if not board_box:
-        print("[TEST] FAIL: could not locate board via robot sprites")
+        print("[TEST] FAIL: could not calibrate board coordinates")
         sys.exit(1)
 
     # Marker: current log length, so we only inspect NEW output
