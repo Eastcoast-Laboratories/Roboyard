@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -449,11 +450,14 @@ fun LevelDesignEditorScreen(
             .background(Color.Black)
             .padding(8.dp)
     ) {
+        // Explicit shared scroll state so a visible VerticalScrollbar can be
+        // attached — on Desktop, mouse drags do not scroll the content
+        val editorScrollState = rememberScrollState()
+        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
         Column(
             modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
+                .fillMaxSize()
+                .verticalScroll(editorScrollState)
         ) {
             // Title + current map name
             Text(
@@ -657,6 +661,12 @@ fun LevelDesignEditorScreen(
                     modifier = Modifier.weight(1f).padding(2.dp).height(44.dp)
                 )
             }
+        }
+
+        androidx.compose.foundation.VerticalScrollbar(
+            adapter = androidx.compose.foundation.rememberScrollbarAdapter(editorScrollState),
+            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight()
+        )
         }
 
         FancyButton(
