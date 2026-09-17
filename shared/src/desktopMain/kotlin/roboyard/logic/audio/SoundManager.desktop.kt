@@ -150,8 +150,14 @@ class DesktopSoundManager : SoundManager {
     }
 
     override fun setBackgroundVolume(volume: Int) {
+        val v = volume.coerceIn(0, 100)
+        // Android parity: updateBackgroundSoundService stops the service at 0
+        if (v <= 0) {
+            stopBackground()
+            return
+        }
         ensureBackgroundStarted()
-        backgroundClip?.let { setClipVolume(it, volume.coerceIn(0, 100)) }
+        backgroundClip?.let { setClipVolume(it, v) }
     }
 
     override fun pauseBackground() {
@@ -172,6 +178,7 @@ class DesktopSoundManager : SoundManager {
         try {
             val clip = AudioSystem.getClip()
             clip.open(decoded.format, decoded.pcm, 0, decoded.pcm.size)
+            setClipVolume(clip, Preferences.backgroundSoundVolume)
             clip.loop(Clip.LOOP_CONTINUOUSLY)
             backgroundClip = clip
         } catch (e: Exception) {
@@ -195,6 +202,11 @@ class DesktopSoundManager : SoundManager {
     }
 }
 
+// Android parity: roboyard.ui.util.SoundManager is a singleton — a new
+// instance per call cannot pause/resume/change the volume of the clip
+// that is actually playing.
+private val instance by lazy { DesktopSoundManager() }
+
 actual fun getSoundManager(): SoundManager {
-    return DesktopSoundManager()
+    return instance
 }

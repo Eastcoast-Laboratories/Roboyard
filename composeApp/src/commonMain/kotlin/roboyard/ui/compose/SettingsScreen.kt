@@ -52,6 +52,7 @@ import roboyard.logic.core.Constants
 import roboyard.logic.core.Preferences
 import roboyard.logic.core.SettingsManager
 import roboyard.logic.core.SettingsState
+import roboyard.logic.audio.getSoundManager
 import roboyard.logic.managers.DataExportImportManager
 import roboyard.logic.managers.SyncManager
 import roboyard.logic.network.RoboyardApiClient
@@ -309,7 +310,13 @@ fun SettingsScreen(
                 SettingsLabel(s("settings_background_sound", "Background Sound:"))
                 Slider(
                     value = settings.backgroundSoundVolume.toFloat(),
-                    onValueChange = { settings = SettingsManager.setBackgroundSoundVolume(it.roundToInt()) },
+                    onValueChange = {
+                        val volume = it.roundToInt()
+                        settings = SettingsManager.setBackgroundSoundVolume(volume)
+                        // Android parity: updateBackgroundSoundService applies
+                        // the new volume to the running music immediately
+                        getSoundManager().setBackgroundVolume(volume)
+                    },
                     valueRange = 0f..100f,
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
