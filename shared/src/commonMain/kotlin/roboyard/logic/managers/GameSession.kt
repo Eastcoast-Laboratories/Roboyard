@@ -13,6 +13,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import roboyard.logic.core.Constants
@@ -217,13 +218,27 @@ class GameSession(
 
     private var isResetting = false
 
+    private val _solverRestartCountFlow = MutableStateFlow(0)
+    /** Observable mirror of [solverRestartCount] for Compose UI (keep-map button, restart counter). */
+    val solverRestartCountFlow: StateFlow<Int> = _solverRestartCountFlow
+
     /** Number of times the solver has been restarted. */
     var solverRestartCount: Int = 0
-        private set
+        private set(value) {
+            field = value
+            _solverRestartCountFlow.value = value
+        }
+
+    private val _lastSolutionMinMovesFlow = MutableStateFlow(0)
+    /** Observable mirror of [lastSolutionMinMoves] for Compose UI (restart counter info). */
+    val lastSolutionMinMovesFlow: StateFlow<Int> = _lastSolutionMinMovesFlow
 
     /** Minimum moves from the last found solution, or 0 if none yet. */
     var lastSolutionMinMoves: Int = 0
-        private set
+        private set(value) {
+            field = value
+            _lastSolutionMinMovesFlow.value = value
+        }
 
     // UI timer tracking (survives fragment/screen recreation)
     var uiTimerElapsedMs: Long = 0
@@ -345,6 +360,27 @@ class GameSession(
      * Start a level game.
      * @param levelId Level ID to load
      */
+    /**
+     * Loads the GameState for a level. Custom levels (custom_level_N.txt in
+     * private storage, written by the level editor) take precedence over
+     * bundled asset levels. Throws if neither source provides the level.
+     */
+    private fun loadLevelState(levelId: Int): GameState {
+        val customFile = "custom_level_$levelId.txt"
+        try {
+            if (storage.fileExists(customFile)) {
+                val content = storage.readFile(customFile)
+                if (content.isNotEmpty()) {
+                    return GameState.parseLevel(content, levelId)
+                }
+            }
+        } catch (e: Exception) {
+            log.e(e, "[LEVEL_LOAD] Failed to load custom level %d from %s", levelId, customFile)
+            throw RuntimeException("Failed to load level $levelId", e)
+        }
+        return GameState.loadLevel(levelId)
+    }
+
     fun startLevelGame(levelId: Int) {
         log.d("startLevelGame() called with levelId: %d", levelId)
 
@@ -365,8 +401,9 @@ class GameSession(
         loadedSolutions = null
         preCompRobotOrder.clear()
 
-        // Load level from assets
-        val state = GameState.loadLevel(levelId)
+        // Load level: custom level file in private storage takes precedence over
+        // bundled assets (custom_level_N.txt is written by the level editor).
+        val state = loadLevelState(levelId)
         state.levelId = levelId
         state.levelName = "Level " + levelId
 

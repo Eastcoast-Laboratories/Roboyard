@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import roboyard.ui.activities.MainActivity;
 import roboyard.logic.network.RoboyardApiClient;
+import roboyard.logic.network.ApiClientProvider;
 import roboyard.logic.managers.SyncManager;
 import timber.log.Timber;
 
@@ -50,7 +51,7 @@ public class MinimapLoginTest {
         final boolean[] loginSuccess = {false};
 
         activityRule.getScenario().onActivity(activity -> {
-            RoboyardApiClient apiClient = RoboyardApiClient.getInstance(activity);
+            RoboyardApiClient apiClient = ApiClientProvider.api(activity);
             apiClient.login("rbk@eclabs.de", "aaaaaaaa", new RoboyardApiClient.ApiCallback<RoboyardApiClient.LoginResult>() {
                 @Override
                 public void onNeedsUpdate() {
@@ -65,7 +66,7 @@ public class MinimapLoginTest {
                     loginSuccess[0] = true;
 
                     // Trigger sync
-                    SyncManager.getInstance(activity).fullSyncOnLogin(activity, new RoboyardApiClient.ApiCallback<String>() {
+                    ApiClientProvider.sync(activity).fullSyncOnLogin(new RoboyardApiClient.ApiCallback<String>() {
                         @Override
                         public void onSuccess(String summary) {
                             Timber.d("[MINIMAP_LOGIN_TEST] Sync complete: %s", summary);

@@ -9,7 +9,16 @@ interface SoundManager {
      * @param soundId The ID of the sound to play
      */
     fun playSound(soundId: String)
-    
+
+    /**
+     * Play a robot-specific collision sound (matches Android SoundManager
+     * robot_{attacker}_hits_robot_{target} with generic fallback).
+     * Default implementation falls back to the generic sound.
+     */
+    fun playSound(soundId: String, attackerRobotId: Int, targetRobotId: Int) {
+        playSound(soundId)
+    }
+
     /**
      * Stop all sounds.
      */

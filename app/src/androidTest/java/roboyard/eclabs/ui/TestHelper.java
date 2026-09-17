@@ -606,7 +606,7 @@ public class TestHelper {
             if (move instanceof RRGameMove) {
                 RRGameMove rrMove = (RRGameMove) move;
                 int robotColor = rrMove.getColor();
-                ERRGameMove direction = rrMove.move;
+                ERRGameMove direction = rrMove.getMove();
                 int dx = getDirectionX(direction);
                 int dy = getDirectionY(direction);
 

@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.TextStyle
@@ -36,27 +37,84 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import roboyard.composeapp.generated.resources.Res
+import roboyard.composeapp.generated.resources.achievements_tropy
+import roboyard.composeapp.generated.resources.help
+import roboyard.composeapp.generated.resources.ic_user_profile
+import roboyard.composeapp.generated.resources.settings_grid
 import roboyard.composeapp.generated.resources.title_bg_optimized
 import roboyard.logic.storage.getPlatformStorage
+import roboyard.logic.ui.getStringProvider
+
 @Composable
 fun MainMenuScreen(
+    session: roboyard.logic.managers.GameSession? = null,
     onNewRandomGame: () -> Unit = {},
     onLevelSelection: () -> Unit = {},
     onSettings: () -> Unit = {},
     onHelp: () -> Unit = {},
     onCredits: () -> Unit = {},
     onSaveLoad: () -> Unit = {},
-    onAchievements: () -> Unit = {}
+    onAchievements: () -> Unit = {},
+    onLevelEditor: () -> Unit = {},
+    onProfile: () -> Unit = {},
+    profileInitial: String? = null
 ) {
+    val stringProvider = getStringProvider()
+    val storage = getPlatformStorage()
     var hasSavedGames by remember { mutableStateOf(false) }
+    var popupQueue by remember { mutableStateOf<List<roboyard.logic.achievements.Achievement>>(emptyList()) }
 
-    // Check if there are saved games (same logic as main game)
+    val achievementManager = remember {
+        roboyard.logic.achievements.AchievementManager.getInstance(storage)
+    }
+    val streakManager = remember {
+        roboyard.logic.achievements.StreakManager.getInstance(storage, achievementManager)
+    }
+
+    // Android onViewCreated: cancel solver + stop map regeneration on menu entry
     LaunchedEffect(Unit) {
-        val storage = getPlatformStorage()
+        session?.cancelSolver()
+        session?.stopRegeneration()
         hasSavedGames = storage.hasSavedGames()
     }
+
+    // Android onResume: record daily login and show the streak popup once per day
+    LaunchedEffect(Unit) {
+        val update = streakManager.recordDailyLogin()
+        if (streakManager.shouldShowStreakPopupToday()) {
+            val days = update.streakDays.coerceAtLeast(streakManager.currentStreak)
+            val headlineKey = if (days >= 31) "streak_popup_day_31_headline"
+                else "streak_popup_day_${days}_headline"
+            val messageKey = if (days == 1) "streak_popup_day_1_message"
+                else "streak_popup_message"
+            val streakAchievement = roboyard.logic.achievements.Achievement(
+                STREAK_POPUP_ID,
+                headlineKey,
+                messageKey,
+                roboyard.logic.achievements.AchievementCategory.PROGRESSION,
+                "icon_46_flame"
+            ).apply { setDescriptionFormatArgs(days) }
+            popupQueue = popupQueue + streakAchievement
+            streakManager.markStreakPopupShownToday()
+        }
+    }
+
+    // Android onResume/onPause: show achievement popups while the menu is visible
+    androidx.compose.runtime.DisposableEffect(Unit) {
+        achievementManager.setUnlockListener(object :
+            roboyard.logic.achievements.AchievementManager.AchievementUnlockListener {
+            override fun onAchievementUnlocked(achievement: roboyard.logic.achievements.Achievement?) {
+                if (achievement != null) popupQueue = popupQueue + achievement
+            }
+        })
+        onDispose { achievementManager.setUnlockListener(null) }
+    }
+
+    // Android parity: while a streak popup is shown, Level/Load buttons are hidden
+    val streakPopupVisible = popupQueue.any { it.id == STREAK_POPUP_ID }
 
     val barBrush = Brush.linearGradient(
         colors = listOf(Color(0xCC000000), Color(0xCC000000)),
@@ -89,7 +147,7 @@ fun MainMenuScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "ROBOYARD",
+                        text = (stringProvider.getString("main_menu_title") ?: "Roboyard").uppercase(),
                         color = Color.White,
                         fontSize = 39.sp,
                         fontWeight = FontWeight.Bold,
@@ -104,10 +162,14 @@ fun MainMenuScreen(
                         )
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    CircularButton(
-                        text = null,
+                    // Profile button: user initial when logged in, else user icon (matches Android)
+                    IconCircularButton(
+                        text = profileInitial,
+                        icon = if (profileInitial == null) Res.drawable.ic_user_profile else null,
                         color = CircularButtonColor.TURQUOISE,
-                        onClick = { },
+                        contentDescription = profileInitial
+                            ?: (stringProvider.getString("profile_a11y") ?: "User profile"),
+                        onClick = onProfile,
                         modifier = Modifier.size(48.dp)
                     )
                 }
@@ -134,25 +196,43 @@ fun MainMenuScreen(
                     modifier = Modifier.fillMaxWidth(0.7f)
                 ) {
                     FancyButton(
-                        text = "New Random Game",
+                        text = stringProvider.getString("new_random_game") ?: "New Random Game",
                         color = FancyButtonColor.GREEN,
                         onClick = onNewRandomGame,
                         modifier = Modifier.fillMaxWidth().semantics { testTag = "newRandomGameButton" }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
+                    // Hidden while a streak popup is visible (Android parity)
+                    if (!streakPopupVisible) {
+                        FancyButton(
+                            text = stringProvider.getString("level_game") ?: "Level Game",
+                            color = FancyButtonColor.BLUE,
+                            onClick = onLevelSelection,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                    // Load Game button - hidden when no saved games (same as main game)
+                    if (hasSavedGames && !streakPopupVisible) {
+                        FancyButton(
+                            text = stringProvider.getString("load_game") ?: "Load Game",
+                            color = FancyButtonColor.RED,
+                            onClick = onSaveLoad,
+                            modifier = Modifier.fillMaxWidth().semantics { testTag = "loadGameButton" }
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+
+        // Achievement / streak popups (Android AchievementPopup parity)
+        AchievementUnlockPopup(
+            achievements = popupQueue,
+            onDismiss = { popupQueue = emptyList() }
+        )
                     FancyButton(
-                        text = "Level Game",
-                        color = FancyButtonColor.BLUE,
-                        onClick = onLevelSelection,
+                        text = stringProvider.getString("level_design_editor") ?: "Level Design Editor",
+                        color = FancyButtonColor.PURPLE,
+                        onClick = onLevelEditor,
                         modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    // Load Game button - always visible (same as main game)
-                    FancyButton(
-                        text = "Load Game",
-                        color = FancyButtonColor.RED,
-                        onClick = onSaveLoad,
-                        modifier = Modifier.fillMaxWidth().semantics { testTag = "loadGameButton" }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -177,7 +257,7 @@ fun MainMenuScreen(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Credits button - X symbol
+                    // Credits button - © symbol
                     CircularButton(
                         text = "©",
                         color = CircularButtonColor.YELLOW,
@@ -186,25 +266,28 @@ fun MainMenuScreen(
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     // Help button
-                    CircularButton(
-                        text = null,
+                    IconCircularButton(
+                        icon = Res.drawable.help,
                         color = CircularButtonColor.ORANGE,
+                        contentDescription = stringProvider.getString("help_a11y") ?: "How to Play",
                         onClick = onHelp,
                         modifier = Modifier.size(48.dp).padding(8.dp)
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     // Achievements button
-                    CircularButton(
-                        text = null,
+                    IconCircularButton(
+                        icon = Res.drawable.achievements_tropy,
                         color = CircularButtonColor.PURPLE,
+                        contentDescription = stringProvider.getString("achievements_title") ?: "Achievements",
                         onClick = onAchievements,
                         modifier = Modifier.size(48.dp).padding(8.dp)
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     // Settings button
-                    CircularButton(
-                        text = null,
+                    IconCircularButton(
+                        icon = Res.drawable.settings_grid,
                         color = CircularButtonColor.GRAY,
+                        contentDescription = stringProvider.getString("settings_a11y") ?: "Game settings",
                         onClick = onSettings,
                         modifier = Modifier.size(48.dp).padding(8.dp).semantics { testTag = "settingsButton" }
                     )

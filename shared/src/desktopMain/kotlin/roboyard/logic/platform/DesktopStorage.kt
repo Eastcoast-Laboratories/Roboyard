@@ -97,9 +97,54 @@ class DesktopStorage : PlatformStorage {
         return File(appDir, fileName).absolutePath
     }
 
+    override fun getFileTimestamp(fileName: String): Long? {
+        val file = File(appDir, fileName)
+        return if (file.exists()) file.lastModified() else null
+    }
+
     override fun hasSavedGames(): Boolean {
         val savesDir = File(appDir, "saves")
         return savesDir.exists() && savesDir.listFiles()?.isNotEmpty() == true
+    }
+
+    override fun listFiles(prefix: String, suffix: String): List<String> {
+        val files = appDir.listFiles() ?: return emptyList()
+        return files.map { it.name }
+            .filter { it.startsWith(prefix) && it.endsWith(suffix) }
+            .sorted()
+    }
+
+    override fun listFilesInDir(dirName: String): List<String> {
+        val dir = File(appDir, dirName)
+        return dir.list()?.toList() ?: emptyList()
+    }
+
+    override fun listAssetFiles(dirName: String): List<String> {
+        // Classpath lookup: handles both exploded resources (dev runs) and jars
+        val classLoader = Thread.currentThread().contextClassLoader
+            ?: DesktopStorage::class.java.classLoader
+        val names = mutableListOf<String>()
+        try {
+            val urls = classLoader.getResources(dirName)
+            while (urls.hasMoreElements()) {
+                val url = urls.nextElement()
+                when (url.protocol) {
+                    "file" -> File(url.toURI()).list()?.let { names.addAll(it) }
+                    "jar" -> {
+                        val conn = url.openConnection() as? java.net.JarURLConnection ?: continue
+                        val prefix = conn.entryName?.let { "$it/" } ?: "$dirName/"
+                        conn.jarFile.entries().asSequence()
+                            .map { it.name }
+                            .filter { it.startsWith(prefix) && it.length > prefix.length }
+                            .map { it.substring(prefix.length).substringBefore('/') }
+                            .let { names.addAll(it) }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            System.err.println("[DESKTOP_STORAGE] listAssetFiles failed for $dirName: ${e.message}")
+        }
+        return names.distinct().sorted()
     }
 
     override fun readBitmap(fileName: String): Any? {

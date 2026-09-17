@@ -21,6 +21,7 @@ app/src/main/assets/adi-registration.properties
 .DS_Store
 /build
 /shared/build
+/shared/bin
 /composeApp/build
 composeApp/build/*
 /dev/images/yard/

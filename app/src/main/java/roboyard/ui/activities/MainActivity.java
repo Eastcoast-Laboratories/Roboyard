@@ -19,14 +19,11 @@ import roboyard.logic.managers.SyncManager;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameState;
 import roboyard.logic.core.Preferences;
-import roboyard.ui.util.MapIdGenerator;
 import roboyard.logic.managers.GameStateManager;
+import roboyard.logic.network.DeepLinkHandler;
 import timber.log.Timber;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
-import roboyard.logic.core.GameElement;
 
 /**
  * Main activity for the game, hosts the fragment-based UI.
@@ -68,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Verify auth token on app start to maintain login session
-        roboyard.logic.network.RoboyardApiClient apiClient = roboyard.logic.network.RoboyardApiClient.getInstance(getApplicationContext());
+        roboyard.logic.network.RoboyardApiClient apiClient = roboyard.logic.network.ApiClientProvider.api(getApplicationContext());
         apiClient.verifyToken(new roboyard.logic.network.RoboyardApiClient.ApiCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean isValid) {
@@ -164,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
         }
         
         // Auto-sync when coming back online (uploads offline achievements/saves/history/streak)
-        SyncManager.getInstance(this).syncOnResume();
+        roboyard.logic.network.ApiClientProvider.sync(this).syncOnResume();
     }
     
     @Override
@@ -216,597 +213,54 @@ public class MainActivity extends AppCompatActivity {
     private void handleIntent(Intent intent) {
         String action = intent.getAction();
         Uri data = intent.getData();
-        
-        if (Intent.ACTION_VIEW.equals(action) && data != null) {
-            // This is a deep link
-            Timber.d("[DEEPLINK] Received deep link: %s", data.toString());
 
-            // Check if this is a random game deep link (roboyard://random or https://roboyard.z11.de/random)
-            String scheme = data.getScheme();
-            String host = data.getHost();
-            String path = data.getPath();
-            
-            if (("roboyard".equals(scheme) && "random".equals(host)) || (path != null && path.equals("/random"))) {
-                String source = ("roboyard".equals(scheme) && "random".equals(host)) ? "roboyard://random" : "https://roboyard.z11.de/random";
-                handleRandomGameDeepLink(source);
+        if (Intent.ACTION_VIEW.equals(action) && data != null) {
+            // This is a deep link - delegate all parsing to the shared DeepLinkHandler
+            DeepLinkHandler.DeepLinkResult result = DeepLinkHandler.INSTANCE.parse(data.toString());
+
+            if (result instanceof DeepLinkHandler.DeepLinkResult.Random) {
+                handleRandomGameDeepLink(data.toString());
                 return;
             }
+            if (result instanceof DeepLinkHandler.DeepLinkResult.UnsupportedVersion) {
+                int ver = ((DeepLinkHandler.DeepLinkResult.UnsupportedVersion) result).getVersion();
+                Timber.w("[DEEPLINK] Unsupported deep-link version %d (max %d), redirecting to menu", ver, DEEPLINK_API_VERSION);
+                android.widget.Toast.makeText(this, R.string.needs_update_toast, android.widget.Toast.LENGTH_LONG).show();
+                if (navController != null) navController.navigate(R.id.mainMenuFragment);
+                return;
+            }
+            if (result instanceof DeepLinkHandler.DeepLinkResult.MapTooLarge) {
+                Timber.e("[DEEPLINK] Map data rejected: size limits exceeded");
+                android.widget.Toast.makeText(this, R.string.deeplink_map_too_large, android.widget.Toast.LENGTH_LONG).show();
+                return;
+            }
+            if (result instanceof DeepLinkHandler.DeepLinkResult.Map) {
+                DeepLinkHandler.DeepLinkResult.Map map = (DeepLinkHandler.DeepLinkResult.Map) result;
+                GameState gameState = map.getGameState();
+                int difficulty = map.getDifficulty();
 
-            // Version check: if server sends a higher version than we support, redirect to menu
-            String verStr = data.getQueryParameter("ver");
-            if (verStr != null && !verStr.isEmpty()) {
-                try {
-                    int ver = Integer.parseInt(verStr);
-                    if (ver > DEEPLINK_API_VERSION) {
-                        Timber.w("[DEEPLINK] Unsupported deep-link version %d (max %d), redirecting to menu", ver, DEEPLINK_API_VERSION);
-                        android.widget.Toast.makeText(this, R.string.needs_update_toast, android.widget.Toast.LENGTH_LONG).show();
-                        if (navController != null) navController.navigate(R.id.mainMenuFragment);
-                        return;
-                    }
-                } catch (NumberFormatException e) {
-                    Timber.e("[DEEPLINK] Invalid ver parameter: %s", verStr);
-                }
-            }
-
-            // Extract parameters - name & difficulty may be separate query params or embedded in data
-            String mapData = data.getQueryParameter("data");
-            String mapName = data.getQueryParameter("name");
-            String difficultyStr = data.getQueryParameter("difficulty");
-            
-            // The play button on roboyard.z11.de embeds &name=...&difficulty=... inside the data value.
-            // Extract them from mapData if not found as separate query parameters.
-            if (mapData != null && mapData.contains("&name=")) {
-                int nameIdx = mapData.indexOf("&name=");
-                String tail = mapData.substring(nameIdx); // "&name=ZUQAV&difficulty=..."
-                mapData = mapData.substring(0, nameIdx);  // pure map string
-                
-                // Parse embedded parameters
-                String[] params = tail.split("&");
-                for (String param : params) {
-                    if (param.startsWith("name=") && mapName == null) {
-                        String val = param.substring("name=".length());
-                        try { val = java.net.URLDecoder.decode(val, "UTF-8"); } catch (Exception ignored) {}
-                        if (!val.isEmpty()) mapName = val;
-                    } else if (param.startsWith("difficulty=") && difficultyStr == null) {
-                        String val = param.substring("difficulty=".length());
-                        if (!val.isEmpty()) difficultyStr = val;
-                    }
-                }
-                Timber.d("[DEEPLINK] Extracted embedded params - name: %s, difficulty: %s", mapName, difficultyStr);
-            }
-            
-            // Log the raw map data for debugging
-            if (mapData != null) {
-                Timber.d("[DEEPLINK_RAW] Raw map data length: %d", mapData.length());
-                String previewData = mapData.length() > 100 ? mapData.substring(0, 100) + "..." : mapData;
-                Timber.d("[DEEPLINK_RAW] Map data preview: %s", previewData);
-            } else {
-                Timber.e("[DEEPLINK_RAW] Map data is null");
-            }
-            
-            // Parse difficulty if provided
-            int difficulty = -1;
-            if (difficultyStr != null && !difficultyStr.isEmpty()) {
-                try {
-                    difficulty = Integer.parseInt(difficultyStr);
-                    Timber.d("[DEEPLINK] Parsed difficulty: %d", difficulty);
-                } catch (NumberFormatException e) {
-                    Timber.e("[DEEPLINK] Invalid difficulty value: %s", difficultyStr);
-                }
-            }
-            
-            if (mapData != null && !mapData.isEmpty()) {
-                Timber.d("[DEEPLINK] Extracted map data: %s", mapData.substring(0, Math.min(50, mapData.length())));
-                
-                // Check if the data is in web format (starts with "name:" or contains "mh" wall markers)
-                if (mapData.startsWith("name:") || mapData.contains("mh") || mapData.contains("mv")) {
-                    Timber.d("[DEEPLINK_FORMAT] Detected web format, converting to app format");
-                    String convertedMapData = convertWebFormatToAppFormat(mapData);
-                    if (convertedMapData == null) {
-                        Timber.e("[DEEPLINK] Map data rejected: size limits exceeded");
-                        android.widget.Toast.makeText(this, R.string.deeplink_map_too_large, android.widget.Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                    Timber.d("[DEEPLINK_CONVERT] Converted map data preview: %s", 
-                             convertedMapData.substring(0, Math.min(100, convertedMapData.length())));
-                    
-                    // Extract map name from web format if not provided as parameter
-                    if (mapName == null && mapData.startsWith("name:")) {
-                        int endIndex = mapData.indexOf(";");
-                        if (endIndex > 5) {
-                            mapName = mapData.substring(5, endIndex);
-                            Timber.d("[DEEPLINK] Extracted map name from web format: %s", mapName);
-                        }
-                    }
-                    
-                    // Process the converted map data
-                    processDeepLinkMapData(convertedMapData, mapName, difficulty);
-                } else {
-                    // Process the map data with the additional parameters
-                    processDeepLinkMapData(mapData, mapName, difficulty);
-                }
-            } else {
-                Timber.w("[DEEPLINK] No map data found in deep link");
-            }
-        }
-    }
-    
-    /**
-     * Convert the web format map data to the app format
-     * Web format: "name:NAME;num_moves:N;solution:board:W,H;mh0,0;mv0,1;...robot_red10,4;..."
-     * App format: The format expected by GameState.parseFromSaveData()
-     * 
-     * @param webFormatData The map data in web format
-     * @return The map data in app format
-     */
-    private String convertWebFormatToAppFormat(String webFormatData) {
-        Timber.d("[DEEPLINK_CONVERT] Converting web format to app format");
-        
-        StringBuilder appFormat = new StringBuilder();
-        String mapName = "Web Map";
-        int width = 16;  // Default values
-        int height = 16;
-        
-        // Parse the web format - split by newlines first, then by semicolons
-        String[] lines = webFormatData.split("\\n");
-        List<String> parts = new ArrayList<>();
-        
-        // Process each line and add to parts
-        for (String line : lines) {
-            // Split each line by semicolons and add each part
-            String[] lineParts = line.split(";");
-            for (String part : lineParts) {
-                if (!part.trim().isEmpty()) {
-                    parts.add(part.trim());
-                }
-            }
-        }
-        
-        Timber.d("[DEEPLINK_CONVERT] Parsed %d parts from web format", parts.size());
-        
-        // Log all parts for debugging
-        for (int i = 0; i < Math.min(parts.size(), 40); i++) {
-            Timber.d("[DEEPLINK_PARSE] Part %d: %s", i, parts.get(i));
-        }
-        
-        // Extract map name and board dimensions
-        for (String part : parts) {
-            if (part.startsWith("name:")) {
-                mapName = part.substring(5);
-                Timber.d("[DEEPLINK_CONVERT] Found map name: %s", mapName);
-            } else if (part.contains("board:")) {
-                int boardIndex = part.indexOf("board:");
-                String dimensionsStr = part.substring(boardIndex + 6);
-                String[] dimensions = dimensionsStr.split(",");
-                if (dimensions.length == 2) {
-                    try {
-                        width = Integer.parseInt(dimensions[0]);
-                        height = Integer.parseInt(dimensions[1]);
-                        Timber.d("[DEEPLINK_CONVERT] Found board dimensions: %dx%d", width, height);
-                    } catch (NumberFormatException e) {
-                        Timber.e("[DEEPLINK_CONVERT] Error parsing board dimensions: %s", e.getMessage());
-                    }
-                }
-            }
-        }
-
-        // Validate board dimensions before allocating any data structures
-        if (width <= 2 || height <= 2
-                || width > DEEPLINK_MAX_WIDTH
-                || height > DEEPLINK_MAX_HEIGHT
-                || (long) width * height > DEEPLINK_MAX_CELLS) {
-            Timber.e("[DEEPLINK_CONVERT] Board dimensions out of range: %dx%d (max %dx%d, max cells %d)",
-                    width, height, DEEPLINK_MAX_WIDTH, DEEPLINK_MAX_HEIGHT, DEEPLINK_MAX_CELLS);
-            return null;
-        }
-        
-        // Start building the app format
-        appFormat.append("#MAPNAME:").append(mapName)
-                .append(";TIME:0;MOVES:0;UNIQUE_MAP_ID:WEBMP\n");
-        
-        // Add board dimensions
-        appFormat.append("WIDTH:").append(width).append(";\n");
-        appFormat.append("HEIGHT:").append(height).append(";\n");
-        
-        // Create empty board
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                if (x > 0) {
-                    appFormat.append(",");
-                }
-                appFormat.append("0"); // Empty cell
-            }
-            appFormat.append("\n");
-        }
-        
-        // Process targets - important to add at least one target as the app requires this
-        List<String> targetParts = new ArrayList<>();
-        for (String part : parts) {
-            if (part.startsWith("target_")) {
-                targetParts.add(part);
-                if (targetParts.size() > DEEPLINK_MAX_TARGETS) {
-                    Timber.e("[DEEPLINK_CONVERT] Too many targets (max %d)", DEEPLINK_MAX_TARGETS);
-                    return null;
-                }
-            }
-        }
-        
-        appFormat.append("TARGET_SECTION:\n");
-        // If no targets found, add a default one to prevent app errors
-        if (targetParts.isEmpty()) {
-            Timber.e("[DEEPLINK_CONVERT] No targets found in web format! Adding a default target.");
-            appFormat.append("TARGET_SECTION:8,8,0\n");
-        } else {
-            for (String part : targetParts) {
-                try {
-                    // Format is now: target_colorX,Y
-                    // The expected format is: target_yellow4,15 (color followed directly by coords)
-                    Timber.d("[DEEPLINK_TARGET_PARSE] Parsing target: %s", part);
-                    
-                    // Extract the color part
-                    String colorPart = part.substring(7); // Skip "target_"
-                    
-                    // Find where the color name ends and coordinates begin
-                    int digitPos = -1;
-                    for (int i = 0; i < colorPart.length(); i++) {
-                        if (Character.isDigit(colorPart.charAt(i))) {
-                            digitPos = i;
-                            break;
-                        }
-                    }
-                    
-                    if (digitPos == -1) {
-                        Timber.e("[DEEPLINK_TARGET_PARSE] Could not find coordinate digits in: %s", colorPart);
-                        continue;
-                    }
-                    
-                    String colorStr = colorPart.substring(0, digitPos);
-                    String coordsStr = colorPart.substring(digitPos);
-                    
-                    Timber.d("[DEEPLINK_TARGET_PARSE] Extracted color: '%s', coords: '%s'", colorStr, coordsStr);
-                    
-                    String[] coords = coordsStr.split(",");
-                    if (coords.length == 2) {
-                        int x = Integer.parseInt(coords[0]);
-                        int y = Integer.parseInt(coords[1]);
-                        int colorId = getColorId(colorStr);
-                        
-                        appFormat.append("TARGET_SECTION:")
-                                .append(x).append(",")
-                                .append(y).append(",")
-                                .append(colorId).append("\n");
-                        
-                        Timber.d("[DEEPLINK_CONVERT] Added target at (%d,%d) with color %d from: %s", 
-                                x, y, colorId, part);
-                    }
-                } catch (Exception e) {
-                    Timber.e("[DEEPLINK_CONVERT] Error parsing target: %s - %s", part, e.getMessage());
-                }
-            }
-        }
-        
-        // Process walls
-        appFormat.append("WALLS:\n");
-        
-        // Collect existing horizontal/vertical wall coords to avoid duplicates
-        // when auto-adding perimeter walls below.
-        java.util.Set<String> existingH = new java.util.HashSet<>();
-        java.util.Set<String> existingV = new java.util.HashSet<>();
-        for (String part : parts) {
-            if (part.startsWith("mh")) existingH.add(part.substring(2));
-            else if (part.startsWith("mv")) existingV.add(part.substring(2));
-        }
-        
-        // Auto-add MISSING perimeter walls. Maps that already include perimeter
-        // walls render with gridWidth=width+1 (because setGridElements uses maxX+1).
-        // Without perimeter walls the board ends up rendered one column/row too small.
-        // [BOARD_SIZE_DEBUG] Adding only walls that are not already present.
-        int addedPerimeter = 0;
-        // Top (y=0) and bottom (y=height) horizontal walls for x in 0..width-1
-        for (int x = 0; x < width; x++) {
-            String topKey = x + ",0";
-            String bottomKey = x + "," + height;
-            if (!existingH.contains(topKey)) {
-                appFormat.append("H,").append(x).append(",0\n");
-                existingH.add(topKey);
-                addedPerimeter++;
-            }
-            if (!existingH.contains(bottomKey)) {
-                appFormat.append("H,").append(x).append(",").append(height).append("\n");
-                existingH.add(bottomKey);
-                addedPerimeter++;
-            }
-        }
-        // Left (x=0) and right (x=width) vertical walls for y in 0..height-1
-        for (int y = 0; y < height; y++) {
-            String leftKey = "0," + y;
-            String rightKey = width + "," + y;
-            if (!existingV.contains(leftKey)) {
-                appFormat.append("V,0,").append(y).append("\n");
-                existingV.add(leftKey);
-                addedPerimeter++;
-            }
-            if (!existingV.contains(rightKey)) {
-                appFormat.append("V,").append(width).append(",").append(y).append("\n");
-                existingV.add(rightKey);
-                addedPerimeter++;
-            }
-        }
-        Timber.d("[BOARD_SIZE_DEBUG] Auto-added %d missing perimeter walls", addedPerimeter);
-        
-        // Parse horizontal walls
-        for (String part : parts) {
-            if (part.startsWith("mh")) {
-                try {
-                    // Format: mhX,Y
-                    String coordsStr = part.substring(2);
-                    String[] coords = coordsStr.split(",");
-                    
-                    if (coords.length == 2) {
-                        int x = Integer.parseInt(coords[0]);
-                        int y = Integer.parseInt(coords[1]);
-                        
-                        appFormat.append("H,")
-                                .append(x).append(",")
-                                .append(y).append("\n");
-                        
-                        Timber.d("[DEEPLINK_CONVERT] Added horizontal wall at (%d,%d) from: %s", x, y, part);
-                    }
-                } catch (Exception e) {
-                    Timber.e("[DEEPLINK_CONVERT] Error parsing horizontal wall: %s - %s", part, e.getMessage());
-                }
-            }
-        }
-        
-        // Parse vertical walls
-        for (String part : parts) {
-            if (part.startsWith("mv")) {
-                try {
-                    // Format: mvX,Y
-                    String coordsStr = part.substring(2);
-                    String[] coords = coordsStr.split(",");
-                    
-                    if (coords.length == 2) {
-                        int x = Integer.parseInt(coords[0]);
-                        int y = Integer.parseInt(coords[1]);
-                        
-                        appFormat.append("V,")
-                                .append(x).append(",")
-                                .append(y).append("\n");
-                        
-                        Timber.d("[DEEPLINK_CONVERT] Added vertical wall at (%d,%d) from: %s", x, y, part);
-                    }
-                } catch (Exception e) {
-                    Timber.e("[DEEPLINK_CONVERT] Error parsing vertical wall: %s - %s", part, e.getMessage());
-                }
-            }
-        }
-        
-        // Process robots
-        List<String> robotParts = new ArrayList<>();
-        for (String part : parts) {
-            if (part.startsWith("robot_")) {
-                robotParts.add(part);
-                if (robotParts.size() > DEEPLINK_MAX_ROBOTS) {
-                    Timber.e("[DEEPLINK_CONVERT] Too many robots (max %d)", DEEPLINK_MAX_ROBOTS);
-                    return null;
-                }
-            }
-        }
-        
-        appFormat.append("ROBOTS:\n");
-        // If no robots found, add a default one to prevent app errors
-        if (robotParts.isEmpty()) {
-            Timber.e("[DEEPLINK_CONVERT] No robots found in web format! Adding a default robot.");
-            appFormat.append("4,4,0\n");
-        } else {
-            for (String part : robotParts) {
-                try {
-                    // Format is now: robot_colorX,Y
-                    // The expected format is: robot_red10,4 (color followed directly by coords)
-                    Timber.d("[DEEPLINK_ROBOT_PARSE] Parsing robot: %s", part);
-                    
-                    // Extract the color part
-                    String colorPart = part.substring(6); // Skip "robot_"
-                    
-                    // Find where the color name ends and coordinates begin
-                    int digitPos = -1;
-                    for (int i = 0; i < colorPart.length(); i++) {
-                        if (Character.isDigit(colorPart.charAt(i))) {
-                            digitPos = i;
-                            break;
-                        }
-                    }
-                    
-                    if (digitPos == -1) {
-                        Timber.e("[DEEPLINK_ROBOT_PARSE] Could not find coordinate digits in: %s", colorPart);
-                        continue;
-                    }
-                    
-                    String colorStr = colorPart.substring(0, digitPos);
-                    String coordsStr = colorPart.substring(digitPos);
-                    
-                    Timber.d("[DEEPLINK_ROBOT_PARSE] Extracted color: '%s', coords: '%s'", colorStr, coordsStr);
-                    
-                    String[] coords = coordsStr.split(",");
-                    if (coords.length == 2) {
-                        int x = Integer.parseInt(coords[0]);
-                        int y = Integer.parseInt(coords[1]);
-                        int colorId = getColorId(colorStr);
-                        
-                        appFormat.append(x).append(",")
-                                .append(y).append(",")
-                                .append(colorId).append("\n");
-                        
-                        Timber.d("[DEEPLINK_CONVERT] Added robot at (%d,%d) with color %d from: %s", 
-                                x, y, colorId, part);
-                    }
-                } catch (Exception e) {
-                    Timber.e("[DEEPLINK_CONVERT] Error parsing robot: %s - %s", part, e.getMessage());
-                }
-            }
-        }
-        
-        // Add initial positions section (same as robots)
-        appFormat.append("INITIAL_POSITIONS:\n");
-        if (robotParts.isEmpty()) {
-            appFormat.append("4,4,0\n");
-        } else {
-            for (String part : robotParts) {
-                try {
-                    // Format is now: robot_colorX,Y
-                    // The expected format is: robot_red10,4 (color followed directly by coords)
-                    
-                    // Extract the color part
-                    String colorPart = part.substring(6); // Skip "robot_"
-                    
-                    // Find where the color name ends and coordinates begin
-                    int digitPos = -1;
-                    for (int i = 0; i < colorPart.length(); i++) {
-                        if (Character.isDigit(colorPart.charAt(i))) {
-                            digitPos = i;
-                            break;
-                        }
-                    }
-                    
-                    if (digitPos == -1) {
-                        continue;
-                    }
-                    
-                    String colorStr = colorPart.substring(0, digitPos);
-                    String coordsStr = colorPart.substring(digitPos);
-                    
-                    String[] coords = coordsStr.split(",");
-                    if (coords.length == 2) {
-                        int x = Integer.parseInt(coords[0]);
-                        int y = Integer.parseInt(coords[1]);
-                        int colorId = getColorId(colorStr);
-                        
-                        appFormat.append(x).append(",")
-                                .append(y).append(",")
-                                .append(colorId).append("\n");
-                    }
-                } catch (Exception e) {
-                    Timber.e("[DEEPLINK_CONVERT] Error parsing robot for initial positions: %s - %s", 
-                            part, e.getMessage());
-                }
-            }
-        }
-        
-        String result = appFormat.toString();
-        Timber.d("[DEEPLINK_CONVERT] Conversion complete, generated app format with length: %d", result.length());
-        
-        // Log a preview of the result
-        String preview = result.substring(0, Math.min(200, result.length()));
-        Timber.d("[DEEPLINK_CONVERT] Result preview: %s", preview);
-        
-        return result;
-    }
-    
-    /**
-     * Convert color name to color ID
-     * @param colorName Color name (red, blue, green, yellow)
-     * @return Color ID (0-3)
-     */
-    private int getColorId(String colorName) {
-        switch (colorName.toLowerCase()) {
-            case "multi": return Constants.COLOR_MULTI;
-            case "red": return Constants.COLOR_PINK; // Red is pink in our system
-            case "pink": return Constants.COLOR_PINK;
-            case "green": return Constants.COLOR_GREEN;
-            case "blue": return Constants.COLOR_BLUE;
-            case "yellow": return Constants.COLOR_YELLOW;
-            case "silver": return Constants.COLOR_SILVER;
-            default: return Constants.COLOR_GREEN; // Default to green
-        }
-    }
-    
-    /**
-     * Process the map data received from a deep link
-     * @param mapData The serialized map data to process
-     * @param mapName Optional custom map name (can be null)
-     * @param difficulty Optional difficulty level (use -1 if not specified)
-     */
-    private void processDeepLinkMapData(String mapData, String mapName, int difficulty) {
-        try {
-            // Parse the map data into a GameState
-            Timber.d("[DEEPLINK_PROCESS] Beginning to parse map data into GameState");
-            GameState gameState = GameState.parseFromSaveData(mapData);
-            
-            if (gameState != null) {
-                // If we successfully parsed the game state, load it
-                Timber.d("[DEEPLINK_PROCESS] Successfully parsed game state: board size=%dx%d, elements=%d",
-                        gameState.width, gameState.height, gameState.gameElements.size());
-                
-                // Log the types of elements in the game state
-                int robotCount = 0;
-                int targetCount = 0;
-                int wallCount = 0;
-                
-                for (GameElement element : gameState.gameElements) {
-                    if (element.type == GameElement.TYPE_ROBOT) {
-                        robotCount++;
-                        Timber.d("[DEEPLINK_ELEMENTS] Robot at (%d,%d) with color %d",
-                                element.x, element.y, element.color);
-                    } else if (element.type == GameElement.TYPE_TARGET) {
-                        targetCount++;
-                        Timber.d("[DEEPLINK_ELEMENTS] Target at (%d,%d) with color %d",
-                                element.x, element.y, element.color);
-                    } else if (element.type == GameElement.TYPE_HORIZONTAL_WALL || element.type == GameElement.TYPE_VERTICAL_WALL) {
-                        wallCount++;
-                    }
-                }
-                
-                Timber.d("[DEEPLINK_ELEMENTS] Game state contains: %d robots, %d targets, %d walls", 
-                        robotCount, targetCount, wallCount);
-                
-                // Override the map name if provided in the deep link
-                if (mapName != null && !mapName.isEmpty()) {
-                    gameState.levelName = mapName;
-                    Timber.d("[DEEPLINK_PROCESS] Set custom map name: %s", mapName);
-                } else {
-                    // No name provided: generate "Web <hash>" like random maps do
-                    String uniqueId = MapIdGenerator.generateUniqueId(gameState.getGridElements());
-                    String generatedName = "Web " + uniqueId;
-                    gameState.levelName = generatedName;
-                    gameState.uniqueMapId = uniqueId;
-                    Timber.d("[DEEPLINK_PROCESS] Generated web map name: %s", generatedName);
-                }
-                
                 // Override the difficulty if specified in the deep link
                 if (difficulty >= 0) {
-                    // Store the difficulty for this map
                     gameStateManager.setDifficulty(difficulty);
                     Timber.d("[DEEPLINK_PROCESS] Set map difficulty: %d", difficulty);
                 }
-                
-                // Check which fragment is currently displayed
-                if (navController != null && navController.getCurrentDestination() != null) {
-                    int currentDestId = navController.getCurrentDestination().getId();
-                    Timber.d("[DEEPLINK_NAV] Current destination ID: %d, gameFragment ID: %d", 
-                            currentDestId, R.id.gameFragment);
-                }
-                
+
                 // Navigate to the game fragment if we're not already there
-                if (navController != null && navController.getCurrentDestination() != null && 
+                if (navController != null && navController.getCurrentDestination() != null &&
                     navController.getCurrentDestination().getId() != R.id.gameFragment) {
                     Timber.d("[DEEPLINK_NAV] Navigating to game fragment");
                     navController.navigate(R.id.gameFragment);
-                } else {
-                    Timber.d("[DEEPLINK_NAV] Already in game fragment or navigation failed");
                 }
-                
+
                 // Set the game state in the GameStateManager
                 Timber.d("[DEEPLINK_PROCESS] Setting game state in GameStateManager");
                 gameStateManager.setGameState(gameState);
-            } else {
-                Timber.e("[DEEPLINK_PROCESS] Failed to parse map data");
+                return;
             }
-        } catch (Exception e) {
-            Timber.e(e, "[DEEPLINK_PROCESS] Error processing map data: %s", e.getMessage());
-            e.printStackTrace();
+            Timber.w("[DEEPLINK] No usable map data in deep link");
         }
     }
+    
     
     /**
      * Handle random game deep link

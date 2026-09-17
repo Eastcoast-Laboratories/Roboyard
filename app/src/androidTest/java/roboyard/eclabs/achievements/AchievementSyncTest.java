@@ -11,8 +11,8 @@ import android.content.Context;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +22,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import roboyard.logic.network.RoboyardApiClient;
+import roboyard.logic.network.ApiClientProvider;
 import timber.log.Timber;
 
 /**
@@ -45,7 +46,7 @@ public class AchievementSyncTest {
     public void setUp() {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         achievementManager = AchievementManagerFactory.getInstance(context);
-        apiClient = RoboyardApiClient.getInstance(context);
+        apiClient = ApiClientProvider.api(context);
         
         // Reset achievements for clean test
         achievementManager.resetAll();
@@ -95,26 +96,26 @@ public class AchievementSyncTest {
         java.util.List<Achievement> achievements = achievementManager.getAllAchievements();
         
         // Build JSON array like syncToServer does
-        JSONArray achievementsArray = new JSONArray();
+        JsonArray achievementsArray = new JsonArray();
         for (Achievement achievement : achievements) {
-            JSONObject achievementJson = new JSONObject();
-            achievementJson.put("id", achievement.id);
-            achievementJson.put("unlocked", achievement.isUnlocked());
-            achievementJson.put("unlocked_timestamp", achievement.unlockedTimestamp);
-            achievementsArray.put(achievementJson);
+            JsonObject achievementJson = new JsonObject();
+            achievementJson.addProperty("id", achievement.id);
+            achievementJson.addProperty("unlocked", achievement.isUnlocked());
+            achievementJson.addProperty("unlocked_timestamp", achievement.unlockedTimestamp);
+            achievementsArray.add(achievementJson);
         }
         
         // Verify structure
-        assertTrue("Should have achievements", achievementsArray.length() > 0);
+        assertTrue("Should have achievements", achievementsArray.size() > 0);
         
         // Find first_game in the array
         boolean foundFirstGame = false;
-        for (int i = 0; i < achievementsArray.length(); i++) {
-            JSONObject obj = achievementsArray.getJSONObject(i);
-            if ("first_game".equals(obj.getString("id"))) {
+        for (int i = 0; i < achievementsArray.size(); i++) {
+            JsonObject obj = achievementsArray.get(i).getAsJsonObject();
+            if ("first_game".equals(obj.get("id").getAsString())) {
                 foundFirstGame = true;
-                assertTrue("first_game should be unlocked", obj.getBoolean("unlocked"));
-                assertTrue("first_game should have timestamp", obj.getLong("unlocked_timestamp") > 0);
+                assertTrue("first_game should be unlocked", obj.get("unlocked").getAsBoolean());
+                assertTrue("first_game should have timestamp", obj.get("unlocked_timestamp").getAsLong() > 0);
             }
         }
         
@@ -129,11 +130,11 @@ public class AchievementSyncTest {
         achievementManager.onRandomGameCompleted(8, 8, 0, 25000, false, 4, 1, 1, true, false, null);
         
         // Build stats object like syncToServer does
-        JSONObject stats = new JSONObject();
+        JsonObject stats = new JsonObject();
         // These are approximations since we can't access private fields directly
-        stats.put("total_games_solved", 2);
-        stats.put("total_games_solved_no_hints", 1);
-        stats.put("total_perfect_solutions", 2);
+        stats.addProperty("total_games_solved", 2);
+        stats.addProperty("total_games_solved_no_hints", 1);
+        stats.addProperty("total_perfect_solutions", 2);
         
         // Verify structure
         assertTrue("Should have total_games_solved", stats.has("total_games_solved"));
@@ -162,20 +163,20 @@ public class AchievementSyncTest {
         
         try {
             // Build achievements array
-            JSONArray achievementsArray = new JSONArray();
+            JsonArray achievementsArray = new JsonArray();
             for (Achievement achievement : achievementManager.getAllAchievements()) {
-                JSONObject achievementJson = new JSONObject();
-                achievementJson.put("id", achievement.id);
-                achievementJson.put("unlocked", achievement.isUnlocked());
-                achievementJson.put("unlocked_timestamp", achievement.unlockedTimestamp);
-                achievementsArray.put(achievementJson);
+                JsonObject achievementJson = new JsonObject();
+                achievementJson.addProperty("id", achievement.id);
+                achievementJson.addProperty("unlocked", achievement.isUnlocked());
+                achievementJson.addProperty("unlocked_timestamp", achievement.unlockedTimestamp);
+                achievementsArray.add(achievementJson);
             }
             
             // Build stats
-            JSONObject stats = new JSONObject();
-            stats.put("total_games_solved", 1);
-            stats.put("total_games_solved_no_hints", 0);
-            stats.put("total_perfect_solutions", 0);
+            JsonObject stats = new JsonObject();
+            stats.addProperty("total_games_solved", 1);
+            stats.addProperty("total_games_solved_no_hints", 0);
+            stats.addProperty("total_perfect_solutions", 0);
             
             // Sync to server
             apiClient.syncAchievements(achievementsArray, stats, new RoboyardApiClient.ApiCallback<RoboyardApiClient.AchievementSyncResult>() {

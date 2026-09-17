@@ -27,6 +27,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import org.jetbrains.compose.resources.DrawableResource
+import roboyard.composeapp.generated.resources.Res
+import roboyard.composeapp.generated.resources.ic_user_profile
 
 /**
  * Color variants for the fancy gradient buttons, matching the original
@@ -60,6 +65,7 @@ enum class CircularButtonColor(
     YELLOW(Color(0xFFFFC107), Color.Black, Color.Black),
     ORANGE(Color(0xFFFF9800), Color.Black, Color.White),
     PURPLE(Color(0xFF9C27B0), Color.Black, Color.White),
+    RED(Color(0xFFF44336), Color.Black, Color.White),
     GRAY(Color(0xFF757575), Color.Black, Color.White)
 }
 
@@ -120,6 +126,97 @@ fun FancyButton(
             maxLines = 1,
             textAlign = TextAlign.Center
         )
+    }
+}
+
+/**
+ * A circular button with an optional icon image or text — matches Android's
+ * icon buttons (help/achievements/settings/profile) in header and footer.
+ */
+@Composable
+fun IconCircularButton(
+    text: String? = null,
+    icon: org.jetbrains.compose.resources.DrawableResource? = null,
+    color: CircularButtonColor,
+    contentDescription: String? = null,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
+) {
+    val shape = RoundedCornerShape(percent = 50)
+    Box(
+        modifier = modifier
+            .size(48.dp)
+            .clip(shape)
+            .background(color.fillColor, shape)
+            .border(BorderStroke(2.dp, color.strokeColor), shape)
+            .clickable(enabled = enabled, onClick = onClick)
+            .semantics {
+                if (contentDescription != null) this.contentDescription = contentDescription
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        if (icon != null) {
+            androidx.compose.foundation.Image(
+                painter = org.jetbrains.compose.resources.painterResource(icon),
+                contentDescription = contentDescription,
+                modifier = Modifier.size(28.dp)
+            )
+        } else text?.let {
+            Text(
+                text = it,
+                color = color.textColor,
+                fontWeight = FontWeight.Bold,
+                fontSize = 30.sp
+            )
+        }
+    }
+}
+
+/**
+ * Shared screen header matching the Android fragments: back button, centered title,
+ * and a profile button on the right (initial when logged in, else user icon).
+ */
+@Composable
+fun ScreenHeader(
+    title: String,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+    profileInitial: String? = null,
+    onProfile: (() -> Unit)? = null,
+    titleColor: Color = Color(0xFF333333)
+) {
+    androidx.compose.foundation.layout.Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        FancyButton(
+            text = "◂ " + (roboyard.logic.ui.getStringProvider().getString("back_button") ?: "Back"),
+            color = FancyButtonColor.GRAY,
+            onClick = onBack,
+            modifier = Modifier.height(40.dp)
+        )
+        Text(
+            text = title,
+            color = titleColor,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f)
+        )
+        if (onProfile != null) {
+            IconCircularButton(
+                text = profileInitial,
+                icon = if (profileInitial == null) Res.drawable.ic_user_profile else null,
+                color = CircularButtonColor.TURQUOISE,
+                contentDescription = profileInitial
+                    ?: (roboyard.logic.ui.getStringProvider().getString("profile_a11y") ?: "User profile"),
+                onClick = onProfile,
+                modifier = Modifier.size(40.dp)
+            )
+        }
     }
 }
 

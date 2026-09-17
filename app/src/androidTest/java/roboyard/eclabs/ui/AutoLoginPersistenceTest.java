@@ -16,6 +16,7 @@ import java.util.Random;
 
 import roboyard.ui.activities.MainActivity;
 import roboyard.logic.network.RoboyardApiClient;
+import roboyard.logic.network.ApiClientProvider;
 import timber.log.Timber;
 
 import static org.junit.Assert.*;
@@ -62,7 +63,7 @@ public class AutoLoginPersistenceTest {
     
     @Test
     public void testAutoLoginPersistsAcrossAppRestarts() throws InterruptedException {
-        RoboyardApiClient apiClient = RoboyardApiClient.getInstance(context);
+        RoboyardApiClient apiClient = ApiClientProvider.api(context);
         
         // Step 1: Verify not logged in initially
         assertFalse("[AUTO_LOGIN_TEST] Should not be logged in initially", apiClient.isLoggedIn());
@@ -116,7 +117,7 @@ public class AutoLoginPersistenceTest {
         }
         
         // Get new instance (simulates app restart)
-        RoboyardApiClient apiClientAfterRestart = RoboyardApiClient.getInstance(context);
+        RoboyardApiClient apiClientAfterRestart = ApiClientProvider.api(context);
         
         // Step 5: Verify still logged in after "restart"
         boolean isLoggedInAfterRestart = apiClientAfterRestart.isLoggedIn();

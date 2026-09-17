@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import roboyard.eclabs.R;
 import roboyard.logic.network.RoboyardApiClient;
+import roboyard.logic.network.ApiClientProvider;
 import roboyard.logic.managers.SyncManager;
 import roboyard.logic.achievements.AchievementManager;
 import roboyard.logic.achievements.AchievementManagerFactory;
@@ -109,7 +110,7 @@ public class LoginDialogHelper {
             return;
         }
         
-        RoboyardApiClient.getInstance(context).login(email, password, new RoboyardApiClient.ApiCallback<RoboyardApiClient.LoginResult>() {
+        ApiClientProvider.api(context).login(email, password, new RoboyardApiClient.ApiCallback<RoboyardApiClient.LoginResult>() {
             @Override
             public void onNeedsUpdate() {
                 Toast.makeText(context, R.string.needs_update_toast, Toast.LENGTH_LONG).show();
@@ -143,7 +144,7 @@ public class LoginDialogHelper {
                 // Sync save games and history (bidirectional)
                 if (context instanceof android.app.Activity) {
                     android.app.Activity activity = (android.app.Activity) context;
-                    SyncManager.getInstance(context).fullSyncOnLogin(activity, new RoboyardApiClient.ApiCallback<String>() {
+                    ApiClientProvider.sync(context).fullSyncOnLogin(new RoboyardApiClient.ApiCallback<String>() {
                         @Override
                         public void onSuccess(String summary) {
                             Timber.d("[LOGIN_SYNC] Full sync complete: %s", summary);

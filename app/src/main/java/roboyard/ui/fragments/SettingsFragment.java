@@ -35,6 +35,7 @@ import roboyard.eclabs.R;
 import roboyard.ui.adapters.LanguageSpinnerAdapter;
 import roboyard.logic.managers.DataExportImportManager;
 import roboyard.logic.network.RoboyardApiClient;
+import roboyard.logic.network.ApiClientProvider;
 import roboyard.ui.RoboyardApplication;
 import roboyard.ui.activities.MainActivity;
 import roboyard.logic.core.BoardSizeOption;
@@ -1999,11 +2000,11 @@ public class SettingsFragment extends Fragment {
                     Toast.makeText(requireContext(), R.string.settings_logging_out, Toast.LENGTH_SHORT).show();
                     
                     // Clear all progress data (achievements, streaks, levels, history, saves)
-                    DataExportImportManager manager = new DataExportImportManager(requireContext());
+                    DataExportImportManager manager = new DataExportImportManager(roboyard.platform.AndroidStorage.getInstance(requireContext()));
                     manager.resetProgressData();
                     
                     // Clear auth credentials
-                    RoboyardApiClient.getInstance(requireContext()).logout();
+                    ApiClientProvider.api(requireContext()).logout();
                     Timber.d("[LOGOUT][RESET] Auth credentials cleared");
                     
                     // Restart the app after a short delay
@@ -2115,7 +2116,7 @@ public class SettingsFragment extends Fragment {
      * Update account UI based on login state
      */
     private void updateAccountUI() {
-        RoboyardApiClient apiClient = RoboyardApiClient.getInstance(requireContext());
+        RoboyardApiClient apiClient = ApiClientProvider.api(requireContext());
         boolean isLoggedIn = apiClient.isLoggedIn();
         
         if (accountLoggedOutContainer != null) {
@@ -2172,7 +2173,7 @@ public class SettingsFragment extends Fragment {
      */
     private void exportData() {
         try {
-            DataExportImportManager manager = new DataExportImportManager(requireContext());
+            DataExportImportManager manager = new DataExportImportManager(roboyard.platform.AndroidStorage.getInstance(requireContext()));
             String jsonData = manager.exportAllData();
             
             if (jsonData != null) {
@@ -2216,7 +2217,7 @@ public class SettingsFragment extends Fragment {
             }
             
             try {
-                DataExportImportManager manager = new DataExportImportManager(requireContext());
+                DataExportImportManager manager = new DataExportImportManager(roboyard.platform.AndroidStorage.getInstance(requireContext()));
                 boolean success = manager.importAllData(jsonData);
                 
                 if (success) {
@@ -2243,11 +2244,11 @@ public class SettingsFragment extends Fragment {
             .setMessage(R.string.settings_reset_confirm_message)
             .setPositiveButton(R.string.settings_reset_data, (dialog, which) -> {
                 try {
-                    DataExportImportManager manager = new DataExportImportManager(requireContext());
+                    DataExportImportManager manager = new DataExportImportManager(roboyard.platform.AndroidStorage.getInstance(requireContext()));
                     manager.resetAllData();
                     
                     // Logout user when resetting all data
-                    roboyard.logic.network.RoboyardApiClient apiClient = roboyard.logic.network.RoboyardApiClient.getInstance(requireContext());
+                    roboyard.logic.network.RoboyardApiClient apiClient = roboyard.logic.network.ApiClientProvider.api(requireContext());
                     apiClient.logout();
                     
                     Toast.makeText(requireContext(), R.string.settings_reset_success, Toast.LENGTH_LONG).show();

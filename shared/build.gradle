@@ -44,5 +44,10 @@ kotlin {
                 implementation "com.google.code.gson:gson:2.13.2"
             }
         }
+        desktopMain {
+            dependencies {
+                implementation "javazoom:jlayer:1.0.1"
+            }
+        }
     }
 }

@@ -1,7 +1,7 @@
 package roboyard.logic.core
 
-import timber.log.Timber
-import java.util.Random
+import roboyard.logic.util.RLog
+import kotlin.random.Random
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -11,7 +11,7 @@ import kotlin.math.min
  * Provides 10 different generation modes for varied board layouts.
  */
 class WallPatternGenerator(private val width: Int, private val height: Int) {
-    private val rand = Random()
+    private val rand = Random
 
     // Wall arrays: [x][y], 1 = wall present
     private lateinit var hWalls: Array<IntArray?> // horizontal walls
@@ -43,7 +43,7 @@ class WallPatternGenerator(private val width: Int, private val height: Int) {
             else -> generateClassic()
         }
 
-        Timber.d("[WALL_PATTERN] Generated pattern %d for %dx%d board", pattern, width, height)
+        log.d("[WALL_PATTERN] Generated pattern %d for %dx%d board", pattern, width, height)
         return buildGameState()
     }
 
@@ -96,7 +96,7 @@ class WallPatternGenerator(private val width: Int, private val height: Int) {
 
     private fun rng(min: Int, max: Int): Int {
         if (min >= max) return min
-        return min + rand.nextInt(max - min + 1)
+        return rand.nextInt(min, max + 1)
     }
 
     private fun buildGameState(): GameState {
@@ -345,7 +345,7 @@ class WallPatternGenerator(private val width: Int, private val height: Int) {
             }
         }
 
-        Timber.d(
+        log.d(
             "[WALL_PATTERN] Maze generated: %dx%d cells, %d extra openings",
             width,
             height,
@@ -588,6 +588,7 @@ class WallPatternGenerator(private val width: Int, private val height: Int) {
     }
 
     companion object {
+        private val log = RLog.tag("WallPatternGenerator")
         const val PATTERN_CLASSIC: Int = 0
         const val PATTERN_SPIRAL: Int = 1
         const val PATTERN_ROOMS: Int = 2
@@ -611,7 +612,7 @@ class WallPatternGenerator(private val width: Int, private val height: Int) {
         fun generateBorderStubs(state: GameState) {
             val w = state.width
             val h = state.height
-            val r = Random()
+            val r = Random
             val minCornerDist = 2
 
             // Remove existing border stubs (perpendicular walls touching the border)
@@ -641,7 +642,7 @@ class WallPatternGenerator(private val width: Int, private val height: Int) {
             }
             state.gameElements.removeAll(toRemove)
 
-            Timber.d(
+            log.d(
                 "[BORDER_STUBS] Removed %d old border stubs from %dx%d board",
                 toRemove.size,
                 w,
@@ -705,7 +706,7 @@ class WallPatternGenerator(private val width: Int, private val height: Int) {
                 }
             }
 
-            Timber.d(
+            log.d(
                 "[BORDER_STUBS] Placed %d stubs on %s edge at %d",
                 positions.size, if (isHorizontalEdge) "horizontal" else "vertical", fixedCoord
             )

@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import roboyard.eclabs.R;
 import roboyard.logic.network.RoboyardApiClient;
+import roboyard.logic.network.ApiClientProvider;
 
 /**
  * Helper class for showing register dialog.
@@ -139,7 +140,7 @@ public class RegisterDialogHelper {
             return;
         }
         
-        RoboyardApiClient.getInstance(context).register(name, email, password, new RoboyardApiClient.ApiCallback<RoboyardApiClient.LoginResult>() {
+        ApiClientProvider.api(context).register(name, email, password, new RoboyardApiClient.ApiCallback<RoboyardApiClient.LoginResult>() {
             @Override
             public void onNeedsUpdate() {
                 Toast.makeText(context, R.string.needs_update_toast, Toast.LENGTH_LONG).show();

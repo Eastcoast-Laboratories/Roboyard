@@ -62,6 +62,15 @@ class HintManager(private val stringProvider: StringProvider? = null) {
     /** Whether we're showing pre-hints */
     private var showingPreHints: Boolean = true
 
+    /** Total pre-hint steps (random pre-hints + fixed pre-hints). Matches Android numPreHints + NUM_FIXED_PRE_HINTS. */
+    fun getTotalPreHintSteps(): Int = numPreHints + NUM_FIXED_PRE_HINTS
+
+    /** True when the current step is the "exact solution" fixed pre-hint (matches Android currentHintStep == numPreHints). */
+    fun isExactSolutionHintStep(): Boolean = showingPreHints && currentHintStep == numPreHints
+
+    /** True when the current step is a regular (per-move) hint. */
+    fun isRegularHintStep(): Boolean = currentHintStep >= numPreHints + NUM_FIXED_PRE_HINTS
+
     /** The solution to show hints for */
     private var solution: Solution? = null
 

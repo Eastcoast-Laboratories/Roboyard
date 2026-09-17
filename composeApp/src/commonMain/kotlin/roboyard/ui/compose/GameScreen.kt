@@ -11,6 +11,7 @@ import androidx.compose.material3.Button
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -29,6 +30,10 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -38,6 +43,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,6 +51,7 @@ import androidx.compose.ui.draw.clip
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -63,11 +70,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.math.min
 import kotlin.math.roundToInt
 import driftingdroids.model.Board
+import driftingdroids.model.TimeProvider
 import driftingdroids.model.isTrivialPuzzle
 import roboyard.logic.core.LevelLoader
 import roboyard.logic.core.LevelFormatParser
@@ -111,7 +120,13 @@ import roboyard.logic.core.MapGenerationDecision
 import roboyard.logic.core.MapGenerationRejectionReason
 import roboyard.logic.core.MapGenerationValidator
 import roboyard.logic.core.GameElement
+import roboyard.logic.achievements.Achievement
+import roboyard.logic.achievements.AchievementManager
+import roboyard.logic.achievements.StreakManager
+import roboyard.logic.managers.GameHistoryManager
 import roboyard.logic.managers.GameSession
+import roboyard.logic.managers.LevelCompletionManager
+import roboyard.logic.core.Constants
 import roboyard.logic.solver.RRGameMove
 import roboyard.logic.audio.SoundManager
 import roboyard.logic.audio.getSoundManager
@@ -134,6 +149,88 @@ private fun errDirToBoardDir(direction: Int): Int {
     }
 }
 
+/** Animated robot transition driven by GameSession.moveAnimator (matches Android RobotAnimationManager). */
+class RobotMoveAnim(
+    val robotColor: Int,
+    val fromX: Int, val fromY: Int,
+    val toX: Int, val toY: Int,
+    val progress: Animatable<Float, AnimationVector1D>
+)
+
+/**
+ * FancyButton with Android's long-press cooldown: when [cooldown] is true the button
+ * must be held for [cooldownMs] while a circular progress sweeps; releasing early
+ * cancels and fades the progress out (matches Android startCircularProgressAnimation).
+ */
+@Composable
+private fun CooldownFancyButton(
+    text: String,
+    color: FancyButtonColor,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    cooldown: Boolean = false,
+    cooldownMs: Int = 1200
+) {
+    val scope = rememberCoroutineScope()
+    val progress = remember { Animatable(0f) }
+    Box(modifier = modifier) {
+        FancyButton(
+            text = text,
+            color = color,
+            onClick = {},
+            enabled = enabled,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clip(RoundedCornerShape(percent = 50))
+                .pointerInput(cooldown, enabled) {
+                    if (!enabled) return@pointerInput
+                    detectTapGestures(
+                        onPress = {
+                            if (!cooldown) {
+                                onClick()
+                                tryAwaitRelease()
+                                return@detectTapGestures
+                            }
+                            val job = scope.launch {
+                                progress.animateTo(
+                                    1f,
+                                    tween(durationMillis = cooldownMs, easing = LinearEasing)
+                                )
+                                // Held for the full duration — trigger the action
+                                onClick()
+                            }
+                            tryAwaitRelease()
+                            if (job.isActive) {
+                                job.cancel()
+                                // Fade the progress out briefly (matches Android)
+                                progress.animateTo(0f, tween(durationMillis = 300))
+                            }
+                        }
+                    )
+                }
+        )
+        if (progress.value > 0f) {
+            Canvas(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(28.dp)
+            ) {
+                drawArc(
+                    color = Color.White,
+                    startAngle = -90f,
+                    sweepAngle = 360f * progress.value,
+                    useCenter = false,
+                    style = Stroke(width = 3.dp.toPx())
+                )
+            }
+        }
+    }
+}
+
 // Helper function to handle game win logic (DRY - delegates to shared buildGameWinMessage)
 fun handleGameWin(
     moveCount: Int,
@@ -151,7 +248,8 @@ fun GameScreen(
     onBack: () -> Unit = {},
     onNewGame: () -> Unit = {},
     onSaveLoad: () -> Unit = {},
-    onNextLevel: () -> Unit = {}
+    onNextLevel: () -> Unit = {},
+    onProfile: () -> Unit = {}
 ) {
     val storage = remember { getPlatformStorage() }
     val stringProvider = remember { getStringProvider() }
@@ -201,11 +299,40 @@ fun GameScreen(
     var lastAutosaveTime by remember { mutableLongStateOf(0L) }
     var autosaveRunning by remember { mutableStateOf(false) }
 
+    // Phase 1 state — matches GameFragment fields
+    val scope = rememberCoroutineScope()
+    val achievementManager = remember { AchievementManager.getInstance(storage, stringProvider, null) }
+    var pendingAchievements by remember { mutableStateOf<List<Achievement>>(emptyList()) }
+    var announcement by remember(gameEpoch) { mutableStateOf<String?>(null) }
+    var robotMoveAnim by remember { mutableStateOf<RobotMoveAnim?>(null) }
+    var showPrevLevelDialog by remember { mutableStateOf(false) }
+    var showLastLevelDialog by remember { mutableStateOf(false) }
+    var liveCounterEnabled by remember(gameEpoch) { mutableStateOf(Preferences.liveMoveCounterEnabled) }
+    var lastCompletedLevelId by remember { mutableIntStateOf(-1) }
+    var lastCompletedTime by remember { mutableLongStateOf(0L) }
+    var lastAutoHintClickTime by remember { mutableLongStateOf(0L) }
+    var gameStartElapsed by remember(gameEpoch) { mutableLongStateOf(TimeProvider.currentTimeMillis()) }
+    val liveCounterText by session.liveMoveCounterText.collectAsState()
+    val liveSolverCalculating by session.liveSolverCalculating.collectAsState()
+
     val selectedRobotIndex = gameState?.getSelectedRobot()?.color ?: -1
 
     val AUTOSAVE_INTERVAL_MS = 60 * 1000 // 60 seconds (same as main game)
+    val AUTO_HINT_COOLDOWN_MS = 1000L // matches Android AUTO_HINT_COOLDOWN_MS
+    val BUTTON_COOLDOWN_MS = 1200 // matches Android BUTTON_COOLDOWN_MS
 
-    // Wire session hooks for Compose visuals (reverse-move undo, fallback dialog)
+    // Toast-style announcement (Android uses Toast.makeText)
+    fun announce(text: String?) {
+        if (!text.isNullOrEmpty()) announcement = text
+    }
+    LaunchedEffect(announcement) {
+        if (announcement != null) {
+            delay(2500)
+            announcement = null
+        }
+    }
+
+    // Wire session hooks for Compose visuals — mirrors Android GameFragment/GameGridView wiring
     LaunchedEffect(session) {
         session.onReverseMoveUndo = { _, undoneRobotColor ->
             pathTracker.undoLastPathSegment(undoneRobotColor)
@@ -220,6 +347,52 @@ fun GameScreen(
                 rejectionReason = MapGenerationRejectionReason.NO_SOLUTION
             )
         }
+        // Robot move animation — RobotAnimationManager equivalent
+        session.moveAnimator = { robot, fromX, fromY, toX, toY, onComplete ->
+            val distance = kotlin.math.abs(toX - fromX) + kotlin.math.abs(toY - fromY)
+            val anim = Animatable(0f)
+            robotMoveAnim = RobotMoveAnim(robot.color, fromX, fromY, toX, toY, anim)
+            scope.launch {
+                try {
+                    anim.animateTo(1f, tween(durationMillis = (distance * 45).coerceIn(120, 400)))
+                } finally {
+                    robotMoveAnim = null
+                    onComplete()
+                }
+            }
+        }
+        // Move completed — Android GameGridView path update + handleRobotMovementSounds
+        session.onRobotMoveCompleted = { state, robot, oldX, oldY ->
+            pathTracker.addPathSegment(robot.color, oldX, oldY, robot.x, robot.y)
+            session.addPathToHistory(robot.color, oldX, oldY, robot.x, robot.y)
+            selectedRobotHasMoved = true
+            val hitRobot = session.lastMoveHitRobotElement
+            when {
+                hitRobot != null -> {
+                    soundManager.playSound("hit_robot", robot.color, hitRobot.color)
+                    achievementManager.onRobotTouched(robot.color, hitRobot.color, state.robots.size)
+                }
+                session.lastMoveHitWall -> soundManager.playSound("hit_wall")
+                else -> soundManager.playSound("move")
+            }
+            // checkIfMoveMatchesHint — auto-advance in Manual/Full-Auto, not in Semi-Auto
+            if (hintContainerVisible && Preferences.hintAutoMoveMode != Preferences.HINT_AUTO_MOVE_SEMI_AUTO) {
+                val movedDir = state.lastMoveDirection
+                val regularHint = hintManager.getRegularHint()
+                if (movedDir != null && movedDir >= 0 && regularHint != null &&
+                    robot.color == regularHint.first &&
+                    errDirToBoardDir(movedDir) == regularHint.second) {
+                    pendingAutoAdvance = true
+                }
+            }
+        }
+        achievementManager.setUnlockListener(object : AchievementManager.AchievementUnlockListener {
+            override fun onAchievementUnlocked(achievement: Achievement?) {
+                if (achievement != null) pendingAchievements = pendingAchievements + achievement
+            }
+        })
+        achievementManager.streakDataProvider = StreakManager.getInstance(storage, achievementManager)
+        achievementManager.checkAndUnlockStreakAchievements()
     }
 
     // Autosave control: start on first move, stop on win (same as main game)
@@ -352,18 +525,165 @@ fun GameScreen(
 
     var hintsUsed by remember(gameEpoch) { mutableIntStateOf(0) }
 
-    // Record that a hint was shown (session stats + GameState tracking + history)
+    // Record that a hint was shown — only real (regular) hints count, matching
+    // Android showNormalHint: hintCount + recordHintUsed + onHintUsed + history save
     fun recordHintShown() {
         val step = hintManager.getCurrentHintStep()
         maxHintUsed = maxOf(maxHintUsed, step)
-        hintsUsed++
-        session.recordHintShown(step)
-        session.saveToHistoryNow("hint_shown_$step")
+        if (hintManager.isRegularHintStep()) {
+            hintsUsed++
+            session.recordHintShown(step - hintManager.getTotalPreHintSteps())
+            achievementManager.onHintUsed()
+            session.saveToHistoryNow("hint_shown_${step - hintManager.getTotalPreHintSteps()}")
+        }
+    }
+
+    // Auto-move robot when a regular hint is shown in Full-Auto mode
+    // (matches Android executeHintAutoMove — 100ms delay, skipped when game complete)
+    fun maybeAutoMoveHint() {
+        if (Preferences.hintAutoMoveMode != Preferences.HINT_AUTO_MOVE_FULL_AUTO) return
+        if (session.isGameComplete.value) return
+        val hint = hintManager.getRegularHint() ?: return
+        scope.launch {
+            delay(100)
+            if (session.isGameComplete.value) return@launch
+            session.selectRobotByColor(hint.first)
+            session.moveRobot(hint.second)
+        }
+    }
+
+    // Advance to next hint — Android showNextHint: Semi-Auto 1s cooldown,
+    // level restrictions live inside HintManager
+    fun showNextHint() {
+        if (hintManager.getCurrentHintStep() >= hintManager.getTotalPreHintSteps() - 1 &&
+            Preferences.hintAutoMoveMode == Preferences.HINT_AUTO_MOVE_SEMI_AUTO) {
+            val now = TimeProvider.currentTimeMillis()
+            if (now - lastAutoHintClickTime < AUTO_HINT_COOLDOWN_MS) return
+            lastAutoHintClickTime = now
+        }
+        if (hintManager.nextHint()) {
+            updateHintDisplay()
+            recordHintShown()
+            maybeAutoMoveHint()
+        }
+    }
+
+    fun showPrevHint() {
+        if (hintManager.prevHint()) {
+            updateHintDisplay()
+            maybeAutoMoveHint()
+        }
     }
 
     fun requestManualNewGame() {
         generationFallback = null
         onNewGame()
+    }
+
+    // Filtered history entries (level games excluded) — matches Android getFilteredHistoryEntries
+    fun filteredHistoryEntries(): List<roboyard.logic.core.GameHistoryEntry> {
+        return GameHistoryManager.getHistoryEntries(storage).filter {
+            val mapName = it.mapName
+            mapName == null || !mapName.matches(Regex("(?i)^Level\\s+\\d+.*"))
+        }
+    }
+
+    // Back button action — full port of Android handleBackButtonClick
+    fun handleBackButtonClick() {
+        if (gameWon) {
+            announce(stringProvider.getString("nothing_to_undo") ?: "Nothing to undo")
+            return
+        }
+        val currentLevelId = gameState?.levelId ?: -1
+
+        if (isLevelGame && currentLevelId > 0 && moveCount == 0) {
+            // showBackToPreviousLevelDialog — level 1 goes straight to level selection
+            if (currentLevelId <= 1) onBack() else showPrevLevelDialog = true
+            return
+        }
+        if (session.isLoadedFromHistory && moveCount == 0) {
+            session.loadPreviousHistoryEntry()
+            return
+        }
+        // Random game with history entries — load most recent entry
+        if (!session.isLoadedFromSave && !isLevelGame && moveCount == 0) {
+            val entries = filteredHistoryEntries()
+            if (entries.isNotEmpty()) {
+                session.loadHistoryEntry(entries[0].getMapPath())
+                return
+            }
+        }
+        // Hint step-back when hints are visible (Android falls through to undo afterwards)
+        if (hintContainerVisible && hintManager.getCurrentHintStep() > 0) {
+            showPrevHint()
+        }
+        // Standard undo
+        if (session.undoLastMove()) {
+            val lastPath = session.removeLastPathFromHistory()
+            lastPath?.let { pathTracker.undoLastPathSegment(it[0]) }
+            hintMessage = null
+        } else {
+            announce(stringProvider.getString("nothing_to_undo") ?: "Nothing to undo")
+        }
+    }
+
+    // New Map / Next Level button action — port of Android handleNewMapButtonClick
+    fun handleNewMapButtonClick() {
+        // Reset achievement game-session flags (matches Android onNewGameStarted)
+        achievementManager.onNewGameStarted()
+        if (isLevelGame) {
+            val state = gameState ?: return
+            val currentLevelId = state.levelId
+            val nextLevelId = currentLevelId + 1
+            if (currentLevelId >= 140) {
+                showLastLevelDialog = true
+                return
+            }
+            val totalStars = LevelCompletionManager.getInstance(storage).totalStars
+            if (nextLevelId - 1 <= totalStars) {
+                pendingAchievements = emptyList()
+                session.startLevelGame(nextLevelId)
+                pathTracker.clearPaths()
+                elapsedTime = 0
+                hintManager.reset()
+                hintMessage = null
+                hintContainerVisible = false
+            } else {
+                val starsNeeded = nextLevelId - 1 - totalStars
+                announce(stringProvider.getString("level_not_unlocked", starsNeeded)
+                    ?: "You need $starsNeeded more star(s) to unlock")
+            }
+            return
+        }
+        if (session.isLoadedFromHistory) {
+            if (!session.loadNextHistoryEntry()) {
+                announce(stringProvider.getString("no_more_history_entries") ?: "No more history entries")
+                session.clearLoadedFromHistoryFlag()
+            }
+            return
+        }
+        // Random game: warn on map dimension mismatch, then start new game
+        if (!Preferences.generateNewMapEachTime) {
+            gameState?.let { s ->
+                if (s.width != Preferences.boardSizeWidth || s.height != Preferences.boardSizeHeight) {
+                    announce(stringProvider.getString(
+                        "map_dimensions_mismatch", s.width, s.height,
+                        Preferences.boardSizeWidth, Preferences.boardSizeHeight
+                    ) ?: "Map dimensions do not fit settings - generating new walls")
+                }
+            }
+        }
+        pendingAchievements = emptyList()
+        pathTracker.clearPaths()
+        session.cancelSolver()
+        session.resetMoveCountsAndHistory()
+        session.startGame()
+        elapsedTime = 0
+        timerRunning = false
+        hintManager.reset()
+        hintMessage = null
+        hintContainerVisible = false
+        selectedRobotHasMoved = false
     }
 
     // Auto-advance hint after 1s delay when player follows the hint (matches Android)
@@ -395,6 +715,26 @@ fun GameScreen(
         }
     }
 
+    // Wrong-robot-on-target toast — once per robot color per game (matches Android observer)
+    LaunchedEffect(wrongRobotAtTarget) {
+        if (wrongRobotAtTarget >= 0 && !session.hasWrongRobotToastBeenShownFor(wrongRobotAtTarget)) {
+            session.markWrongRobotToastShownFor(wrongRobotAtTarget)
+            announce(stringProvider.getString("wrong_robot_on_target") ?: "Wrong robot on target")
+        }
+    }
+
+    // Restore live-move-counter preference on each new game (matches Android observer setup):
+    // level games force it off; random games restore the persisted preference
+    LaunchedEffect(gameEpoch, isLevelGame) {
+        if (isLevelGame) {
+            session.setLiveMoveCounterEnabled(false)
+            liveCounterEnabled = false
+        } else {
+            session.setLiveMoveCounterEnabled(liveCounterEnabled)
+            if (liveCounterEnabled) session.triggerLiveSolver()
+        }
+    }
+
     // Start timer when game starts (on first move)
     LaunchedEffect(moveCount) {
         if (moveCount > 0 && !timerRunning && !gameWon) {
@@ -402,26 +742,79 @@ fun GameScreen(
         }
     }
 
-    // Stop timer when game is won and show completion message (matches Android)
+    // Stop timer when game is won — full Android completion flow:
+    // win sound, stars, completion message, achievements, history save (matches GameFragment)
     LaunchedEffect(gameWon) {
         if (gameWon) {
             timerRunning = false
-            session.saveToHistoryNow("completed")
+            accessibilityControlsVisible = false
             soundManager.playSound("win")
-            val optimalMoves = sessionSolution?.moves?.size ?: 0
-            val stars = calculateStars(moveCount, optimalMoves, maxHintUsed)
-            val finalStars = if (stars < 1 && isLevelGame && levelId <= 10) 1 else stars
+            val state = session.currentState.value ?: return@LaunchedEffect
+            val optimalMoves = sessionSolution?.moves?.size ?: session.lastSolutionMinMoves
+            val hintsUsed = state.hintCount
+            val elapsed = TimeProvider.currentTimeMillis() - gameStartElapsed
             hintContainerVisible = true
-            hintMessage = if (isLevelGame) {
-                val starStr = buildString { repeat(finalStars) { append("\u2605 ") } }.trim()
-                if (starStr.isEmpty()) "Level $levelId Complete!" else "Level $levelId Complete! $starStr"
+
+            if (isLevelGame && state.levelId > 0) {
+                var stars = session.calculateStars(moveCount, optimalMoves, hintsUsed)
+                if (stars < 1 && state.levelId <= Constants.MIN_STAR_GUARANTEE_LEVEL) stars = 1
+                val starStr = buildString { repeat(stars) { append("\u2605 ") } }.trim()
+                hintMessage = (stringProvider.getString("level_complete") ?: "Level Complete!") + " " + starStr
+                announcement = hintMessage
+                if (!state.hasCompletionBeenHandledThisSession()) {
+                    state.markCompletionHandledThisSession()
+                    session.saveToHistoryNow("completed")
+                    val now = TimeProvider.currentTimeMillis()
+                    if (state.levelId != lastCompletedLevelId || now - lastCompletedTime > 1000) {
+                        achievementManager.onLevelCompleted(
+                            state.levelId, moveCount, optimalMoves, hintsUsed, stars, elapsed
+                        )
+                        lastCompletedLevelId = state.levelId
+                        lastCompletedTime = now
+                    }
+                }
             } else {
-                if (moveCount == optimalMoves && optimalMoves > 0) {
-                    "Perfect! You found the optimal solution!"
-                } else if (optimalMoves > 0) {
-                    "Completed in $moveCount moves (optimal: $optimalMoves)"
-                } else {
-                    "Completed in $moveCount moves!"
+                // Random game completion message (matches Android updateStatusText block)
+                var completionMessage = stringProvider.getString("random_game_complete") ?: "Level Complete!"
+                val sol = sessionSolution
+                if (sol != null && sol.moves.isNotEmpty() && hintManager.getCurrentHintStep() < 4) {
+                    if (moveCount == optimalMoves) {
+                        if (hintManager.getCurrentHintStep() == 0) {
+                            completionMessage += " \n" +
+                                (stringProvider.getString("perfect_solution") ?: "Perfect! You found the optimal solution!")
+                        }
+                    } else {
+                        val extra = when {
+                            optimalMoves < 1 ->
+                                (stringProvider.getString("no_solution_found") ?: "No solution found") + "!"
+                            moveCount == 1 ->
+                                stringProvider.getString("pre_hint_less_than_1") ?: "You found a better solution than the A.I.!"
+                            else ->
+                                stringProvider.getString("pre_hint_less_than_x", moveCount)
+                                    ?: "The A.I. found a solution in less than $moveCount moves"
+                        }
+                        completionMessage += " \n" + extra
+                    }
+                }
+                hintMessage = completionMessage
+                announcement = completionMessage
+                if (!state.hasCompletionBeenHandledThisSession()) {
+                    state.markCompletionHandledThisSession()
+                    val mapSignature = state.generateMapSignature()
+                    val isFirstCompletion = GameHistoryManager.isFirstCompletion(storage, mapSignature)
+                    session.saveToHistoryNow("completed")
+                    var qualifiesForNoHints = !state.hasUsedHintsThisSession()
+                    if (!isFirstCompletion) {
+                        GameHistoryManager.findByMapSignature(storage, mapSignature)?.let {
+                            qualifiesForNoHints = it.qualifiesForNoHintsAchievement()
+                        }
+                    }
+                    achievementManager.onRandomGameCompleted(
+                        moveCount, optimalMoves, hintsUsed, elapsed,
+                        Preferences.difficulty == Constants.DIFFICULTY_IMPOSSIBLE,
+                        state.robots.size, state.targets.size, state.getRobotCount(),
+                        isFirstCompletion, qualifiesForNoHints, state.generateWallSignature()
+                    )
                 }
             }
         }
@@ -430,16 +823,40 @@ fun GameScreen(
     val board = renderBoard
     val startB = startBoard
     if (board == null || startB == null) {
-        // Map is still being generated / loaded
+        // Map is still being generated / loaded — matches Android showSolverCalculationStatus:
+        // counter " (restarts/lastMoves)" after >3 restarts, green ✓ keep-map button after >1
+        val restartCount by session.solverRestartCountFlow.collectAsState()
+        val lastMoves by session.lastSolutionMinMovesFlow.collectAsState()
+        var keepMapChosen by remember(gameEpoch) { mutableStateOf(false) }
         Box(
             modifier = Modifier.fillMaxSize().background(Color.Black),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = stringProvider.getString("ai_calculating") ?: "Calculating...",
-                color = Color.White,
-                fontSize = 18.sp
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                val counterInfo = if (restartCount > 3) {
+                    " ($restartCount" + (if (lastMoves > 0) "/$lastMoves" else "") + ")"
+                } else ""
+                Text(
+                    text = (if (keepMapChosen) {
+                        stringProvider.getString("keep_map") ?: "Play this map. Calculating..."
+                    } else {
+                        stringProvider.getString("ai_calculating") ?: "Calculating..."
+                    }) + counterInfo,
+                    color = Color.White,
+                    fontSize = 18.sp
+                )
+                if (restartCount > 1 && !keepMapChosen) {
+                    FancyButton(
+                        text = "✓",
+                        color = FancyButtonColor.GREEN,
+                        onClick = {
+                            session.keepCurrentMapDespiteDifficulty()
+                            keepMapChosen = true
+                        },
+                        modifier = Modifier.padding(start = 8.dp).height(32.dp)
+                    )
+                }
+            }
         }
         return
     }
@@ -463,36 +880,15 @@ fun GameScreen(
                     selectedRobotHasMoved = false
                 },
                 onRobotMove = { robotIndex, direction ->
-                    val pathSizeBefore = session.pathHistory.size
                     val robot = session.selectRobotByColor(robotIndex)
                     if (robot != null) {
-                        val oldX = robot.x
-                        val oldY = robot.y
-                        if (session.moveRobot(direction)) {
-                            if (session.pathHistory.size == pathSizeBefore) {
-                                // Forward move — UI owns path rendering
-                                val moved = session.currentState.value?.gameElements
-                                    ?.firstOrNull { it.type == GameElement.TYPE_ROBOT && it.color == robotIndex }
-                                if (moved != null) {
-                                    pathTracker.addPathSegment(robotIndex, oldX, oldY, moved.x, moved.y)
-                                    session.addPathToHistory(robotIndex, oldX, oldY, moved.x, moved.y)
-                                }
-                                // Play move sound (matches Android SoundManager)
-                                soundManager.playSound("move")
-                                selectedRobotHasMoved = true
-
-                                // Check if player followed the current hint (auto-advance)
-                                if (hintMessage != null && robotIndex == currentHintRobot && direction == currentHintDirection) {
-                                    pendingAutoAdvance = true
-                                } else if (hintMessage != null) {
-                                    hintMessage = null
-                                }
-                            }
-                            // else: reverse-move undo — session popped pathHistory
-                            // and onReverseMoveUndo updated the pathTracker
-                        }
+                        // Forward move: moveAnimator + onRobotMoveCompleted hooks handle
+                        // animation, path tracking, sounds, achievements and hint auto-advance.
+                        // Reverse move: session pops pathHistory and fires onReverseMoveUndo.
+                        session.moveRobot(direction)
                     }
                 },
+                robotMoveAnim = robotMoveAnim,
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(board.width.toFloat() / board.height.toFloat())
@@ -500,9 +896,13 @@ fun GameScreen(
             )
         }
 
-        // Hint container (between grid and info row, matches Android position)
+        // Hint container (matches Android: prev ◂ | status text | 👁 live toggle | ▸ next)
+        // Visible when the hint toggle is checked OR the live move counter is enabled
+        val liveOnlyMode = liveCounterEnabled && !hintContainerVisible
+        val liveStatusText = if (liveSolverCalculating) "…" else liveCounterText
+        val hintStatusText = if (hintContainerVisible) hintMessage ?: "" else liveStatusText
         AnimatedVisibility(
-            visible = hintContainerVisible && hintMessage != null,
+            visible = (hintContainerVisible && hintMessage != null) || (liveOnlyMode && liveStatusText.isNotEmpty()),
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
@@ -510,77 +910,63 @@ fun GameScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(hintBgColor)
+                    .background(if (liveOnlyMode) Color(0xFFDD000000) else hintBgColor)
                     .padding(horizontal = 8.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                FancyButton(
-                    text = "\u2715",
-                    color = FancyButtonColor.GRAY,
-                    onClick = {
-                        hintContainerVisible = false
-                        hintMessage = null
-                    },
-                    modifier = Modifier.height(32.dp).width(32.dp).padding(end = 4.dp)
-                )
-                FancyButton(
-                    text = "\u25C2",
-                    color = FancyButtonColor.HINT,
-                    onClick = {
-                        if (hintManager.hasPrevHint()) {
-                            hintManager.prevHint()
-                            updateHintDisplay()
-                        }
-                    },
-                    modifier = Modifier.height(32.dp)
-                )
+                // prev/next arrows only while the hint toggle is checked (Android hides them in live-only mode)
+                if (hintContainerVisible && hintManager.hasPrevHint()) {
+                    FancyButton(
+                        text = "\u25C2",
+                        color = FancyButtonColor.HINT,
+                        onClick = { showPrevHint() },
+                        modifier = Modifier.height(32.dp)
+                    )
+                }
                 Text(
-                    text = hintMessage ?: "",
-                    color = Color(0xFF1A1A1A),
+                    text = hintStatusText,
+                    color = if (liveOnlyMode) Color.White else Color(0xFF1A1A1A),
                     fontSize = 12.sp,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
                 )
-                val optMoves = sessionSolution?.moves?.size ?: 0
-                if (optMoves > 0) {
-                    val optimalButtonColor = when (optMoves % 5) {
-                        0 -> FancyButtonColor.RED
-                        1 -> FancyButtonColor.GREEN
-                        2 -> FancyButtonColor.YELLOW
-                        3 -> FancyButtonColor.BLUE
-                        4 -> FancyButtonColor.GRAY
-                        else -> FancyButtonColor.HINT
-                    }
+                // Live move counter toggle — visible from the exact-solution pre-hint onwards
+                // or while enabled; never in level games (matches Android)
+                if (!isLevelGame && (liveCounterEnabled || hintManager.isExactSolutionHintStep())) {
                     FancyButton(
-                        text = optMoves.toString(),
-                        color = optimalButtonColor,
+                        text = if (liveCounterEnabled) "\uD83D\uDC41" else "\uD83D\uDC41\u200D\uD83D\uDDE8",
+                        color = FancyButtonColor.HINT,
                         onClick = {
-                            if (hintManager.hasNextHint()) {
-                                hintManager.nextHint()
-                                updateHintDisplay()
-                                recordHintShown()
+                            val checked = !liveCounterEnabled
+                            liveCounterEnabled = checked
+                            session.setLiveMoveCounterEnabled(checked)
+                            if (checked) {
+                                gameState?.recordHintUsed(0)
+                                session.saveToHistoryNow("live_move")
+                                session.triggerLiveSolver()
                             }
                         },
-                        modifier = Modifier.height(32.dp).width(48.dp)
+                        modifier = Modifier
+                            .height(32.dp)
+                            .semantics {
+                                contentDescription = stringProvider.getString("live_move_counter_label_a11y") ?: "Show remaining moves"
+                            }
                     )
                 }
-                FancyButton(
-                    text = "\u25B8",
-                    color = FancyButtonColor.HINT,
-                    onClick = {
-                        if (hintManager.hasNextHint()) {
-                            hintManager.nextHint()
-                            updateHintDisplay()
-                            recordHintShown()
-                        }
-                    },
-                    modifier = Modifier.height(32.dp)
-                )
+                if (hintContainerVisible && hintManager.hasNextHint()) {
+                    FancyButton(
+                        text = "\u25B8",
+                        color = FancyButtonColor.HINT,
+                        onClick = { showNextHint() },
+                        modifier = Modifier.height(32.dp)
+                    )
+                }
             }
         }
 
-        // Game info row (move count, squares moved, timer)
+        // Game info row — Android 3-block layout: left (Moves/Squares/Difficulty),
+        // center (optimal moves button, shown from exact-solution hint), right (Timer, MapID, Dice)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -589,80 +975,223 @@ fun GameScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(SpanStyle(fontSize = 10.sp)) { append("Moves: ") }
-                    withStyle(SpanStyle(fontSize = 15.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)) { append("$moveCount") }
-                },
-                color = Color.White
-            )
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(SpanStyle(fontSize = 9.sp)) { append("Squares: ") }
-                    withStyle(SpanStyle(fontSize = 14.sp)) { append("$squaresMoved") }
-                },
-                color = Color.White
-            )
-            Text(
-                text = formatElapsedTime(elapsedTime),
-                color = Color.White,
-                fontSize = 14.sp
-            )
+            Column(modifier = Modifier.weight(0.55f)) {
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(SpanStyle(fontSize = 10.sp)) { append((stringProvider.getString("moves_label") ?: "Moves") + ": ") }
+                        withStyle(SpanStyle(fontSize = 15.sp, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)) { append("$moveCount") }
+                    },
+                    color = Color.White
+                )
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(SpanStyle(fontSize = 9.sp)) { append((stringProvider.getString("squares_label") ?: "Squares") + ": ") }
+                        withStyle(SpanStyle(fontSize = 14.sp)) { append("$squaresMoved") }
+                    },
+                    color = Color.White
+                )
+                Text(
+                    text = session.localizedDifficultyString,
+                    color = Color.White,
+                    fontSize = 8.sp
+                )
+            }
+            // Optimal moves button — appears when the exact-solution pre-hint is shown (Android updateOptimalMovesButton)
+            Box(modifier = Modifier.weight(0.2f), contentAlignment = Alignment.Center) {
+                val optMoves = sessionSolution?.moves?.size ?: 0
+                if (hintContainerVisible && hintManager.isExactSolutionHintStep() && optMoves > 0) {
+                    FancyButton(
+                        text = optMoves.toString(),
+                        color = FancyButtonColor.HINT,
+                        onClick = { showNextHint() },
+                        modifier = Modifier.height(32.dp).width(48.dp)
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier.weight(0.25f),
+                horizontalAlignment = Alignment.End
+            ) {
+                Text(
+                    text = formatElapsedTime(elapsedTime),
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
+                // unique map id / level text — clickable to show next hint (matches Android)
+                val mapIdText = when {
+                    isLevelGame && levelId > 0 -> stringProvider.getString("level_id_text", levelId) ?: "Level $levelId"
+                    !gameState?.levelName.isNullOrEmpty() -> gameState!!.levelName!!
+                    else -> stringProvider.getString("unique_map_id", gameState?.uniqueMapId ?: "") ?: (gameState?.uniqueMapId ?: "")
+                }
+                Text(
+                    text = mapIdText,
+                    color = Color.White,
+                    fontSize = 8.sp,
+                    modifier = Modifier.clickable {
+                        if (hintContainerVisible) showNextHint()
+                    }
+                )
+                // Dice button — only in random games when generateNewMapEachTime=false (matches Android)
+                if (!isLevelGame && !Preferences.generateNewMapEachTime) {
+                    Text(
+                        text = "\uD83C\uDFB2",
+                        fontSize = 18.sp,
+                        modifier = Modifier
+                            .padding(top = 2.dp)
+                            .clickable {
+                                roboyard.logic.core.MapGenerator.forceGenerateNewMapOnce = true
+                                pathTracker.clearPaths()
+                                session.resetMoveCountsAndHistory()
+                                session.startGame()
+                                elapsedTime = 0
+                                timerRunning = false
+                                hintManager.reset()
+                                hintMessage = null
+                                hintContainerVisible = false
+                            }
+                    )
+                }
+            }
         }
 
-        // Accessibility controls container (visible when enabled)
+        // Accessibility controls — Android accessibility_controls.xml 3-row layout:
+        // Row1: [Announce] [North] [Select Robot]   Row2: [West] [East]
+        // Row3: [txtSelectedRobot] [South] [txtRobotGoal]
         if (accessibilityControlsVisible) {
-            Row(
+            val selectedRobot = gameState?.getSelectedRobot()
+            val robotColorName = if (selectedRobotIndex >= 0) getRobotColorName(selectedRobotIndex) else "Robot"
+            val robotButtonColor = if (selectedRobotIndex >= 0) getRobotButtonColor(selectedRobotIndex) else FancyButtonColor.BLUE
+            val goalElement = gameState?.gameElements?.firstOrNull {
+                it.type == GameElement.TYPE_TARGET && it.color == selectedRobot?.color
+            }
+            val selectedRobotText = if (selectedRobot != null) {
+                stringProvider.getString("robot_selected_info", robotColorName, selectedRobot.x, selectedRobot.y)
+                    ?: "Selected: $robotColorName robot at position (${selectedRobot.x}, ${selectedRobot.y})"
+            } else {
+                stringProvider.getString("no_robot_selected") ?: "No robot selected"
+            }
+            val robotGoalText = when {
+                selectedRobot == null -> ""
+                goalElement != null -> stringProvider.getString(
+                    "robot_target_info", robotColorName, goalElement.x, goalElement.y
+                ) ?: "$robotColorName goal: (${goalElement.x}, ${goalElement.y})"
+                else -> stringProvider.getString("no_target_for_robot") ?: "No goal for this robot"
+            }
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xDD000000))
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .background(Color(0xFF303030))
+                    .padding(8.dp)
             ) {
-                val robotColorName = if (selectedRobotIndex >= 0) getRobotColorName(selectedRobotIndex) else "Robot"
-                val robotButtonColor = if (selectedRobotIndex >= 0) getRobotButtonColor(selectedRobotIndex) else FancyButtonColor.BLUE
-                FancyButton(
-                    text = robotColorName,
-                    color = robotButtonColor,
-                    onClick = {
-                        val robotCount = gameState?.getRobotCount() ?: 4
-                        session.selectRobotByColor((selectedRobotIndex + 1) % robotCount)
-                        selectedRobotHasMoved = false
-                    },
-                    modifier = Modifier.weight(1f).padding(end = 4.dp)
-                )
-                FancyButton(
-                    text = "$robotColorName ${getDirectionName(Board.NORTH)}",
-                    color = robotButtonColor,
-                    onClick = { session.moveRobot(Board.NORTH) },
-                    modifier = Modifier.weight(1f).padding(end = 4.dp)
-                )
-                FancyButton(
-                    text = "$robotColorName ${getDirectionName(Board.SOUTH)}",
-                    color = robotButtonColor,
-                    onClick = { session.moveRobot(Board.SOUTH) },
-                    modifier = Modifier.weight(1f).padding(end = 4.dp)
-                )
-                FancyButton(
-                    text = "$robotColorName ${getDirectionName(Board.EAST)}",
-                    color = robotButtonColor,
-                    onClick = { session.moveRobot(Board.EAST) },
-                    modifier = Modifier.weight(1f).padding(end = 4.dp)
-                )
-                FancyButton(
-                    text = "$robotColorName ${getDirectionName(Board.WEST)}",
-                    color = robotButtonColor,
-                    onClick = { session.moveRobot(Board.WEST) },
-                    modifier = Modifier.weight(1f)
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    FancyButton(
+                        text = stringProvider.getString("announce") ?: "Announce",
+                        color = FancyButtonColor.HINT,
+                        onClick = {
+                            // announceGameStart: target + selected robot position + adjacent walls
+                            val st = gameState ?: return@FancyButton
+                            val sb = StringBuilder()
+                            st.gameElements.firstOrNull { it.type == GameElement.TYPE_TARGET }
+                                ?.let { target ->
+                                    sb.append(getRobotColorName(target.color)).append(" ")
+                                        .append(stringProvider.getString("target_a11y", target.x + 1, target.y + 1)
+                                            ?: "Goal at position ${target.x + 1}, ${target.y + 1}")
+                                        .append(". ")
+                                }
+                            val robot = st.getSelectedRobot()
+                            if (robot != null) {
+                                sb.append(getRobotColorName(robot.color))
+                                    .append(" robot ${robot.x + 1},${robot.y + 1}")
+                                val walls = mutableListOf<String>()
+                                if (!st.canRobotMoveTo(robot, robot.x + 1, robot.y) && robot.x + 1 < st.width && st.getRobotAt(robot.x + 1, robot.y) == null) walls.add("east")
+                                if (!st.canRobotMoveTo(robot, robot.x - 1, robot.y) && robot.x - 1 >= 0 && st.getRobotAt(robot.x - 1, robot.y) == null) walls.add("west")
+                                if (!st.canRobotMoveTo(robot, robot.x, robot.y - 1) && robot.y - 1 >= 0 && st.getRobotAt(robot.x, robot.y - 1) == null) walls.add("north")
+                                if (!st.canRobotMoveTo(robot, robot.x, robot.y + 1) && robot.y + 1 < st.height && st.getRobotAt(robot.x, robot.y + 1) == null) walls.add("south")
+                                if (walls.isNotEmpty()) sb.append(", walls ").append(walls.joinToString(", "))
+                                sb.append(".")
+                            }
+                            announce(sb.toString())
+                        },
+                        modifier = Modifier.weight(1f).padding(end = 4.dp)
+                    )
+                    FancyButton(
+                        text = if (selectedRobotIndex >= 0) "$robotColorName ${getDirectionName(Board.NORTH)}" else getDirectionName(Board.NORTH),
+                        color = robotButtonColor,
+                        onClick = { session.moveRobot(Board.NORTH) },
+                        modifier = Modifier.weight(1f).padding(horizontal = 4.dp)
+                    )
+                    FancyButton(
+                        text = stringProvider.getString("next_robot") ?: "Next Robot",
+                        color = FancyButtonColor.HINT,
+                        onClick = {
+                            val robotCount = gameState?.getRobotCount() ?: 4
+                            session.selectRobotByColor((selectedRobotIndex + 1) % robotCount)
+                            selectedRobotHasMoved = false
+                            if (selectedRobotIndex >= 0) {
+                                announce(stringProvider.getString("robot_selected_a11y", robotColorName)
+                                    ?: "$robotColorName robot selected")
+                            }
+                        },
+                        modifier = Modifier.weight(1f).padding(start = 4.dp)
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    FancyButton(
+                        text = if (selectedRobotIndex >= 0) "$robotColorName ${getDirectionName(Board.WEST)}" else getDirectionName(Board.WEST),
+                        color = robotButtonColor,
+                        onClick = { session.moveRobot(Board.WEST) },
+                        modifier = Modifier.weight(1f).padding(end = 4.dp)
+                    )
+                    FancyButton(
+                        text = if (selectedRobotIndex >= 0) "$robotColorName ${getDirectionName(Board.EAST)}" else getDirectionName(Board.EAST),
+                        color = robotButtonColor,
+                        onClick = { session.moveRobot(Board.EAST) },
+                        modifier = Modifier.weight(1f).padding(start = 4.dp)
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = selectedRobotText,
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f).padding(end = 4.dp),
+                        maxLines = 3
+                    )
+                    FancyButton(
+                        text = if (selectedRobotIndex >= 0) "$robotColorName ${getDirectionName(Board.SOUTH)}" else getDirectionName(Board.SOUTH),
+                        color = robotButtonColor,
+                        onClick = { session.moveRobot(Board.SOUTH) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        text = robotGoalText,
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        modifier = Modifier.weight(1f).padding(start = 4.dp),
+                        maxLines = 3
+                    )
+                }
             }
         }
 
         // Flexible space pushes the buttons to the bottom
         Spacer(modifier = Modifier.weight(1f))
 
-        // Bottom button container (two rows of fancy buttons)
+        // Bottom button container — matches Android layout:
+        // Row 1: [Save Map] [Hint] [Back]  Row 2: [Menu] [Reset] [New Map]
+        // Row 3 (completion only): full-width Next Level / New Random Game
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -674,36 +1203,29 @@ fun GameScreen(
                     .fillMaxWidth()
                     .padding(bottom = 3.dp)
             ) {
-                // Dice button: visible only when generateNewMapEachTime=false and not in level game (matches Android)
-                if (!isLevelGame && !Preferences.generateNewMapEachTime) {
-                    FancyButton(
-                        text = "\uD83C\uDFB2",
-                        color = FancyButtonColor.GRAY,
-                        onClick = {
-                            requestManualNewGame()
-                        },
-                        modifier = Modifier.weight(1f).padding(end = 3.dp)
-                    )
-                }
                 // Save Map button: hidden in level games, disabled during solver (matches Android)
-                if (!isLevelGame && !isSolverRunning) {
+                if (!isLevelGame) {
                     FancyButton(
-                        text = "Save Map",
+                        text = stringProvider.getString("button_save_map") ?: "Save Map",
                         color = FancyButtonColor.RED,
-                        onClick = {
-                            onSaveLoad()
-                        },
+                        enabled = !isSolverRunning,
+                        onClick = { onSaveLoad() },
                         modifier = Modifier.weight(1f).padding(end = 3.dp)
                     )
                 }
+                // Hint toggle button (Android ToggleButton: 💡Hint / ❌ Hint);
+                // disabled while the solver is generating a map with no solution yet
                 FancyButton(
-                    text = if (hintContainerVisible) "\u274C Hint" else if (isSolverRunning) "Calculating..." else "\uD83D\uDCA1Hint",
+                    enabled = !isSolverRunning || sessionSolution != null,
+                    text = if (hintContainerVisible) {
+                        stringProvider.getString("hint_cancel_button") ?: "\u274C Hint"
+                    } else {
+                        stringProvider.getString("hint_button") ?: "\uD83D\uDCA1Hint"
+                    },
                     color = FancyButtonColor.HINT,
                     onClick = {
-                        println("[HINT] Hint button clicked, isSolverRunning=$isSolverRunning, solution=$sessionSolution")
-
-                        // If hint container is visible, toggle OFF (matches Android)
                         if (hintContainerVisible) {
+                            // Toggle OFF (matches Android unchecking the toggle)
                             hintContainerVisible = false
                             hintMessage = null
                             currentHintRobotColor = -1
@@ -712,10 +1234,7 @@ fun GameScreen(
                             hintManager.resetStep()
                             return@FancyButton
                         }
-
-                        // Toggle ON: show hint container
                         hintContainerVisible = true
-
                         if (sessionSolution == null || sessionSolution!!.moves.isEmpty()) {
                             hintMessage = if (isSolverRunning) {
                                 stringProvider.getString("ai_calculating") ?: "Calculating..."
@@ -723,8 +1242,6 @@ fun GameScreen(
                                 stringProvider.getString("no_solution_found") ?: "No solution found"
                             }
                         } else {
-                            println("[HINT] Solution exists, showing current hint")
-                            hintContainerVisible = true
                             if (!hintManager.hasSolution()) {
                                 val moves = sessionSolution!!.moves.mapNotNull { m ->
                                     (m as? RRGameMove)?.let { Pair(it.color, errDirToBoardDir(it.direction)) }
@@ -732,24 +1249,27 @@ fun GameScreen(
                                 hintManager.initialize(moves, isLevelGame, levelId)
                             }
                             updateHintDisplay()
+                            maybeAutoMoveHint()
                         }
                     },
                     modifier = Modifier.weight(1f).padding(end = 3.dp)
                 )
-                FancyButton(
-                    text = if (session.canUndo()) "Undo" else "Back",
-                    color = if (session.canUndo()) FancyButtonColor.YELLOW else FancyButtonColor.GREEN,
-                    onClick = {
-                        if (session.canUndo()) {
-                            val lastPathEntry = session.removeLastPathFromHistory()
-                            if (session.undoLastMove()) {
-                                lastPathEntry?.let { pathTracker.undoLastPathSegment(it[0]) }
-                                hintMessage = null
-                            }
-                        } else {
-                            onBack()
-                        }
-                    },
+                // Back button — text always "Back"; color encodes the action (Android updateBackButtonColor)
+                val atStart = moveCount == 0
+                val backColor = when {
+                    !atStart -> FancyButtonColor.HINT // yellow-ish: undo
+                    isLevelGame || session.isLoadedFromHistory -> FancyButtonColor.GREEN
+                    !session.isLoadedFromSave && filteredHistoryEntries().isNotEmpty() -> FancyButtonColor.GREEN
+                    else -> FancyButtonColor.GRAY
+                }
+                // Long-press required for random games at start (not level/history/save) — matches Android
+                val backNeedsCooldown = atStart && !isLevelGame &&
+                    !session.isLoadedFromHistory && !session.isLoadedFromSave
+                CooldownFancyButton(
+                    text = "\u25C2 " + (stringProvider.getString("button_back_game") ?: "Back"),
+                    color = backColor,
+                    cooldown = backNeedsCooldown,
+                    onClick = { handleBackButtonClick() },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -757,13 +1277,17 @@ fun GameScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 FancyButton(
-                    text = "Menu",
+                    text = stringProvider.getString("button_menu") ?: "Menu",
                     color = FancyButtonColor.GRAY,
                     onClick = onBack,
                     modifier = Modifier.weight(1f).padding(end = 3.dp)
                 )
                 FancyButton(
-                    text = if (gameWon) "Retry" else "Reset",
+                    text = if (gameWon) {
+                        stringProvider.getString("retry_button") ?: "Retry"
+                    } else {
+                        stringProvider.getString("button_reset") ?: "Reset"
+                    },
                     color = FancyButtonColor.BLUE,
                     onClick = {
                         session.resetGame()
@@ -773,27 +1297,121 @@ fun GameScreen(
                         hintMessage = null
                         hintContainerVisible = false
                         selectedRobotHasMoved = false
+                        elapsedTime = 0
                     },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).padding(end = 3.dp)
                 )
-                // New Game button: hidden in level games (matches Android), shows "Next Level"/"New Random Game" on completion
-                if (!isLevelGame || gameWon) {
-                    FancyButton(
-                        text = if (gameWon) {
-                            if (isLevelGame) "Next Level" else "New Random Game"
-                        } else "New Game",
-                        color = FancyButtonColor.GREEN,
-                        onClick = {
-                            if (gameWon) {
-                                if (isLevelGame) onNextLevel() else requestManualNewGame()
-                            } else requestManualNewGame()
+                // New Map button: hidden in level games (Android sets GONE);
+                // history games show "Next Game" (disabled at last entry)
+                if (!isLevelGame) {
+                    val isHistoryGame = session.isLoadedFromHistory
+                    val hasNext = isHistoryGame && session.hasNextHistoryEntry()
+                    CooldownFancyButton(
+                        text = if (isHistoryGame) {
+                            stringProvider.getString("button_next_game") ?: "Next Game"
+                        } else {
+                            stringProvider.getString("button_new_game") ?: "New Game"
                         },
+                        color = FancyButtonColor.GREEN,
+                        enabled = !isHistoryGame || hasNext,
+                        cooldown = true,
+                        onClick = { handleNewMapButtonClick() },
                         modifier = Modifier.weight(1f)
                     )
                 }
             }
+            // Full-width completion button (Android next_level_button, initially invisible;
+            // hidden while an achievement popup is showing — Android does the same)
+            if (gameWon && pendingAchievements.isEmpty()) {
+                FancyButton(
+                    text = if (isLevelGame) {
+                        stringProvider.getString("next_level") ?: "Next Level"
+                    } else {
+                        stringProvider.getString("new_random_game_button") ?: "New Random Game"
+                    },
+                    color = FancyButtonColor.GREEN,
+                    onClick = { handleNewMapButtonClick() },
+                    modifier = Modifier.fillMaxWidth().padding(top = 3.dp)
+                )
+            }
         }
     }
+    }
+
+    // Toast-style announcement overlay (Android Toast equivalent)
+    announcement?.let { msg ->
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Text(
+                text = msg,
+                color = Color.White,
+                fontSize = 13.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .padding(bottom = 120.dp)
+                    .background(Color(0xCC333333), RoundedCornerShape(8.dp))
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+        }
+    }
+
+    // Achievement unlock popup (Android AchievementPopup equivalent — tap to dismiss)
+    AchievementUnlockPopup(
+        achievements = pendingAchievements,
+        onDismiss = { pendingAchievements = emptyList() }
+    )
+
+    // Back-to-previous-level confirmation (Android showBackToPreviousLevelDialog)
+    if (showPrevLevelDialog) {
+        val prevId = (gameState?.levelId ?: 2) - 1
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showPrevLevelDialog = false },
+            text = {
+                Text(stringProvider.getString("confirm_level_change", prevId)
+                    ?: "Go back to level $prevId?")
+            },
+            confirmButton = {
+                Button(onClick = {
+                    showPrevLevelDialog = false
+                    session.startLevelGame(prevId)
+                    pathTracker.clearPaths()
+                    elapsedTime = 0
+                    hintManager.reset()
+                    hintMessage = null
+                    hintContainerVisible = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                Button(onClick = { showPrevLevelDialog = false }) {
+                    Text(stringProvider.getString("cancel") ?: "Cancel")
+                }
+            }
+        )
+    }
+
+    // Last-level dialog (Android: level 140 → offer profile page for custom maps)
+    if (showLastLevelDialog) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showLastLevelDialog = false },
+            title = { Text("Last Level") },
+            text = {
+                Text(stringProvider.getString("last_level_message")
+                    ?: "That was the last level!")
+            },
+            confirmButton = {
+                Button(onClick = {
+                    showLastLevelDialog = false
+                    onProfile()
+                }) { Text(stringProvider.getString("yes") ?: "Yes") }
+            },
+            dismissButton = {
+                Button(onClick = { showLastLevelDialog = false }) {
+                    Text(stringProvider.getString("no") ?: "No")
+                }
+            }
+        )
     }
 
     generationFallback?.let { decision ->
@@ -947,6 +1565,7 @@ fun BoardCanvas(
     pathTracker: PathTracker? = null,
     selectedRobotIndex: Int = -1,
     selectedRobotHasMoved: Boolean = false,
+    robotMoveAnim: RobotMoveAnim? = null,
     modifier: Modifier = Modifier
 ) {
     val gameState = remember(board) { ComposeGameState(board) }
@@ -1439,6 +2058,18 @@ fun BoardCanvas(
             val position = board.robotPositions[i]
             val robotX = position % board.width
             val robotY = position / board.width
+            // Animated position while a move animation is in flight (RobotAnimationManager equivalent)
+            val anim = robotMoveAnim
+            val drawX: Float
+            val drawY: Float
+            if (anim != null && anim.robotColor == i) {
+                val p = anim.progress.value
+                drawX = anim.fromX + (anim.toX - anim.fromX) * p
+                drawY = anim.fromY + (anim.toY - anim.fromY) * p
+            } else {
+                drawX = robotX.toFloat()
+                drawY = robotY.toFloat()
+            }
             val sprite = if (i in robotSprites.indices) robotSprites[i] else robotSprites.last()
             // Match Android scale logic:
             // - Selected and not moved yet: 1.5x (initial click pop)
@@ -1452,8 +2083,8 @@ fun BoardCanvas(
             val robotInset = (robotScale - 1f) * cellSize / 2f
             drawImageScaled(
                 sprite,
-                offsetX + robotX * cellSize - robotInset,
-                offsetY + robotY * cellSize - robotInset,
+                offsetX + drawX * cellSize - robotInset,
+                offsetY + drawY * cellSize - robotInset,
                 cellSize * robotScale,
                 cellSize * robotScale
             )

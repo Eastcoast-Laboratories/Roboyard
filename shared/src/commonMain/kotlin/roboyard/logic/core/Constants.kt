@@ -3,6 +3,9 @@ package roboyard.logic.core
 // ARGB color constants (replaced android.graphics.Color for KMP compatibility)
 
 object Constants {
+    /** App version shared across platforms. Keep in sync with app/build.gradle versionName. */
+    const val APP_VERSION_NAME: String = "53"
+
     // Screen indices (preserved for compatibility with existing code)
     const val SCREEN_START: Int = 0
     const val SCREEN_SETTINGS: Int = 2

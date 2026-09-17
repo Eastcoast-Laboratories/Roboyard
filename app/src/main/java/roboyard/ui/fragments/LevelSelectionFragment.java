@@ -435,58 +435,9 @@ public class LevelSelectionFragment extends BaseGameFragment {
      */
     private void loadHistoryByMapName() {
         historyByMapName.clear();
-        try {
-            List<GameHistoryEntry> entries = GameHistoryManager.getHistoryEntries(roboyard.platform.AndroidStorage.getInstance(requireActivity()));
-            if (entries != null) {
-                for (GameHistoryEntry entry : entries) {
-                    String key = extractLevelKey(entry);
-                    if (key == null) continue;
-                    // Keep the entry with the most completions if there are duplicates
-                    GameHistoryEntry existing = historyByMapName.get(key);
-                    if (existing == null || entry.getCompletionCount() >= existing.getCompletionCount()) {
-                        historyByMapName.put(key, entry);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            Timber.e(e, "[LEVEL_SELECTION] Error loading history entries for minimap display");
-        }
+        historyByMapName.putAll(GameHistoryManager.getHistoryByLevelKey(
+                roboyard.platform.AndroidStorage.getInstance(requireActivity())));
         Timber.d("[LEVEL_SELECTION] Loaded %d history entries into map", historyByMapName.size());
-    }
-
-    /**
-     * Extracts a normalized level key (e.g. "level_1") from a history entry.
-     * History mapName is "Level 1" (set via GameStateManager.startLevelGame).
-     * Also falls back to parsing the mapPath basename (e.g. "level_1.txt").
-     *
-     * @return normalized key like "level_1" or "custom_level_141", or null if not a level entry
-     */
-    private static String extractLevelKey(GameHistoryEntry entry) {
-        // Prioritize mapPath parsing to handle corrupt server data where mapNames are 5-letter codes
-        String mapPath = entry.getMapPath();
-        Timber.d("[LEVEL_SELECTION] extractLevelKey: mapName='%s', mapPath='%s'", entry.mapName, mapPath);
-        if (mapPath != null) {
-            String base = mapPath.contains("/")
-                    ? mapPath.substring(mapPath.lastIndexOf('/') + 1)
-                    : mapPath;
-            if (base.startsWith("level_") || base.startsWith("custom_level_")) {
-                String key = base.endsWith(".txt") ? base.substring(0, base.length() - 4) : base;
-                Timber.d("[LEVEL_SELECTION] extractLevelKey: parsed from mapPath, key='%s'", key);
-                return key;
-            }
-        }
-        // Fallback: try mapName "Level N" -> "level_N"
-        String mapName = entry.mapName;
-        if (mapName != null) {
-            if (mapName.matches("(?i)Level \\d+")) {
-                int id = Integer.parseInt(mapName.trim().split("\\s+")[1]);
-                String key = id >= 141 ? "custom_level_" + id : "level_" + id;
-                Timber.d("[LEVEL_SELECTION] extractLevelKey: matched Level pattern, key='%s'", key);
-                return key;
-            }
-        }
-        Timber.d("[LEVEL_SELECTION] extractLevelKey: no valid key found, returning null");
-        return null;
     }
 
     /**
@@ -497,43 +448,10 @@ public class LevelSelectionFragment extends BaseGameFragment {
      */
     private void loadAvailableLevels() {
         availableLevels.clear();
-        try {
-            // Load built-in levels (1-140)
-            String[] files = getActivity().getAssets().list("Maps");
-            for (String file : files) {
-                if (file.startsWith("level_") && file.endsWith(".txt")) {
-                    try {
-                        int levelId = Integer.parseInt(file.substring(6, file.length() - 4));
-                        availableLevels.add(levelId);
-                    } catch (NumberFormatException e) {
-                        // Skip files with invalid level IDs
-                    }
-                }
-            }
-
-            // Check for custom levels (141+) in internal storage
-            File internalDir = requireContext().getFilesDir();
-            File[] internalFiles = internalDir.listFiles();
-            if (internalFiles != null) {
-                for (File file : internalFiles) {
-                    String fileName = file.getName();
-                    if (fileName.startsWith("custom_level_") && fileName.endsWith(".txt")) {
-                        try {
-                            int levelId = Integer.parseInt(fileName.substring("custom_level_".length(), fileName.length() - 4));
-                            availableLevels.add(levelId);
-                        } catch (NumberFormatException e) {
-                            // Skip files with invalid level IDs
-                        }
-                    }
-                }
-            }
-
-            // Sort levels by ID
-            Collections.sort(availableLevels);
-
-        } catch (IOException e) {
-            Timber.e(e, "Error loading levels");
-        }
+        // Built-in levels from assets/Maps plus custom_level_N.txt in private
+        // storage — shared discovery via PlatformStorage.listAssetFiles
+        availableLevels.addAll(roboyard.logic.core.LevelLoader.INSTANCE.listAvailableLevelIds(
+                roboyard.platform.AndroidStorage.getInstance(requireContext())));
 
         // Calculate total stars earned
         calculateTotalStars();

@@ -37,7 +37,7 @@ public class BackgroundSoundServiceTest {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         
         // Ensure background sound volume is set to a non-zero value
-        Preferences.initialize(context);
+        Preferences.initialize(roboyard.platform.AndroidStorage.getInstance(context), false);
         if (Preferences.backgroundSoundVolume == 0) {
             Preferences.setBackgroundSoundVolume(50);
             Timber.d("[UNITTESTS][SOUND_TEST] Set background sound volume to 50 for testing");

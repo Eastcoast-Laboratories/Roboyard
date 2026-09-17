@@ -48,8 +48,8 @@ class ComposeAppUiSmokeTest {
         composeRule.onNodeWithText("©").performClick()
         composeRule.waitForIdle()
 
-        // Should navigate to Credits screen and show a BACK button
-        composeRule.onNodeWithText("BACK").assertExists()
+        // Should navigate to Credits screen and show a back button ("← Back")
+        composeRule.onNodeWithText("Back", substring = true).assertExists()
     }
 
     @Test
@@ -58,7 +58,7 @@ class ComposeAppUiSmokeTest {
 
         composeRule.onNodeWithText("©").performClick()
         composeRule.waitForIdle()
-        composeRule.onNodeWithText("BACK").performClick()
+        composeRule.onNodeWithText("Back", substring = true).performClick()
         composeRule.waitForIdle()
 
         // Should be back at main menu
