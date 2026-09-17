@@ -257,21 +257,22 @@ fun MainMenuScreen(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Credits button - © symbol
+                    // Credits button - © symbol (Android: paddingBottom=5dp nudges the glyph up)
                     CircularButton(
                         text = "©",
                         color = CircularButtonColor.YELLOW,
                         onClick = onCredits,
-                        modifier = Modifier.size(48.dp).padding(8.dp)
+                        modifier = Modifier.size(64.dp).padding(8.dp),
+                        textModifier = Modifier.padding(bottom = 5.dp)
                     )
                     Spacer(modifier = Modifier.weight(1f))
-                    // Help button
+                    // Help button (Android: 48dp button + 8dp padding around the icon)
                     IconCircularButton(
                         icon = Res.drawable.help,
                         color = CircularButtonColor.ORANGE,
                         contentDescription = stringProvider.getString("help_a11y") ?: "How to Play",
                         onClick = onHelp,
-                        modifier = Modifier.size(48.dp).padding(8.dp)
+                        modifier = Modifier.size(64.dp).padding(8.dp)
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     // Achievements button
@@ -280,7 +281,7 @@ fun MainMenuScreen(
                         color = CircularButtonColor.PURPLE,
                         contentDescription = stringProvider.getString("achievements_title") ?: "Achievements",
                         onClick = onAchievements,
-                        modifier = Modifier.size(48.dp).padding(8.dp)
+                        modifier = Modifier.size(64.dp).padding(8.dp)
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     // Settings button
@@ -289,7 +290,7 @@ fun MainMenuScreen(
                         color = CircularButtonColor.GRAY,
                         contentDescription = stringProvider.getString("settings_a11y") ?: "Game settings",
                         onClick = onSettings,
-                        modifier = Modifier.size(48.dp).padding(8.dp).semantics { testTag = "settingsButton" }
+                        modifier = Modifier.size(64.dp).padding(8.dp).semantics { testTag = "settingsButton" }
                     )
                 }
             }

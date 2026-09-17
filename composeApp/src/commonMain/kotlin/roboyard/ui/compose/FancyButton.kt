@@ -230,7 +230,8 @@ fun CircularButton(
     color: CircularButtonColor,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    textModifier: Modifier = Modifier
 ) {
     val shape = RoundedCornerShape(percent = 50)
     Box(
@@ -247,7 +248,8 @@ fun CircularButton(
                 text = it,
                 color = color.textColor,
                 fontWeight = FontWeight.Bold,
-                fontSize = 30.sp
+                fontSize = 30.sp,
+                modifier = textModifier
             )
         }
     }
