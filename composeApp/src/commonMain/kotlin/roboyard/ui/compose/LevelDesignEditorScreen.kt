@@ -680,8 +680,8 @@ fun LevelDesignEditorScreen(
             )
         }
 
-        androidx.compose.foundation.VerticalScrollbar(
-            adapter = androidx.compose.foundation.rememberScrollbarAdapter(editorScrollState),
+        PlatformVerticalScrollbar(
+            scrollState = editorScrollState,
             modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight()
         )
     }

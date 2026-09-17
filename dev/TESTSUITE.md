@@ -383,6 +383,14 @@ Use these tags to find tests relevant to a specific feature:
 
 ---
 
+## Build / Release
+
+| Tool | Status | Description | Tags |
+|------|--------|-------------|------|
+| `dev/build_compose_app.sh` | ✅ Working | Builds the Compose Multiplatform app artifacts and publishes them to `~/Downloads/Roboyard_{android,desktop,ios}/` as `Roboyard_v<version>_<platform>.*`. Usage: `bash dev/build_compose_app.sh [android|desktop|ios|all]` (default: all three). Android builds `:composeAndroidApp:assembleRelease` (wrapper module hosting `App()`; version comes from `composeAndroidApp/build.gradle` `versionName`), Desktop builds `:composeApp:packageReleaseUberJarForCurrentOS`, iOS links `Roboyard.framework` (arm64 + simulator, zipped) — macOS only, skipped with a warning elsewhere. | compose, build, release, android, desktop, ios |
+
+---
+
 ## Notes
 
 - **`LevelEditorExportTest`**: Requires a running Python receiver: `python3 dev/scripts/level_receiver.py`. Skip in CI unless setup is available.

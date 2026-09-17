@@ -42,6 +42,16 @@ class AndroidSoundManager(private val context: Context) : SoundManager {
     }
 }
 
+private var registeredSoundManager: SoundManager? = null
+
+/** Called once by the app module's Application class (mirrors initPlatformStorage). */
+fun initSoundManager(soundManager: SoundManager) {
+    registeredSoundManager = soundManager
+}
+
 actual fun getSoundManager(): SoundManager {
-    throw IllegalStateException("AndroidSoundManager requires Context. Use AndroidSoundManager(context) directly.")
+    return registeredSoundManager
+        ?: throw IllegalStateException(
+            "SoundManager not initialized. Call initSoundManager() from the Application class."
+        )
 }

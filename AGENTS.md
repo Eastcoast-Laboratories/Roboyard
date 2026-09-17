@@ -2,7 +2,8 @@
 
 ## Project Shape
 
-- Kotlin Multiplatform project with modules `app` (Android), `shared`, and `composeApp` (Desktop/iOS).
+- Kotlin Multiplatform project with modules `app` (Android), `shared`, `composeApp` (Compose Multiplatform UI: Desktop/iOS) and `composeAndroidApp` (APK wrapper hosting the Compose UI).
+- The `app` module is the actively developed Android app and the reference implementation — never call it "legacy".
 - Goal: the app must run on Android, iOS, and Desktop. Keep changes platform-independent or resolve platform differences with `expect`/`actual`.
 - The solver code under `shared/src/*/kotlin/driftingdroids/` is ported from the DriftingDroids project (local repo: `/var/www/DriftingDroids`). Do not delete files there; coordinate solver changes with the upstream source.
 

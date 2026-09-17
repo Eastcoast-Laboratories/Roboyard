@@ -81,3 +81,10 @@ fun Modifier.desktopVerticalScroll(): Modifier = composed {
         .desktopScrollable(scrollState)
         .verticalScroll(scrollState)
 }
+
+/**
+ * Vertical scrollbar shown next to scrollable content.
+ * Real scrollbar on Desktop; touch platforms show none (actuals are no-ops).
+ */
+@androidx.compose.runtime.Composable
+expect fun PlatformVerticalScrollbar(scrollState: ScrollState, modifier: Modifier)

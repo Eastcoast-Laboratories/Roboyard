@@ -24,6 +24,7 @@ app/src/main/assets/adi-registration.properties
 /shared/bin
 /composeApp/build
 composeApp/build/*
+/composeAndroidApp/build
 /dev/images/yard/
 zzbak~*
 /app/release/output-metadata.json
@@ -35,7 +36,9 @@ zzbak~*
 /dev/translation_stats/
 androidTestResultsUserPreferences.xml
 /dev/pgs_import/*.png
-.kotlin/*
+.kotlin/
+/composeApp/bin
+/composeAndroidApp/bin
 */python_testsuite_screenshots/
 screenshot_*.png
 */__pycache__/*
