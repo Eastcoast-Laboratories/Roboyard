@@ -70,7 +70,7 @@ fun AchievementsScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .desktopVerticalScroll()
                 .padding(16.dp)
         ) {
             // Progress text: "unlocked / total"

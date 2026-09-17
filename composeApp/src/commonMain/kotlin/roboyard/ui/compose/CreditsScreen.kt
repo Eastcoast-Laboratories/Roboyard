@@ -65,10 +65,12 @@ fun CreditsScreen(
                 .padding(top = 16.dp, bottom = 16.dp)
         )
 
+        val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
                 .weight(1f)
-                .verticalScroll(rememberScrollState())
+                .desktopScrollable(scrollState)
+                .verticalScroll(scrollState)
         ) {
             // Based on (matches fragment_credits.xml)
             Text(

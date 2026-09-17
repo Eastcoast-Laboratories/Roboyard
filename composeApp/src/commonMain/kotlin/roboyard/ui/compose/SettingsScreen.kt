@@ -106,7 +106,7 @@ fun SettingsScreen(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
+                    .desktopVerticalScroll()
                     .padding(8.dp)
             ) {
                 // Title — 3s long-press opens the debug screen (matches Android

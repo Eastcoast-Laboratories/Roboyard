@@ -45,7 +45,7 @@ fun LogViewerDialog(onDismiss: () -> Unit) {
         onDismissRequest = onDismiss,
         title = { Text("Logs (last ${roboyard.logic.util.LogBuffer.getLines().size} lines)") },
         text = {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+            Column(modifier = Modifier.desktopVerticalScroll()) {
                 val lines = roboyard.logic.util.LogBuffer.getLines()
                 if (lines.isEmpty()) {
                     Text("No log entries yet", color = Color.Gray, fontSize = 12.sp)

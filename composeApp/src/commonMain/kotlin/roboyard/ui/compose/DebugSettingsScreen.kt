@@ -97,7 +97,7 @@ fun DebugSettingsScreen(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
+                .desktopVerticalScroll()
         ) {
             // ---- STREAK TESTING ----
             DebugSectionTitle("STREAK TESTING")
@@ -521,7 +521,7 @@ fun DebugSettingsScreen(
             onDismissRequest = { showAchievementSelector = false },
             title = { Text("Toggle Achievements") },
             text = {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                Column(modifier = Modifier.desktopVerticalScroll()) {
                     DEBUG_ACHIEVEMENT_IDS.forEach { achievementId ->
                         val unlocked = achievementManager.isUnlocked(achievementId)
                         TextButton(onClick = {

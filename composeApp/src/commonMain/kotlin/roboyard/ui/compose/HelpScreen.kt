@@ -53,7 +53,7 @@ fun HelpScreen(
         Column(
             modifier = Modifier
                 .weight(1f)
-                .verticalScroll(rememberScrollState())
+                .desktopVerticalScroll()
         ) {
             // Goal section
             SectionHeading(s("help_goal_section_title", "Goal"))

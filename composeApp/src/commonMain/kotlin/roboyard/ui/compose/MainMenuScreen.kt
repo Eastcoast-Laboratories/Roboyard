@@ -186,7 +186,7 @@ fun MainMenuScreen(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
+                    .desktopVerticalScroll()
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
