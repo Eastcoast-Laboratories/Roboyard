@@ -534,8 +534,8 @@ fun LevelDesignEditorScreen(
                 listOf(
                     EDIT_MODE_ROBOT to s("editor_mode_robot", "Robot"),
                     EDIT_MODE_TARGET to s("editor_mode_target", "Goal"),
-                    EDIT_MODE_WALL_H to s("editor_mode_wall_h", "– Wall"),
-                    EDIT_MODE_WALL_V to s("editor_mode_wall_v", "| Wall"),
+                    EDIT_MODE_WALL_H to "–",
+                    EDIT_MODE_WALL_V to "|",
                     EDIT_MODE_ERASE to s("editor_mode_erase", "Erase")
                 ).forEach { (mode, label) ->
                     Row(
