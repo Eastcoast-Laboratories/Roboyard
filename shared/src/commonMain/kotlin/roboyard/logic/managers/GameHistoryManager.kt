@@ -572,17 +572,14 @@ object GameHistoryManager {
      * @param entry The history entry
      * @return The level key, or null if not a level
      */
-    private fun extractLevelKey(entry: GameHistoryEntry): String? {
-        val mapName = entry.mapName
-        if (mapName != null && mapName.matches("(?i)Level \\d+".toRegex())) {
-            val id =
-                mapName.trim { it <= ' ' }.split("\\s+".toRegex()).dropLastWhile { it.isEmpty() }
-                    .toTypedArray()[1].toInt()
-
-            val levelKey = if (id >= 141) "custom_level_$id" else "level_$id"
-            return levelKey
-        }
-
+    /**
+     * Extracts a normalized level key (e.g. "level_1", "custom_level_141") from a
+     * history entry. Prioritizes mapPath parsing to handle corrupt server data
+     * where mapNames are 5-letter codes; falls back to mapName "Level N".
+     * Matches Android LevelSelectionFragment.extractLevelKey.
+     */
+    @JvmStatic
+    fun extractLevelKey(entry: GameHistoryEntry): String? {
         val mapPath = entry.getMapPath()
         if (mapPath != null) {
             val base = if (mapPath.contains("/"))
@@ -593,7 +590,38 @@ object GameHistoryManager {
                 return if (base.endsWith(".txt")) base.substring(0, base.length - 4) else base
             }
         }
+
+        val mapName = entry.mapName
+        if (mapName != null && mapName.matches("(?i)Level \\d+".toRegex())) {
+            val id =
+                mapName.trim { it <= ' ' }.split("\\s+".toRegex()).dropLastWhile { it.isEmpty() }
+                    .toTypedArray()[1].toInt()
+            return if (id >= 141) "custom_level_$id" else "level_$id"
+        }
         return null
+    }
+
+    /**
+     * Loads history entries mapped by normalized level key (e.g. "level_1").
+     * When duplicates exist, the entry with the most completions wins.
+     * Matches Android LevelSelectionFragment.loadHistoryByMapName.
+     */
+    @JvmStatic
+    fun getHistoryByLevelKey(storage: PlatformStorage): Map<String, GameHistoryEntry> {
+        val result = HashMap<String, GameHistoryEntry>()
+        try {
+            val entries = getHistoryEntries(storage)
+            for (entry in entries) {
+                val key = extractLevelKey(entry) ?: continue
+                val existing = result[key]
+                if (existing == null || entry.completionCount >= existing.completionCount) {
+                    result[key] = entry
+                }
+            }
+        } catch (e: Exception) {
+            log.e(e, "[LEVEL_SELECTION] Error loading history entries for minimap display")
+        }
+        return result
     }
 
     /**

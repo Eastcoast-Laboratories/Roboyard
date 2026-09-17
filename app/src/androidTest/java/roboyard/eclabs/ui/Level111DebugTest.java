@@ -105,7 +105,7 @@ public class Level111DebugTest {
                         if (move instanceof RRGameMove) {
                             RRGameMove rrMove = (RRGameMove) move;
                             Timber.d("[UNITTESTS][LEVEL111_DEBUG] Move %d: Robot %d -> %s", 
-                                    i + 1, rrMove.getColor(), rrMove.move);
+                                    i + 1, rrMove.getColor(), rrMove.getMove());
                         }
                     }
                 } else {

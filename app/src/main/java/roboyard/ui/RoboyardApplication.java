@@ -96,6 +96,7 @@ public class RoboyardApplication extends Application implements Application.Acti
         
         // Store the application context for global access
         appContext = getApplicationContext();
+        roboyard.logic.platform.PlatformBrowser_androidKt.setAppContextProvider(() -> appContext);
 
         registerActivityLifecycleCallbacks(this);
         
@@ -105,6 +106,8 @@ public class RoboyardApplication extends Application implements Application.Acti
         // Set up storage provider for Preferences
         PlatformStorage storage = AndroidStorage.getInstance(appContext);
         Preferences.INSTANCE.setStorageProvider(() -> storage);
+        // Register for shared getPlatformStorage() used by KMP common code
+        roboyard.logic.storage.PlatformStorage_androidKt.initPlatformStorage(storage);
 
         // Set up StringProvider for shared module localization
         roboyard.platform.StringProviderBridge.setStringProvider(

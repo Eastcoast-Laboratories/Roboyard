@@ -270,7 +270,7 @@ public abstract class BaseGameFragment extends Fragment {
      * @param openAfterLogin If true, opens profile page after successful login
      */
     protected void openProfilePage(boolean openAfterLogin) {
-        roboyard.logic.network.RoboyardApiClient apiClient = roboyard.logic.network.RoboyardApiClient.getInstance(requireContext());
+        roboyard.logic.network.RoboyardApiClient apiClient = roboyard.logic.network.ApiClientProvider.api(requireContext());
         if (apiClient.isLoggedIn()) {
             // Open profile in browser with auto-login token
             String url = apiClient.buildAutoLoginUrl("https://roboyard.z11.de/profile");
@@ -336,7 +336,7 @@ public abstract class BaseGameFragment extends Fragment {
             return;
         }
         
-        roboyard.logic.network.RoboyardApiClient apiClient = roboyard.logic.network.RoboyardApiClient.getInstance(requireContext());
+        roboyard.logic.network.RoboyardApiClient apiClient = roboyard.logic.network.ApiClientProvider.api(requireContext());
         if (apiClient.isLoggedIn()) {
             String userName = apiClient.getUserName();
             if (userName == null) userName = apiClient.getUserEmail();

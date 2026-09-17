@@ -47,6 +47,7 @@ import java.util.Scanner;
 
 import roboyard.logic.storage.FileReadWrite;
 import roboyard.logic.network.RoboyardApiClient;
+import roboyard.logic.network.ApiClientProvider;
 import roboyard.logic.core.Constants;
 import roboyard.logic.solver.RRGetMap;
 import roboyard.logic.core.WallPatternGenerator;
@@ -860,7 +861,7 @@ public class LevelDesignEditorFragment extends Fragment {
     }
     
     private void shareLevelOnline(String levelText, String mapName) {
-        RoboyardApiClient apiClient = RoboyardApiClient.getInstance(requireContext());
+        RoboyardApiClient apiClient = ApiClientProvider.api(requireContext());
         
         if (apiClient.isLoggedIn()) {
             // Logged in: post directly via API
@@ -876,7 +877,7 @@ public class LevelDesignEditorFragment extends Fragment {
                     }
                     
                     // Open the share URL in browser with auto-login
-                    String autoLoginUrl = RoboyardApiClient.getInstance(requireContext()).buildAutoLoginUrl(result.shareUrl);
+                    String autoLoginUrl = ApiClientProvider.api(requireContext()).buildAutoLoginUrl(result.shareUrl);
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(autoLoginUrl));
                     startActivity(intent);
                     
@@ -900,7 +901,7 @@ public class LevelDesignEditorFragment extends Fragment {
                 }
                 
                 // Wrap with auto-login if user is logged in
-                String finalUrl = RoboyardApiClient.getInstance(requireContext()).buildAutoLoginUrl(shareUrl);
+                String finalUrl = ApiClientProvider.api(requireContext()).buildAutoLoginUrl(shareUrl);
                 
                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(finalUrl));
                 startActivity(intent);

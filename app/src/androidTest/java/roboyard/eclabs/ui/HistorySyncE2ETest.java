@@ -40,6 +40,7 @@ import roboyard.logic.storage.FileReadWrite;
 import roboyard.logic.managers.GameHistoryManager;
 import roboyard.logic.managers.GameStateManager;
 import roboyard.logic.network.RoboyardApiClient;
+import roboyard.logic.network.ApiClientProvider;
 import roboyard.logic.managers.SyncManager;
 import timber.log.Timber;
 
@@ -81,7 +82,7 @@ public class HistorySyncE2ETest {
 
         // Ensure we start logged out and with clean history
         activityRule.getScenario().onActivity(a -> {
-            RoboyardApiClient.getInstance(a).logout();
+            ApiClientProvider.api(a).logout();
         });
         clearAllHistory();
         
@@ -104,7 +105,7 @@ public class HistorySyncE2ETest {
         AtomicReference<String> registerError = new AtomicReference<>();
 
         activityRule.getScenario().onActivity(a -> {
-            RoboyardApiClient.getInstance(a).register(testName, testEmail, testPassword,
+            ApiClientProvider.api(a).register(testName, testEmail, testPassword,
                     new RoboyardApiClient.ApiCallback<RoboyardApiClient.LoginResult>() {
                         @Override
                         public void onSuccess(RoboyardApiClient.LoginResult result) {
@@ -128,7 +129,7 @@ public class HistorySyncE2ETest {
         // Verify logged in
         AtomicBoolean isLoggedIn = new AtomicBoolean(false);
         activityRule.getScenario().onActivity(a -> {
-            isLoggedIn.set(RoboyardApiClient.getInstance(a).isLoggedIn());
+            isLoggedIn.set(ApiClientProvider.api(a).isLoggedIn());
         });
         assertTrue("Must be logged in after registration", isLoggedIn.get());
         step("1/8", "PASS: Registered and logged in as " + testEmail);
@@ -192,11 +193,11 @@ public class HistorySyncE2ETest {
         AtomicInteger serverEntryCount = new AtomicInteger(0);
 
         activityRule.getScenario().onActivity(a -> {
-            RoboyardApiClient.getInstance(a).fetchHistory(new RoboyardApiClient.ApiCallback<org.json.JSONArray>() {
+            ApiClientProvider.api(a).fetchHistory(new RoboyardApiClient.ApiCallback<com.google.gson.JsonArray>() {
                 @Override
-                public void onSuccess(org.json.JSONArray result) {
-                    serverEntryCount.set(result.length());
-                    Timber.d(TAG + " Server has %d history entries", result.length());
+                public void onSuccess(com.google.gson.JsonArray result) {
+                    serverEntryCount.set(result.size());
+                    Timber.d(TAG + " Server has %d history entries", result.size());
                     fetchLatch.countDown();
                 }
 
@@ -216,8 +217,8 @@ public class HistorySyncE2ETest {
         // === STEP 5: Reset all local data + logout ===
         step("5/8", "Resetting all local data and logging out");
         activityRule.getScenario().onActivity(a -> {
-            new DataExportImportManager(a).resetAllData();
-            RoboyardApiClient.getInstance(a).logout();
+            new DataExportImportManager(roboyard.platform.AndroidStorage.getInstance(a)).resetAllData();
+            ApiClientProvider.api(a).logout();
         });
         Thread.sleep(1000);
 
@@ -229,7 +230,7 @@ public class HistorySyncE2ETest {
         // Verify logged out
         AtomicBoolean loggedOutCheck = new AtomicBoolean(true);
         activityRule.getScenario().onActivity(a -> {
-            loggedOutCheck.set(RoboyardApiClient.getInstance(a).isLoggedIn());
+            loggedOutCheck.set(ApiClientProvider.api(a).isLoggedIn());
         });
         assertFalse("Must be logged out after reset", loggedOutCheck.get());
         step("5/8", "PASS: All data reset, logged out");
@@ -241,7 +242,7 @@ public class HistorySyncE2ETest {
         AtomicReference<String> loginError = new AtomicReference<>();
 
         activityRule.getScenario().onActivity(a -> {
-            RoboyardApiClient.getInstance(a).login(testEmail, testPassword,
+            ApiClientProvider.api(a).login(testEmail, testPassword,
                     new RoboyardApiClient.ApiCallback<RoboyardApiClient.LoginResult>() {
                         @Override
                         public void onSuccess(RoboyardApiClient.LoginResult result) {
@@ -271,7 +272,7 @@ public class HistorySyncE2ETest {
         AtomicReference<String> downloadError = new AtomicReference<>();
 
         activityRule.getScenario().onActivity(a -> {
-            SyncManager.getInstance(a).downloadHistory(a, new RoboyardApiClient.ApiCallback<Integer>() {
+            ApiClientProvider.sync(a).downloadHistory(new RoboyardApiClient.ApiCallback<Integer>() {
                 @Override
                 public void onSuccess(Integer result) {
                     Timber.d(TAG + " Download success: %d entries restored", result);

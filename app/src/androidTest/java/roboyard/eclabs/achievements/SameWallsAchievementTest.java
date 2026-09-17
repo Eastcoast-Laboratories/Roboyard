@@ -70,7 +70,7 @@ public class SameWallsAchievementTest {
         // Clear history on Main thread and set activity reference
         runOnMainThreadSync(act -> {
             FileReadWrite.deletePrivateData(act, "history_index.json");
-            achievementManager.setCurrentActivity(act);
+            AchievementManagerFactory.setCurrentActivity(act);
             Timber.d("[UNITTESTS][SAME_WALLS_TEST] History cleared, activity set");
         });
 
@@ -116,7 +116,7 @@ public class SameWallsAchievementTest {
             Timber.d("[UNITTESTS][SAME_WALLS_TEST] Added history entry #%d: wallSig=%s", positionIndex, wallSig);
 
             // Mirror GameFragment: setCurrentActivity + onRandomGameCompleted after saveToHistoryNow
-            achievementManager.setCurrentActivity(act);
+            AchievementManagerFactory.setCurrentActivity(act);
             achievementManager.onNewGameStarted();
             achievementManager.onRandomGameCompleted(5, 5, 0, 15000, false, 4, 1, 1, true, false, wallSig);
         });

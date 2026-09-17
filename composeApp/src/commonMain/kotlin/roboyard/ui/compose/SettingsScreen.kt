@@ -9,19 +9,23 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,6 +35,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -42,6 +52,10 @@ import roboyard.logic.core.Constants
 import roboyard.logic.core.Preferences
 import roboyard.logic.core.SettingsManager
 import roboyard.logic.core.SettingsState
+import roboyard.logic.managers.DataExportImportManager
+import roboyard.logic.managers.SyncManager
+import roboyard.logic.network.RoboyardApiClient
+import roboyard.logic.storage.getPlatformStorage
 import roboyard.logic.ui.getStringProvider
 
 private val DescriptionGray = Color(0xFFAAAAAA)
@@ -51,7 +65,8 @@ private val DropdownBackground = Color(0xFF333333)
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit = {},
-    onFullscreenChanged: (Boolean) -> Unit = {}
+    onFullscreenChanged: (Boolean) -> Unit = {},
+    onDebugSettings: () -> Unit = {}
 ) {
     var settings by remember { mutableStateOf(SettingsManager.currentState()) }
     val stringProvider = remember { getStringProvider() }
@@ -83,6 +98,10 @@ fun SettingsScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(8.dp)
             ) {
+                // Title — 3s long-press opens the debug screen (matches Android
+                // Constants.DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS on the settings title)
+                val coroutineScope = rememberCoroutineScope()
+                var debugPressJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
                 Text(
                     text = s("settings_title", "Settings"),
                     color = Color.White,
@@ -92,6 +111,19 @@ fun SettingsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 16.dp, bottom = 16.dp)
+                        .pointerInput(Unit) {
+                            awaitEachGesture {
+                                awaitFirstDown()
+                                debugPressJob = coroutineScope.launch {
+                                    kotlinx.coroutines.delay(
+                                        roboyard.logic.core.Constants.DEBUG_SCREEN_LONG_PRESS_TIMEOUT_MS
+                                    )
+                                    onDebugSettings()
+                                }
+                                waitForUpOrCancellation()
+                                debugPressJob?.cancel()
+                            }
+                        }
                 )
 
                 SettingDropdownRow(
@@ -314,6 +346,13 @@ fun SettingsScreen(
                         textColor = SecretGray
                     )
                 }
+
+                AccountSection(
+                    stringProvider = stringProvider,
+                    s = { k, f -> s(k, f) }
+                )
+
+                DataManagementSection(s = { k, f -> s(k, f) })
             }
 
             Box(
@@ -328,6 +367,243 @@ fun SettingsScreen(
                 }
             }
         }
+    }
+}
+
+/**
+ * Roboyard account section — mirrors Android SettingsFragment account containers:
+ * logged out → Login/Register buttons; logged in → "Logged in as X" + Logout.
+ */
+@Composable
+private fun AccountSection(
+    stringProvider: roboyard.logic.ui.StringProvider,
+    s: (String, String) -> String
+) {
+    val storage = getPlatformStorage()
+    var authRefresh by remember { mutableStateOf(0) }
+    var showAuthDialog by remember { mutableStateOf(false) }
+    var showLogoutConfirm by remember { mutableStateOf(false) }
+
+    val apiClient = remember { RoboyardApiClient.getInstance(storage) }
+    val loggedIn = remember(authRefresh) { apiClient.isLoggedIn }
+    val userName = remember(authRefresh) { apiClient.userName ?: apiClient.userEmail }
+
+    SettingsLabel(s("settings_account_section", "Roboyard Account"))
+    Text(
+        text = s("settings_account_description", "Login to share maps directly to roboyard.z11.de"),
+        color = DescriptionGray,
+        fontSize = 16.sp,
+        modifier = Modifier.padding(bottom = 8.dp)
+    )
+
+    if (loggedIn) {
+        Text(
+            text = s("settings_logged_in_as", "Logged in as: {0}").replace("{0}", userName ?: ""),
+            color = Color.White,
+            fontSize = 20.sp,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        Row(modifier = Modifier.padding(bottom = 24.dp)) {
+            Button(onClick = { showLogoutConfirm = true }) {
+                Text(s("settings_logout", "Logout"))
+            }
+        }
+    } else {
+        Row(modifier = Modifier.padding(bottom = 24.dp)) {
+            Button(onClick = { showAuthDialog = true }) {
+                Text(s("settings_login", "Login"))
+            }
+        }
+    }
+
+    if (showAuthDialog) {
+        LoginDialog(
+            storage = storage,
+            stringProvider = stringProvider,
+            syncManager = SyncManager.getExistingInstance(),
+            onDismiss = { showAuthDialog = false },
+            onLoginSuccess = { authRefresh++ }
+        )
+    }
+
+    if (showLogoutConfirm) {
+        AlertDialog(
+            onDismissRequest = { showLogoutConfirm = false },
+            title = { Text(s("settings_logout_confirm_title", "Logout?")) },
+            text = {
+                Text(
+                    s(
+                        "settings_logout_confirm_message",
+                        "Logging out will clear all local achievements, level progress, game history, and streaks from this device. Your data is saved on the server and will be restored on next login."
+                    )
+                )
+            },
+            confirmButton = {
+                Button(onClick = {
+                    showLogoutConfirm = false
+                    // Android parity: logout clears progress data then auth credentials
+                    DataExportImportManager(storage).resetProgressData()
+                    apiClient.logout()
+                    authRefresh++
+                }) {
+                    Text(s("settings_logout", "Logout"))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutConfirm = false }) {
+                    Text(s("button_cancel", "Cancel"))
+                }
+            }
+        )
+    }
+}
+
+/**
+ * Data management section — mirrors Android SettingsFragment:
+ * Export Data, Import Data, Reset All Data.
+ */
+@Composable
+private fun DataManagementSection(s: (String, String) -> String) {
+    val storage = getPlatformStorage()
+    var showImportDialog by remember { mutableStateOf(false) }
+    var showResetConfirm by remember { mutableStateOf(false) }
+    var statusMessage by remember { mutableStateOf<String?>(null) }
+    var exportedData by remember { mutableStateOf<String?>(null) }
+
+    val scope = rememberCoroutineScope()
+
+    SettingsLabel(s("settings_data_section", "Data Management"))
+
+    Row(modifier = Modifier.padding(bottom = 8.dp)) {
+        Button(onClick = {
+            exportedData = DataExportImportManager(storage).exportAllData()
+            statusMessage = if (exportedData != null)
+                s("settings_export_success", "Data exported successfully")
+            else
+                s("settings_export_failed", "Export failed: {0}").replace("{0}", "Unknown error")
+        }) {
+            Text(s("settings_export_data", "Export Data"))
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        // Save export directly to a file via native dialog (desktop)
+        Button(onClick = {
+            val data = exportedData ?: DataExportImportManager(storage).exportAllData()
+            if (data == null) {
+                statusMessage = s("settings_export_failed", "Export failed: {0}").replace("{0}", "Unknown error")
+                return@Button
+            }
+            exportedData = data
+            scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                val ok = roboyard.logic.platform.saveTextToFileWithDialog(data, "roboyard-export.json")
+                if (ok) {
+                    statusMessage = s("settings_export_success", "Data exported successfully")
+                }
+            }
+        }) {
+            Text(s("settings_export_to_file", "Save to File"))
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        Button(onClick = { showImportDialog = true }) {
+            Text(s("settings_import_data", "Import Data"))
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        Button(onClick = { showResetConfirm = true }) {
+            Text(s("settings_reset_data", "Reset All Data"))
+        }
+    }
+
+    statusMessage?.let {
+        Text(it, color = DescriptionGray, fontSize = 16.sp, modifier = Modifier.padding(bottom = 8.dp))
+    }
+
+    // Show exported JSON so the user can copy it (Android shares via intent)
+    exportedData?.let { data ->
+        OutlinedTextField(
+            value = data,
+            onValueChange = {},
+            readOnly = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+                .padding(bottom = 24.dp)
+        )
+    }
+
+    if (showImportDialog) {
+        var importText by remember { mutableStateOf("") }
+        AlertDialog(
+            onDismissRequest = { showImportDialog = false },
+            title = { Text(s("settings_import_data", "Import Data")) },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = importText,
+                        onValueChange = { importText = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Paste JSON data here") }
+                    )
+                    // Native file open dialog (desktop)
+                    TextButton(onClick = {
+                        scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                            roboyard.logic.platform.loadTextFromFileWithDialog()?.let {
+                                importText = it
+                            }
+                        }
+                    }) {
+                        Text(s("settings_import_from_file", "Load from File"))
+                    }
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    if (importText.isBlank()) return@Button
+                    val success = DataExportImportManager(storage).importAllData(importText.trim())
+                    statusMessage = if (success)
+                        s("settings_import_success", "Data imported successfully. Please restart the app.")
+                    else
+                        s("settings_import_failed", "Import failed: {0}").replace("{0}", "Invalid data format")
+                    showImportDialog = false
+                }) {
+                    Text(s("settings_import_data", "Import Data"))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showImportDialog = false }) {
+                    Text(s("button_cancel", "Cancel"))
+                }
+            }
+        )
+    }
+
+    if (showResetConfirm) {
+        AlertDialog(
+            onDismissRequest = { showResetConfirm = false },
+            title = { Text(s("settings_reset_confirm_title", "Reset All Data?")) },
+            text = {
+                Text(
+                    s(
+                        "settings_reset_confirm_message",
+                        "This will delete all your preferences, achievements, level progress, and save games. This action cannot be undone."
+                    )
+                )
+            },
+            confirmButton = {
+                Button(onClick = {
+                    showResetConfirm = false
+                    DataExportImportManager(storage).resetAllData()
+                    // Logout user when resetting all data (Android parity)
+                    RoboyardApiClient.getInstance(storage).logout()
+                    statusMessage = s("settings_reset_success", "All data has been reset. Please restart the app.")
+                }) {
+                    Text(s("settings_reset_data", "Reset All Data"))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetConfirm = false }) {
+                    Text(s("button_cancel", "Cancel"))
+                }
+            }
+        )
     }
 }
 

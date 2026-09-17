@@ -3,6 +3,7 @@ package roboyard.eclabs.achievements;
 import roboyard.logic.achievements.AchievementManager;
 import roboyard.logic.achievements.AchievementManagerFactory;
 import roboyard.logic.achievements.StreakManager;
+import roboyard.logic.achievements.StreakManagerFactory;
 
 import android.content.Context;
 
@@ -32,7 +33,7 @@ public class StreakManagerTest {
     @Before
     public void setUp() {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        streakManager = StreakManager.getInstance(context);
+        streakManager = StreakManagerFactory.getInstance(context);
         achievementManager = AchievementManagerFactory.getInstance(context);
         
         // Reset for clean test

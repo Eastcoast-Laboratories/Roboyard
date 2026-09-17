@@ -25,6 +25,24 @@ interface PlatformStorage {
     fun getFilePath(fileName: String): String
     fun hasSavedGames(): Boolean
 
+    /**
+     * List files in the app storage root matching prefix/suffix
+     * (e.g. "custom_level_", ".txt"). Returns file names only.
+     */
+    fun listFiles(prefix: String = "", suffix: String = ""): List<String> = emptyList()
+
+    /** List file names inside a subdirectory of private storage (e.g. "saves"). */
+    fun listFilesInDir(dirName: String): List<String> = emptyList()
+
+    /**
+     * List file names inside a bundled-asset directory (e.g. "Maps").
+     * Used for level discovery like Android's context.assets.list("Maps").
+     */
+    fun listAssetFiles(dirName: String): List<String> = emptyList()
+
+    /** Last-modified timestamp of a stored file in epoch millis, or null if unavailable. */
+    fun getFileTimestamp(fileName: String): Long? = null
+
     // Bitmap operations (may be no-op on some platforms)
     fun readBitmap(fileName: String): Any?
     fun writeBitmap(fileName: String, bitmap: Any?): Boolean

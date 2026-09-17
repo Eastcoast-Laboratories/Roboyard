@@ -1,12 +1,36 @@
 package roboyard.logic.core
 
 import driftingdroids.model.Board
+import roboyard.logic.storage.PlatformStorage
 
 /**
  * Loads level files from shared resources and creates Board instances.
  * Levels are stored in shared/src/commonMain/resources/Maps/level_X.txt
  */
 object LevelLoader {
+
+    /**
+     * Discovers all available level IDs: built-in levels from bundled "Maps"
+     * assets plus custom levels (custom_level_N.txt) in private storage.
+     * Matches Android LevelSelectionFragment.loadAvailableLevels.
+     */
+    fun listAvailableLevelIds(storage: PlatformStorage): List<Int> {
+        val ids = mutableListOf<Int>()
+        try {
+            for (file in storage.listAssetFiles("Maps")) {
+                if (file.startsWith("level_") && file.endsWith(".txt")) {
+                    file.substring(6, file.length - 4).toIntOrNull()?.let { ids.add(it) }
+                }
+            }
+            for (file in storage.listFiles("custom_level_", ".txt")) {
+                file.substring(13, file.length - 4).toIntOrNull()?.let { ids.add(it) }
+            }
+            ids.sort()
+        } catch (e: Exception) {
+            System.err.println("[LEVEL_LOADER] Error listing available levels: ${e.message}")
+        }
+        return ids
+    }
 
     /**
      * Loads a level by ID (1-140) from shared resources.

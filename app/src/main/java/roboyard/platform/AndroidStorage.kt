@@ -173,9 +173,39 @@ class AndroidStorage(private val context: Context) : PlatformStorage {
         return context.getFileStreamPath(fileName).absolutePath
     }
 
+    override fun getFileTimestamp(fileName: String): Long? {
+        return try {
+            val file = context.getFileStreamPath(fileName)
+            if (file.exists()) file.lastModified() else null
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     override fun hasSavedGames(): Boolean {
         val savesDir = java.io.File(context.filesDir, "saves")
         return savesDir.exists() && savesDir.listFiles()?.isNotEmpty() == true
+    }
+
+    override fun listFiles(prefix: String, suffix: String): List<String> {
+        val files = context.filesDir.listFiles() ?: return emptyList()
+        return files.map { it.name }
+            .filter { it.startsWith(prefix) && it.endsWith(suffix) }
+            .sorted()
+    }
+
+    override fun listFilesInDir(dirName: String): List<String> {
+        val dir = java.io.File(context.filesDir, dirName)
+        return dir.list()?.toList() ?: emptyList()
+    }
+
+    override fun listAssetFiles(dirName: String): List<String> {
+        return try {
+            context.assets.list(dirName)?.toList() ?: emptyList()
+        } catch (e: Exception) {
+            Timber.e(e, "listAssetFiles failed for dir: %s", dirName)
+            emptyList()
+        }
     }
 
     // Bitmap operations

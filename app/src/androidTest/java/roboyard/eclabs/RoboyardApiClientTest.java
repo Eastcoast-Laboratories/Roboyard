@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import roboyard.logic.network.RoboyardApiClient;
+import roboyard.logic.network.ApiClientProvider;
 import timber.log.Timber;
 
 /**
@@ -42,7 +43,7 @@ public class RoboyardApiClientTest {
     @Before
     public void setUp() {
         context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        apiClient = RoboyardApiClient.getInstance(context);
+        apiClient = ApiClientProvider.api(context);
         
         // Logout before each test
         apiClient.logout();

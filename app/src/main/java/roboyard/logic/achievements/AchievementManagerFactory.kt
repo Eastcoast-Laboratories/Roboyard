@@ -3,9 +3,7 @@ package roboyard.logic.achievements
 import android.app.Activity
 import android.content.Context
 import android.widget.Toast
-import org.json.JSONArray
-import org.json.JSONObject
-import roboyard.logic.network.RoboyardApiClient
+import roboyard.logic.network.ApiClientProvider
 import roboyard.platform.AndroidStorage
 import roboyard.logic.platform.PlayGamesClient
 import roboyard.logic.ui.StringProvider
@@ -26,7 +24,7 @@ object AchievementManagerFactory {
             val stringProvider = AndroidStringProvider(context)
             currentInstance = AchievementManager.getInstance(storage, stringProvider, null)
             // Wire up Android-specific clients
-            currentInstance!!.syncClient = AndroidAchievementSyncClient(context)
+            currentInstance!!.syncClient = ApiAchievementSyncClient(ApiClientProvider.api(context))
             playGamesClient = AndroidPlayGamesClient(context)
             currentInstance!!.playGamesClient = playGamesClient
             currentInstance!!.streakDataProvider = StreakManagerFactory.getInstance(context)
@@ -78,52 +76,6 @@ class AndroidUiNotifier(private val activity: Activity) : UiNotifier {
         activity.runOnUiThread {
             Toast.makeText(activity, message, Toast.LENGTH_LONG).show()
         }
-    }
-}
-
-/**
- * Android implementation of AchievementSyncClient using RoboyardApiClient.
- */
-private class AndroidAchievementSyncClient(private val context: Context) : AchievementSyncClient {
-    override val isLoggedIn: Boolean
-        get() = RoboyardApiClient.getInstance(context).isLoggedIn
-
-    override fun syncAchievements(
-        achievementsJson: String,
-        statsJson: String,
-        callback: AchievementSyncCallback
-    ) {
-        val apiClient = RoboyardApiClient.getInstance(context)
-        val achievements = JSONArray(achievementsJson)
-        val stats = JSONObject(statsJson)
-        apiClient.syncAchievements(achievements, stats, object : RoboyardApiClient.ApiCallback<RoboyardApiClient.AchievementSyncResult?> {
-            override fun onSuccess(result: RoboyardApiClient.AchievementSyncResult?) {
-                callback.onSuccess(
-                    result?.syncedCount ?: 0,
-                    result?.newAchievements ?: 0,
-                    result?.latestAppVersion
-                )
-            }
-
-            override fun onError(error: String?) {
-                callback.onError(error)
-            }
-        })
-    }
-
-    override fun fetchAchievements(callback: AchievementFetchCallback) {
-        val apiClient = RoboyardApiClient.getInstance(context)
-        apiClient.fetchAchievements(object : RoboyardApiClient.ApiCallback<RoboyardApiClient.AchievementFetchResult?> {
-            override fun onSuccess(result: RoboyardApiClient.AchievementFetchResult?) {
-                val achievementsJson = result?.achievements?.toString() ?: "[]"
-                val statsJson = result?.stats?.toString()
-                callback.onSuccess(achievementsJson, statsJson)
-            }
-
-            override fun onError(error: String?) {
-                callback.onError(error)
-            }
-        })
     }
 }
 

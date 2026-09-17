@@ -50,7 +50,9 @@ import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameHistoryEntry;
 import roboyard.logic.managers.GameStateManager;
 import roboyard.logic.managers.GameHistoryManager;
+import roboyard.logic.managers.ShareMapHelper;
 import roboyard.logic.network.RoboyardApiClient;
+import roboyard.logic.network.ApiClientProvider;
 import roboyard.platform.AndroidStorage;
 import timber.log.Timber;
 import roboyard.ui.graphics.MinimapGenerator;
@@ -1048,7 +1050,7 @@ public class SaveGameFragment extends BaseGameFragment {
     private void shareSaveSlot(int slotId) {
         try {
             // Check if user is logged in - if so, offer to share directly to account
-            RoboyardApiClient apiClient = RoboyardApiClient.getInstance(requireContext());
+            RoboyardApiClient apiClient = ApiClientProvider.api(requireContext());
             if (apiClient.isLoggedIn()) {
                 // Show dialog to choose between direct share and URL share
                 new androidx.appcompat.app.AlertDialog.Builder(requireContext())
@@ -1089,7 +1091,7 @@ public class SaveGameFragment extends BaseGameFragment {
             View loadingOverlay = showLoadingSpinner();
             
             // Share via API
-            RoboyardApiClient.getInstance(requireContext()).shareMap(mapData, mapName, new RoboyardApiClient.ApiCallback<RoboyardApiClient.ShareResult>() {
+            ApiClientProvider.api(requireContext()).shareMap(mapData, mapName, new RoboyardApiClient.ApiCallback<RoboyardApiClient.ShareResult>() {
                 @Override
                 public void onSuccess(RoboyardApiClient.ShareResult result) {
                     // Hide loading spinner
@@ -1102,7 +1104,7 @@ public class SaveGameFragment extends BaseGameFragment {
                     }
                     
                     // Open the share URL in browser with auto-login
-                    String autoLoginUrl = RoboyardApiClient.getInstance(requireContext()).buildAutoLoginUrl(result.shareUrl);
+                    String autoLoginUrl = ApiClientProvider.api(requireContext()).buildAutoLoginUrl(result.shareUrl);
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(autoLoginUrl));
                     startActivity(intent);
                     
@@ -1128,212 +1130,30 @@ public class SaveGameFragment extends BaseGameFragment {
      * Get map name from a save slot
      */
     private String getMapNameFromSlot(int slotId) {
+        String saveData = loadSaveDataForSlot(slotId);
+        return ShareMapHelper.getMapNameFromSaveData(saveData);
+    }
+
+    /** Load raw save-file content for a slot, or null if missing. */
+    private String loadSaveDataForSlot(int slotId) {
         try {
             File savesDir = new File(requireContext().getFilesDir(), Constants.SAVE_DIRECTORY);
             String filename = Constants.SAVE_FILENAME_PREFIX + slotId + Constants.SAVE_FILENAME_EXTENSION;
             File saveFile = new File(savesDir, filename);
-            
             if (saveFile.exists()) {
-                String saveData = FileReadWrite.loadAbsoluteData(saveFile.getAbsolutePath());
-                if (saveData != null && !saveData.isEmpty()) {
-                    String[] lines = saveData.split("\n");
-                    if (lines.length > 0 && lines[0].startsWith("#")) {
-                        String[] metadata = lines[0].substring(1).split(";");
-                        for (String item : metadata) {
-                            if (item.startsWith("MAPNAME:")) {
-                                return item.substring("MAPNAME:".length());
-                            }
-                        }
-                    }
-                }
+                return FileReadWrite.loadAbsoluteData(saveFile.getAbsolutePath());
             }
         } catch (Exception e) {
-            Timber.e(e, "[SHARE] Error getting map name from slot %d", slotId);
+            Timber.e(e, "[SHARE] Error loading save data for slot %d", slotId);
         }
-        return "Shared Map";
+        return null;
     }
-    
+
     /**
-     * Parse wall data from save file format and add to formatted data
-     * Extracted to DRY principle - used by both shareToAccount and shareViaUrl
-     */
-    private void parseAndAddWalls(String[] lines, int width, int height, StringBuilder formattedData, Set<String> wallEntries) {
-        boolean inWallsSection = false;
-        
-        for (String line : lines) {
-            String trimmedLine = line.trim();
-            
-            if (trimmedLine.equals("WALLS:")) {
-                inWallsSection = true;
-                continue;
-            } else if (trimmedLine.equals("TARGET_SECTION:") || trimmedLine.equals("ROBOTS:") || trimmedLine.equals("BOARD:")) {
-                inWallsSection = false;
-                continue;
-            }
-            
-            if (inWallsSection && !trimmedLine.isEmpty()) {
-                String[] parts = trimmedLine.split(",");
-                if (parts.length >= 3) {
-                    try {
-                        // Check if format is 'H,y,x' or 'V,y,x'
-                        if (parts[0].equals("H") || parts[0].equals("V")) {
-                            if (parts[1].matches("\\d+") && parts[2].matches("\\d+")) {
-                                int y = Integer.parseInt(parts[1]);
-                                int x = Integer.parseInt(parts[2].replace(";", ""));
-                                
-                                // Skip border walls
-                                if (isBorderWall(x, y, width, height)) {
-                                    continue;
-                                }
-                                
-                                String wallEntry;
-                                if ("H".equals(parts[0])) {
-                                    wallEntry = "\nmh" + y + "," + x + ";";
-                                } else {
-                                    wallEntry = "\nmv" + y + "," + x + ";";
-                                }
-                                
-                                if (wallEntries.add(wallEntry)) {
-                                    formattedData.append(wallEntry);
-                                }
-                            }
-                        } else {
-                            // Try format 'x,y,direction'
-                            if (parts[0].matches("\\d+") && parts[1].matches("\\d+")) {
-                                int x = Integer.parseInt(parts[0]);
-                                int y = Integer.parseInt(parts[1]);
-                                String direction = parts[2].replace(";", "");
-                                
-                                // Skip border walls
-                                if (isBorderWall(x, y, width, height)) {
-                                    continue;
-                                }
-                                
-                                String wallEntry;
-                                if ("h".equals(direction)) {
-                                    wallEntry = "\nmh" + y + "," + x + ";";
-                                } else {
-                                    wallEntry = "\nmv" + y + "," + x + ";";
-                                }
-                                
-                                if (wallEntries.add(wallEntry)) {
-                                    formattedData.append(wallEntry);
-                                }
-                            }
-                        }
-                    } catch (NumberFormatException e) {
-                        Timber.e(e, "[SHARE] Error parsing wall: %s", trimmedLine);
-                    }
-                }
-            }
-        }
-    }
-    
-    /**
-     * Build map data string for sharing - formats save data for API
+     * Build map data string for sharing - delegates to shared ShareMapHelper
      */
     private String buildMapDataForShare(int slotId) {
-        try {
-            File savesDir = new File(requireContext().getFilesDir(), Constants.SAVE_DIRECTORY);
-            String filename = Constants.SAVE_FILENAME_PREFIX + slotId + Constants.SAVE_FILENAME_EXTENSION;
-            File saveFile = new File(savesDir, filename);
-            
-            if (!saveFile.exists()) {
-                return null;
-            }
-            
-            String saveData = FileReadWrite.loadAbsoluteData(saveFile.getAbsolutePath());
-            if (saveData == null || saveData.isEmpty()) {
-                return null;
-            }
-            
-            // Parse and format the save data for API
-            StringBuilder formattedData = new StringBuilder();
-            String[] lines = saveData.split("\n");
-            
-            String mapName = "Shared Map";
-            int width = 12;
-            int height = 12;
-            int numMoves = 0;
-            
-            // Extract metadata from first line
-            if (lines.length > 0 && lines[0].startsWith("#")) {
-                String[] metadata = lines[0].substring(1).split(";");
-                for (String item : metadata) {
-                    if (item.startsWith("MAPNAME:")) {
-                        mapName = item.substring("MAPNAME:".length());
-                    } else if (item.startsWith("SIZE:")) {
-                        String[] size = item.substring("SIZE:".length()).split(",");
-                        if (size.length == 2) {
-                            width = Integer.parseInt(size[0]);
-                            height = Integer.parseInt(size[1]);
-                        }
-                    } else if (item.startsWith("MOVES:")) {
-                        try {
-                            numMoves = Integer.parseInt(item.substring("MOVES:".length()));
-                        } catch (NumberFormatException e) {
-                            // Ignore
-                        }
-                    }
-                }
-            }
-            
-            // Start with name and board size
-            formattedData.append("name:").append(mapName).append(";");
-            formattedData.append("num_moves:").append(numMoves).append(";");
-            formattedData.append("solution:board:").append(width).append(",").append(height).append(";");
-            
-            // Parse sections
-            boolean inTargetsSection = false;
-            boolean inRobotsSection = false;
-            Set<String> targetEntries = new HashSet<>();
-            Set<String> wallEntries = new HashSet<>();
-            Set<String> robotEntries = new HashSet<>();
-            
-            for (String line : lines) {
-                String trimmedLine = line.trim();
-                if (trimmedLine.equals("TARGET_SECTION:")) {
-                    inTargetsSection = true;
-                    inRobotsSection = false;
-                } else if (trimmedLine.equals("ROBOTS:")) {
-                    inTargetsSection = false;
-                    inRobotsSection = true;
-                } else if (inTargetsSection && trimmedLine.startsWith("TARGET_SECTION:") && trimmedLine.length() > 15) {
-                    String targetData = trimmedLine.substring("TARGET_SECTION:".length());
-                    String[] parts = targetData.split(",");
-                    if (parts.length >= 3 && parts[0].matches("\\d+") && parts[1].matches("\\d+") && parts[2].matches("-?\\d+")) {
-                        int x = Integer.parseInt(parts[0]);
-                        int y = Integer.parseInt(parts[1]);
-                        int color = Integer.parseInt(parts[2].replace(";", ""));
-                        String colorName = getRobotColorName(color);
-                        String targetEntry = "\ntarget_" + colorName + x + "," + y + ";";
-                        if (targetEntries.add(targetEntry)) {
-                            formattedData.append(targetEntry);
-                        }
-                    }
-                } else if (inRobotsSection && !trimmedLine.isEmpty() && !trimmedLine.equals("ROBOTS:")) {
-                    String[] parts = trimmedLine.split(",");
-                    if (parts.length >= 3 && parts[0].matches("\\d+") && parts[1].matches("\\d+") && parts[2].matches("\\d+")) {
-                        int x = Integer.parseInt(parts[0]);
-                        int y = Integer.parseInt(parts[1]);
-                        int color = Integer.parseInt(parts[2].replace(";", ""));
-                        String colorName = getRobotColorName(color);
-                        String robotEntry = "\nrobot_" + colorName + x + "," + y + ";";
-                        if (robotEntries.add(robotEntry)) {
-                            formattedData.append(robotEntry);
-                        }
-                    }
-                }
-            }
-            
-            // Parse walls using shared method
-            parseAndAddWalls(lines, width, height, formattedData, wallEntries);
-            
-            return formattedData.toString();
-        } catch (Exception e) {
-            Timber.e(e, "[SHARE] Error building map data for slot %d", slotId);
-            return null;
-        }
+        return ShareMapHelper.buildMapDataForShare(loadSaveDataForSlot(slotId));
     }
     
     /**
@@ -1375,7 +1195,7 @@ public class SaveGameFragment extends BaseGameFragment {
                     Timber.d("[SHARE] Loaded save data, length: %d characters", saveData.length());
                     
                     // Parse save data using shared static method
-                    ShareParseResult result = parseSaveDataForShare(saveData);
+                    ShareMapHelper.ShareParseResult result = parseSaveDataForShare(saveData);
                     
                     if (result == null) {
                         Toast.makeText(requireContext(), "Cannot share - failed to parse save data", Toast.LENGTH_LONG).show();
@@ -1396,25 +1216,16 @@ public class SaveGameFragment extends BaseGameFragment {
                         return;
                     }
                     
-                    // URL encode the formatted data
-                    String encodedData;
-                    try {
-                        encodedData = URLEncoder.encode(result.formattedData, "UTF-8");
-                        Timber.d("[SHARE] Encoded data length: %d chars", encodedData.length());
-                        Timber.d("[SHARE] Full encoded data: %s", encodedData);
-                    } catch (Exception e) {
-                        Timber.e(e, "[SHARE] Error encoding data");
-                        return;
-                    }
-                    
-                    // Create the share URL
-                    String shareUrl = "https://roboyard.z11.de/share_map?data=" + encodedData;
+                    // Create the share URL on the configured API base (dev backend support)
+                    String shareUrl = ShareMapHelper.buildShareUrl(
+                            ApiClientProvider.api(requireContext()).getBaseUrl(), result.formattedData);
+                    Timber.d("[SHARE] Encoded data length: %d chars", shareUrl.length());
                     
                     // Log the full URL for debugging - use a separate log entry for the clickable URL
                     Timber.d("[SHARE] Share URL: %s", shareUrl);  // Log only the URL to make it clickable in the console
                     
                     // Wrap with auto-login if user is logged in
-                    String finalUrl = RoboyardApiClient.getInstance(requireContext()).buildAutoLoginUrl(shareUrl);
+                    String finalUrl = ApiClientProvider.api(requireContext()).buildAutoLoginUrl(shareUrl);
                     
                     // Create an intent to open the URL
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(finalUrl));
@@ -1445,11 +1256,7 @@ public class SaveGameFragment extends BaseGameFragment {
      * @return true if the wall is a border wall
      */
     static boolean isBorderWall(int x, int y, int width, int height) {
-        // Note: In Roboyard, walls are indexed starting at -1
-        // Walls at x=0 or y=0 are NOT border walls, they are valid game elements
-        // Only consider walls at the absolute edge (which would be at -1 if walls were indexed properly)
-        // Since we don't have access to -1 coordinates here, we don't filter any walls
-        return false; // Don't filter out any walls - we need them all
+        return ShareMapHelper.isBorderWall(x, y, width, height);
     }
     
     /**
@@ -1458,184 +1265,21 @@ public class SaveGameFragment extends BaseGameFragment {
      * @return Color name for URL
      */
     static String getRobotColorName(int color) {
-        switch (color) {
-            case -1: // Multicolor target (any robot can reach it)
-                return "multi";
-            case 0: // Constants.COLOR_PINK
-                return "pink";
-            case 1: // Constants.COLOR_GREEN
-                return "green";
-            case 2: // Constants.COLOR_BLUE
-                return "blue";
-            case 3: // Constants.COLOR_YELLOW
-                return "yellow";
-            case 4: // Constants.COLOR_SILVER
-                return "silver";
-            case 5: // Constants.COLOR_RED
-                return "red";
-            case 6: // Constants.COLOR_BROWN
-                return "brown";
-            case 7: // Constants.COLOR_ORANGE
-                return "orange"; 
-            case 8: // Constants.COLOR_WHITE
-                return "white";
-            case 9: // Constants.COLOR_MULTI (for multi target)
-                return "multi";
-            default:
-                return "unknown";
-        }
-    }
-    
-    /**
-     * Parse save data string into formatted share data.
-     * Package-visible for testing.
-     * 
-     * @param saveData The raw save data string
-     * @return ShareParseResult with parsed data, or null on failure
-     */
-    public static ShareParseResult parseSaveDataForShare(String saveData) {
-        // Use central metadata parser (DRY)
-        Map<String, Object> metadata = GameState.parseMetadata(saveData);
-        if (metadata == null) return null;
-        
-        String mapName = (String) metadata.get("mapName");
-        int width = (Integer) metadata.get("width");
-        int height = (Integer) metadata.get("height");
-        int moveCount = (Integer) metadata.get("moveCount");
-        int optimalMoveCount = (Integer) metadata.get("optimalMoveCount");
-        @SuppressWarnings("unchecked")
-        List<String> allItems = (List<String>) metadata.get("allItems");
-        
-        StringBuilder formattedData = new StringBuilder();
-        formattedData.append("name:").append(mapName).append(";");
-        int numMoves = optimalMoveCount > 0 ? optimalMoveCount : moveCount;
-        formattedData.append("num_moves:").append(numMoves).append(";");
-        formattedData.append("solution:board:").append(width).append(",").append(height).append(";");
-        
-        int wallCount = 0, targetCount = 0, robotCount = 0;
-        Set<String> wallEntries = new HashSet<>();
-        Set<String> targetEntries = new HashSet<>();
-        Set<String> robotEntries = new HashSet<>();
-        
-        // Parse board elements from metadata items
-        for (String item : allItems) {
-            try {
-                String data = item;
-                if (data.startsWith("||")) data = data.substring(2);
-                else if (data.startsWith("|")) data = data.substring(1);
-                
-                if (data.startsWith("MAPNAME:") || data.startsWith("MOVES:") || 
-                    data.startsWith("OPTIMAL:") || data.startsWith("SIZE:") ||
-                    data.startsWith("WIDTH:") || data.startsWith("HEIGHT:") ||
-                    data.startsWith("MAX_HINT_USED:") || data.startsWith("SOLVED:") ||
-                    data.startsWith("DIFFICULTY:") || data.startsWith("TIME:")) {
-                    continue;
-                }
-                
-                // Save format concatenates multiple entries per line, e.g.
-                //   "tm4,15;tr10,4;"      (all targets)
-                //   "h0,1;h2,3;v5,7;"     (all walls)
-                //   "rr1,5;rg2,3;rb4,8;"  (all robots)
-                // Split by ; and parse each piece.
-                for (String piece : data.split(";")) {
-                    if (piece.isEmpty()) continue;
-                    
-                    // Compact robot: r{colorChar}{x},{y}  e.g. rr3,4
-                    if (piece.matches("r[a-z]\\d+,\\d+")) {
-                        char colorChar = piece.charAt(1);
-                        String[] coords = piece.substring(2).split(",");
-                        int x = Integer.parseInt(coords[0]);
-                        int y = Integer.parseInt(coords[1]);
-                        String colorName = getColorNameFromChar(colorChar);
-                        String robotEntry = "\nrobot_" + colorName + x + "," + y + ";";
-                        if (robotEntries.add(robotEntry)) {
-                            formattedData.append(robotEntry);
-                            robotCount++;
-                        }
-                        continue;
-                    }
-                    
-                    // Compact target: t{colorChar}{x},{y}  e.g. tm4,15
-                    if (piece.matches("t[a-z]\\d+,\\d+")) {
-                        char colorChar = piece.charAt(1);
-                        String[] coords = piece.substring(2).split(",");
-                        int x = Integer.parseInt(coords[0]);
-                        int y = Integer.parseInt(coords[1]);
-                        String colorName = getColorNameFromChar(colorChar);
-                        String targetEntry = "\ntarget_" + colorName + x + "," + y + ";";
-                        if (targetEntries.add(targetEntry)) {
-                            formattedData.append(targetEntry);
-                            targetCount++;
-                        }
-                        continue;
-                    }
-                    
-                    // Compact wall: h{x},{y} or v{x},{y}
-                    if (piece.matches("[hv]\\d+,\\d+")) {
-                        String type = "m" + piece.charAt(0);
-                        String[] parts = piece.substring(1).split(",");
-                        int coordX = Integer.parseInt(parts[0]);
-                        int coordY = Integer.parseInt(parts[1]);
-                        if (!isBorderWall(coordX, coordY, width, height)) {
-                            String wallEntry = "\n" + type + coordX + "," + coordY + ";";
-                            if (wallEntries.add(wallEntry)) {
-                                formattedData.append(wallEntry);
-                                wallCount++;
-                            }
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                Timber.e(e, "[SHARE] Error parsing item in static method: %s", item);
-            }
-        }
-        
-        return new ShareParseResult(formattedData.toString(), mapName, width, height, 
-                wallCount, targetCount, robotCount, numMoves);
-    }
-    
-    /**
-     * Inverse of GameState.getColorChar - maps compact color char to share-URL color name.
-     */
-    static String getColorNameFromChar(char colorChar) {
-        switch (colorChar) {
-            case 'm': return "multi";
-            case 'r': return "red";
-            case 'g': return "green";
-            case 'b': return "blue";
-            case 'y': return "yellow";
-            case 's': return "silver";
-            default:  return "unknown";
-        }
+        return ShareMapHelper.getRobotColorName(color);
     }
 
     /**
-     * Result of parsing save data for sharing.
-     * Package-visible for testing.
+     * Parse save data string into formatted share data.
+     * Delegates to the shared ShareMapHelper implementation.
      */
-    public static class ShareParseResult {
-        public final String formattedData;
-        public final String mapName;
-        public final int width;
-        public final int height;
-        public final int wallCount;
-        public final int targetCount;
-        public final int robotCount;
-        public final int numMoves;
-        
-        ShareParseResult(String formattedData, String mapName, int width, int height,
-                int wallCount, int targetCount, int robotCount, int numMoves) {
-            this.formattedData = formattedData;
-            this.mapName = mapName;
-            this.width = width;
-            this.height = height;
-            this.wallCount = wallCount;
-            this.targetCount = targetCount;
-            this.robotCount = robotCount;
-            this.numMoves = numMoves;
-        }
+    public static ShareMapHelper.ShareParseResult parseSaveDataForShare(String saveData) {
+        return ShareMapHelper.parseSaveDataForShare(saveData);
     }
-    
+
+    static String getColorNameFromChar(char colorChar) {
+        return ShareMapHelper.getColorNameFromChar(colorChar);
+    }
+
     @Override
     public String getScreenTitle() {
         return saveMode ? "Save Game" : "Load Game";

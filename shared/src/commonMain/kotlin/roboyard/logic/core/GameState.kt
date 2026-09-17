@@ -299,6 +299,77 @@ class GameState(
     }
 
     /**
+     * Add border walls around the board edges.
+     * Bottom wall row is at y=height, right wall column is at x=width.
+     * (Ported from Android LevelDesignEditorFragment.)
+     */
+    fun createBorderWalls() {
+        for (x in 0 until width) {
+            addHorizontalWall(x, 0)
+            addHorizontalWall(x, height)
+        }
+        for (y in 0 until height) {
+            addVerticalWall(0, y)
+            addVerticalWall(width, y)
+        }
+    }
+
+    /**
+     * Create the center carree (2x2 square) walls for this board.
+     * Also removes any elements inside the carree area.
+     * (Ported from Android LevelDesignEditorFragment.)
+     */
+    fun createCenterCarree() {
+        val centerX = width / 2 - 1
+        val centerY = height / 2 - 1
+        gameElements.removeAll {
+            it.x in centerX..(centerX + 1) && it.y in centerY..(centerY + 1)
+        }
+        addHorizontalWall(centerX, centerY)
+        addHorizontalWall(centerX + 1, centerY)
+        addHorizontalWall(centerX, centerY + 2)
+        addHorizontalWall(centerX + 1, centerY + 2)
+        addVerticalWall(centerX, centerY)
+        addVerticalWall(centerX, centerY + 1)
+        addVerticalWall(centerX + 2, centerY)
+        addVerticalWall(centerX + 2, centerY + 1)
+    }
+
+    /**
+     * Remove the center carree walls based on the given board dimensions.
+     * (Ported from Android LevelDesignEditorFragment.)
+     */
+    fun removeCenterCarree(width: Int, height: Int) {
+        val centerX = width / 2 - 1
+        val centerY = height / 2 - 1
+        gameElements.removeAll { element ->
+            when (element.type) {
+                GameElement.TYPE_HORIZONTAL_WALL ->
+                    (element.y == centerY || element.y == centerY + 2) &&
+                        (element.x == centerX || element.x == centerX + 1)
+                GameElement.TYPE_VERTICAL_WALL ->
+                    (element.x == centerX || element.x == centerX + 2) &&
+                        (element.y == centerY || element.y == centerY + 1)
+                else -> false
+            }
+        }
+    }
+
+    /**
+     * Remove all outer walls (boundary walls at x=0, x=width, y=0, y=height).
+     * (Ported from Android LevelDesignEditorFragment.)
+     */
+    fun removeOuterWalls() {
+        gameElements.removeAll { element ->
+            when (element.type) {
+                GameElement.TYPE_HORIZONTAL_WALL -> element.y == 0 || element.y == height
+                GameElement.TYPE_VERTICAL_WALL -> element.x == 0 || element.x == width
+                else -> false
+            }
+        }
+    }
+
+    /**
      * Get the selected robot
      */
     fun getSelectedRobot(): GameElement? {

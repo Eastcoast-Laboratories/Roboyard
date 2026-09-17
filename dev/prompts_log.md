@@ -36,3 +36,4 @@
 26-09-16 14:33 "continue"
 26-09-16 15:15 "committed! [Megaplan file attached] Is everything in the plan implemented? If not, continue. For example you still cannot log in, which is actually the button in the top right of my menu"
 26-09-16 21:38 "commit that, then implement all phases of the plan, do not stop until everything is implemented"
+26-09-17 00:05 "continue"

@@ -13,26 +13,44 @@ import co.touchlab.kermit.Logger
  *   log.d("Loading level %d", levelId)
  *   log.e(exception, "Error: %s", message)
  */
-class RLog private constructor(private val logger: Logger) {
+class RLog private constructor(private val logger: Logger, private val tag: String) {
 
     fun d(message: String?, vararg args: Any?) {
-        if (message != null) logger.d { formatMsg(message, args) }
+        if (message != null) {
+            val msg = formatMsg(message, args)
+            LogBuffer.add("D", tag, msg)
+            logger.d { msg }
+        }
     }
 
     fun i(message: String?, vararg args: Any?) {
-        if (message != null) logger.i { formatMsg(message, args) }
+        if (message != null) {
+            val msg = formatMsg(message, args)
+            LogBuffer.add("I", tag, msg)
+            logger.i { msg }
+        }
     }
 
     fun w(message: String?, vararg args: Any?) {
-        if (message != null) logger.w { formatMsg(message, args) }
+        if (message != null) {
+            val msg = formatMsg(message, args)
+            LogBuffer.add("W", tag, msg)
+            logger.w { msg }
+        }
     }
 
     fun e(message: String?, vararg args: Any?) {
-        if (message != null) logger.e { formatMsg(message, args) }
+        if (message != null) {
+            val msg = formatMsg(message, args)
+            LogBuffer.add("E", tag, msg)
+            logger.e { msg }
+        }
     }
 
     fun e(t: Throwable?, message: String?, vararg args: Any?) {
-        logger.e(t ?: Exception(message)) { if (message != null) formatMsg(message, args) else "" }
+        val msg = if (message != null) formatMsg(message, args) else ""
+        LogBuffer.add("E", tag, "$msg ${t?.message ?: ""}")
+        logger.e(t ?: Exception(message)) { msg }
     }
 
     private fun formatMsg(message: String, args: Array<out Any?>): String {
@@ -51,10 +69,34 @@ class RLog private constructor(private val logger: Logger) {
 
     companion object {
         /** Create a tagged logger (Timber.tag() equivalent) */
-        fun tag(tag: String): RLog = RLog(Logger.withTag(tag))
+        fun tag(tag: String): RLog = RLog(Logger.withTag(tag), tag)
 
         /** Create a logger for a class (uses class simple name as tag) */
-        fun <T : Any> forClass(clazz: kotlin.reflect.KClass<T>): RLog =
-            RLog(Logger.withTag(clazz.simpleName ?: "Unknown"))
+        fun <T : Any> forClass(clazz: kotlin.reflect.KClass<T>): RLog {
+            val tag = clazz.simpleName ?: "Unknown"
+            return RLog(Logger.withTag(tag), tag)
+        }
     }
+}
+
+/**
+ * In-memory ring buffer of recent log lines — desktop equivalent of the
+ * Android "View Logs" logcat viewer (keeps the last 500 lines like
+ * `logcat -d -t 500`).
+ */
+object LogBuffer {
+    private const val MAX_LINES = 500
+    private val buffer = ArrayDeque<String>()
+
+    @Synchronized
+    fun add(level: String, tag: String, message: String) {
+        buffer.addLast("$level/$tag: $message")
+        while (buffer.size > MAX_LINES) buffer.removeFirst()
+    }
+
+    @Synchronized
+    fun getLines(): List<String> = buffer.toList()
+
+    @Synchronized
+    fun clear() = buffer.clear()
 }

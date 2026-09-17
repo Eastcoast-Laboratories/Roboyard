@@ -69,7 +69,7 @@ public class ShareParsingTest {
 
         String saveData = "#MAPNAME:TestMap;mv9,10;mv9,6;mv9,8;||R0@3,6;R1@5,9;R2@5,12;R3@7,8;|T3@1,3;;MAX_HINT_USED:13;SOLVED:false;SIZE:12,14;DIFFICULTY:0;TIME:27805;MOVES:14";
 
-        SaveGameFragment.ShareParseResult result = SaveGameFragment.parseSaveDataForShare(saveData);
+        roboyard.logic.managers.ShareMapHelper.ShareParseResult result = roboyard.logic.managers.ShareMapHelper.parseSaveDataForShare(saveData);
 
         assertNotNull(TAG + " Parse result must not be null", result);
         assertEquals(TAG + " Map name", "TestMap", result.mapName);
@@ -107,7 +107,7 @@ public class ShareParsingTest {
 
         String saveData = "#MAPNAME:MultiTest;||R0@2,5;R1@2,8;R2@3,1;R3@3,11;|T-1@11,11;;SIZE:12,14;MOVES:0";
 
-        SaveGameFragment.ShareParseResult result = SaveGameFragment.parseSaveDataForShare(saveData);
+        roboyard.logic.managers.ShareMapHelper.ShareParseResult result = roboyard.logic.managers.ShareMapHelper.parseSaveDataForShare(saveData);
 
         assertNotNull(TAG + " Parse result must not be null", result);
         assertEquals(TAG + " Target count", 1, result.targetCount);
@@ -162,7 +162,7 @@ public class ShareParsingTest {
         assertTrue(TAG + " Save data must not be empty", saveData.length() > 0);
 
         step("3/4", "Parsing save data (" + saveData.length() + " chars)");
-        SaveGameFragment.ShareParseResult result = SaveGameFragment.parseSaveDataForShare(saveData);
+        roboyard.logic.managers.ShareMapHelper.ShareParseResult result = roboyard.logic.managers.ShareMapHelper.parseSaveDataForShare(saveData);
 
         assertNotNull(TAG + " Parse result must not be null", result);
         step("3/4", "Result: walls=" + result.wallCount + " targets=" + result.targetCount 
@@ -187,8 +187,8 @@ public class ShareParsingTest {
     public void testParseNullAndEmpty() {
         step("4/4", "Testing null and empty input");
 
-        assertNull(TAG + " null input must return null", SaveGameFragment.parseSaveDataForShare(null));
-        assertNull(TAG + " empty input must return null", SaveGameFragment.parseSaveDataForShare(""));
+        assertNull(TAG + " null input must return null", roboyard.logic.managers.ShareMapHelper.parseSaveDataForShare(null));
+        assertNull(TAG + " empty input must return null", roboyard.logic.managers.ShareMapHelper.parseSaveDataForShare(""));
 
         step("4/4", "PASSED - Null/empty handled correctly");
     }
