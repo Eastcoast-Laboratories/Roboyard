@@ -1,7 +1,6 @@
 package roboyard.platform
 
 import android.content.Context
-import roboyard.eclabs.R
 import roboyard.logic.ui.StringProvider
 
 /**
