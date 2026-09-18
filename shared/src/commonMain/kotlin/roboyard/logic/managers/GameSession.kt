@@ -2254,9 +2254,19 @@ class GameSession(
                     initializeSolver(capturedElements)
                     runSolver()
                 } catch (e: kotlinx.coroutines.CancellationException) {
+                    // Unstick the flag so the next request is not ignored forever —
+                    // but only if this job is still the active solver job; a
+                    // superseding request already owns the flag.
+                    if (solverJob == coroutineContext[Job]) {
+                        _isSolverRunning.value = false
+                    }
+                    log.d("[SOLUTION_SOLVER] Solver coroutine cancelled")
                     throw e
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
+                    // Catch Throwable (incl. OutOfMemoryError): an uncaught error
+                    // would kill the coroutine and leave _isSolverRunning stuck.
                     log.e(e, "[SOLUTION_SOLVER] Error running solver")
+                    _isSolverRunning.value = false
                     scope.launch {
                         onSolutionCalculationFailed("Error: " + e.message)
                     }
@@ -2317,7 +2327,8 @@ class GameSession(
             } else {
                 scope.launch { onSolverCancelled() }
             }
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
+            // Throwable (incl. OutOfMemoryError): must not leave the flag stuck
             log.e(e, "[SOLUTION_SOLVER] Exception in solver processing: %s", e.message)
             scope.launch { onSolverCancelled() }
         }
@@ -2392,6 +2403,12 @@ class GameSession(
      * Stores the solution, runs map-regeneration validation and notifies the callback.
      */
     private fun onSolutionCalculationCompleted(solution: GameSolution?) {
+        // Clear the running flag first: every early return below (map discard
+        // + delayed regeneration) must leave the flag cleared, otherwise the
+        // next calculateSolutionAsync() is ignored and the UI stays on
+        // "AI calculating solution" forever.
+        _isSolverRunning.value = false
+
         val state = _currentState.value
         val isLevelMode = (state != null && state.levelId > 0)
 
@@ -2466,8 +2483,6 @@ class GameSession(
         currentSolution = solution
         currentSolutionStep = 0
         updatePreCompRobotOrder(solution)
-
-        _isSolverRunning.value = false
 
         solutionWasAccepted = true
 
@@ -2621,9 +2636,11 @@ class GameSession(
         squaresMovedHistory.clear()
         clearNextMovesCache()
 
-        val gridElements = newState.gridElements
         resetSolverInitialization()
-        initializeSolver(gridElements)
+        // No synchronous initializeSolver() here: the solver coroutine calls
+        // initializeSolver(capturedElements) itself before runSolver(). Doing it
+        // here would build a Board on the caller thread that is discarded
+        // immediately and would overwrite the solver field mid-flight.
 
         // Quick check for trivial puzzles before starting expensive solver
         if (validateDifficulty && isTrivialPuzzle(newState)) {
@@ -3375,6 +3392,7 @@ class GameSession(
         liveSolverJob?.cancel()
         solver?.cancel()
         solverJob?.cancel()
+        _isSolverRunning.value = false
         preComputeCancelled = true
         preComputeJob?.cancel()
     }
