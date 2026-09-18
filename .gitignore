@@ -18,6 +18,8 @@ app/src/main/assets/adi-registration.properties
 /.idea/other.xml
 /.idea/planningMode.xml
 /.idea/workspace.xml
+/.idea/modules.xml
+.idea/artifacts/composeApp_*.xml
 .DS_Store
 /build
 /shared/build
@@ -44,4 +46,4 @@ screenshot_*.png
 */__pycache__/*
 test_suite.cpython-*.pyc
 *_testsuite.cpython-*.pyc
-/.idea/modules.xml
+.idea/artifacts/shared.xml
