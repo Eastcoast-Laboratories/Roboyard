@@ -1,5 +1,7 @@
 package roboyard.logic.core
 
+import roboyard.logic.ui.StringProvider
+
 /**
  * Shared game utility functions used by both the Android app and ComposeApp.
  * Extracted to avoid duplication (DRY).
@@ -65,4 +67,30 @@ fun buildGameWinMessage(
     }
 
     return "$baseMessage Stars: $stars"
+}
+
+/**
+ * Build the optimal-solution suffix appended to the random-game completion
+ * message when the player did NOT match the optimal move count.
+ * Shared between Android GameFragment and Compose GameScreen so both apps
+ * show identical messages.
+ *
+ * @param actualMoves Moves the player used
+ * @param optimalMoves Moves in the solver's solution
+ * @param stringProvider Localized string lookup, may be null (English fallback)
+ * @return Localized message for the completion screen
+ */
+fun buildCompletionOptimalMessage(
+    actualMoves: Int,
+    optimalMoves: Int,
+    stringProvider: StringProvider?
+): String = when {
+    optimalMoves < 1 ->
+        (stringProvider?.getString("no_solution_found") ?: "No solution found") + "!"
+    actualMoves < optimalMoves ->
+        stringProvider?.getString("pre_hint_less_than_1")
+            ?: "You found a better solution than the A.I.!"
+    else ->
+        stringProvider?.getString("pre_hint_less_than_x", actualMoves)
+            ?: "The A.I. found a solution in less than $actualMoves moves"
 }

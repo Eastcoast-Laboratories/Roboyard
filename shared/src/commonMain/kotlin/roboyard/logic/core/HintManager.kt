@@ -2,6 +2,7 @@ package roboyard.logic.core
 
 import driftingdroids.model.Board
 import driftingdroids.model.Solution
+import roboyard.logic.platform.PlatformInfo
 import roboyard.logic.ui.StringProvider
 import roboyard.logic.util.RLog
 
@@ -263,13 +264,17 @@ class HintManager(private val stringProvider: StringProvider? = null) {
 
                 // Format the list with commas and "and" (matches Android)
                 val andWord = stringProvider?.getString("and") ?: "and"
+                // Android appends the hardcoded English word "robot(s)" only when the
+                // app language is English (Locale.getDefault().language == "en")
+                val isEnglish = (Preferences.appLanguage
+                    ?: PlatformInfo.getSystemLanguageTag()?.substringBefore("-")) == "en"
                 for (i in robotsInvolved.indices) {
                     if (i == robotsInvolved.size - 1 && robotsInvolved.size > 1) {
                         sb.append(andWord).append(" ").append(robotsInvolved[i])
-                        sb.append(if (robotsInvolved.size > 1) " robots" else " robot")
+                        if (isEnglish) sb.append(if (robotsInvolved.size > 1) " robots" else " robot")
                     } else if (i == robotsInvolved.size - 1) {
                         sb.append(robotsInvolved[i])
-                        sb.append(" robot")
+                        if (isEnglish) sb.append(" robot")
                     } else if (i == robotsInvolved.size - 2) {
                         sb.append(robotsInvolved[i]).append(" ")
                     } else {
@@ -515,7 +520,8 @@ class HintManager(private val stringProvider: StringProvider? = null) {
             6 -> "color_brown"
             7 -> "color_orange"
             8 -> "color_white"
-            else -> return "robot $color"
+            else -> return stringProvider?.getString("unknown_color", color.toString())
+                ?: "Unknown: $color"
         }
         return stringProvider?.getString(key) ?: when (color) {
             0 -> "Pink"
