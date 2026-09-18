@@ -101,3 +101,7 @@ höre erst auf, wenn du all diese punkte ausgeführt hast und stelle keine frage
 - Wenn man in einem history Eintrag schon einmal die Tipps benutzt hat, um sich die Anzahl optimale anzeigen zu lassen. Dann soll dies auch gleich beim Start eines history Games angezeigt werden
 
 - wenn man auf "view acheivements" im Popup  drückt soll auch der spinner kommen, der im main menu kommt, wenn man auuf den achievements button drückt
+
+ist das gelöst?
+- Audit-Fund 2: Involved-Robots-Pre-Hint: Android hängt „ robots"/„ robot" nur bei Locale.language=="en" an (GameFragment.java:3514-3529); HintManager.kt:266-276 unbedingt → nicht-en-Locales zeigen englisches „robots".
+- Audit-Fund 3: getRobotColorName-Fallback: Android getString(unknown_color, id) vs. HintManager "robot $color".

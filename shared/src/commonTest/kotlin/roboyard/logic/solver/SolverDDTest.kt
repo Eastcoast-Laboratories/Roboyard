@@ -100,4 +100,50 @@ class SolverDDTest {
             assertEquals(positions(elements, type), positions(parsed, type), "positions for $type")
         }
     }
+
+    /**
+     * Exact board from a user-reported solver hang (logcat 2026-09-18):
+     * 13x15, robots r@(1,0) g@(2,7) b@(7,10) y@(11,8), blue target B@(11,0).
+     * The solver must find the 5-move solution quickly — the reported hang was
+     * an orchestration bug (stuck isSolverRunning flag), not a solver issue.
+     */
+    @Test
+    fun solverSolvesReported13x15Board() {
+        val asciiMap = """
+            0 1 2 3 4 5 6 7 8 9101112
+         0 |‾ r̅ ‾ ‾|‾ ‾ ‾|‾ ‾ ‾ ‾ B̅|.
+         1 |. . . . . . . . . . . .|.
+         2 |. .|. . .|‾ . . .|‾ . .|.
+         3 |. ‾ . . . . .|. . . . .|.
+         4 |‾ . . . ‾|. ‾ . .|. . .|.
+         5 |. . .|. . . . . . ‾ . ‾|.
+         6 |. . . ‾ .|‾ ‾|. . . . .|.
+         7 |. .|g̅ . .|. .|. . ‾|. .|.
+         8 |. . . . . ‾ ‾ . . . . y|.
+         9 |‾ .|. ‾|. . . .|. . . .|.
+        10 |. . ‾ . . ‾|. b̅ . .|. ‾|.
+        11 |. . . .|‾ . . . . . ‾ .|.
+        12 |. .|‾ . . .|‾ . . ‾|. .|.
+        13 |. . . .|. . . .|. . . .|.
+        14  ‾ ‾ ‾ ‾ ‾ ‾ ‾ ‾ ‾ ‾ ‾ ‾ .
+        """.trimIndent()
+
+        val elements = RRGetMap.parseAsciiMap(asciiMap)
+        assertNotNull(elements, "ASCII map from the log must parse")
+
+        val solver = SolverDD()
+        solver.init(elements)
+        solver.run()
+
+        assertEquals(
+            SolverStatus.solved, solver.getSolverStatus(),
+            "solver must solve the reported board (status=" + solver.getSolverStatus() + ")"
+        )
+        val solution = solver.getSolution(0)
+        assertNotNull(solution)
+        assertTrue(
+            solution.moves.size <= 5,
+            "solution must need at most 5 moves, was " + solution.moves.size
+        )
+    }
 }

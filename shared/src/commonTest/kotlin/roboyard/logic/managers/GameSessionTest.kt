@@ -10,6 +10,8 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import roboyard.logic.core.GameElement
 import roboyard.logic.core.GameState
 import roboyard.logic.core.Preferences
@@ -199,5 +201,55 @@ class GameSessionTest {
         val meta = GameSession.extractMetadataFromSaveData(saveData)
         assertEquals("2", meta["DIFFICULTY"])
         assertEquals("5", meta["MOVES"])
+    }
+
+    /**
+     * Regression: when the solver finishes and the generated map is discarded
+     * (too easy/too hard/no solution), onSolutionCalculationCompleted used to
+     * return early WITHOUT clearing isSolverRunning. The delayed regeneration
+     * then hit the "already running" guard and the solver never ran again —
+     * the UI stayed on "AI calculating solution" forever.
+     */
+    @Test
+    fun test_isSolverRunning_clearedAfterMapDiscard() {
+        val savedMin = Preferences.minSolutionMoves
+        val savedMax = Preferences.maxSolutionMoves
+        try {
+            Preferences.boardSizeWidth = 8
+            Preferences.boardSizeHeight = 8
+            // Every generated map violates the difficulty bounds -> discard path
+            Preferences.minSolutionMoves = 999
+            Preferences.maxSolutionMoves = 999
+
+            // Saw a solver start, then the flag cleared again (thread-safe via
+            // StateFlow because collect runs on the session scope's dispatcher)
+            val sawCleared = MutableStateFlow(false)
+            val collectJob = scope.launch {
+                var sawRunning = false
+                session.isSolverRunning.collect { running ->
+                    if (running) {
+                        sawRunning = true
+                    } else if (sawRunning) {
+                        sawCleared.value = true
+                    }
+                }
+            }
+
+            session.startGame()
+
+            val deadline = System.currentTimeMillis() + 60_000
+            while (!sawCleared.value && System.currentTimeMillis() < deadline) {
+                Thread.sleep(10)
+            }
+            collectJob.cancel()
+
+            assertTrue(
+                sawCleared.value,
+                "isSolverRunning was never cleared after a map discard — solver stays stuck on 'AI calculating solution'"
+            )
+        } finally {
+            Preferences.minSolutionMoves = savedMin
+            Preferences.maxSolutionMoves = savedMax
+        }
     }
 }
