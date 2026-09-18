@@ -129,6 +129,7 @@ import roboyard.logic.core.calculateStars
 import roboyard.logic.core.saveLevelCompletion
 import roboyard.logic.core.formatElapsedTime
 import roboyard.logic.core.buildGameWinMessage
+import roboyard.logic.core.buildCompletionOptimalMessage
 import roboyard.logic.core.isBoardSolved
 import roboyard.logic.core.moveRobotOnBoard
 import roboyard.logic.core.GameController
@@ -907,16 +908,9 @@ fun GameScreen(
                                 (stringProvider.getString("perfect_solution") ?: "Perfect! You found the optimal solution!")
                         }
                     } else {
-                        val extra = when {
-                            optimalMoves < 1 ->
-                                (stringProvider.getString("no_solution_found") ?: "No solution found") + "!"
-                            moveCount == 1 ->
-                                stringProvider.getString("pre_hint_less_than_1") ?: "You found a better solution than the A.I.!"
-                            else ->
-                                stringProvider.getString("pre_hint_less_than_x", moveCount)
-                                    ?: "The A.I. found a solution in less than $moveCount moves"
-                        }
-                        completionMessage += " \n" + extra
+                        completionMessage += " \n" + buildCompletionOptimalMessage(
+                            moveCount, optimalMoves, stringProvider
+                        )
                     }
                 }
                 hintMessage = completionMessage

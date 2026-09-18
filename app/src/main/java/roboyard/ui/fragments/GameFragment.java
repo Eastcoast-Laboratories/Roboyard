@@ -63,6 +63,8 @@ import roboyard.logic.core.GameHistoryEntry;
 import roboyard.logic.achievements.Achievement;
 import roboyard.logic.achievements.AchievementManager;
 import roboyard.logic.achievements.AchievementManagerFactory;
+import roboyard.logic.core.GameUtilsKt;
+import roboyard.platform.AndroidStringProvider;
 import roboyard.ui.achievements.AchievementPopup;
 import timber.log.Timber;
 
@@ -830,17 +832,9 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                             } else {
                                  // show hint to optimal moves if nohints were used
                                 // show the hint step if the hint was shown already how many total moves were used
-                                String extraMessage;
-                                if (optimalMoves < 1) {
-                                    extraMessage = getString(R.string.no_solution_found) + "!";
-                                    Timber.d("[COMPLETION_MESSAGE] Optimal is less than 1 move (" + optimalMoves + "), showing no solution found");
-                                } else {
-                                    extraMessage = getString(R.string.pre_hint_less_than_x, actualMoves);
-                                    if (actualMoves == 1) {
-                                        // Woekaround, if there is still a map with optimal solution 1 which was not solved by the solver in one moves
-                                        extraMessage = getString(R.string.pre_hint_less_than_1);
-                                    }
-                                }
+                                String extraMessage = GameUtilsKt.buildCompletionOptimalMessage(
+                                        actualMoves, optimalMoves,
+                                        AndroidStringProvider.getInstance(requireContext()));
                                 completionMessage += " \n" + extraMessage;
                                 completionMessage_a11y += " " + extraMessage;
                                 Timber.d("[COMPLETION_MESSAGE] Showing optimal moves: %d (actual: %d, no hints used)", optimalMoves, actualMoves);

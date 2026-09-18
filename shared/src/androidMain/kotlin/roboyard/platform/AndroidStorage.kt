@@ -20,6 +20,13 @@ class AndroidStorage(private val context: Context) : PlatformStorage {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
 
+    /**
+     * Resolve a storage file name to a File inside the app's private files dir.
+     * Context.getFileStreamPath() rejects names containing '/', so it cannot be
+     * used for subdirectory paths like "saves/save_0.dat".
+     */
+    private fun fileFor(fileName: String): java.io.File = java.io.File(context.filesDir, fileName)
+
     companion object {
         private const val PREFS_NAME = "roboyard_prefs"
 
@@ -117,7 +124,7 @@ class AndroidStorage(private val context: Context) : PlatformStorage {
     // File I/O
     override fun readFile(fileName: String): String {
         return try {
-            val file = context.getFileStreamPath(fileName)
+            val file = fileFor(fileName)
             if (!file.exists()) return ""
 
             val input = FileInputStream(file)
@@ -135,7 +142,7 @@ class AndroidStorage(private val context: Context) : PlatformStorage {
 
     override fun writeFile(fileName: String, content: String): Boolean {
         return try {
-            val file = context.getFileStreamPath(fileName)
+            val file = fileFor(fileName)
             // Create parent directories for subdirectory paths like "saves/save_0.dat"
             file.parentFile?.mkdirs()
             val output = FileOutputStream(file)
@@ -154,7 +161,7 @@ class AndroidStorage(private val context: Context) : PlatformStorage {
 
     override fun fileExists(fileName: String): Boolean {
         return try {
-            context.getFileStreamPath(fileName).exists()
+            fileFor(fileName).exists()
         } catch (e: Exception) {
             false
         }
@@ -162,7 +169,7 @@ class AndroidStorage(private val context: Context) : PlatformStorage {
 
     override fun deleteFile(fileName: String): Boolean {
         return try {
-            val file = context.getFileStreamPath(fileName)
+            val file = fileFor(fileName)
             if (file.exists()) file.delete() else false
         } catch (e: Exception) {
             false
@@ -170,12 +177,12 @@ class AndroidStorage(private val context: Context) : PlatformStorage {
     }
 
     override fun getFilePath(fileName: String): String {
-        return context.getFileStreamPath(fileName).absolutePath
+        return fileFor(fileName).absolutePath
     }
 
     override fun getFileTimestamp(fileName: String): Long? {
         return try {
-            val file = context.getFileStreamPath(fileName)
+            val file = fileFor(fileName)
             if (file.exists()) file.lastModified() else null
         } catch (e: Exception) {
             null
@@ -211,7 +218,7 @@ class AndroidStorage(private val context: Context) : PlatformStorage {
     // Bitmap operations
     override fun readBitmap(fileName: String): Any? {
         return try {
-            val file = context.getFileStreamPath(fileName)
+            val file = fileFor(fileName)
             if (!file.exists()) return null
             BitmapFactory.decodeFile(file.absolutePath)
         } catch (e: Exception) {
@@ -223,7 +230,8 @@ class AndroidStorage(private val context: Context) : PlatformStorage {
     override fun writeBitmap(fileName: String, bitmap: Any?): Boolean {
         return try {
             if (bitmap !is Bitmap) return false
-            val file = context.getFileStreamPath(fileName)
+            val file = fileFor(fileName)
+            file.parentFile?.mkdirs()
             FileOutputStream(file).use { out ->
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
             }
