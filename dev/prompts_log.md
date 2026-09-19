@@ -75,3 +75,4 @@
 26-09-17 22:35 "Also, a bug was introduced into the original Android app by all these changes: sometimes the solver cannot find a solution, and when you then try to save the map where no solution was found yet (which should not happen anyway), an error appears saying it cannot save. The log is at file:///var/tmp/roboyard_save-error.txt."
 26-09-18 06:45 "The solver in the Android app does not always find a solution — here is e.g. an easy one: solvable in 5 moves, but it hangs at 'AI calculating solution' [logcat attached]. megaplan"
 26-09-18 08:40 "Implement and test/verify with matching existing unit tests from the test suite."
+26-09-18 09:45 "The spinner on the next level button should only become active after 20s — before that you may press the new game or next game button directly without a spinner. This should be the same in both Android and the Compose app." (clarified: applies to New/Next Game + Back button, time basis = game time since map start)

@@ -1281,8 +1281,11 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                         return true;
                     }
 
-                    // At start: long-press only for random games
-                    if (!gameStateManager.isLoadedFromHistory() && !gameStateManager.isLoadedFromSave()) {
+                    // At start: long-press only for random games — and only once
+                    // the game is older than BUTTON_COOLDOWN_GRACE_MS; before that
+                    // a plain click is enough (no spinner).
+                    if (!gameStateManager.isLoadedFromHistory() && !gameStateManager.isLoadedFromSave()
+                            && gameStateManager.gameElapsedMs() >= Constants.BUTTON_COOLDOWN_GRACE_MS) {
                         isLongPressInProgress = true;
                         startCircularProgressAnimation(backButton);
                         longPressHandler.postDelayed(() -> {
@@ -1641,6 +1644,14 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                 case MotionEvent.ACTION_DOWN:
                     // For level games, trigger immediately (no cooldown)
                     if (isLevelGame) {
+                        handleNewMapButtonClick();
+                        return true;
+                    }
+
+                    // Within the grace period after map start a plain click is
+                    // enough — the long-press spinner only becomes required
+                    // once the game is older than BUTTON_COOLDOWN_GRACE_MS.
+                    if (gameStateManager.gameElapsedMs() < Constants.BUTTON_COOLDOWN_GRACE_MS) {
                         handleNewMapButtonClick();
                         return true;
                     }

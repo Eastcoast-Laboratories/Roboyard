@@ -406,6 +406,11 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
 
     // ── Undo / counters ────────────────────────────────────────────────────
 
+    /** Milliseconds elapsed since the current map started (button cooldown grace). */
+    fun gameElapsedMs(): Long {
+        return session.gameElapsedMs()
+    }
+
     fun undoLastMove(): Boolean {
         return session.undoLastMove()
     }

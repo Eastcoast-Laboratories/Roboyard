@@ -1724,6 +1724,14 @@ class GameSession(
     }
 
     /**
+     * Milliseconds elapsed since the current map/game started.
+     * Used by the button cooldown grace period (Constants.BUTTON_COOLDOWN_GRACE_MS).
+     */
+    fun gameElapsedMs(): Long {
+        return if (startTime == 0L) Long.MAX_VALUE else TimeProvider.currentTimeMillis() - startTime
+    }
+
+    /**
      * Calculate star rating based on player performance (delegates to shared logic).
      */
     fun calculateStars(playerMoves: Int, optimalMoves: Int, hintsUsed: Int): Int {
