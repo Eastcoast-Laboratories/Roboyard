@@ -177,9 +177,11 @@ class RobotMoveAnim(
 )
 
 /**
- * FancyButton with Android's long-press cooldown: when [cooldown] is true the button
- * must be held for [cooldownMs] while a circular progress sweeps; releasing early
- * cancels and fades the progress out (matches Android startCircularProgressAnimation).
+ * FancyButton with Android's long-press cooldown: when [cooldown] evaluates to
+ * true at press time the button must be held for [cooldownMs] while a circular
+ * progress sweeps; releasing early cancels and fades the progress out
+ * (matches Android startCircularProgressAnimation). Evaluated per press so the
+ * BUTTON_COOLDOWN_GRACE_MS window after map start can bypass the hold.
  */
 @Composable
 private fun CooldownFancyButton(
@@ -188,11 +190,12 @@ private fun CooldownFancyButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    cooldown: Boolean = false,
+    cooldown: () -> Boolean = { false },
     cooldownMs: Int = 1200
 ) {
     val scope = rememberCoroutineScope()
     val progress = remember { Animatable(0f) }
+    val cooldownRequired by rememberUpdatedState(cooldown)
     Box(modifier = modifier) {
         FancyButton(
             text = text,
@@ -205,11 +208,11 @@ private fun CooldownFancyButton(
             modifier = Modifier
                 .matchParentSize()
                 .clip(RoundedCornerShape(percent = 50))
-                .pointerInput(cooldown, enabled) {
+                .pointerInput(enabled) {
                     if (!enabled) return@pointerInput
                     detectTapGestures(
                         onPress = {
-                            if (!cooldown) {
+                            if (!cooldownRequired()) {
                                 onClick()
                                 tryAwaitRelease()
                                 return@detectTapGestures
@@ -286,6 +289,10 @@ fun GameScreen(
     val isSolverRunning by session.isSolverRunning.collectAsState()
     val sessionSolution by session.solutionFlow.collectAsState()
     val wrongRobotAtTarget by session.wrongRobotAtTarget.collectAsState()
+
+    // New/Next/Back buttons only require the long-press spinner once the map is
+    // older than the grace period — a plain click is enough before that.
+    val pastCooldownGrace = { session.gameElapsedMs() >= Constants.BUTTON_COOLDOWN_GRACE_MS }
 
     // Derived Board used purely as render model (least churn per plan)
     val renderBoard = remember(stateRevision) {
@@ -1486,7 +1493,7 @@ fun GameScreen(
                         CooldownFancyButton(
                             text = "◂",
                             color = FancyButtonColor.HINT,
-                            cooldown = true,
+                            cooldown = pastCooldownGrace,
                             onClick = { handleBackButtonClick() },
                             modifier = Modifier.weight(1f).height(64.dp)
                         )
@@ -1505,7 +1512,7 @@ fun GameScreen(
                             text = "▸",
                             color = FancyButtonColor.GREEN,
                             enabled = !isHistoryGame || hasNext,
-                            cooldown = true,
+                            cooldown = pastCooldownGrace,
                             onClick = { handleNewMapButtonClick() },
                             modifier = Modifier.weight(1f).height(64.dp)
                         )
@@ -1589,7 +1596,7 @@ fun GameScreen(
                 CooldownFancyButton(
                     text = "\u25C2 " + (stringProvider.getString("button_back_game") ?: "Back"),
                     color = backColor,
-                    cooldown = backNeedsCooldown,
+                    cooldown = { backNeedsCooldown && pastCooldownGrace() },
                     onClick = { handleBackButtonClick() },
                     modifier = Modifier.weight(1f)
                 )
@@ -1626,7 +1633,7 @@ fun GameScreen(
                         },
                         color = FancyButtonColor.GREEN,
                         enabled = !isHistoryGame || hasNext,
-                        cooldown = true,
+                        cooldown = pastCooldownGrace,
                         onClick = { handleNewMapButtonClick() },
                         modifier = Modifier.weight(1f)
                     )

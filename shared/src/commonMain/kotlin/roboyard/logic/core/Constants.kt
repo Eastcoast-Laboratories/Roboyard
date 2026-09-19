@@ -6,6 +6,13 @@ object Constants {
     /** App version shared across platforms. Keep in sync with app/build.gradle versionName. */
     const val APP_VERSION_NAME: String = "53"
 
+    /**
+     * Grace period after a map starts during which the New Game / Next Game /
+     * Back buttons react to a plain click — the long-press circular progress
+     * only becomes required once the game is older than this.
+     */
+    const val BUTTON_COOLDOWN_GRACE_MS: Long = 20_000L
+
     // Screen indices (preserved for compatibility with existing code)
     const val SCREEN_START: Int = 0
     const val SCREEN_SETTINGS: Int = 2

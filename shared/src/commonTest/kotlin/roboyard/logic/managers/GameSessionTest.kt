@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import roboyard.logic.core.Constants
 import roboyard.logic.core.GameElement
 import roboyard.logic.core.GameState
 import roboyard.logic.core.Preferences
@@ -251,5 +252,25 @@ class GameSessionTest {
             Preferences.minSolutionMoves = savedMin
             Preferences.maxSolutionMoves = savedMax
         }
+    }
+
+    @Test
+    fun test_gameElapsedMs_gracePeriodAfterMapStart() {
+        // No game started yet -> report "past grace" so buttons keep their
+        // long-press protection.
+        assertTrue(
+            session.gameElapsedMs() >= Constants.BUTTON_COOLDOWN_GRACE_MS,
+            "no game running: elapsed must be past the cooldown grace"
+        )
+
+        Preferences.boardSizeWidth = 8
+        Preferences.boardSizeHeight = 8
+        session.startGame()
+
+        val elapsed = session.gameElapsedMs()
+        assertTrue(
+            elapsed in 0 until Constants.BUTTON_COOLDOWN_GRACE_MS,
+            "fresh map must be inside the ${Constants.BUTTON_COOLDOWN_GRACE_MS}ms click grace, was ${elapsed}ms"
+        )
     }
 }
