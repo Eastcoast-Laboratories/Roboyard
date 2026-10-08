@@ -65,6 +65,18 @@ fun main(args: Array<String>) = application {
     // Android parity: MainActivity starts the background music service at startup
     getSoundManager().setBackgroundVolume(Preferences.backgroundSoundVolume)
 
+    // Shutdown watchdog + audio cleanup: if any shutdown hook wedges —
+    // observed: a stuck javax.sound/PipeWire line close made the VM ignore
+    // Ctrl+C forever — the watchdog forcibly halts the VM a few seconds
+    // after shutdown begins. Normal exits finish long before it fires.
+    Runtime.getRuntime().addShutdownHook(Thread({
+        Thread({
+            Thread.sleep(3_000)
+            Runtime.getRuntime().halt(0)
+        }, "roboyard-shutdown-watchdog").start()
+        runCatching { getSoundManager().stopAll() }
+    }, "roboyard-shutdown"))
+
     val windowState = rememberWindowState(
         placement = if (Preferences.fullscreenEnabled) WindowPlacement.Fullscreen else WindowPlacement.Floating,
         width = 400.dp,
