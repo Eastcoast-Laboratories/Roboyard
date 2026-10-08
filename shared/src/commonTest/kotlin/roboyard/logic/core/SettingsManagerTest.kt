@@ -75,6 +75,14 @@ class SettingsManagerTest {
     }
 
     @Test
+    fun test_fullscreenDefault_offOnDesktop() {
+        // Desktop requirement: first launch must be windowed — fullscreen only
+        // after the user enables it in the settings. The shared test target is
+        // the desktop JVM; on Android/iOS the default is true instead.
+        assertFalse(Preferences.DEFAULT_FULLSCREEN_ENABLED)
+    }
+
+    @Test
     fun test_setDifficulty_appliesPresets() {
         var state = SettingsManager.setDifficulty(Constants.DIFFICULTY_BEGINNER)
         assertEquals(Constants.DIFFICULTY_BEGINNER, state.difficulty)

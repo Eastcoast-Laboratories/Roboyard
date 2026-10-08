@@ -53,4 +53,6 @@ actual object PlatformInfo {
     actual fun getAppVersionName(): String = cachedVersionName ?: "unknown"
 
     actual fun isPlayGamesEnabled(): Boolean = cachedPlayGamesEnabled ?: false
+
+    actual fun isMobile(): Boolean = true
 }

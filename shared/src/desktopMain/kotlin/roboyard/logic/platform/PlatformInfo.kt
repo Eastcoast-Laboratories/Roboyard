@@ -21,4 +21,6 @@ actual object PlatformInfo {
     actual fun getAppVersionName(): String = roboyard.logic.core.Constants.APP_VERSION_NAME
 
     actual fun isPlayGamesEnabled(): Boolean = false
+
+    actual fun isMobile(): Boolean = false
 }

@@ -1,5 +1,6 @@
 package roboyard.logic.core
 
+import roboyard.logic.platform.PlatformInfo
 import roboyard.logic.storage.PlatformStorage
 import roboyard.logic.util.RLog
 import kotlin.math.max
@@ -66,7 +67,8 @@ object Preferences {
     const val DEFAULT_APP_LANGUAGE: String = "en"
     const val DEFAULT_TALKBACK_LANGUAGE: String = "same"
     val DEFAULT_GAME_MODE: Int = Constants.GAME_MODE_STANDARD
-    const val DEFAULT_FULLSCREEN_ENABLED: Boolean = true
+    /** Fullscreen default: on for mobile (Android/iOS), off for desktop. */
+    val DEFAULT_FULLSCREEN_ENABLED: Boolean get() = PlatformInfo.isMobile()
     const val DEFAULT_MIN_SOLUTION_MOVES: Int = 4
     const val DEFAULT_MAX_SOLUTION_MOVES: Int = 6
     const val DEFAULT_ALLOW_MULTICOLOR_TARGET: Boolean = true

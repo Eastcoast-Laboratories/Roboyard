@@ -35,4 +35,6 @@ actual object PlatformInfo {
     }
 
     actual fun isPlayGamesEnabled(): Boolean = false
+
+    actual fun isMobile(): Boolean = true
 }
