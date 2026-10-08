@@ -1,10 +1,14 @@
 # Play Store Changelogs für Version 53 (versionCode: 141)
 
 <en-GB>
-- convert all logic to Kotlin
+- Next Level button in game
+- History tab: gold-framed map previews with 0-3 stars
+- New/Next/Back buttons: no Long-Press needed during the first 20s after a map starts
 - Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
 </en-GB>
 <de-DE>
-- Konvertierung aller Logik zu Kotlin
+- Next-Level-Button im Spiel
+- Verlauf-Tab: Karten-Vorschau im Goldrahmen mit 0-3 Sternen
+- New/Next/Back-Buttons: in den ersten 20s nach Kartenstart ist kein Long-Press nötig
 - komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
 </de-DE>
