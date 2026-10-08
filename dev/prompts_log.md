@@ -77,3 +77,6 @@
 26-09-18 08:40 "Implement and test/verify with matching existing unit tests from the test suite."
 26-09-18 09:45 "The spinner on the next level button should only become active after 20s — before that you may press the new game or next game button directly without a spinner. This should be the same in both Android and the Compose app." (clarified: applies to New/Next Game + Back button, time basis = game time since map start)
 26-10-08 12:02 "The generated roboyard_desktop.jar does not start under Windows: A Java exception has occurred. How do you start it correctly under Windows? Add this to the README."
+26-10-08 12:37 "In the desktop app fullscreen must not be the default — first start should be windowed; fullscreen only when enabled in the settings. In the mobile app fullscreen should default to on."
+26-10-08 12:46 "Under Windows the fullscreen only shows a black screen, although the taskbar preview shows the correct image. Clicking where the settings button is works — the app reacts invisibly, it is only a display problem."
+26-10-08 12:51 "Commit both changes separately, but not the APKs/JARs yet."
