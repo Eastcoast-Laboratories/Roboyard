@@ -2,9 +2,10 @@ Changelog Deutsch
 =================
 
 
-## Version 53 (141)
-- Konvertierung aller Logik zu Kotlin
-
+## Version 53 (2026-10-08)
+- Next-Level-Button im Spiel
+- Verlauf-Tab: Karten-Vorschau im Goldrahmen mit 0-3 Sternen
+- New/Next/Back-Buttons: in den ersten 20s nach Kartenstart ist kein Long-Press nötig
 
 ## Version 52 (140)
 - Long-Press-Schutz fuer Neues Spiel im Spielbildschirm hinzugefuegt

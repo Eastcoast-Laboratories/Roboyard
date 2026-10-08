@@ -1,2 +1,4 @@
-- convert all logic to Kotlin
+- Next Level button in game
+- History tab: gold-framed map previews with 0-3 stars
+- New/Next/Back buttons: no Long-Press needed during the first 20s after a map starts
 - Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
