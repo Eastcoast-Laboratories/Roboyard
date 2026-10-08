@@ -29,6 +29,38 @@ Roboyard ermöglicht es, bis zu 35 verschiedene Karten zu speichern. Wenn Sie al
      alt="Jetzt bei Google Play"
      height="80">](https://play.google.com/store/apps/details?id=de.z11.roboyard)
 
+# Desktop-App (Windows, macOS, Linux)
+
+Die Releases enthalten auch eine Desktop-Version, `Roboyard_v<Version>_desktop.jar`.
+Es ist ein einzelnes plattformübergreifendes Fat-JAR — die nativen
+Skiko-Bibliotheken für Windows (x64 + ARM64), macOS (x64 + ARM64) und Linux
+(x64 + ARM64) sind bereits gebündelt, sodass dasselbe JAR auf jedem
+Betriebssystem läuft.
+
+Voraussetzung: **Java 17 oder neuer** (z. B. [Eclipse Temurin](https://adoptium.net))
+— prüfbar mit `java -version`.
+
+Starten — immer mit dem Flag `-jar`, auf jedem Betriebssystem:
+
+```
+java -jar Roboyard_v60_desktop.jar
+```
+
+Ohne `-jar` interpretiert Java den Pfad als Klassennamen und schlägt mit
+„Hauptklasse konnte nicht gefunden werden" (`ClassNotFoundException`) fehl.
+
+- **Windows**: Sobald eine JRE installiert ist, reicht auch ein Doppelklick auf
+  das JAR. Falls Windows „A Java exception has occurred" anzeigt oder das JAR
+  als Archiv geöffnet wird, führe den Befehl oben in `cmd`/PowerShell aus, um
+  den echten Fehler zu sehen.
+- **Linux / macOS**: den Befehl oben im Terminal ausführen, z. B.
+  `java -jar ~/Downloads/Roboyard_v60_desktop.jar`.
+
+Hinweis: Ein JAR, das nur mit `compose.desktop.currentOs` gebaut wird, enthält
+nur die Native-Bibliotheken des Bau-Rechners und scheitert auf anderen
+Betriebssystemen mit `UnsatisfiedLinkError`. Da `composeApp/build.gradle` jetzt
+alle Skiko-Runtime-Artefakte bündelt, deckt ein JAR alle Desktop-Systeme ab.
+
 # Screenshot
 ![](download/Roboyard_screenshot.png)
 

@@ -76,3 +76,4 @@
 26-09-18 06:45 "The solver in the Android app does not always find a solution — here is e.g. an easy one: solvable in 5 moves, but it hangs at 'AI calculating solution' [logcat attached]. megaplan"
 26-09-18 08:40 "Implement and test/verify with matching existing unit tests from the test suite."
 26-09-18 09:45 "The spinner on the next level button should only become active after 20s — before that you may press the new game or next game button directly without a spinner. This should be the same in both Android and the Compose app." (clarified: applies to New/Next Game + Back button, time basis = game time since map start)
+26-10-08 12:02 "The generated roboyard_desktop.jar does not start under Windows: A Java exception has occurred. How do you start it correctly under Windows? Add this to the README."

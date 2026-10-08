@@ -32,6 +32,36 @@ Roboyard allows to record up to 35 different maps. So if during your games you e
      alt="Get it on Google Play"
      height="80">](https://play.google.com/store/apps/details?id=de.z11.roboyard)
 
+# Desktop App (Windows, macOS, Linux)
+
+The releases also ship a desktop build, `Roboyard_v<version>_desktop.jar`. It is a
+single cross-platform fat jar — the native Skiko libraries for Windows
+(x64 + ARM64), macOS (x64 + ARM64) and Linux (x64 + ARM64) are bundled, so the
+same jar runs on every OS.
+
+Requirements: **Java 17 or newer** (e.g. [Eclipse Temurin](https://adoptium.net))
+— check with `java -version`.
+
+Running it — always with the `-jar` flag, on every OS:
+
+```
+java -jar Roboyard_v60_desktop.jar
+```
+
+Without `-jar`, Java interprets the path as a class name and fails with
+"main class could not be found" (`ClassNotFoundException`).
+
+- **Windows**: once a JRE is installed, double-clicking the jar works too. If
+  Windows shows "A Java exception has occurred" or the jar opens as an archive
+  instead, run the command above in `cmd`/PowerShell to see the real error.
+- **Linux / macOS**: run the command above in a terminal, e.g.
+  `java -jar ~/Downloads/Roboyard_v60_desktop.jar`.
+
+Note: a jar built with `compose.desktop.currentOs` alone would only contain the
+natives of the machine that built it and fail on any other OS with
+`UnsatisfiedLinkError`. Since `composeApp/build.gradle` now bundles all Skiko
+runtime artifacts, one jar covers every desktop OS.
+
 # Supported languages
 
 English, German (Deutsch), French (Français), Spanish (Español), Chinese (中文), Korean (한국어)

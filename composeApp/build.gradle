@@ -58,6 +58,20 @@ kotlin {
             dependencies {
                 implementation compose.desktop.currentOs
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.9.0"
+                // Bundle the Skiko natives for every OS so the release uber-jar
+                // runs on Windows, macOS and Linux alike — currentOs alone only
+                // embeds the natives of the machine that built the jar, which
+                // makes a Linux-built jar fail on Windows with UnsatisfiedLinkError
+                // ("A Java exception has occurred" when double-clicked).
+                // Version must match the Skiko version bundled by the Compose
+                // plugin (see `desktopRuntimeClasspath` dependencies).
+                def skikoVersion = '0.9.22.2'
+                implementation "org.jetbrains.skiko:skiko-awt-runtime-windows-x64:$skikoVersion"
+                implementation "org.jetbrains.skiko:skiko-awt-runtime-windows-arm64:$skikoVersion"
+                implementation "org.jetbrains.skiko:skiko-awt-runtime-linux-x64:$skikoVersion"
+                implementation "org.jetbrains.skiko:skiko-awt-runtime-linux-arm64:$skikoVersion"
+                implementation "org.jetbrains.skiko:skiko-awt-runtime-macos-x64:$skikoVersion"
+                implementation "org.jetbrains.skiko:skiko-awt-runtime-macos-arm64:$skikoVersion"
             }
         }
         desktopTest {
