@@ -25,4 +25,10 @@ expect object PlatformInfo {
      * Check if Google Play Games integration is enabled.
      */
     fun isPlayGamesEnabled(): Boolean
+
+    /**
+     * Whether this is a mobile platform (Android/iOS) — drives
+     * platform-dependent defaults such as fullscreen.
+     */
+    fun isMobile(): Boolean
 }
