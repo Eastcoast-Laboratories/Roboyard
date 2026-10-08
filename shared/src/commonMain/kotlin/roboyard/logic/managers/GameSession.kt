@@ -2411,12 +2411,6 @@ class GameSession(
      * Stores the solution, runs map-regeneration validation and notifies the callback.
      */
     private fun onSolutionCalculationCompleted(solution: GameSolution?) {
-        // Clear the running flag first: every early return below (map discard
-        // + delayed regeneration) must leave the flag cleared, otherwise the
-        // next calculateSolutionAsync() is ignored and the UI stays on
-        // "AI calculating solution" forever.
-        _isSolverRunning.value = false
-
         val state = _currentState.value
         val isLevelMode = (state != null && state.levelId > 0)
 
@@ -2446,6 +2440,10 @@ class GameSession(
                         )
                         regenerationCount++
 
+                        // Clear the running flag so the delayed regeneration's
+                        // calculateSolutionAsync() is not skipped by its
+                        // already-running guard.
+                        _isSolverRunning.value = false
                         resetSolverInitialization()
                         solver?.cancel()
 
@@ -2476,6 +2474,9 @@ class GameSession(
                     regenerationCount + 1, MAX_AUTO_REGENERATIONS
                 )
                 regenerationCount++
+                // Clear the running flag so the delayed regeneration's
+                // calculateSolutionAsync() is not skipped by its guard.
+                _isSolverRunning.value = false
                 resetSolverInitialization()
                 solver?.cancel()
                 scope.launch {
@@ -2487,7 +2488,11 @@ class GameSession(
             log.w("[SOLUTION_SOLVER][MOVES] onSolutionCalculationCompleted: No solution found, accepting puzzle")
         }
 
-        // Store the solution for later use with getHint()
+        // Store the solution for later use with getHint(). All accepted state
+        // must be set before the running flag is cleared: isSolverRunning
+        // observers (e.g. the save-map button enable check) read
+        // currentSolution/solutionWasAccepted synchronously and must see the
+        // accepted snapshot, not the pre-solver state.
         currentSolution = solution
         currentSolutionStep = 0
         updatePreCompRobotOrder(solution)
@@ -2495,6 +2500,8 @@ class GameSession(
         solutionWasAccepted = true
 
         regenerationCount = 0
+
+        _isSolverRunning.value = false
 
         if (solutionCallback != null) {
             solutionCallback!!.onSolutionCalculationCompleted(solution)
