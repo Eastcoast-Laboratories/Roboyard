@@ -1,8 +1,16 @@
 package roboyard
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
+import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import java.time.OffsetDateTime
@@ -77,16 +85,30 @@ fun main(args: Array<String>) = application {
         runCatching { getSoundManager().stopAll() }
     }, "roboyard-shutdown"))
 
-    val windowState = rememberWindowState(
-        placement = if (Preferences.fullscreenEnabled) WindowPlacement.Fullscreen else WindowPlacement.Floating,
-        width = 400.dp,
-        height = 800.dp
-    )
-    Window(
-        onCloseRequest = ::exitApplication,
-        title = "Roboyard",
-        state = windowState
-    ) {
+    // Skiko's native fullscreen (WindowPlacement.Fullscreen) presents a black
+    // window on Windows — the app stays interactive but invisible. Emulate
+    // fullscreen with an undecorated borderless window covering the whole
+    // screen instead. AWT can't change isUndecorated while the window is
+    // showing, so the window is recreated via key() when the flag toggles.
+    val isWindows = System.getProperty("os.name").startsWith("Windows")
+    var windowsFullscreen by remember {
+        mutableStateOf(isWindows && Preferences.fullscreenEnabled)
+    }
+
+    key(windowsFullscreen) {
+        val screenSize = if (windowsFullscreen) primaryScreenSizeDp() else null
+        val windowState = rememberWindowState(
+            placement = if (Preferences.fullscreenEnabled && !isWindows) WindowPlacement.Fullscreen else WindowPlacement.Floating,
+            position = if (windowsFullscreen) WindowPosition(0.dp, 0.dp) else WindowPosition(Alignment.Center),
+            width = screenSize?.width ?: 400.dp,
+            height = screenSize?.height ?: 800.dp
+        )
+        Window(
+            onCloseRequest = ::exitApplication,
+            title = "Roboyard",
+            state = windowState,
+            undecorated = windowsFullscreen
+        ) {
         // Desktop drag-scroll driver: this runtime does not deliver pointer
         // move events to Compose handlers while a mouse button is held —
         // they arrive coalesced at release. Raw AWT MOUSE_DRAGGED events do
@@ -143,9 +165,25 @@ fun main(args: Array<String>) = application {
         }
         App(
             onFullscreenChanged = { enabled ->
-                windowState.placement = if (enabled) WindowPlacement.Fullscreen else WindowPlacement.Floating
+                if (isWindows) {
+                    // Toggles the borderless-fullscreen window via key() recreation
+                    windowsFullscreen = enabled
+                } else {
+                    windowState.placement = if (enabled) WindowPlacement.Fullscreen else WindowPlacement.Floating
+                }
             },
             pendingDeepLink = pendingDeepLink
         )
+        }
     }
+}
+
+/** Full bounds of the primary screen in dp — used to emulate fullscreen on Windows. */
+private fun primaryScreenSizeDp(): DpSize? = try {
+    val config = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment()
+        .defaultScreenDevice.defaultConfiguration
+    val scale = config.defaultTransform.scaleX
+    DpSize((config.bounds.width / scale).dp, (config.bounds.height / scale).dp)
+} catch (e: Exception) {
+    null
 }
