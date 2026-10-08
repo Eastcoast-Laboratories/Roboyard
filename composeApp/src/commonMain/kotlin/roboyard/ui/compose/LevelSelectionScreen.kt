@@ -65,7 +65,6 @@ import driftingdroids.model.Board
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import roboyard.composeapp.generated.resources.Res
-import roboyard.composeapp.generated.resources.ic_check_green
 import roboyard.composeapp.generated.resources.ic_lock
 import roboyard.composeapp.generated.resources.ic_play_arrow
 import roboyard.composeapp.generated.resources.ic_user_profile
@@ -601,9 +600,7 @@ private fun LevelCardVisual(
 ) {
     val shape = RoundedCornerShape(8.dp)
     val brush = when {
-        isCompleted -> Brush.linearGradient(
-            listOf(Color(0xFFC8A415), Color(0xFFE8C840), Color(0xFFA07A10))
-        )
+        isCompleted -> LevelCardGoldBrush
         isUnlocked -> Brush.linearGradient(
             listOf(Color(0xFF1565C0), Color(0xFF1E88E5), Color(0xFF0D47A1))
         )
@@ -612,7 +609,7 @@ private fun LevelCardVisual(
         )
     }
     val borderColor = when {
-        isCompleted -> Color(0xFFFFD700)
+        isCompleted -> LevelCardGoldBorder
         isUnlocked -> Color(0xFF42A5F5)
         else -> Color(0xFFA0A0A0)
     }
@@ -660,27 +657,13 @@ private fun LevelCardVisual(
                     )
                 }
                 // Stars row (or green check when 0 stars)
-                Row(
+                StarsRow(
+                    stars = starsEarned,
+                    showCheckWhenZero = true,
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .padding(top = 2.dp)
-                ) {
-                    if (starsEarned == 0) {
-                        Image(
-                            painter = painterResource(Res.drawable.ic_check_green),
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    } else {
-                        repeat(starsEarned.coerceAtMost(4)) {
-                            Image(
-                                painter = painterResource(Res.drawable.star),
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    }
-                }
+                )
                 // Info button (bottom-end, only with a history entry)
                 if (showInfo) {
                     Text(

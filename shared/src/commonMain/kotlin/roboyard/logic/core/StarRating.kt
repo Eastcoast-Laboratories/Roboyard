@@ -34,6 +34,49 @@ fun calculateStars(playerMoves: Int, optimalMoves: Int, hintsUsed: Int): Int {
 }
 
 /**
+ * Calculate the star rating shown for a history entry (display only — the
+ * level-completion rating above stays untouched).
+ *
+ * Star allocation rules:
+ * - Optimal solutions up to 10 moves:
+ *   - 3 stars: optimal moves or better
+ *   - 2 stars: one move over optimal
+ *   - 1 star: two moves over optimal
+ *   - 0 stars: more than two moves over optimal
+ * - Optimal solutions above 10 moves (linear scaling):
+ *   - 3 stars: optimal moves or better
+ *   - 2 stars: at most 10% over optimal
+ *   - 1 star: at most 20% over optimal
+ *   - 0 stars: more than 20% over optimal
+ *
+ * @param playerMoves  Number of moves used by player
+ * @param optimalMoves Optimal number of moves from solver
+ * @return Number of stars earned (0-3)
+ */
+fun calculateHistoryStars(playerMoves: Int, optimalMoves: Int): Int {
+    if (optimalMoves <= 0 || playerMoves <= 0) {
+        return 0
+    }
+    if (playerMoves <= optimalMoves) {
+        return 3
+    }
+    return if (optimalMoves <= Constants.HISTORY_SMALL_LEVEL_OPTIMAL) {
+        when {
+            playerMoves <= optimalMoves + 1 -> 2
+            playerMoves <= optimalMoves + 2 -> 1
+            else -> 0
+        }
+    } else {
+        val ratio = playerMoves.toDouble() / optimalMoves
+        when {
+            ratio <= 1.10 -> 2
+            ratio <= 1.20 -> 1
+            else -> 0
+        }
+    }
+}
+
+/**
  * Save level completion data (DRY - same as in main game)
  * 
  * @param levelCompletionManager LevelCompletionManager instance

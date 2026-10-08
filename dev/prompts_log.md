@@ -82,5 +82,6 @@
 26-10-08 12:51 "Commit both changes separately, but not the APKs/JARs yet."
 26-10-08 14:52 "The Android app from the new system cannot reach the internet — missing INTERNET permission."
 26-10-08 19:08 "History tab in the save screen: the info button should sit higher, exactly in the corner, and the maps should get the golden frame like on the level screen, plus a row of 0-3 stars above each map — same look as the level screen (DRY). Stars: for levels with <=10 optimal moves, 3 for optimal, 2 for one more, 1 for two more; for levels with more, 3 for optimal, 2 for max 10% over, 1 for max 20% over, 0 at 30% over. Same star graphics and size as the level screen, identical in old Android app and Compose app — put the logic in shared."
-26-10-08 19:20 "Clarification: the stars should scale linearly — e.g. on a 20-move level, 3 stars for 20 moves, 2 stars for 21 or 22, 1 star for 23 or 24, 0 above that. New rule applies to the history display only."
 26-10-08 20:30 "In the Android app I can no longer press the save button in the game." + logcat excerpt of a random game session
+26-10-08 19:20 "Clarification: the stars should scale linearly — e.g. on a 20-move level, 3 stars for 20 moves, 2 stars for 21 or 22, 1 star for 23 or 24, 0 above that. New rule applies to the history display only."
+26-10-08 21:05 "The gold-framed maps are framed, but they should also have a golden head row on top and the stars should be left-aligned — exactly like the level selection screen."

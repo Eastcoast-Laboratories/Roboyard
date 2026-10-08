@@ -2,6 +2,7 @@ package roboyard.ui.compose
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -43,6 +45,7 @@ import driftingdroids.model.Board
 import roboyard.logic.core.Constants
 import roboyard.logic.core.GameHistoryEntry
 import roboyard.logic.core.GameState
+import roboyard.logic.core.calculateHistoryStars
 import roboyard.logic.managers.GameHistoryManager
 import roboyard.logic.managers.GameSession
 import roboyard.logic.managers.ShareMapHelper
@@ -686,15 +689,51 @@ fun HistoryItem(
         else -> s("history_not_completed", "Not completed", emptyArray())
     }
 
+    // Stars above the map — same display as the level cards: 0-3 stars from
+    // the shared history-star rules, green check when completed with 0 stars.
+    val stars = if (entry.completionCount > 0) {
+        if (entry.optimalMoves > 0) {
+            calculateHistoryStars(entry.movesMade, entry.optimalMoves)
+        } else {
+            entry.starsEarned.coerceAtMost(3)
+        }
+    } else {
+        -1
+    }
+    val shape = RoundedCornerShape(8.dp)
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFF2C2C2C), RoundedCornerShape(8.dp))
+            .background(Color(0xFF2C2C2C), shape)
             .clickable { onClick() }
-            .padding(12.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            MinimapCanvas(saveData = saveData, modifier = Modifier.size(80.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(12.dp)
+        ) {
+            // Gold card matching the completed level cards: stars on the gold
+            // head row (left-aligned, like Android item_level stars_container),
+            // minimap below
+            Box(
+                modifier = Modifier
+                    .clip(shape)
+                    .background(LevelCardGoldBrush)
+                    .border(2.dp, LevelCardGoldBorder, shape)
+                    .padding(4.dp)
+            ) {
+                Column {
+                    StarsRow(
+                        stars = stars,
+                        showCheckWhenZero = true,
+                        modifier = Modifier
+                            .align(Alignment.Start)
+                            .padding(start = 2.dp, top = 2.dp)
+                            .height(18.dp)
+                    )
+                    MinimapCanvas(saveData = saveData, modifier = Modifier.size(80.dp))
+                }
+            }
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(entry.mapName ?: "Unknown", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
@@ -706,27 +745,32 @@ fun HistoryItem(
                     Text(completionStatus, color = Color.LightGray, fontSize = 14.sp)
                 }
             }
-            Column {
-                CircularButton(
-                    text = "i",
-                    color = CircularButtonColor.GRAY,
-                    onClick = onInfoClick,
-                    modifier = Modifier.semantics {
-                        contentDescription = infoA11y
-                        testTag = "infoButton_${entry.getHistoryIndex()}"
-                    }
-                )
-                CircularButton(
-                    text = "🗑",
-                    color = CircularButtonColor.RED,
-                    onClick = onDeleteClick,
-                    modifier = Modifier.semantics {
-                        contentDescription = deleteA11y
-                        testTag = "deleteButton_${entry.getHistoryIndex()}"
-                    }
-                )
-            }
+            // Reserved column for the corner buttons below
+            Spacer(modifier = Modifier.width(52.dp))
         }
+        // Info button flush in the top-right card corner
+        CircularButton(
+            text = "i",
+            color = CircularButtonColor.GRAY,
+            onClick = onInfoClick,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .semantics {
+                    contentDescription = infoA11y
+                    testTag = "infoButton_${entry.getHistoryIndex()}"
+                }
+        )
+        CircularButton(
+            text = "🗑",
+            color = CircularButtonColor.RED,
+            onClick = onDeleteClick,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .semantics {
+                    contentDescription = deleteA11y
+                    testTag = "deleteButton_${entry.getHistoryIndex()}"
+                }
+        )
     }
 }
 
