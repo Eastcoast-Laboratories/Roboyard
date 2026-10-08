@@ -15,6 +15,10 @@
 #   <DOWNLOAD_DIR>/Roboyard_desktop/Roboyard_v<version>_desktop.jar
 #   <DOWNLOAD_DIR>/Roboyard_ios/Roboyard_v<version>_ios_<arch>.framework.zip
 #
+#   The desktop jar is cross-platform: it bundles the Skiko natives for
+#   Windows, macOS and Linux (see composeApp/build.gradle) and runs with
+#   `java -jar` on Java 17+.
+#
 # Notes:
 #   - The version is read from composeAndroidApp/build.gradle (versionName).
 #   - iOS frameworks can only be linked on macOS (Kotlin/Native + Xcode).
