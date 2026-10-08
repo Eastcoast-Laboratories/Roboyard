@@ -67,12 +67,16 @@ check_length() {
 # German Changelog (for CHANGELOG_de.md - without link)
 DE_CHANGES=$(cat << EOF
 - Next-Level-Button im Spiel
+- Verlauf-Tab: Karten-Vorschau im Goldrahmen mit 0-3 Sternen
+- New/Next/Back-Buttons: in den ersten 20s nach Kartenstart ist kein Long-Press nötig
 EOF
 )
 
 # English Changelog (for CHANGELOG.md - without link)
 EN_CHANGES=$(cat << EOF
 - Next Level button in game
+- History tab: gold-framed map previews with 0-3 stars
+- New/Next/Back buttons: no Long-Press needed during the first 20s after a map starts
 EOF
 )
 

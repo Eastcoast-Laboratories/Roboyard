@@ -15,16 +15,77 @@
         android:layout_height="wrap_content"
         android:padding="8dp">
 
-        <!-- History minimap thumbnail -->
-        <ImageView
-            android:id="@+id/minimap_view"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:importantForAccessibility="no"
-            android:scaleType="fitCenter"
+        <!-- Map column: gold card with the stars row on top and the minimap
+             below — same look as item_level (stars sit on the gold head row,
+             left-aligned) -->
+        <LinearLayout
+            android:id="@+id/map_column"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/bg_level_card_gold"
+            android:padding="4dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:src="@android:drawable/ic_menu_gallery" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <!-- 0-3 stars, same graphic, size and left alignment as item_level stars_container -->
+            <LinearLayout
+                android:id="@+id/stars_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="16dp"
+                android:orientation="horizontal"
+                android:gravity="start"
+                android:layout_marginStart="2dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp">
+
+                <!-- Green checkmark (shown when completed with 0 stars) -->
+                <ImageView
+                    android:id="@+id/history_check_green"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginEnd="1dp"
+                    android:src="@drawable/ic_check_green"
+                    android:visibility="gone"
+                    android:importantForAccessibility="no" />
+
+                <ImageView
+                    android:id="@+id/history_star_1"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginEnd="1dp"
+                    android:src="@drawable/star"
+                    android:visibility="gone"
+                    android:importantForAccessibility="no" />
+
+                <ImageView
+                    android:id="@+id/history_star_2"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginEnd="1dp"
+                    android:src="@drawable/star"
+                    android:visibility="gone"
+                    android:importantForAccessibility="no" />
+
+                <ImageView
+                    android:id="@+id/history_star_3"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:src="@drawable/star"
+                    android:visibility="gone"
+                    android:importantForAccessibility="no" />
+            </LinearLayout>
+
+            <!-- History minimap thumbnail -->
+            <ImageView
+                android:id="@+id/minimap_view"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:importantForAccessibility="no"
+                android:scaleType="fitCenter"
+                tools:src="@android:drawable/ic_menu_gallery" />
+        </LinearLayout>
 
         <!-- Level name -->
         <TextView
@@ -36,8 +97,9 @@
             android:maxLines="2"
             android:textSize="16sp"
             android:textStyle="bold"
+            android:layout_marginEnd="48dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/minimap_view"
+            app:layout_constraintStart_toEndOf="@+id/map_column"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Level 1" />
 
@@ -50,7 +112,7 @@
             android:layout_marginTop="8dp"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/minimap_view"
+            app:layout_constraintStart_toEndOf="@+id/map_column"
             app:layout_constraintTop_toBottomOf="@+id/name_text"
             tools:text="2025-03-19 12:45" />
 
@@ -62,7 +124,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
             android:textSize="14sp"
-            app:layout_constraintStart_toEndOf="@+id/minimap_view"
+            app:layout_constraintStart_toEndOf="@+id/map_column"
             app:layout_constraintTop_toBottomOf="@+id/date_text"
             tools:text="Board: 12×12" />
 
@@ -86,7 +148,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
             android:textSize="14sp"
-            app:layout_constraintStart_toEndOf="@+id/minimap_view"
+            app:layout_constraintStart_toEndOf="@+id/map_column"
             app:layout_constraintTop_toBottomOf="@+id/board_size_text"
             tools:text="5 moves" />
 
@@ -103,18 +165,6 @@
             app:layout_constraintTop_toBottomOf="@+id/board_size_text"
             tools:text="Completed" />
 
-        <!-- Info button (i) - shows map details popup -->
-        <ImageButton
-            android:id="@+id/info_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginTop="4dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/info_button_a11y"
-            android:src="@android:drawable/ic_menu_info_details"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
         <!-- Delete button - hidden but logic preserved for potential future use -->
         <ImageButton
             android:id="@+id/delete_button"
@@ -126,8 +176,18 @@
             android:src="@android:drawable/ic_menu_delete"
             android:tint="#F44336"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/info_button"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Info button (i) - flush in the top-right card corner, shows map details popup -->
+    <ImageButton
+        android:id="@+id/info_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="top|end"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/info_button_a11y"
+        android:src="@android:drawable/ic_menu_info_details" />
 </androidx.cardview.widget.CardView>

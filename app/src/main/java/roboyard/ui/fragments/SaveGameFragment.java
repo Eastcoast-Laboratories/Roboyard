@@ -48,6 +48,7 @@ import roboyard.eclabs.R;
 import roboyard.logic.storage.FileReadWrite;
 import roboyard.logic.core.Constants;
 import roboyard.logic.core.GameHistoryEntry;
+import roboyard.logic.core.StarRatingKt;
 import roboyard.logic.managers.GameStateManager;
 import roboyard.logic.managers.GameHistoryManager;
 import roboyard.logic.managers.ShareMapHelper;
@@ -1531,6 +1532,21 @@ public class SaveGameFragment extends BaseGameFragment {
                 holder.completionStatus.setVisibility(View.GONE);
             }
             
+            // Stars above the map — same rating display as the level cards:
+            // 0-3 stars from the shared history-star rules, green check when
+            // completed with 0 stars, empty row when never completed.
+            GameHistoryEntry he = entry.getHistoryEntry();
+            int stars = -1;
+            if (he != null && he.getCompletionCount() > 0) {
+                stars = he.optimalMoves > 0
+                        ? StarRatingKt.calculateHistoryStars(he.movesMade, he.optimalMoves)
+                        : Math.min(he.starsEarned, 3);
+            }
+            holder.checkGreen.setVisibility(stars == 0 ? View.VISIBLE : View.GONE);
+            holder.star1.setVisibility(stars >= 1 ? View.VISIBLE : View.GONE);
+            holder.star2.setVisibility(stars >= 2 ? View.VISIBLE : View.GONE);
+            holder.star3.setVisibility(stars >= 3 ? View.VISIBLE : View.GONE);
+
             // Load minimap asynchronously to prevent main thread blocking
             if (entry.getMapPath() != null && !entry.getMapPath().isEmpty()) {
                 if (entry.getMinimap() != null) {
@@ -1685,6 +1701,10 @@ public class SaveGameFragment extends BaseGameFragment {
         TextView difficultyText;
         TextView completionStatus;
         ImageView minimapView;
+        ImageView checkGreen;
+        ImageView star1;
+        ImageView star2;
+        ImageView star3;
         ImageButton deleteButton;
         ImageButton infoButton;
         
@@ -1697,6 +1717,10 @@ public class SaveGameFragment extends BaseGameFragment {
             difficultyText = itemView.findViewById(R.id.difficulty_text);
             completionStatus = itemView.findViewById(R.id.completion_status);
             minimapView = itemView.findViewById(R.id.minimap_view);
+            checkGreen = itemView.findViewById(R.id.history_check_green);
+            star1 = itemView.findViewById(R.id.history_star_1);
+            star2 = itemView.findViewById(R.id.history_star_2);
+            star3 = itemView.findViewById(R.id.history_star_3);
             deleteButton = itemView.findViewById(R.id.delete_button);
             infoButton = itemView.findViewById(R.id.info_button);
         }

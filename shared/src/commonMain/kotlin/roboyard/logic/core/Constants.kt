@@ -134,4 +134,8 @@ object Constants {
     const val MIN_STAR_GUARANTEE_LEVEL: Int = 10
     const val CUSTOM_LEVEL_START_ID: Int = 141
     const val STARS_PER_LEVEL: Int = 1
+
+    // History star display: maps with at most this many optimal moves use
+    // fixed move offsets (3/2/1 for +0/+1/+2), larger maps scale by percentage
+    const val HISTORY_SMALL_LEVEL_OPTIMAL: Int = 10
 }
