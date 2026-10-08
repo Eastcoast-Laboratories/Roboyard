@@ -80,3 +80,4 @@
 26-10-08 12:37 "In the desktop app fullscreen must not be the default — first start should be windowed; fullscreen only when enabled in the settings. In the mobile app fullscreen should default to on."
 26-10-08 12:46 "Under Windows the fullscreen only shows a black screen, although the taskbar preview shows the correct image. Clicking where the settings button is works — the app reacts invisibly, it is only a display problem."
 26-10-08 12:51 "Commit both changes separately, but not the APKs/JARs yet."
+26-10-08 14:52 "The Android app from the new system cannot reach the internet — missing INTERNET permission."
