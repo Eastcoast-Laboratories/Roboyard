@@ -33,6 +33,7 @@
 
 - `dev/achievements.md` is the source of truth for achievement definitions — keep it synchronized with `shared/src/commonMain/kotlin/roboyard/logic/achievements/AchievementDefinitions.kt` when changing the achievement system.
 - `dev/TESTSUITE.md` is the source of truth for the test suite status.
+- All UI texts live only in the Android `app/src/main/res/values*/strings.xml` files. `composeApp/src/commonMain/resources/strings/strings.json` is generated from them by `dev/scripts/sync_strings_json.py` (Gradle task `:composeApp:generateStringsJson`, runs before every composeApp resource step) — never edit the JSON by hand.
 
 ## Deployment
 

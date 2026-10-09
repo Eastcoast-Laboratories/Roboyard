@@ -809,4 +809,16 @@
     
     <!-- Empty text placeholder used in layouts -->
     <string name="empty_text"></string>
+    <string name="level_design_editor">レベルエディター</string>
+    <string name="yes">はい</string>
+    <string name="no">いいえ</string>
+    <string name="cancel">キャンセル</string>
+    <string name="delete_button_a11y">履歴エントリを削除</string>
+    <string name="no_history_entries">履歴エントリがありません</string>
+    <string name="history_delete_failed">履歴エントリの削除に失敗しました</string>
+    <string name="standard_levels">標準レベル</string>
+    <string name="custom_levels">カスタムレベル</string>
+    <string name="level_card_a11y">レベル %1$d</string>
+    <string name="settings_export_to_file">ファイルに保存</string>
+    <string name="settings_import_from_file">ファイルから読み込む</string>
 </resources>

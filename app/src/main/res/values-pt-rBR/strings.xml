@@ -818,4 +818,16 @@
     
     <!-- Empty text placeholder used in layouts -->
     <string name="empty_text"></string>
+    <string name="level_design_editor">Editor de níveis</string>
+    <string name="yes">Sim</string>
+    <string name="no">Não</string>
+    <string name="cancel">Cancelar</string>
+    <string name="delete_button_a11y">Excluir entrada do histórico</string>
+    <string name="no_history_entries">Sem entradas de histórico</string>
+    <string name="history_delete_failed">Falha ao excluir entrada</string>
+    <string name="standard_levels">Níveis padrão</string>
+    <string name="custom_levels">Níveis personalizados</string>
+    <string name="level_card_a11y">Nível %1$d</string>
+    <string name="settings_export_to_file">Salvar em arquivo</string>
+    <string name="settings_import_from_file">Carregar de arquivo</string>
 </resources>

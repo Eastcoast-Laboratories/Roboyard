@@ -795,4 +795,16 @@
     <string name="settings_hint_auto_move_semi_auto">반자동 (다음 힌트 버튼으로 이동)</string>
     <string name="settings_hint_auto_move_semi_auto_a11y">반자동 모드: 다음 힌트 버튼을 클릭하면 로봇이 이동합니다</string>
 
+    <string name="level_design_editor">레벨 에디터</string>
+    <string name="yes">예</string>
+    <string name="no">아니요</string>
+    <string name="cancel">취소</string>
+    <string name="delete_button_a11y">기록 항목 삭제</string>
+    <string name="no_history_entries">기록 항목 없음</string>
+    <string name="history_delete_failed">기록 항목 삭제 실패</string>
+    <string name="standard_levels">기본 레벨</string>
+    <string name="custom_levels">사용자 지정 레벨</string>
+    <string name="level_card_a11y">레벨 %1$d</string>
+    <string name="settings_export_to_file">파일로 저장</string>
+    <string name="settings_import_from_file">파일에서 불러오기</string>
 </resources>
