@@ -749,10 +749,14 @@ fun GameScreen(
         }
     }
 
-    // Auto-move robot when a regular hint is shown in Full-Auto mode
-    // (matches Android executeHintAutoMove — 100ms delay, skipped when game complete)
-    fun maybeAutoMoveHint() {
-        if (Preferences.hintAutoMoveMode != Preferences.HINT_AUTO_MOVE_FULL_AUTO) return
+    // Auto-move robot when a regular hint is shown (matches Android
+    // executeHintAutoMove — 100ms delay, skipped when game complete).
+    // Full-Auto: every regular hint display executes the move (next, prev,
+    // auto-advance). Semi-Auto: only forward showNextHint taps execute it.
+    fun maybeAutoMoveHint(includeSemiAuto: Boolean = false) {
+        val mode = Preferences.hintAutoMoveMode
+        if (mode != Preferences.HINT_AUTO_MOVE_FULL_AUTO &&
+            !(includeSemiAuto && mode == Preferences.HINT_AUTO_MOVE_SEMI_AUTO)) return
         if (session.isGameComplete.value) return
         val hint = hintManager.getRegularHint() ?: return
         scope.launch {
@@ -775,7 +779,7 @@ fun GameScreen(
         if (hintManager.nextHint()) {
             updateHintDisplay()
             recordHintShown()
-            maybeAutoMoveHint()
+            maybeAutoMoveHint(includeSemiAuto = true)
         }
     }
 
@@ -905,6 +909,9 @@ fun GameScreen(
                 hintManager.nextHint()
                 updateHintDisplay(fromAutoAdvance = true)
                 recordHintShown()
+                // Android: showNormalHint executes the move in Full-Auto, so
+                // the auto-advance chain plays out the whole solution
+                maybeAutoMoveHint()
             } else {
                 hintMessage = stringProvider.getString("all_hints_shown") ?: "All hints shown"
             }
