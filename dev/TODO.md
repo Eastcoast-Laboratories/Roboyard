@@ -111,4 +111,23 @@ ist das gelöst?
 
 - play games service option, ist egal, da ja in android auch deaktivierrt
 - talkback ist noch nciht komlett
-- longpress auf den titel im settings menu um in den debug screen zu kommen
+
+- landscape: App.kt klemmt alles auf portrait fest (contentWidth = minOf(maxWidth, maxHeight*0.7), schwarze balken). android hat richtige landscape-layouts (fragment_game_landscape + grid_left-variante). im GameScreen.kt ist der landscape-code samt ⇄-toggle schon drin, aber durch die portrait-klammer unerreichbar. betrifft auch composeAndroidApp beim drehen
+- system-back / hw-back-button (und desktop Esc) fehlt komplett: keine BackHandler in composeApp. android GameFragment fängt back ab: selektierter roboter → deselektieren + vom rand wegrücken (moveRobotInDirection), sonst normale back-navigation; bei 0 zügen lädt back den letzten history-eintrag
+- vibration fehlt (nur composeAndroidApp relevant): android vibriert 50ms beim roboter-move (GameFragment ~Z.1968, Vibrator via reflection)
+- flaggen in den settings im sprachauswahl select
+
+# sofort umsetzen:
+- LevelDesignEditorScreen.kt.todo im source tree = komplette kopie des android-fragments als referenz, aufräumen/entfernen
+- Hint auto move:
+  - wenn man den richtigen zug gemacht hat, soll automatisch der nächste hint angezeigt werden und der roboter selected werden, der dann muss
+  - Semi-auto: geht noch gar nichth, soll so wie in android
+  
+# aus dem audit als bereits portiert verifiziert (keine gaps):
+
+- sounds: 45 robot-sounds identisch, hintergrundmusik + focus-pause vorhanden
+- keep-map-button bei laufender solver-generation (✓ bei >1 restart)
+- long-press-buttons mit kreis-progress (new game/next/back)
+- landscape_grid_left-pref-key geteilt mit android
+- share-flows (savegame/editor), update-nudge in credits, streak-popups, history-sync
+- roboter-durchschalten (cycle) inkl. accessibility-ansage

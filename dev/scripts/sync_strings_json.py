@@ -43,10 +43,15 @@ COMMENT = {
 }
 
 FORMAT_ARG = re.compile(r"%(?:(\d+)\$)?[sdfoxeg]")
+# Android/aapt decodes Java-style \uXXXX escapes in string values (e.g. the
+# zero-width space \u200B used in history_detail_qualifies_no_hints_perfect).
+# Escaped \\uXXXX stays literal, like aapt's \\ -> \ handling.
+UNICODE_ESCAPE = re.compile(r"(?<!\\)\\u([0-9a-fA-F]{4})")
 
 
 def android_to_json(value: str) -> str:
     """Unescape Android string escapes and convert format args to {N}."""
+    value = UNICODE_ESCAPE.sub(lambda m: chr(int(m.group(1), 16)), value)
     value = value.replace("\\'", "'").replace('\\"', '"').replace("\\\\", "\\")
     counter = iter(range(1000))
 
