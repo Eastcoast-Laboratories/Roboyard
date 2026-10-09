@@ -1037,8 +1037,23 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
                             statusTextView.setText(spannable);
                         }
                     } else {
-                        statusTextView.setText(text);
-                        statusTextView.setTextColor(Preferences.highContrastMode ? Color.BLACK : darkGreen);
+                        // No delta part (still on the optimal path): the leading
+                        // number keeps the 1.5x emphasis, the rest 0.9x
+                        int spaceIdx = text.indexOf(" ");
+                        if (spaceIdx > 0) {
+                            SpannableString spannable = new SpannableString(text);
+                            spannable.setSpan(new android.text.style.RelativeSizeSpan(1.5f), 0, spaceIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            spannable.setSpan(new ForegroundColorSpan(darkGreen), 0, spaceIdx, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            spannable.setSpan(new android.text.style.RelativeSizeSpan(0.9f), spaceIdx, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            spannable.setSpan(new ForegroundColorSpan(darkGreen), spaceIdx, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            if (Preferences.highContrastMode) {
+                                spannable.setSpan(new ForegroundColorSpan(Color.BLACK), 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            }
+                            statusTextView.setText(spannable);
+                        } else {
+                            statusTextView.setText(text);
+                            statusTextView.setTextColor(Preferences.highContrastMode ? Color.BLACK : darkGreen);
+                        }
                     }
                     
                     // Apply background in live move counter based on mode
@@ -4507,14 +4522,7 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
      * 0=green, 1=green-yellow, 2=dark yellow, 3=orange, 4=red, 5+=dark-red
      */
     private int getDeviationColor(Integer deviation) {
-        if (deviation == null || deviation <= 0) return Color.parseColor("#006400"); // Green
-        switch (deviation) {
-            case 1: return Color.parseColor("#7CB342"); // Green-yellow
-            case 2: return Color.parseColor("#C6A700"); // Dark yellow
-            case 3: return Color.parseColor("#E65100"); // Orange
-            case 4: return Color.parseColor("#D50000"); // Red
-            default: return Color.parseColor("#8B0000"); // Dark red (5+)
-        }
+        return (int) Constants.liveCounterDeviationColor(deviation == null ? 0 : deviation);
     }
 
     /**

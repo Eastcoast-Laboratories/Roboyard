@@ -39,6 +39,10 @@ import androidx.compose.material3.Text
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -55,6 +59,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -73,6 +78,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
@@ -156,6 +162,51 @@ import roboyard.logic.storage.PlatformStorage
 
 // Compose App Version - increment after each session
 const val COMPOSE_APP_VERSION = "v1.9"
+
+/**
+ * Live counter status text with Android's SpannableString formatting
+ * (GameFragment liveMoveCounterText observer): the move count 1.5x in dark
+ * green, the label 0.9x in dark green and "Δ+x" 1.5x in the deviation color;
+ * without a delta part the leading number still gets the 1.5x emphasis.
+ * High-contrast mode forces all colors to black while keeping the sizes.
+ * Base size is @dimen/status_text_size (18sp).
+ */
+fun liveCounterStatusText(text: String, deviation: Int, highContrast: Boolean): AnnotatedString {
+    val baseColor = if (highContrast) Color.Black else Color(0xFF006400)
+    val deltaColor = if (highContrast) Color.Black
+        else Color(Constants.liveCounterDeviationColor(deviation))
+    val baseSize = 18.sp
+    return buildAnnotatedString {
+        val deltaIdx = text.indexOf('Δ')
+        val spaceIdx = text.indexOf(' ')
+        when {
+            deltaIdx >= 0 && spaceIdx in 1 until deltaIdx -> {
+                withStyle(SpanStyle(fontSize = baseSize * 1.5f, color = baseColor)) {
+                    append(text, 0, spaceIdx)
+                }
+                withStyle(SpanStyle(fontSize = baseSize * 0.9f, color = baseColor)) {
+                    append(text, spaceIdx, deltaIdx)
+                }
+                withStyle(SpanStyle(fontSize = baseSize * 1.5f, color = deltaColor)) {
+                    append(text, deltaIdx, text.length)
+                }
+            }
+            deltaIdx >= 0 -> {
+                withStyle(SpanStyle(color = baseColor)) { append(text, 0, deltaIdx) }
+                withStyle(SpanStyle(color = deltaColor)) { append(text, deltaIdx, text.length) }
+            }
+            spaceIdx > 0 -> {
+                withStyle(SpanStyle(fontSize = baseSize * 1.5f, color = baseColor)) {
+                    append(text, 0, spaceIdx)
+                }
+                withStyle(SpanStyle(fontSize = baseSize * 0.9f, color = baseColor)) {
+                    append(text, spaceIdx, text.length)
+                }
+            }
+            else -> withStyle(SpanStyle(color = baseColor)) { append(text) }
+        }
+    }
+}
 
 /** Convert ERRGameMove bitmask directions (1/2/4/8) to Board direction constants (NORTH=0..WEST=3). */
 private fun errDirToBoardDir(direction: Int): Int {
@@ -347,6 +398,34 @@ fun GameScreen(
     var gameStartElapsed by remember(gameEpoch) { mutableLongStateOf(TimeProvider.currentTimeMillis()) }
     val liveCounterText by session.liveMoveCounterText.collectAsState()
     val liveSolverCalculating by session.liveSolverCalculating.collectAsState()
+    val liveCounterDeviation by session.liveMoveCounterDeviation.collectAsState()
+
+    // Android writes the hint text and the live counter into the same
+    // status_text — whichever was written last is displayed, so the last
+    // writer is tracked here. A hint write is every hintMessage change; the
+    // Android counter observer only writes non-empty text while enabled.
+    var statusShowsLiveCounter by remember(gameEpoch) { mutableStateOf(false) }
+    var lastLiveCounterText by remember(gameEpoch) { mutableStateOf("") }
+    LaunchedEffect(hintMessage) {
+        statusShowsLiveCounter = false
+    }
+    LaunchedEffect(liveCounterText) {
+        if (liveCounterEnabled && liveCounterText.isNotEmpty()) {
+            statusShowsLiveCounter = true
+            lastLiveCounterText = liveCounterText
+        }
+    }
+
+    // Eye blink while the live solver runs
+    // (Android: alpha 1↔0.2, 400 ms, INFINITE/REVERSE)
+    val liveEyeAlpha = if (liveSolverCalculating && liveCounterEnabled) {
+        rememberInfiniteTransition(label = "liveEyeBlink").animateFloat(
+            initialValue = 1f,
+            targetValue = 0.2f,
+            animationSpec = infiniteRepeatable(tween(400), RepeatMode.Reverse),
+            label = "liveEyeAlpha"
+        ).value
+    } else 1f
 
     val selectedRobotIndex = gameState?.getSelectedRobot()?.color ?: -1
 
@@ -597,19 +676,21 @@ fun GameScreen(
         }
     }
 
-    // Helper: get hint container background color based on robot color (matches Android)
-    fun getHintBackgroundColor(robotColorIndex: Int): Color {
+    // status_text background per hinted robot color (fill + border), matching
+    // the GradientDrawable built in Android's updateStatusText; the default
+    // (-1) is the status_text_background drawable (light green, green stroke)
+    fun getHintStatusColors(robotColorIndex: Int): Pair<Color, Color> {
         return when (robotColorIndex) {
-            0 -> Color(0xFFff80e0) // pink — stronger
-            1 -> Color(0xFFb5f874) // green
-            2 -> Color(0xFF4080ff) // blue — stronger
-            3 -> Color(0xFFfffe71) // yellow
-            4 -> Color(0xFFc0c0c0) // silver
-            5 -> Color(0xFFf77070) // red
-            6 -> Color(0xFFa0522d) // brown
-            7 -> Color(0xFFffa77f) // orange
-            8 -> Color(0xFFf0f0f0) // white
-            else -> Color(0xFFfffe71) // default — yellowish like Android
+            Constants.COLOR_PINK -> Color(0xFFeb91ff) to Color(0xFF800080)
+            Constants.COLOR_GREEN -> Color(0xFFb5f874) to Color(0xFF008f00)
+            Constants.COLOR_BLUE -> Color(0xFF71a6ff) to Color(0xFF0000ff)
+            Constants.COLOR_YELLOW -> Color(0xFFfffe71) to Color(0xFFdaa520)
+            Constants.COLOR_SILVER -> Color(0xFFc0c0c0) to Color(0xFF888888)
+            Constants.COLOR_RED -> Color(0xFFf77070) to Color(0xFFff0000)
+            Constants.COLOR_BROWN -> Color(0xFFa0522d) to Color(0xFF654321)
+            Constants.COLOR_ORANGE -> Color(0xFFffa77f) to Color(0xFFffa500)
+            Constants.COLOR_WHITE -> Color(0xFFf0f0f0) to Color(0xFF888888)
+            else -> Color(0xFFb5f874) to Color(0xFF008f00)
         }
     }
 
@@ -1054,47 +1135,101 @@ fun GameScreen(
 
     @Composable
     fun ColumnScope.controlsArea(altLayout: Boolean = false) {
-        // Hint container (matches Android: prev ◂ | status text | 👁 live toggle | ▸ next)
-        // Visible when the hint toggle is checked OR the live move counter is enabled
-        val liveOnlyMode = liveCounterEnabled && !hintContainerVisible
-        val liveStatusText = if (liveSolverCalculating) "…" else liveCounterText
-        val hintStatusText = if (hintContainerVisible) hintMessage ?: "" else liveStatusText
+        // Hint container (matches Android hint_container):
+        // [◂ prev] [status_text weight=1] [👁 live-move-toggle] [▸ next] on a
+        // #DD000000 bar; visible while the hint toggle is checked OR the live
+        // move counter is enabled. In the alt layout the live-move-toggle sits
+        // in the top bar (LiveModeToggleButtonAlt), not inside this row.
         AnimatedVisibility(
-            visible = (hintContainerVisible && hintMessage != null) || (liveOnlyMode && liveStatusText.isNotEmpty()),
+            visible = hintContainerVisible || (liveCounterEnabled && !isLevelGame),
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
-            val hintBgColor = if (currentHintRobotColor >= 0) getHintBackgroundColor(currentHintRobotColor) else getHintBackgroundColor(-1)
+            val highContrast = Preferences.highContrastMode
+            // status_text background — per last writer: gold gradient
+            // (hint_text_fancy_background) for the counter, robot-colored
+            // rounded rect for hints, white/black in high-contrast mode
+            val statusShape = RoundedCornerShape(if (statusShowsLiveCounter) 16.dp else 8.dp)
+            val statusBgModifier = when {
+                highContrast -> Modifier
+                    .shadow(4.dp, statusShape)
+                    .background(Color.White, statusShape)
+                    .border(BorderStroke(3.dp, Color.Black), statusShape)
+                statusShowsLiveCounter -> Modifier
+                    .shadow(4.dp, statusShape)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color(0xFFFFA000), Color(0xFFFFCC02), Color(0xFFFFE082))
+                        ),
+                        statusShape
+                    )
+                    .border(BorderStroke(2.dp, Color(0xFFFFB300)), statusShape)
+                else -> {
+                    val (fill, stroke) = getHintStatusColors(currentHintRobotColor)
+                    Modifier
+                        .shadow(4.dp, statusShape)
+                        .background(fill, statusShape)
+                        .border(BorderStroke(3.dp, stroke), statusShape)
+                }
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(if (liveOnlyMode) Color(0xFFDD000000) else hintBgColor)
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                    .background(
+                        if (highContrast && !statusShowsLiveCounter) Color.White
+                        else Color(0xFFDD000000)
+                    )
+                    .padding(horizontal = 2.dp, vertical = 2.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 // prev/next arrows only while the hint toggle is checked (Android hides them in live-only mode)
                 if (hintContainerVisible && hintManager.hasPrevHint()) {
                     FancyButton(
                         text = "\u25C2",
                         color = FancyButtonColor.HINT,
+                        fontSize = 18.sp,
                         onClick = { showPrevHint() },
                         modifier = Modifier.height(32.dp)
                     )
                 }
-                Text(
-                    text = hintStatusText,
-                    color = if (liveOnlyMode) Color.White else Color(0xFF1A1A1A),
-                    fontSize = 12.sp,
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
-                )
+                // status_text — the counter renders as an AnnotatedString with
+                // the number/label/delta styling, hints as plain bold text
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .then(statusBgModifier)
+                        .padding(horizontal = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (statusShowsLiveCounter) {
+                        Text(
+                            text = liveCounterStatusText(
+                                lastLiveCounterText, liveCounterDeviation, highContrast
+                            ),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                    } else {
+                        Text(
+                            text = hintMessage ?: "",
+                            color = if (highContrast) Color.Black else Color(0xFF1A1A1A),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
                 // Live move counter toggle — visible from the exact-solution pre-hint onwards
                 // or while enabled; never in level games (matches Android)
-                if (!isLevelGame && (liveCounterEnabled || hintManager.isExactSolutionHintStep())) {
+                if (!altLayout && !isLevelGame &&
+                    (liveCounterEnabled || hintManager.isExactSolutionHintStep())
+                ) {
                     FancyButton(
                         text = if (liveCounterEnabled) "\uD83D\uDC41" else "\uD83D\uDC41\u200D\uD83D\uDDE8",
                         color = FancyButtonColor.HINT,
+                        fontSize = 18.sp,
                         onClick = {
                             val checked = !liveCounterEnabled
                             liveCounterEnabled = checked
@@ -1107,6 +1242,7 @@ fun GameScreen(
                         },
                         modifier = Modifier
                             .height(32.dp)
+                            .alpha(liveEyeAlpha)
                             .semantics {
                                 contentDescription = stringProvider.getString("live_move_counter_label_a11y") ?: "Show remaining moves"
                             }
@@ -1116,6 +1252,7 @@ fun GameScreen(
                     FancyButton(
                         text = "\u25B8",
                         color = FancyButtonColor.HINT,
+                        fontSize = 18.sp,
                         onClick = { showNextHint() },
                         modifier = Modifier.height(32.dp)
                     )
@@ -1701,6 +1838,7 @@ fun GameScreen(
                     text = if (liveCounterEnabled) "👁" else "👁‍🗨",
                     fontSize = 20.sp,
                     modifier = Modifier
+                        .alpha(liveEyeAlpha)
                         .padding(horizontal = 4.dp)
                         .clickable {
                             val checked = !liveCounterEnabled

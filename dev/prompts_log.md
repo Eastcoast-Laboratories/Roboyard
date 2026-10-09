@@ -89,5 +89,10 @@
 26-10-08 22:04 Sometimes the paths the robots moved are not deleted. Although I often go back to the menu and start a new game, the drawn paths from the last game are sometimes still visible.
 
 26-10-09 03:40 "After ~2000 attempts it did find a level with 22 moves. Keep analyzing why the path was not cleared." (repro: min 20 moves, semi-auto robot movements, last two moves manual, finish level, start new game → map generated quickly, old robot paths still visible)
+26-10-09 04:10 "Live move counter ('eye' toggle) in the composeApp — integrate the display into the hint container pixel-perfect like Android: status_text equivalent as AnnotatedString (number 1.5x #006400, label 0.9x, 'Δ+X' 1.5x in deviation color; high-contrast all black), deviation colors via shared helper reused in Android, eye blinks (alpha 1↔0.2, 400ms, infinite/reverse) while liveSolverCalculating, last-writer-wins for status_text, both layout variants (normal + altLayout)."
+26-10-09 04:35 "I am working on the machine myself right now, so you cannot run tests that require moving the mouse."
+26-10-09 04:38 "The 'moves from here' text is already displayed correctly in the box with different fonts. Only the first text, when there is no delta, should also have a larger number."
 
 26-10-09 04:15 "Confirmed: I had the 20-move map computed yesterday, then the phone was off for 5h, and just now I loaded it from history and kept playing the level it created yesterday." / "Commit only what belongs to the path fix, the live counter is being worked on in the other session."
+
+26-10-09 04:30 "They can go, it works! The 2000-at-999 issue should be fixed, the limit must be respected."
