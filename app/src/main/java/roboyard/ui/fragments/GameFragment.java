@@ -681,6 +681,10 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
     private void setupObservers() {
         // Observe current game state
         gameStateManager.getCurrentState().observe(getViewLifecycleOwner(), state -> {
+            // Bind trails to the installed game before rendering it
+            if (gameGridView != null) {
+                gameGridView.syncPathsWithGame(gameStateManager.getGameCounter());
+            }
             updateGameState(state);
             
             // Update difficulty display when game state changes (e.g., after loading or starting new game)
@@ -3758,12 +3762,14 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             return;
         }
         
-        Timber.d("[HINT_AUTO_MOVE] Scheduling auto-move for robot color %d in direction %d", 
-                robotColor, direction);
+        Timber.d("[HINT_AUTO_MOVE][PATH_DIAG] Scheduling auto-move for robot color %d in direction %d, %s",
+                robotColor, direction, gameStateManager.pathDiagInfo());
         
         // Execute auto-move asynchronously to avoid ANR when clicking hints rapidly
         if (getView() != null) {
             getView().postDelayed(() -> {
+                Timber.d("[HINT_AUTO_MOVE][PATH_DIAG] Executing scheduled auto-move color %d, %s",
+                        robotColor, gameStateManager.pathDiagInfo());
                 // Check if game is still active before executing move
                 if (gameStateManager.isGameComplete().getValue()) {
                     Timber.d("[HINT_AUTO_MOVE] Game complete, skipping auto-move");

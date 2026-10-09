@@ -77,6 +77,8 @@ public class GameGridView extends View {
     
     // Track robot movement paths
     private final HashMap<Integer, ArrayList<int[]>> robotPaths = new HashMap<>(); // Map robot color to list of positions [x,y]
+    private boolean staleTrailsLogged = false; // [PATH_DIAG] log stale-trail detection once per occurrence
+    private int pathsGameCounter = -1; // GameSession game counter the drawn trails belong to (-1 = not yet bound)
     private final HashMap<Integer, float[]> robotBaseOffsets = new HashMap<>(); // Base offset for each robot
     private final HashMap<Integer, HashMap<String, Integer>> segmentCounts = new HashMap<>(); // Track segment traversal count
     
@@ -877,6 +879,12 @@ public class GameGridView extends View {
         }
         
         // Draw robot movement paths
+        boolean staleTrails = !robotPaths.isEmpty() && gameStateManager != null && gameStateManager.pathHistory.isEmpty();
+        if (staleTrails && !staleTrailsLogged) {
+            Timber.w("[PATH_DIAG] STALE trails drawn: view=%x robotPaths=%d but pathHistory is empty %s",
+                    System.identityHashCode(this), robotPaths.size(), pathDiagInfo());
+        }
+        staleTrailsLogged = staleTrails;
         for (int color : robotPaths.keySet()) {
             ArrayList<int[]> path = robotPaths.get(color);
             HashMap<String, Integer> robotSegments = segmentCounts.get(color);
@@ -1656,6 +1664,8 @@ public class GameGridView extends View {
         if (robot == null) return;
         
         int color = robot.color;
+        Timber.d("[PATH_DIAG] updateRobotPath view=%x color=%d (%d,%d)->(%d,%d) robotPaths=%d %s",
+                System.identityHashCode(this), color, fromX, fromY, toX, toY, robotPaths.size(), pathDiagInfo());
 
         // Initialize data structures if they don't exist
         if (!robotPaths.containsKey(color)) {
@@ -1857,7 +1867,13 @@ public class GameGridView extends View {
     /**
      * Clear all robot paths
      */
+    private String pathDiagInfo() {
+        return gameStateManager != null ? gameStateManager.pathDiagInfo() : "gsm=null";
+    }
+
     public void clearRobotPaths() {
+        Timber.d(new Throwable("caller"), "[PATH_DIAG] clearRobotPaths view=%x robotPaths=%d %s",
+                System.identityHashCode(this), robotPaths.size(), pathDiagInfo());
         robotPaths.clear();
         robotBaseOffsets.clear();
         segmentCounts.clear();
@@ -1867,12 +1883,36 @@ public class GameGridView extends View {
         }
         visitedSquaresPerRobot.clear();
         visitedSquaresAllRobots.clear();
+        resetPerGameFlags();
+        invalidate();
+    }
+
+    private void resetPerGameFlags() {
         allSquaresOneRobotUnlocked = false;
         allSquaresOneRobotGoalUnlocked = false;
         allSquaresAllRobotsUnlocked = false;
         allSquaresAllRobotsGoalUnlocked = false;
         goalReached = false;
-        invalidate();
+    }
+
+    /**
+     * Keep the drawn trails bound to the game they belong to. When the session
+     * installs a different game (any source: new random map, level, history
+     * entry, savegame, deep link) its game counter changes and the trails are
+     * rebuilt from the session's path history, which the session empties for
+     * every new game. A freshly created view (counter unknown) restores the
+     * trails of the game in progress the same way.
+     * @param gameCounter current GameSession game counter
+     */
+    public void syncPathsWithGame(int gameCounter) {
+        if (gameCounter == pathsGameCounter) return;
+        Timber.d("[PATH_DIAG] syncPathsWithGame view=%x game %d -> %d, robotPaths=%d %s",
+                System.identityHashCode(this), pathsGameCounter, gameCounter, robotPaths.size(), pathDiagInfo());
+        if (pathsGameCounter != -1) {
+            resetPerGameFlags();
+        }
+        pathsGameCounter = gameCounter;
+        reconstructPathsFromHistory();
     }
     
     /**
@@ -1883,6 +1923,8 @@ public class GameGridView extends View {
         if (gameStateManager == null) return;
         
         ArrayList<int[]> pathHistory = gameStateManager.pathHistory;
+        Timber.d(new Throwable("caller"), "[PATH_DIAG] reconstructPathsFromHistory view=%x robotPaths=%d %s",
+                System.identityHashCode(this), robotPaths.size(), pathDiagInfo());
         
         // Clear current paths but keep the history. An empty history
         // legitimately means "no trails", so clearing must not be skipped —

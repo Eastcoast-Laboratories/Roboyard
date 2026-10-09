@@ -134,6 +134,19 @@ class GameSession(
         _stateRevision.value = _stateRevision.value + 1
     }
 
+    /**
+     * Install [state] as a different game (new random map, level, history entry,
+     * savegame, deep link). Robot trails belong to the replaced game, so
+     * [pathHistory] is dropped and [gameCounter] advances before the state is
+     * emitted: state observers that compare the counter (Android GameFragment,
+     * Compose gameEpoch) already see the new game identity and an empty history.
+     */
+    private fun emitNewGameState(state: GameState) {
+        pathHistory.clear()
+        _gameCounter.value = _gameCounter.value + 1
+        emitState(state)
+    }
+
     private val _moveCount = MutableStateFlow(0)
     val moveCount = _moveCount
 
@@ -347,9 +360,6 @@ class GameSession(
         resetGameTimer()
         startGameTimer()
 
-        // New game starts with no moves — clear robot trail history
-        pathHistory.clear()
-
         // Create a new valid game (will regenerate if solution is too simple)
         createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight)
 
@@ -404,11 +414,6 @@ class GameSession(
         loadedSolutions = null
         preCompRobotOrder.clear()
 
-        // A new level starts with no moves — drop the previous game's path
-        // history so UIs do not redraw stale robot trails (Android clears it
-        // via GameGridView.clearRobotPaths on every level change)
-        pathHistory.clear()
-
         // Load level: custom level file in private storage takes precedence over
         // bundled assets (custom_level_N.txt is written by the level editor).
         val state = loadLevelState(levelId)
@@ -422,8 +427,7 @@ class GameSession(
         state.setGameStateManager(this)
 
         // Set the current state
-        emitState(state)
-        _gameCounter.value = _gameCounter.value + 1
+        emitNewGameState(state)
         this.levelName = "Level-" + levelId
 
         // Reset move counts and history
@@ -478,8 +482,7 @@ class GameSession(
 
         newState.setGameStateManager(this)
 
-        emitState(newState)
-        _gameCounter.value = _gameCounter.value + 1
+        emitNewGameState(newState)
         _moveCount.value = 0
         _isGameComplete.value = false
 
@@ -608,8 +611,7 @@ class GameSession(
             log.d("[GAME_LOAD] Synchronized %d targets after loading", syncedTargets)
         }
 
-        emitState(newState)
-        _gameCounter.value = _gameCounter.value + 1
+        emitNewGameState(newState)
         _moveCount.value = newState.moveCount
         _isGameComplete.value = newState.isComplete
 
@@ -2626,7 +2628,10 @@ class GameSession(
      * @param height Height of the board
      */
     private fun createValidGame(width: Int, height: Int) {
-        log.d("createValidGame() called")
+        log.d(
+            "[PATH_DIAG] createValidGame() called: game=%d moves=%d pathHistory=%d regen=%d",
+            _gameCounter.value, _moveCount.value, pathHistory.size, regenerationCount
+        )
 
         if (keepCurrentMapDespiteDifficulty) {
             log.d("[KEEP_MAP_ENFORCER] createValidGame() blocked - user chose to keep current map")
@@ -2638,8 +2643,7 @@ class GameSession(
 
         val newState = createRandom()
 
-        emitState(newState)
-        _gameCounter.value = _gameCounter.value + 1
+        emitNewGameState(newState)
         _moveCount.value = 0
         _isGameComplete.value = false
 
@@ -2938,8 +2942,7 @@ class GameSession(
 
         state.setGameStateManager(this)
 
-        emitState(state)
-        _gameCounter.value = _gameCounter.value + 1
+        emitNewGameState(state)
 
         _moveCount.value = state.moveCount
 

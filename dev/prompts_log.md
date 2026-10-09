@@ -87,3 +87,7 @@
 26-10-08 21:05 "The gold-framed maps are framed, but they should also have a golden head row on top and the stars should be left-aligned — exactly like the level selection screen."
 
 26-10-08 22:04 Sometimes the paths the robots moved are not deleted. Although I often go back to the menu and start a new game, the drawn paths from the last game are sometimes still visible.
+
+26-10-09 03:40 "After ~2000 attempts it did find a level with 22 moves. Keep analyzing why the path was not cleared." (repro: min 20 moves, semi-auto robot movements, last two moves manual, finish level, start new game → map generated quickly, old robot paths still visible)
+
+26-10-09 04:15 "Confirmed: I had the 20-move map computed yesterday, then the phone was off for 5h, and just now I loaded it from history and kept playing the level it created yesterday." / "Commit only what belongs to the path fix, the live counter is being worked on in the other session."

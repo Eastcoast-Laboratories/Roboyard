@@ -388,6 +388,15 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
         session.addPathToHistory(color, fromX, fromY, toX, toY)
     }
 
+    /** Identity of the installed game; changes whenever a different game is loaded. */
+    val gameCounter: Int
+        get() = session.gameCounter.value
+
+    /** Diagnostic snapshot of path-related state for [PATH_DIAG] logging. */
+    fun pathDiagInfo(): String =
+        "game=${session.gameCounter.value} moves=${session.moveCount.value} history=${session.pathHistory.size} " +
+            "mgrView=${Integer.toHexString(System.identityHashCode(gameGridView))} complete=${session.isGameComplete.value}"
+
     fun removeLastPathFromHistory(): IntArray? {
         return session.removeLastPathFromHistory()
     }
@@ -664,6 +673,8 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
      * @param gameGridView The game grid view
      */
     fun setGameGridView(gameGridView: GameGridView?) {
+        d("[PATH_DIAG] setGameGridView: old=%x new=%x",
+            System.identityHashCode(this.gameGridView), System.identityHashCode(gameGridView))
         this.gameGridView = gameGridView
         robotAnimationManager.setGameGridView(gameGridView)
     }
