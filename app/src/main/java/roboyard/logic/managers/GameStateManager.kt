@@ -131,8 +131,25 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
     private val liveMoveCounterDeviationLiveData =
         session.liveMoveCounterDeviation.asLiveData() as LiveData<Int?>
 
+    /**
+     * Pending notice for a map accepted after the regeneration limit:
+     * (attempts, optimal moves or null). Null when nothing is pending.
+     */
+    private val mapFallbackNoticeLiveData = MutableLiveData<Pair<Int, Int?>?>(null)
+    val mapFallbackNotice: LiveData<Pair<Int, Int?>?>
+        get() = mapFallbackNoticeLiveData
+
+    /** Mark the fallback notice as shown so it is not repeated on view recreation. */
+    fun clearMapFallbackNotice() {
+        mapFallbackNoticeLiveData.value = null
+    }
+
     init {
         // Wire platform hooks into the shared session.
+
+        session.onMapFallbackAccepted = { attempts, moves ->
+            mapFallbackNoticeLiveData.postValue(attempts to moves)
+        }
 
         // Robot movement animation via RobotAnimationManager; without it the
         // position is applied immediately (same as the old immediate mode).
@@ -391,11 +408,6 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
     /** Identity of the installed game; changes whenever a different game is loaded. */
     val gameCounter: Int
         get() = session.gameCounter.value
-
-    /** Diagnostic snapshot of path-related state for [PATH_DIAG] logging. */
-    fun pathDiagInfo(): String =
-        "game=${session.gameCounter.value} moves=${session.moveCount.value} history=${session.pathHistory.size} " +
-            "mgrView=${Integer.toHexString(System.identityHashCode(gameGridView))} complete=${session.isGameComplete.value}"
 
     fun removeLastPathFromHistory(): IntArray? {
         return session.removeLastPathFromHistory()
@@ -673,8 +685,6 @@ open class GameStateManager(application: Application) : AndroidViewModel(applica
      * @param gameGridView The game grid view
      */
     fun setGameGridView(gameGridView: GameGridView?) {
-        d("[PATH_DIAG] setGameGridView: old=%x new=%x",
-            System.identityHashCode(this.gameGridView), System.identityHashCode(gameGridView))
         this.gameGridView = gameGridView
         robotAnimationManager.setGameGridView(gameGridView)
     }

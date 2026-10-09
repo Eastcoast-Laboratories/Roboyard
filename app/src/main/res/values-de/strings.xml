@@ -389,6 +389,10 @@
     <string name="and">und</string>
     <string name="pre_hint_first_move">Bewege zuerst den %1$s Roboter</string>
     <string name="no_solution_found">Keine Lösung gefunden</string>
+    <string name="map_generation_failed_title">Keine passende Karte gefunden</string>
+    <string name="map_generation_failed_min_message">Nach %2$d Versuchen konnte keine Karte mit mindestens %1$d Zügen erzeugt werden. Die zuletzt erzeugte Karte (%3$s Züge) wird verwendet.</string>
+    <string name="map_generation_failed_range_message">Nach %3$d Versuchen konnte keine Karte mit %1$d bis %2$d Zügen erzeugt werden. Die zuletzt erzeugte Karte (%4$s Züge) wird verwendet.</string>
+    <string name="map_generation_unknown_moves">unbekannt</string>
     <string name="live_move_counter_label_a11y">Verbleibende Züge anzeigen</string>
     <string name="live_move_counter_optimal">%1$d Züge von hier</string>
     <plurals name="live_move_counter_optimal_plural">
