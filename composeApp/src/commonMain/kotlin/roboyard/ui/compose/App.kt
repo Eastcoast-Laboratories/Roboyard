@@ -30,7 +30,8 @@ import roboyard.logic.ui.getStringProvider
 @Composable
 fun App(
     onFullscreenChanged: (Boolean) -> Unit = {},
-    pendingDeepLink: String? = null
+    pendingDeepLink: String? = null,
+    externalSession: GameSession? = null
 ) {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.MainMenu) }
     var selectedLevelId by remember { mutableStateOf(1) }
@@ -45,7 +46,7 @@ fun App(
 
     // Single shared game session for the whole app (mirrors Android GameStateManager)
     val appScope = rememberCoroutineScope()
-    val session = remember { GameSession(storage, appScope) }
+    val session = remember { externalSession ?: GameSession(storage, appScope) }
 
     // UiNotifier (Android Toast parity): one Compose notifier shared by
     // GameSession and AchievementManager so messages surface as toasts

@@ -73,6 +73,13 @@ fun main(args: Array<String>) = application {
     // Android parity: MainActivity starts the background music service at startup
     getSoundManager().setBackgroundVolume(Preferences.backgroundSoundVolume)
 
+    // Shared game session created here so the window-focus listener can drive
+    // pauseTimer/resumeTimer like Android's MainActivity does on onPause/onResume
+    val appScope = androidx.compose.runtime.rememberCoroutineScope()
+    val session = androidx.compose.runtime.remember {
+        roboyard.logic.managers.GameSession(storage, appScope)
+    }
+
     // Shutdown watchdog + audio cleanup: if any shutdown hook wedges —
     // observed: a stuck javax.sound/PipeWire line close made the VM ignore
     // Ctrl+C forever — the watchdog forcibly halts the VM a few seconds
@@ -150,14 +157,17 @@ fun main(args: Array<String>) = application {
             }
         }
         // Android parity: SoundService pauses background music when the app
-        // loses focus (Activity onPause) and resumes on onResume
+        // loses focus (Activity onPause) and resumes on onResume; the game
+        // timer follows the same lifecycle via GameSession.pauseTimer/resumeTimer
         androidx.compose.runtime.DisposableEffect(windowState) {
             val listener = object : java.awt.event.WindowFocusListener {
                 override fun windowGainedFocus(e: java.awt.event.WindowEvent?) {
                     getSoundManager().resumeBackground()
+                    session.resumeTimer()
                 }
                 override fun windowLostFocus(e: java.awt.event.WindowEvent?) {
                     getSoundManager().pauseBackground()
+                    session.pauseTimer()
                 }
             }
             window.addWindowFocusListener(listener)
@@ -172,7 +182,8 @@ fun main(args: Array<String>) = application {
                     windowState.placement = if (enabled) WindowPlacement.Fullscreen else WindowPlacement.Floating
                 }
             },
-            pendingDeepLink = pendingDeepLink
+            pendingDeepLink = pendingDeepLink,
+            externalSession = session
         )
         }
     }

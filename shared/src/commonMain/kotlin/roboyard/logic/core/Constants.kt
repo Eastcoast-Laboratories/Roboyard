@@ -6,6 +6,9 @@ object Constants {
     /** App version shared across platforms. Keep in sync with app/build.gradle versionName. */
     const val APP_VERSION_NAME: String = "53"
 
+    /** Build code shared across platforms. Keep in sync with app/build.gradle versionCode. */
+    const val APP_VERSION_CODE: Int = 141
+
     /**
      * Grace period after a map starts during which the New Game / Next Game /
      * Back buttons react to a plain click — the long-press circular progress
