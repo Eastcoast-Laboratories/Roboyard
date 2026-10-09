@@ -79,7 +79,8 @@ fun FancyButton(
     color: FancyButtonColor,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    fontSize: androidx.compose.ui.unit.TextUnit = 14.sp
 ) {
     // 135-degree gradient: top-left (start) to bottom-right (end)
     val brush = Brush.linearGradient(
@@ -122,7 +123,7 @@ fun FancyButton(
             text = text,
             color = color.textColor,
             fontWeight = FontWeight.Bold,
-            fontSize = 14.sp,
+            fontSize = fontSize,
             maxLines = 1,
             textAlign = TextAlign.Center
         )

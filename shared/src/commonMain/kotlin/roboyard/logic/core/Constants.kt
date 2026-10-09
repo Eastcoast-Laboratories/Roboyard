@@ -90,6 +90,21 @@ object Constants {
 
     const val COLOR_MULTI: Int = -1 // the multi target
 
+    /**
+     * Live move counter deviation color as packed ARGB long
+     * (used by both the Android status_text spans and the composeApp):
+     * <=0 dark green, 1 green-yellow, 2 dark yellow, 3 orange, 4 red, 5+ dark red.
+     */
+    @JvmStatic
+    fun liveCounterDeviationColor(deviation: Int): Long = when {
+        deviation <= 0 -> 0xFF006400L
+        deviation == 1 -> 0xFF7CB342L
+        deviation == 2 -> 0xFFC6A700L
+        deviation == 3 -> 0xFFE65100L
+        deviation == 4 -> 0xFFD50000L
+        else -> 0xFF8B0000L
+    }
+
     const val NUM_ROBOTS: Int = 4 // number of robots
     const val MAX_NUM_ROBOTS: Int = 5 // maximal allowed num robots
 
