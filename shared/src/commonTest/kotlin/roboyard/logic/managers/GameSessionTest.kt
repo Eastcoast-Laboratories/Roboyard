@@ -93,6 +93,24 @@ class GameSessionTest {
         assertFalse(session.isGameComplete.value)
     }
 
+    /**
+     * Loading a different game (history entry / savegame path) must drop the
+     * previous game's robot trails and advance the game counter, so UIs bound
+     * to the counter rebuild their trails from the emptied history.
+     */
+    @Test
+    fun test_applyLoadedGameState_clearsPathHistoryAndAdvancesGameCounter() {
+        session.setGameState(testState())
+        session.addPathToHistory(0, 1, 1, 7, 1)
+        session.addPathToHistory(0, 7, 1, 7, 7)
+        val counterBefore = session.gameCounter.value
+
+        session.applyLoadedGameState(testState())
+
+        assertTrue(session.pathHistory.isEmpty(), "trails of the replaced game must not survive a load")
+        assertEquals(counterBefore + 1, session.gameCounter.value)
+    }
+
     @Test
     fun test_moveRobotInDirection_slidesUntilBoundary() {
         val state = testState()
