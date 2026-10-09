@@ -105,3 +105,7 @@ höre erst auf, wenn du all diese punkte ausgeführt hast und stelle keine frage
 ist das gelöst?
 - Audit-Fund 2: Involved-Robots-Pre-Hint: Android hängt „ robots"/„ robot" nur bei Locale.language=="en" an (GameFragment.java:3514-3529); HintManager.kt:266-276 unbedingt → nicht-en-Locales zeigen englisches „robots".
 - Audit-Fund 3: getRobotColorName-Fallback: Android getString(unknown_color, id) vs. HintManager "robot $color".
+
+
+- in der compose-app geht das auge auch, da soll ja immer von der aktuellen spielsituation aus ein neuer solver gestartet werden unm anzuzeigen, wieviel schritte ncoh von hieraus . diese anzeige erscheint aber verdeckt von dem hint container, die soll aber innerhalb des hint containers angezeigt werden, mit farbkodierung, je nach anzahl des deltas vom optimalen. sieh dir den android code an und baue es genau so nach, mit font-grössen , also das delta selbst in etwas grösserem font, es soll haargenau so aussehen , wie in der android app
+

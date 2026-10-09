@@ -85,3 +85,5 @@
 26-10-08 20:30 "In the Android app I can no longer press the save button in the game." + logcat excerpt of a random game session
 26-10-08 19:20 "Clarification: the stars should scale linearly — e.g. on a 20-move level, 3 stars for 20 moves, 2 stars for 21 or 22, 1 star for 23 or 24, 0 above that. New rule applies to the history display only."
 26-10-08 21:05 "The gold-framed maps are framed, but they should also have a golden head row on top and the stars should be left-aligned — exactly like the level selection screen."
+
+26-10-08 22:04 Sometimes the paths the robots moved are not deleted. Although I often go back to the menu and start a new game, the drawn paths from the last game are sometimes still visible.
