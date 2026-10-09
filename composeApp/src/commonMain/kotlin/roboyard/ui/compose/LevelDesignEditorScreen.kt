@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.net.URLEncoder
+import roboyard.logic.network.urlEncodeUtf8
 import kotlin.math.min
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -692,7 +692,7 @@ fun LevelDesignEditorScreen(
         var shareName by remember { mutableStateOf("") }
         val apiClient = remember { RoboyardApiClient.getInstance(storage) }
         val shareUrl = apiClient.baseUrl + "/share_map?data=" +
-            URLEncoder.encode(levelText, "UTF-8")
+            urlEncodeUtf8(levelText)
         AlertDialog(
             onDismissRequest = { showExportDialog = false },
             title = { Text("Level Text Format") },
@@ -715,7 +715,7 @@ fun LevelDesignEditorScreen(
                     var receiverReachable by remember { mutableStateOf(false) }
                     var savedToSource by remember { mutableStateOf(false) }
                     androidx.compose.runtime.LaunchedEffect(Unit) {
-                        launch(Dispatchers.IO) {
+                        launch(Dispatchers.Default) {
                             try {
                                 val (code, _) = roboyard.logic.network.PlatformHttp.request(
                                     "GET", "http://127.0.0.1:8787/ping", emptyMap(), null
@@ -730,7 +730,7 @@ fun LevelDesignEditorScreen(
                                 else "💾 " + s("editor_save_to_sourcecode", "Save to Sourcecode"),
                             color = FancyButtonColor.BLUE,
                             onClick = {
-                                scope.launch(Dispatchers.IO) {
+                                scope.launch(Dispatchers.Default) {
                                     try {
                                         val escaped = levelText
                                             .replace("\\", "\\\\").replace("\"", "\\\"")
@@ -810,7 +810,7 @@ fun LevelDesignEditorScreen(
                     } else {
                         var url = shareUrl
                         if (shareName.isNotBlank()) {
-                            url += "&name=" + URLEncoder.encode(shareName.trim(), "UTF-8")
+                            url += "&name=" + urlEncodeUtf8(shareName.trim())
                         }
                         openAutoLoginUrl(apiClient.buildAutoLoginUrl(url))
                         toast(s("editor_opening_share_url", "Opening share URL in browser"))

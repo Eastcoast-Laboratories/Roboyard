@@ -547,7 +547,7 @@ private fun DataManagementSection(s: (String, String) -> String) {
                 return@Button
             }
             exportedData = data
-            scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            scope.launch(kotlinx.coroutines.Dispatchers.Default) {
                 val ok = roboyard.logic.platform.saveTextToFileWithDialog(data, "roboyard-export.json")
                 if (ok) {
                     statusMessage = s("settings_export_success", "Data exported successfully")
@@ -603,7 +603,7 @@ private fun DataManagementSection(s: (String, String) -> String) {
                     )
                     // Native file open dialog (desktop)
                     TextButton(onClick = {
-                        scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                        scope.launch(kotlinx.coroutines.Dispatchers.Default) {
                             roboyard.logic.platform.loadTextFromFileWithDialog()?.let {
                                 importText = it
                             }

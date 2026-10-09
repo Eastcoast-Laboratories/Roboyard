@@ -56,9 +56,6 @@ import roboyard.logic.storage.PlatformStorage
 import roboyard.logic.storage.getPlatformStorage
 import roboyard.logic.ui.getStringProvider
 import roboyard.ui.graphics.MinimapGenerator
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 private const val ITEMS_PER_PAGE = 20
 private const val MAX_SAVE_SLOT = 34
@@ -104,7 +101,7 @@ fun SaveLoadScreen(
     val storage = remember { getPlatformStorage() }
     val stringProvider = remember { getStringProvider() }
     val apiClient = remember { RoboyardApiClient.getInstance(storage) }
-    val listDateFormat = remember { SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.US) }
+    val listDateFormat = remember { PlatformDateFormat("dd.MM.yyyy HH:mm", deviceLocale = false) }
 
     fun s(key: String, fallback: String, vararg args: Any): String =
         stringProvider.getString(key, *args) ?: formatArgs(fallback, *args)
@@ -608,7 +605,7 @@ internal fun MinimapCanvas(saveData: String?, modifier: Modifier = Modifier) {
 private fun SaveSlotItem(
     slot: SaveSlotInfo,
     storage: PlatformStorage,
-    dateFormat: SimpleDateFormat,
+    dateFormat: PlatformDateFormat,
     onClick: () -> Unit,
     onShareClick: () -> Unit,
     onInfoClick: () -> Unit
@@ -633,7 +630,7 @@ private fun SaveSlotItem(
             Column(modifier = Modifier.weight(1f)) {
                 Text(slot.name, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 slot.dateMillis?.let {
-                    Text(dateFormat.format(Date(it)), color = Color.LightGray, fontSize = 14.sp)
+                    Text(dateFormat.format(it), color = Color.LightGray, fontSize = 14.sp)
                 }
                 slot.boardSize?.let { Text(it, color = Color.LightGray, fontSize = 14.sp) }
                 slot.difficulty?.let { Text(it, color = Color.LightGray, fontSize = 14.sp) }
@@ -669,7 +666,7 @@ private fun SaveSlotItem(
 fun HistoryItem(
     entry: GameHistoryEntry,
     storage: PlatformStorage,
-    dateFormat: SimpleDateFormat,
+    dateFormat: PlatformDateFormat,
     s: (String, String, Array<out Any>) -> String,
     onClick: () -> Unit,
     onInfoClick: () -> Unit,
@@ -737,7 +734,7 @@ fun HistoryItem(
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(entry.mapName ?: "Unknown", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                Text(dateFormat.format(Date(entry.timestamp)), color = Color.LightGray, fontSize = 14.sp)
+                Text(dateFormat.format(entry.timestamp), color = Color.LightGray, fontSize = 14.sp)
                 entry.boardSize?.let { Text(it, color = Color.LightGray, fontSize = 14.sp) }
                 Row {
                     Text("Moves: ${entry.movesMade}", color = Color.LightGray, fontSize = 14.sp)
@@ -783,7 +780,7 @@ private fun SaveSlotInfoDialog(
     s: (String, String, Array<out Any>) -> String,
     onDismiss: () -> Unit
 ) {
-    val sdf = remember { SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault()) }
+    val sdf = remember { PlatformDateFormat("dd.MM.yyyy HH:mm:ss", deviceLocale = true) }
     val message = remember(slot.slotId) {
         val saveData = slot.saveData
         val sb = StringBuilder()
@@ -816,7 +813,7 @@ private fun SaveSlotInfoDialog(
         }
 
         slot.dateMillis?.let {
-            sb.append(s("save_slot_saved", "Saved:", emptyArray())).append(" ").append(sdf.format(Date(it))).append("\n")
+            sb.append(s("save_slot_saved", "Saved:", emptyArray())).append(" ").append(sdf.format(it)).append("\n")
         }
         sb.append(s("save_slot_status", "Status:", emptyArray())).append(" ")
             .append(if (solved) s("save_slot_solved", "Solved", emptyArray()) else s("save_slot_in_progress", "In progress", emptyArray()))
@@ -860,13 +857,13 @@ private fun SaveSlotInfoDialog(
 internal fun buildHistoryInfoMessage(
     entry: GameHistoryEntry,
     s: (String, String, Array<out Any>) -> String,
-    sdf: SimpleDateFormat
+    sdf: PlatformDateFormat
 ): String {
     val sb = StringBuilder()
     sb.append(s("history_detail_completions", "Completions:", emptyArray())).append(" ").append(entry.completionCount).append("\n")
-    sb.append(s("history_detail_first_started", "First started:", emptyArray())).append(" ").append(sdf.format(Date(entry.timestamp))).append("\n")
+    sb.append(s("history_detail_first_started", "First started:", emptyArray())).append(" ").append(sdf.format(entry.timestamp)).append("\n")
     if (entry.lastCompletionTimestamp > 0) {
-        sb.append(s("history_detail_last_played", "Last played:", emptyArray())).append(" ").append(sdf.format(Date(entry.lastCompletionTimestamp))).append("\n")
+        sb.append(s("history_detail_last_played", "Last played:", emptyArray())).append(" ").append(sdf.format(entry.lastCompletionTimestamp)).append("\n")
     }
     val timestamps = entry.getCompletionTimestamps()
     if (timestamps.size > 1) {
@@ -875,7 +872,7 @@ internal fun buildHistoryInfoMessage(
         val completionMoves = entry.getCompletionMoves()
         sb.append("\n").append(s("history_detail_all_completions", "All completions:", emptyArray())).append("\n")
         for (i in timestamps.indices) {
-            sb.append("  ").append(i + 1).append(". ").append(sdf.format(Date(timestamps[i])))
+            sb.append("  ").append(i + 1).append(". ").append(sdf.format(timestamps[i]))
             if (isLevelGame) {
                 val stars = if (i < completionStars.size) completionStars[i] else entry.starsEarned
                 val moves = if (i < completionMoves.size) completionMoves[i] else entry.movesMade
@@ -917,9 +914,9 @@ internal fun buildHistoryInfoMessage(
     sb.append(s("history_detail_qualifies_no_hints_perfect", "Qualifies for perfect no-hints achievement:", emptyArray())).append(" ")
         .append(if (entry.qualifiesForPerfectNoHintsAchievement()) s("history_detail_yes", "Yes", emptyArray()) else s("history_detail_no", "No", emptyArray())).append("\n")
     sb.append(s("history_detail_last_solved_no_hints", "Last solved without hints:", emptyArray())).append(" ")
-        .append(if (entry.lastSolvedWithoutHints > 0) sdf.format(Date(entry.lastSolvedWithoutHints)) else "—").append("\n")
+        .append(if (entry.lastSolvedWithoutHints > 0) sdf.format(entry.lastSolvedWithoutHints) else "—").append("\n")
     sb.append(s("history_detail_last_perfect_no_hints", "Last perfectly solved without hints:", emptyArray())).append(" ")
-        .append(if (entry.lastPerfectlySolvedWithoutHints > 0) sdf.format(Date(entry.lastPerfectlySolvedWithoutHints)) else "—").append("\n")
+        .append(if (entry.lastPerfectlySolvedWithoutHints > 0) sdf.format(entry.lastPerfectlySolvedWithoutHints) else "—").append("\n")
     return sb.toString()
 }
 
@@ -929,7 +926,7 @@ fun HistoryInfoDialog(
     onDismiss: () -> Unit
 ) {
     val stringProvider = remember { getStringProvider() }
-    val sdf = remember { SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault()) }
+    val sdf = remember { PlatformDateFormat("dd.MM.yyyy HH:mm:ss", deviceLocale = true) }
     fun s(key: String, fallback: String, vararg args: Any): String =
         stringProvider.getString(key, *args) ?: formatArgs(fallback, *args)
 

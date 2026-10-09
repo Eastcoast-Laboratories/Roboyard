@@ -591,7 +591,7 @@ fun GameScreen(
     LaunchedEffect(moveCount, gameWon) {
         if (moveCount > 0 && !autosaveRunning && !gameWon) {
             autosaveRunning = true
-            lastAutosaveTime = System.currentTimeMillis()
+            lastAutosaveTime = TimeProvider.currentTimeMillis()
         }
         if (gameWon) {
             autosaveRunning = false
@@ -604,14 +604,14 @@ fun GameScreen(
             while (autosaveRunning) {
                 delay(1000)
                 if (autosaveRunning && !session.timerPaused.value &&
-                    System.currentTimeMillis() - lastAutosaveTime >= AUTOSAVE_INTERVAL_MS
+                    TimeProvider.currentTimeMillis() - lastAutosaveTime >= AUTOSAVE_INTERVAL_MS
                 ) {
                     // Android autosave(): skip level games (levelId > 0)
                     if ((gameState?.levelId ?: 0) <= 0) {
                         session.saveGame(0, isAutoSave = true)
                         println("[AUTOSAVE] Autosaved to slot 0")
                     }
-                    lastAutosaveTime = System.currentTimeMillis()
+                    lastAutosaveTime = TimeProvider.currentTimeMillis()
                 }
             }
         }
