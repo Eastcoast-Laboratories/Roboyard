@@ -15,7 +15,7 @@ import roboyard.logic.ui.StringProvider
 fun formatTime(elapsedTimeMs: Long): String {
     val seconds = (elapsedTimeMs / 1000) % 60
     val minutes = (elapsedTimeMs / 1000) / 60
-    return String.format("%d:%02d", minutes, seconds)
+    return "$minutes:${seconds.toString().padStart(2, '0')}"
 }
 
 /**
@@ -30,11 +30,11 @@ fun formatElapsedTime(elapsedTimeMs: Long): String {
     val seconds = totalSeconds % 60
 
     return if (minutes < 100) {
-        String.format("%02d:%02d", minutes, seconds)
+        "${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
     } else {
         val hours = minutes / 60
         val mins = minutes % 60
-        String.format("%02d:%02d:%02d", hours, mins, seconds)
+        "${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}"
     }
 }
 

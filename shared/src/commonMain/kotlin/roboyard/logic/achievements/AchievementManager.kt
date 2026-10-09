@@ -1,8 +1,8 @@
 package roboyard.logic.achievements
 
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
+import roboyard.logic.json.JsonArray
+import roboyard.logic.json.JsonObject
+import roboyard.logic.json.JsonParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -22,6 +22,10 @@ import roboyard.logic.util.DateUtils
 import roboyard.logic.util.RLog
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.jvm.JvmField
+import kotlin.jvm.JvmStatic
+import roboyard.logic.util.Synchronized
+import driftingdroids.model.TimeProvider
 
 /**
  * Manages achievement unlocking, storage, and retrieval.
@@ -311,7 +315,7 @@ class AchievementManager private constructor(
         }
 
         achievement.setUnlocked(true)
-        val timestamp = System.currentTimeMillis()
+        val timestamp = TimeProvider.currentTimeMillis()
         achievement.unlockedTimestamp = timestamp
 
 
@@ -1117,7 +1121,7 @@ class AchievementManager private constructor(
 
         val lastNudgedVersion = storage.getString(KEY_LAST_NUDGED_VERSION, null)
         val lastNudgeMs = storage.getLong(KEY_LAST_NUDGE_MS, 0L)
-        val now = System.currentTimeMillis()
+        val now = TimeProvider.currentTimeMillis()
         val elapsed = now - lastNudgeMs
         val sameVersion = latestAppVersion == lastNudgedVersion
 
@@ -1194,9 +1198,9 @@ class AchievementManager private constructor(
 
                     for (i in 0..<serverAchievements.size()) {
                         val serverAchievement = serverAchievements[i].asJsonObject
-                        val id = serverAchievement.get("id").asString
-                        val unlocked = if (serverAchievement.has("unlocked")) serverAchievement.get("unlocked").asBoolean else false
-                        val unlockedAt = if (serverAchievement.has("unlocked_at") && !serverAchievement.get("unlocked_at").isJsonNull) serverAchievement.get("unlocked_at").asString else null
+                        val id = serverAchievement.get("id")!!.asString
+                        val unlocked = if (serverAchievement.has("unlocked")) serverAchievement.get("unlocked")!!.asBoolean else false
+                        val unlockedAt = if (serverAchievement.has("unlocked_at") && !serverAchievement.get("unlocked_at")!!.isJsonNull) serverAchievement.get("unlocked_at")!!.asString else null
 
                         if (!unlocked) continue
 
@@ -1220,13 +1224,13 @@ class AchievementManager private constructor(
                                         id,
                                         unlockedAt
                                     )
-                                    timestamp = System.currentTimeMillis()
+                                    timestamp = TimeProvider.currentTimeMillis()
                                 }
                             }
 
                             localAchievement.setUnlocked(true)
                             localAchievement.unlockedTimestamp =
-                                if (timestamp > 0) timestamp else System.currentTimeMillis()
+                                if (timestamp > 0) timestamp else TimeProvider.currentTimeMillis()
 
 
                             // Save to storage
@@ -1250,18 +1254,18 @@ class AchievementManager private constructor(
                     // Restore streak data from server (bidirectional)
                     if (statsJson != null) {
                         val stats = JsonParser.parseString(statsJson).asJsonObject
-                        val serverStreak = if (stats.has("daily_login_streak")) stats.get("daily_login_streak").asInt else 0
-                        val serverLongestStreak = if (stats.has("longest_streak")) stats.get("longest_streak").asInt else 0
+                        val serverStreak = if (stats.has("daily_login_streak")) stats.get("daily_login_streak")!!.asInt else 0
+                        val serverLongestStreak = if (stats.has("longest_streak")) stats.get("longest_streak")!!.asInt else 0
                         // Use last_login_date with fallback to last_streak_date (for users who synced before last_login_date was introduced)
                         var serverLastLoginDate: String? = null
-                        if (stats.has("last_login_date") && !stats.get("last_login_date").isJsonNull) {
-                            serverLastLoginDate = stats.get("last_login_date").asString
+                        if (stats.has("last_login_date") && !stats.get("last_login_date")!!.isJsonNull) {
+                            serverLastLoginDate = stats.get("last_login_date")!!.asString
                         }
-                        if (serverLastLoginDate == null && stats.has("last_streak_date") && !stats.get("last_streak_date").isJsonNull) {
-                            serverLastLoginDate = stats.get("last_streak_date").asString
+                        if (serverLastLoginDate == null && stats.has("last_streak_date") && !stats.get("last_streak_date")!!.isJsonNull) {
+                            serverLastLoginDate = stats.get("last_streak_date")!!.asString
                         }
                         val serverLongestStreakDate: String? =
-                            if (stats.has("longest_streak_date") && !stats.get("longest_streak_date").isJsonNull) stats.get("longest_streak_date").asString else null
+                            if (stats.has("longest_streak_date") && !stats.get("longest_streak_date")!!.isJsonNull) stats.get("longest_streak_date")!!.asString else null
                         streakDataProvider?.restoreFromServer(
                             serverStreak,
                             serverLastLoginDate,
@@ -1335,7 +1339,7 @@ class AchievementManager private constructor(
                 } catch (e: NumberFormatException) {
                     nb = 0
                 }
-                if (na != nb) return Integer.compare(na, nb)
+                if (na != nb) return na.compareTo(nb)
             }
             return 0
         }

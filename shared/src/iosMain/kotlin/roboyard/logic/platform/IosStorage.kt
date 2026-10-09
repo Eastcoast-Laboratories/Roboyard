@@ -1,14 +1,24 @@
 package roboyard.logic.platform
 
-import platform.Foundation.NSUserDefaults
+import kotlinx.cinterop.BetaInteropApi
+import kotlinx.cinterop.ExperimentalForeignApi
+import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
+import platform.Foundation.NSString
 import platform.Foundation.NSURL
+import platform.Foundation.NSUTF8StringEncoding
+import platform.Foundation.NSUserDefaults
+import platform.Foundation.dataUsingEncoding
+import platform.Foundation.NSUserDomainMask
+import platform.Foundation.stringWithContentsOfFile
 import platform.Foundation.stringWithString
+import platform.Foundation.timeIntervalSince1970
 import roboyard.logic.storage.PlatformStorage
 
 /**
  * iOS implementation of PlatformStorage using NSUserDefaults and NSFileManager.
  */
+@OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
 class IosStorage : PlatformStorage {
     private val userDefaults = NSUserDefaults.standardUserDefaults
     private val fileManager = NSFileManager.defaultManager
@@ -65,8 +75,7 @@ class IosStorage : PlatformStorage {
     // File I/O operations using NSFileManager
     override fun readFile(fileName: String): String {
         val filePath = getFilePath(fileName)
-        val content = fileManager.contentsAtPath(filePath)
-        return content?.toByteArray()?.decodeToString() ?: ""
+        return NSString.stringWithContentsOfFile(filePath, NSUTF8StringEncoding, null) ?: ""
     }
 
     override fun writeFile(fileName: String, content: String): Boolean {
@@ -76,15 +85,14 @@ class IosStorage : PlatformStorage {
         if (parentPath.isNotEmpty()) {
             fileManager.createDirectoryAtPath(parentPath, withIntermediateDirectories = true, attributes = null, error = null)
         }
-        return content.encodeToByteArray().let { data ->
-            val success = fileManager.createFileAtPath(filePath, data, null)
-            if (success) {
-                println("[STORAGE] writeFile SUCCESS: $fileName -> $filePath")
-            } else {
-                println("[STORAGE] writeFile ERROR: $fileName -> $filePath")
-            }
-            success
+        val data = (content as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+        val success = fileManager.createFileAtPath(filePath, data, null)
+        if (success) {
+            println("[STORAGE] writeFile SUCCESS: $fileName -> $filePath")
+        } else {
+            println("[STORAGE] writeFile ERROR: $fileName -> $filePath")
         }
+        return success
     }
 
     override fun fileExists(fileName: String): Boolean {

@@ -17,6 +17,8 @@
 package driftingdroids.model
 
 import kotlin.concurrent.Volatile
+import kotlin.jvm.JvmStatic
+import roboyard.logic.util.Throws
 
 abstract class Solver protected constructor(board: Board) {
     enum class SOLUTION_MODE(private val modeName: String, private val l10nKey: String) {

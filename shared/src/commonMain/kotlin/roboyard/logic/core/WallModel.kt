@@ -1,5 +1,8 @@
 package roboyard.logic.core
 
+import kotlin.jvm.JvmField
+import kotlin.jvm.JvmStatic
+
 
 /**
  * Model class that represents all walls on a game board.

@@ -4,6 +4,10 @@ import roboyard.logic.storage.PlatformStorage
 import roboyard.logic.util.DateUtils
 import roboyard.logic.util.RLog
 import kotlin.math.max
+import kotlin.jvm.JvmField
+import kotlin.jvm.JvmStatic
+import roboyard.logic.util.Synchronized
+import driftingdroids.model.TimeProvider
 
 /**
  * Manages daily login streaks and comeback tracking.
@@ -173,9 +177,9 @@ class StreakManager private constructor(
                 return mockTodayDate!!
             }
             if (testMode) {
-                return System.currentTimeMillis() / TEST_DAY_MS
+                return TimeProvider.currentTimeMillis() / TEST_DAY_MS
             }
-            val now = System.currentTimeMillis()
+            val now = TimeProvider.currentTimeMillis()
             val offsetMs = DateUtils.getTimezoneOffsetMs(now)
             return (now + offsetMs) / NORMAL_DAY_MS
         }

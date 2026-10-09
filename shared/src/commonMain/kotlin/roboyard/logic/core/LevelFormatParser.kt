@@ -1,6 +1,8 @@
 package roboyard.logic.core
 
 import roboyard.logic.util.RLog
+import kotlin.jvm.JvmField
+import kotlin.jvm.JvmStatic
 
 
 /**

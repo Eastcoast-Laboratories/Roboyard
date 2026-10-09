@@ -1,6 +1,6 @@
 package roboyard.logic.achievements
 
-import com.google.gson.JsonParser
+import roboyard.logic.json.JsonParser
 import roboyard.logic.network.RoboyardApiClient
 
 /**

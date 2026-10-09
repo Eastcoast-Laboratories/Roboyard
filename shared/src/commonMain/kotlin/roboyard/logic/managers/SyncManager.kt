@@ -1,12 +1,8 @@
 package roboyard.logic.managers
 
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
+import roboyard.logic.json.JsonArray
+import roboyard.logic.json.JsonObject
+import roboyard.logic.json.JsonParser
 import roboyard.logic.core.Constants
 import roboyard.logic.core.GameHistoryEntry
 import roboyard.logic.core.LevelCompletionData
@@ -19,7 +15,13 @@ import roboyard.logic.network.optJsonArray
 import roboyard.logic.network.optLong
 import roboyard.logic.network.optString
 import roboyard.logic.storage.PlatformStorage
+import roboyard.logic.util.DateFormatUtils
 import roboyard.logic.util.RLog
+import kotlin.jvm.JvmOverloads
+import kotlin.jvm.JvmStatic
+import roboyard.logic.util.Synchronized
+import kotlin.concurrent.Volatile
+import driftingdroids.model.TimeProvider
 
 /**
  * Platform-specific hooks needed by the shared SyncManager.
@@ -69,7 +71,7 @@ class SyncManager private constructor(
             return
         }
 
-        val now = System.currentTimeMillis()
+        val now = TimeProvider.currentTimeMillis()
         if (now - lastSyncTimestamp < MIN_SYNC_INTERVAL_MS) {
             log.d("[AUTO_SYNC] Throttled - last sync was %d ms ago", now - lastSyncTimestamp)
             return
@@ -159,9 +161,9 @@ class SyncManager private constructor(
 
                 try {
                     for (i in 0 until (saves?.size() ?: 0)) {
-                        val save = saves!!.get(i).asJsonObject
-                        val slotId = save.get("slot_id").asInt
-                        val saveData = save.get("save_data").asString
+                        val save = saves!!.get(i)!!.asJsonObject
+                        val slotId = save.get("slot_id")!!.asInt
+                        val saveData = save.get("save_data")!!.asString
 
                         val fileName = Constants.SAVE_DIRECTORY + "/" +
                             Constants.SAVE_FILENAME_PREFIX + slotId + Constants.SAVE_FILENAME_EXTENSION
@@ -268,9 +270,7 @@ class SyncManager private constructor(
                 historyJson.addProperty("play_time_seconds", entry.playDuration)
                 historyJson.addProperty("stars_earned", entry.starsEarned)
                 // CRITICAL: Send played_at in UTC timezone to prevent timezone offset issues
-                val utcFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.US)
-                utcFormat.timeZone = TimeZone.getTimeZone("UTC")
-                historyJson.addProperty("played_at", utcFormat.format(Date(entry.timestamp)))
+                historyJson.addProperty("played_at", DateFormatUtils.formatIsoUtcOffset(entry.timestamp))
                 historyJson.addProperty("best_time", entry.bestTime)
                 historyJson.addProperty("best_moves", entry.bestMoves)
                 historyJson.addProperty("completion_count", entry.completionCount)
@@ -289,11 +289,9 @@ class SyncManager private constructor(
                 historyJson.add("completion_stars", starsArray)
 
                 // Log timestamps with human-readable format for debugging timezone issues
-                val playedAtStr = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.US)
-                    .format(Date(entry.timestamp))
+                val playedAtStr = DateFormatUtils.formatIsoUtcOffset(entry.timestamp)
                 val lastCompletionStr = if (entry.lastCompletionTimestamp > 0)
-                    SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
-                        .format(Date(entry.lastCompletionTimestamp))
+                    DateFormatUtils.formatLocalDateTime(entry.lastCompletionTimestamp)
                 else
                     "never"
                 log.d(
@@ -341,7 +339,7 @@ class SyncManager private constructor(
                     log.e("[HISTORY_SYNC] ✗ Upload failed: %s", error)
 
                     // If unauthorized, try to re-login once and retry
-                    if (error != null && error.lowercase(Locale.getDefault()).contains("unauthorized")) {
+                    if (error != null && error.lowercase().contains("unauthorized")) {
                         log.d("[HISTORY_SYNC] Attempting auto re-login after 401...")
                         apiClient.attemptReLogin(object : ApiCallback<Boolean?> {
                             override fun onSuccess(reLoginSuccess: Boolean?) {
@@ -390,9 +388,9 @@ class SyncManager private constructor(
                     val existingEntries = GameHistoryManager.getHistoryEntries(storage)
 
                     for (i in 0 until (history?.size() ?: 0)) {
-                        val entry = history!!.get(i).asJsonObject
+                        val entry = history!!.get(i)!!.asJsonObject
                         val mapName = entry.optString("map_name") ?: "Unnamed"
-                        val saveData = entry.get("save_data").asString
+                        val saveData = entry.get("save_data")!!.asString
 
                         // VALIDATION: Fix corrupt mapPath values where mapName is "Level X" but mapPath doesn't match
                         // This prevents corrupt data from server from causing incorrect minimaps
@@ -479,7 +477,7 @@ class SyncManager private constructor(
                             if (tsArrayDl != null) {
                                 val timestamps = mutableListOf<Long>()
                                 for (j in 0 until tsArrayDl.size()) {
-                                    timestamps.add(tsArrayDl.get(j).asLong)
+                                    timestamps.add(tsArrayDl.get(j)!!.asLong)
                                 }
                                 historyEntry.setCompletionTimestamps(timestamps)
                             }
@@ -489,7 +487,7 @@ class SyncManager private constructor(
                             if (movesArrayDl != null) {
                                 val movesList = mutableListOf<Int>()
                                 for (j in 0 until movesArrayDl.size()) {
-                                    movesList.add(movesArrayDl.get(j).asInt)
+                                    movesList.add(movesArrayDl.get(j)!!.asInt)
                                 }
                                 historyEntry.setCompletionMoves(movesList)
                             }
@@ -497,7 +495,7 @@ class SyncManager private constructor(
                             if (starsArrayDl != null) {
                                 val starsList = mutableListOf<Int>()
                                 for (j in 0 until starsArrayDl.size()) {
-                                    starsList.add(starsArrayDl.get(j).asInt)
+                                    starsList.add(starsArrayDl.get(j)!!.asInt)
                                 }
                                 historyEntry.setCompletionStars(starsList)
                             }
@@ -508,11 +506,9 @@ class SyncManager private constructor(
                             // Log timestamps with human-readable format for debugging timezone issues
                             val downloadedPlayedAt = entry.optString("played_at") ?: "null"
                             val parsedTimestampStr =
-                                SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
-                                    .format(Date(historyEntry.timestamp))
+                                DateFormatUtils.formatLocalDateTime(historyEntry.timestamp)
                             val lastCompletionStrDl = if (historyEntry.lastCompletionTimestamp > 0)
-                                SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
-                                    .format(Date(historyEntry.lastCompletionTimestamp))
+                                DateFormatUtils.formatLocalDateTime(historyEntry.lastCompletionTimestamp)
                             else
                                 "never"
                             log.d("[HISTORY_SYNC] Restored history entry: %s", mapName)
@@ -637,23 +633,20 @@ class SyncManager private constructor(
 
     private fun parseTimestamp(isoTimestamp: String?): Long {
         if (isoTimestamp.isNullOrEmpty()) {
-            return System.currentTimeMillis()
+            return TimeProvider.currentTimeMillis()
         }
         return try {
             val millis = hooks.parseIsoTimestamp(isoTimestamp)
-            val utcFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
-            utcFormat.timeZone = TimeZone.getTimeZone("UTC")
-            val localFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
             log.d(
                 "[HISTORY_SYNC_TIME] parseTimestamp: input='%s' → millis=%d → UTC='%s', local='%s'",
                 isoTimestamp, millis,
-                utcFormat.format(Date(millis)),
-                localFormat.format(Date(millis))
+                DateFormatUtils.formatUtcDateTime(millis),
+                DateFormatUtils.formatLocalDateTime(millis)
             )
             millis
         } catch (e: Exception) {
             log.e(e, "[HISTORY_SYNC_TIME] Failed to parse timestamp: %s", isoTimestamp)
-            System.currentTimeMillis()
+            TimeProvider.currentTimeMillis()
         }
     }
 
@@ -705,7 +698,7 @@ class SyncManager private constructor(
             var restoredLevels = 0
 
             for (i in 0 until history.size()) {
-                val entry = history.get(i).asJsonObject
+                val entry = history.get(i)!!.asJsonObject
                 val mapName = entry.optString("map_name") ?: ""
                 val stars = entry.optInt("stars_earned", 0)
                 val moves = entry.optInt("move_count", 0)

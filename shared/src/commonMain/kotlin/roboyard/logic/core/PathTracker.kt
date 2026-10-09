@@ -73,8 +73,8 @@ class PathTracker {
 
         // Initialize base offset if not set (random ±BASE_OFFSET_RATIO * cellSize)
         if (robotColor !in robotBaseOffsets) {
-            val offsetX = (Math.random() * 2 - 1).toFloat() * BASE_OFFSET_RATIO
-            val offsetY = (Math.random() * 2 - 1).toFloat() * BASE_OFFSET_RATIO
+            val offsetX = (kotlin.random.Random.nextDouble() * 2 - 1).toFloat() * BASE_OFFSET_RATIO
+            val offsetY = (kotlin.random.Random.nextDouble() * 2 - 1).toFloat() * BASE_OFFSET_RATIO
             robotBaseOffsets[robotColor] = floatArrayOf(offsetX, offsetY)
         }
 

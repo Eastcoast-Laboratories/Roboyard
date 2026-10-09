@@ -11,8 +11,8 @@ import platform.Foundation.timeIntervalSince1970
  */
 actual object DateUtils {
     actual fun getTimezoneOffsetMs(timestampMs: Long): Long {
-        val tz = NSTimeZone.systemTimeZone()
-        return tz.secondsFromGMT().toLong() * 1000L
+        val tz = NSTimeZone.systemTimeZone
+        return tz.secondsFromGMTForDate(NSDate()).toLong() * 1000L
     }
 
     actual fun formatDateIso(timestampMs: Long): String {

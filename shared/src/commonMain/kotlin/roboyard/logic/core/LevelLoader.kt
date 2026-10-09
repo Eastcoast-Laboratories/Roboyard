@@ -1,5 +1,6 @@
 package roboyard.logic.core
 
+import co.touchlab.kermit.Logger
 import driftingdroids.model.Board
 import roboyard.logic.storage.PlatformStorage
 
@@ -8,6 +9,8 @@ import roboyard.logic.storage.PlatformStorage
  * Levels are stored in shared/src/commonMain/resources/Maps/level_X.txt
  */
 object LevelLoader {
+
+    private val log = Logger.withTag("LevelLoader")
 
     /**
      * Discovers all available level IDs: built-in levels from bundled "Maps"
@@ -27,7 +30,7 @@ object LevelLoader {
             }
             ids.sort()
         } catch (e: Exception) {
-            System.err.println("[LEVEL_LOADER] Error listing available levels: ${e.message}")
+            log.e(e) { "[LEVEL_LOADER] Error listing available levels: ${e.message}" }
         }
         return ids
     }

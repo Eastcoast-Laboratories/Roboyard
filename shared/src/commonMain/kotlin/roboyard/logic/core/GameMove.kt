@@ -1,5 +1,8 @@
 package roboyard.logic.core
 
+import kotlin.jvm.JvmField
+import kotlin.jvm.JvmOverloads
+
 
 /**
  * Represents a single move of a robot in the game.

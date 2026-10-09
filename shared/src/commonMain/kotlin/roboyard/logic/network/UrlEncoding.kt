@@ -24,3 +24,35 @@ fun urlEncodeUtf8(value: String): String {
     }
     return out.toString()
 }
+
+/**
+ * Decodes application/x-www-form-urlencoded data, matching
+ * java.net.URLDecoder.decode(value, "UTF-8"): '+' becomes space, %XX
+ * sequences are UTF-8 bytes. Malformed input is decoded leniently
+ * (literal characters pass through).
+ */
+fun urlDecodeUtf8(value: String): String {
+    val bytes = ArrayList<Byte>(value.length)
+    var i = 0
+    while (i < value.length) {
+        val c = value[i]
+        when {
+            c == '+' -> bytes.add(' '.code.toByte())
+            c == '%' && i + 2 < value.length -> {
+                val hex = value.substring(i + 1, i + 3).toIntOrNull(16)
+                if (hex != null) {
+                    bytes.add(hex.toByte())
+                    i += 2
+                } else {
+                    bytes.add(c.code.toByte())
+                }
+            }
+            else -> {
+                // encode the char itself as UTF-8 (handles non-ASCII literals)
+                c.toString().encodeToByteArray().forEach { bytes.add(it) }
+            }
+        }
+        i++
+    }
+    return bytes.toByteArray().decodeToString()
+}

@@ -17,6 +17,7 @@
 package driftingdroids.model
 
 import kotlin.concurrent.Volatile
+import roboyard.logic.util.Throws
 
 class SolverIDDFS(board: Board) : Solver(board) {
     private val MAX_DEPTH: Int // maximal depth of search tree to prevent OOM
@@ -106,7 +107,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
             this.obstacles[0][pos] = obstacle
         }
         for (depth in 1..<this.obstacles.size) {
-            this.obstacles[depth] = this.obstacles[0].clone()
+            this.obstacles[depth] = this.obstacles[0].copyOf()
         }
     }
 
@@ -139,7 +140,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
         if (null == this.board.getGoal()) {
             Logger.println("no goal is set - nothing to solve!")
         } else {
-            this.states[0] = this.board.robotPositions.clone()
+            this.states[0] = this.board.robotPositions.copyOf()
             swapGoalLast(this.states[0]) //goal robot is always the last one.
             this.directions[0].fill(DIRECTION_NOT_MOVED_YET)
             this.precomputeMinimumMovesToGoal()
@@ -586,10 +587,10 @@ class SolverIDDFS(board: Board) : Solver(board) {
         }
 
         var newSolution = Solution(this.board)
-        var state0 = this.states[0].clone()
+        var state0 = this.states[0].copyOf()
         swapGoalLast(state0)
         for (i in 0..<depth) {
-            val state1 = this.states[i + 1].clone()
+            val state1 = this.states[i + 1].copyOf()
             swapGoalLast(state1)
             newSolution.add(Move(this.board, state0, state1, i))
             state0 = state1

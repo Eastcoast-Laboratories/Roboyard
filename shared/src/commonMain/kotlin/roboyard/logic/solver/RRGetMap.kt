@@ -11,6 +11,7 @@ import roboyard.logic.core.Preferences
 import roboyard.logic.core.WallModel.Companion.fromGridElements
 import roboyard.logic.core.WallType
 import roboyard.logic.util.RLog
+import kotlin.jvm.JvmStatic
 
 /**
  * Utility class for converting between Roboyard's game elements and DriftingDroids board format.
@@ -125,7 +126,7 @@ object RRGetMap {
                 type == "target_pink"
             ) { // Added target_pink here
 
-                val targetColor: Int = colors.getOrDefault(type, Constants.COLOR_PINK)!!
+                val targetColor: Int = colors[type] ?: Constants.COLOR_PINK
                 board!!.addGoal(position, targetColor, 1)
                 targetFound = true
                 targetInfoList.add(intArrayOf(position, targetColor))
@@ -151,7 +152,7 @@ object RRGetMap {
                 // Get the color index from the GameLogic
 
                 val colorIndex: Int =
-                    colors.getOrDefault(type, robotCounter % Constants.NUM_ROBOTS)!!
+                    colors[type] ?: robotCounter % Constants.NUM_ROBOTS
 
 
                 // Map color indices to valid piece array indices (0-3)
@@ -411,14 +412,14 @@ object RRGetMap {
 
             if (element.type == "mh") {
                 // Remember this position has a horizontal wall
-                val prevContent = cellContents.getOrDefault(key, "")
+                val prevContent = cellContents[key] ?: ""
                 cellContents.put(key, prevContent + "mh,")
             } else if (element.type == "mv") {
                 // Vertical walls go in their own position
                 asciiMap[x * 2]!![y] = "|"
             } else {
                 // Remember this position has a robot or target
-                val prevContent = cellContents.getOrDefault(key, "")
+                val prevContent = cellContents[key] ?: ""
                 cellContents.put(key, prevContent + element.type + ",")
             }
         }

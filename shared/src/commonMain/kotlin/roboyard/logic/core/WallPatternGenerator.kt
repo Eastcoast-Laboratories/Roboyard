@@ -5,6 +5,7 @@ import kotlin.random.Random
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.jvm.JvmStatic
 
 /**
  * Generates wall patterns for the level editor.

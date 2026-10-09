@@ -2,6 +2,8 @@ package roboyard.logic.core
 
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.jvm.JvmField
+import kotlin.jvm.JvmStatic
 
 data class BoardSizeOption(val width: Int, val height: Int) {
     override fun toString(): String = "${width}x${height}"

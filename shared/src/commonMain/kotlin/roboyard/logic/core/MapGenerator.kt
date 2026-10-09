@@ -4,6 +4,7 @@ import kotlin.math.max
 import kotlin.random.Random
 import kotlin.math.min
 import roboyard.logic.util.RLog
+import kotlin.jvm.JvmField
 
 /**
  * Created by Alain on 04/02/2015.

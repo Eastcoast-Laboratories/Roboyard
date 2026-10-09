@@ -16,6 +16,8 @@
 */
 package driftingdroids.model
 
+import kotlin.jvm.JvmField
+
 class Move(
     val board: Board,
     oldPositions: IntArray,

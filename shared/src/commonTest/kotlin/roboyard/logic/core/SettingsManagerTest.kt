@@ -1,5 +1,6 @@
 package roboyard.logic.core
 
+import roboyard.logic.platform.PlatformInfo
 import roboyard.logic.storage.PlatformStorage
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -77,9 +78,9 @@ class SettingsManagerTest {
     @Test
     fun test_fullscreenDefault_offOnDesktop() {
         // Desktop requirement: first launch must be windowed — fullscreen only
-        // after the user enables it in the settings. The shared test target is
-        // the desktop JVM; on Android/iOS the default is true instead.
-        assertFalse(Preferences.DEFAULT_FULLSCREEN_ENABLED)
+        // after the user enables it in the settings. On Android/iOS the
+        // default is true instead (mobile apps always start fullscreen).
+        assertEquals(PlatformInfo.isMobile(), Preferences.DEFAULT_FULLSCREEN_ENABLED)
     }
 
     @Test

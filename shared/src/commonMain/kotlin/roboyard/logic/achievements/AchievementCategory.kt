@@ -1,6 +1,7 @@
 package roboyard.logic.achievements
 
 import roboyard.logic.ui.StringProvider
+import kotlin.jvm.JvmField
 
 /**
  * Categories for achievements.

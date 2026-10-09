@@ -1,14 +1,19 @@
 package roboyard.logic.network
 
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
+import roboyard.logic.json.JsonArray
+import roboyard.logic.json.JsonObject
+import roboyard.logic.json.JsonParser
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import roboyard.logic.storage.PlatformStorage
 import roboyard.logic.util.RLog
+import kotlin.jvm.JvmField
+import kotlin.jvm.JvmOverloads
+import kotlin.jvm.JvmStatic
+import roboyard.logic.util.Synchronized
+import kotlin.concurrent.Volatile
 
 /**
  * API client for roboyard.z11.de authentication and map sharing.
@@ -129,11 +134,11 @@ class RoboyardApiClient private constructor(
                     return@launch
                 }
                 if (json.has("error")) {
-                    postError(callback, json.get("error").asString)
+                    postError(callback, json.get("error")!!.asString)
                     return@launch
                 }
 
-                val token = json.get("token").asString
+                val token = json.get("token")!!.asString
                 val userObject = json.getAsJsonObject("user")
                 val userName = userObject.optString("name", "")
                 val email = userObject.optString("email", "")
@@ -179,11 +184,11 @@ class RoboyardApiClient private constructor(
                     return@launch
                 }
                 if (json.has("error")) {
-                    postError(callback, json.get("error").asString)
+                    postError(callback, json.get("error")!!.asString)
                     return@launch
                 }
 
-                val token = json.get("token").asString
+                val token = json.get("token")!!.asString
                 // The API returns the user id inside the "user" object; "user_id" is kept as fallback
                 val userId = json.optInt("user_id",
                     json.optJsonObject("user")?.optInt("id", -1) ?: -1)
@@ -333,11 +338,11 @@ class RoboyardApiClient private constructor(
                     return@launch
                 }
                 if (json.has("error")) {
-                    postError(callback, json.get("error").asString)
+                    postError(callback, json.get("error")!!.asString)
                     return@launch
                 }
 
-                val mapId = json.get("map_id").asInt
+                val mapId = json.get("map_id")!!.asInt
                 val shareUrl = json.optString("share_url", "$baseUrl/maps/$mapId")
                 val isDuplicate = json.optBoolean("duplicate")
 
@@ -368,7 +373,7 @@ class RoboyardApiClient private constructor(
 
     private fun makeAuthenticatedPostRequest(endpoint: String?, body: String): String {
         val token = storage.getString(KEY_AUTH_TOKEN, null)
-            ?: throw java.io.IOException("Not authenticated")
+            ?: throw IllegalStateException("Not authenticated")
         val (code, text) = PlatformHttp.request(
             "POST", baseUrl + endpoint,
             mapOf(
@@ -383,7 +388,7 @@ class RoboyardApiClient private constructor(
 
     private fun makeAuthenticatedGetRequest(endpoint: String?): String {
         val token = storage.getString(KEY_AUTH_TOKEN, null)
-            ?: throw java.io.IOException("Not authenticated")
+            ?: throw IllegalStateException("Not authenticated")
         val (code, text) = PlatformHttp.request(
             "GET", baseUrl + endpoint,
             mapOf(
@@ -457,7 +462,7 @@ class RoboyardApiClient private constructor(
                 val json = JsonParser.parseString(response).asJsonObject
 
                 if (json.has("error")) {
-                    postError(callback, json.get("error").asString)
+                    postError(callback, json.get("error")!!.asString)
                     return@launch
                 }
 
@@ -492,7 +497,7 @@ class RoboyardApiClient private constructor(
                 val json = JsonParser.parseString(response).asJsonObject
 
                 if (json.has("error")) {
-                    postError(callback, json.get("error").asString)
+                    postError(callback, json.get("error")!!.asString)
                     return@launch
                 }
 
@@ -519,7 +524,7 @@ class RoboyardApiClient private constructor(
                 val json = JsonParser.parseString(response).asJsonObject
 
                 if (json.has("error")) {
-                    postError(callback, json.get("error").asString)
+                    postError(callback, json.get("error")!!.asString)
                     return@launch
                 }
 
@@ -551,7 +556,7 @@ class RoboyardApiClient private constructor(
                 val json = JsonParser.parseString(response).asJsonObject
 
                 if (json.has("error")) {
-                    postError(callback, json.get("error").asString)
+                    postError(callback, json.get("error")!!.asString)
                     return@launch
                 }
 
@@ -566,7 +571,7 @@ class RoboyardApiClient private constructor(
                 if (json.has("details")) {
                     val details = json.getAsJsonArray("details")
                     for (i in 0 until details.size()) {
-                        val detail = details.get(i).asJsonObject
+                        val detail = details.get(i)!!.asJsonObject
                         val action = detail.optString("action", "unknown")
                         val mapName = detail.optString("map_name", "Unknown")
                         when (action) {
@@ -598,7 +603,7 @@ class RoboyardApiClient private constructor(
                 val json = JsonParser.parseString(response).asJsonObject
 
                 if (json.has("error")) {
-                    postError(callback, json.get("error").asString)
+                    postError(callback, json.get("error")!!.asString)
                     return@launch
                 }
 
@@ -635,7 +640,7 @@ class RoboyardApiClient private constructor(
                 val json = JsonParser.parseString(response).asJsonObject
 
                 if (json.has("error")) {
-                    postError(callback, json.get("error").asString)
+                    postError(callback, json.get("error")!!.asString)
                     return@launch
                 }
 
@@ -644,7 +649,7 @@ class RoboyardApiClient private constructor(
                     json.optInt("synced_count", 0),
                     json.optInt("new_achievements", 0),
                     json.optBoolean("stats_updated"),
-                    if (json.has("latest_app_version") && !json.get("latest_app_version").isJsonNull)
+                    if (json.has("latest_app_version") && !json.get("latest_app_version")!!.isJsonNull)
                         json.optString("latest_app_version", null) else null
                 )
                 postSuccess(callback, result)

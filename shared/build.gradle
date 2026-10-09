@@ -30,7 +30,6 @@ kotlin {
                 implementation compose.components.resources
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0"
                 implementation "co.touchlab:kermit:2.1.0"
-                implementation "com.google.code.gson:gson:2.13.2"
             }
         }
         commonTest {
@@ -41,7 +40,6 @@ kotlin {
         androidMain {
             dependencies {
                 implementation "com.jakewharton.timber:timber:5.0.1"
-                implementation "com.google.code.gson:gson:2.13.2"
             }
         }
         desktopMain {
