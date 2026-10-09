@@ -111,6 +111,38 @@ class GameSessionTest {
         assertEquals(counterBefore + 1, session.gameCounter.value)
     }
 
+    /**
+     * Map difficulty decision: inside the regeneration limit only the
+     * configured range is accepted; past the limit generation continues until
+     * the map has at least min(10, configured minimum) optimal moves.
+     */
+    @Test
+    fun test_evaluateGeneratedMap_fallbackRequiresMinimumMoves() {
+        val within = 0
+        val pastLimit = 100_000
+        fun verdict(moves: Int, min: Int, max: Int, discarded: Int, trivial: Boolean = false) =
+            GameSession.evaluateGeneratedMap(moves, trivial, min, max, discarded)
+
+        assertEquals(GameSession.Companion.MapVerdict.ACCEPT, verdict(22, 20, 99, within))
+        assertEquals(GameSession.Companion.MapVerdict.DISCARD, verdict(12, 20, 99, within))
+        assertEquals(GameSession.Companion.MapVerdict.DISCARD, verdict(0, 20, 99, within))
+
+        // Past the limit: below 10 moves keeps generating, 10+ is accepted as fallback
+        assertEquals(GameSession.Companion.MapVerdict.DISCARD_BELOW_FALLBACK, verdict(2, 20, 99, pastLimit))
+        assertEquals(GameSession.Companion.MapVerdict.DISCARD_BELOW_FALLBACK, verdict(9, 20, 99, pastLimit))
+        assertEquals(GameSession.Companion.MapVerdict.DISCARD_BELOW_FALLBACK, verdict(0, 20, 99, pastLimit))
+        assertEquals(GameSession.Companion.MapVerdict.ACCEPT_FALLBACK, verdict(10, 20, 99, pastLimit))
+        assertEquals(GameSession.Companion.MapVerdict.ACCEPT, verdict(20, 20, 99, pastLimit))
+
+        // Too hard past the limit is accepted as fallback (any maximum)
+        assertEquals(GameSession.Companion.MapVerdict.ACCEPT_FALLBACK, verdict(14, 5, 8, pastLimit))
+        // Configured minimum below 10 caps the fallback minimum (6 here)
+        assertEquals(GameSession.Companion.MapVerdict.ACCEPT_FALLBACK, verdict(9, 6, 8, pastLimit))
+        assertEquals(GameSession.Companion.MapVerdict.DISCARD_BELOW_FALLBACK, verdict(5, 6, 8, pastLimit))
+        // A trivial one-move solution is never accepted by generation
+        assertEquals(GameSession.Companion.MapVerdict.DISCARD_BELOW_FALLBACK, verdict(1, 1, 99, pastLimit, trivial = true))
+    }
+
     @Test
     fun test_moveRobotInDirection_slidesUntilBoundary() {
         val state = testState()

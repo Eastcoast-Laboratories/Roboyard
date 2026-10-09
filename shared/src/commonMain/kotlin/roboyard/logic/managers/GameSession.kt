@@ -311,8 +311,9 @@ class GameSession(
     private var preComputeCancelled = false
 
     // Difficulty validation / regeneration
-    private var validateDifficulty = true
     private var regenerationCount = 0
+    /** Delayed createValidGame() of a discarded candidate; at most one pending. */
+    private var regenerationJob: Job? = null
     private var allowRegeneration = true
     private var keepCurrentMapDespiteDifficulty = false
 
@@ -477,6 +478,7 @@ class GameSession(
      * @param levelId Level ID to load
      */
     open fun loadLevel(levelId: Int) {
+        cancelPendingRegeneration()
         val newState = GameState.loadLevel(levelId)
         newState.levelId = levelId
 
@@ -523,6 +525,8 @@ class GameSession(
      * @return true if successful, false otherwise
      */
     fun applyLoadedGameState(newState: GameState): Boolean {
+        cancelPendingRegeneration()
+
         // Mark that a new game was loaded - timer should reset
         isNewGameLoaded = true
         _newGameLoadedEvent.value = true
@@ -2417,76 +2421,16 @@ class GameSession(
         val isLevelMode = (state != null && state.levelId > 0)
 
         val moveCount = if (solution != null) solution.moves.size else 0
-        if (moveCount > 0) {
-            val minRequiredMoves = this.minimumRequiredMoves
-            val maxRequiredMoves = this.maximumRequiredMoves
-
-            // Skip validation for level games, loaded savegames, or when regeneration is disabled
-            if (!isLevelMode && !isLoadedFromSave && allowRegeneration && regenerationCount < MAX_AUTO_REGENERATIONS) {
-                val isTooEasy = moveCount < minRequiredMoves
-                val isTooHard = moveCount > maxRequiredMoves
-
-                if (keepCurrentMapDespiteDifficulty && (isTooEasy || isTooHard)) {
-                    log.d(
-                        "[SOLUTION_SOLVER][MOVES][KEEP_MAP_ENFORCER] Solution has only %d moves, but current map was manually kept",
-                        moveCount
-                    )
-                } else {
-                    if (isTooEasy || isTooHard) {
-                        log.d(
-                            "[MAP_VALIDATION][DISCARD] Map discarded: %s (%d moves), regenerating (attempt %d/%d)",
-                            if (isTooEasy) "too easy" else "too hard",
-                            moveCount,
-                            regenerationCount + 1,
-                            MAX_AUTO_REGENERATIONS
-                        )
-                        regenerationCount++
-
-                        // Clear the running flag so the delayed regeneration's
-                        // calculateSolutionAsync() is not skipped by its
-                        // already-running guard.
-                        _isSolverRunning.value = false
-                        resetSolverInitialization()
-                        solver?.cancel()
-
-                        scope.launch {
-                            delay(100)
-                            createValidGame(
-                                Preferences.boardSizeWidth, Preferences.boardSizeHeight
-                            )
-                        }
-                        return
-                    }
-                }
-            } else if (regenerationCount >= MAX_AUTO_REGENERATIONS) {
-                log.d(
-                    "[MAP_VALIDATION][ACCEPT] Map accepted: reached maximum regeneration attempts (%d)",
-                    MAX_AUTO_REGENERATIONS
-                )
-                onMapFallbackAccepted?.invoke(MAX_AUTO_REGENERATIONS, moveCount)
-                regenerationCount = 0
-            } else if (!allowRegeneration) {
-                log.d("[MAP_VALIDATION][ACCEPT] Map accepted: regeneration disabled")
-            }
-        } else {
-            // moveCount==0: solver hit memory/depth limit or puzzle is unsolvable
-            if (!isLevelMode && !isLoadedFromSave && allowRegeneration && regenerationCount < MAX_AUTO_REGENERATIONS) {
-                log.d(
-                    "[MAP_VALIDATION][DISCARD] Map discarded: no solution found, trying new map (regen %d/%d)",
-                    regenerationCount + 1, MAX_AUTO_REGENERATIONS
-                )
-                regenerationCount++
-                // Clear the running flag so the delayed regeneration's
-                // calculateSolutionAsync() is not skipped by its guard.
-                _isSolverRunning.value = false
-                resetSolverInitialization()
-                solver?.cancel()
-                scope.launch {
-                    delay(100)
-                    createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight)
-                }
+        // Skip validation for level games, loaded savegames, or when regeneration is disabled
+        if (!isLevelMode && !isLoadedFromSave && allowRegeneration) {
+            if (!acceptGeneratedMap(moveCount)) {
+                scheduleRegeneration()
                 return
             }
+        } else if (!allowRegeneration) {
+            log.d("[MAP_VALIDATION][ACCEPT] Map accepted: regeneration disabled")
+        }
+        if (moveCount == 0) {
             log.w("[SOLUTION_SOLVER][MOVES] onSolutionCalculationCompleted: No solution found, accepting puzzle")
         }
 
@@ -2564,9 +2508,89 @@ class GameSession(
         onSolutionCalculationFailed("Solver was cancelled")
     }
 
-    /** Cancel any running solver operation. */
+    /**
+     * Difficulty validation of a generated random map.
+     * Within [MAX_AUTO_REGENERATIONS] attempts only maps inside the configured
+     * min/max range are accepted. Once the limit is exhausted, generation goes
+     * on until a map has at least min([FALLBACK_MIN_SOLUTION_MOVES], configured
+     * minimum) optimal moves (any maximum); unsolved candidates stay rejected.
+     * Such a fallback map is reported via [onMapFallbackAccepted].
+     * @return true if the map is accepted, false if a new candidate is needed
+     */
+    private fun acceptGeneratedMap(moveCount: Int): Boolean {
+        val minMoves = minimumRequiredMoves
+        val maxMoves = maximumRequiredMoves
+        val verdict = evaluateGeneratedMap(
+            moveCount, isSolution01(), minMoves, maxMoves, regenerationCount
+        )
+        val discard = verdict == MapVerdict.DISCARD || verdict == MapVerdict.DISCARD_BELOW_FALLBACK
+        if (discard && keepCurrentMapDespiteDifficulty) {
+            log.d(
+                "[SOLUTION_SOLVER][MOVES][KEEP_MAP_ENFORCER] Solution has %d moves, but current map was manually kept",
+                moveCount
+            )
+            return true
+        }
+        when (verdict) {
+            MapVerdict.ACCEPT -> return true
+            MapVerdict.DISCARD -> {
+                log.d(
+                    "[MAP_VALIDATION][DISCARD] Map discarded (%d moves, configured %d-%d), regenerating (attempt %d/%d)",
+                    moveCount, minMoves, maxMoves, regenerationCount + 1, MAX_AUTO_REGENERATIONS
+                )
+                return false
+            }
+            MapVerdict.DISCARD_BELOW_FALLBACK -> {
+                log.d(
+                    "[MAP_VALIDATION][DISCARD][FALLBACK] Limit of %d attempts reached, map still discarded: %d moves < fallback minimum %d, attempt %d",
+                    MAX_AUTO_REGENERATIONS, moveCount, min(FALLBACK_MIN_SOLUTION_MOVES, minMoves), regenerationCount + 1
+                )
+                return false
+            }
+            MapVerdict.ACCEPT_FALLBACK -> {
+                log.d(
+                    "[MAP_VALIDATION][ACCEPT][FALLBACK] Map accepted after %d attempts: %d moves (configured %d-%d, fallback minimum %d)",
+                    regenerationCount + 1, moveCount, minMoves, maxMoves, min(FALLBACK_MIN_SOLUTION_MOVES, minMoves)
+                )
+                onMapFallbackAccepted?.invoke(regenerationCount + 1, moveCount)
+                return true
+            }
+        }
+    }
+
+    /**
+     * Discard the current candidate map and generate the next one after a
+     * short delay. [regenerationCount] counts the discarded candidates for
+     * [evaluateGeneratedMap]; the previous pending job is replaced so only one
+     * chain can exist.
+     */
+    private fun scheduleRegeneration() {
+        regenerationCount++
+        // Clear the running flag so the delayed regeneration's
+        // calculateSolutionAsync() is not skipped by its already-running guard.
+        _isSolverRunning.value = false
+        resetSolverInitialization()
+        solver?.cancel()
+        regenerationJob?.cancel()
+        regenerationJob = scope.launch {
+            delay(100)
+            createValidGame(Preferences.boardSizeWidth, Preferences.boardSizeHeight)
+        }
+    }
+
+    /** Drop a pending regeneration so it cannot replace a newly installed game. */
+    private fun cancelPendingRegeneration() {
+        if (regenerationJob?.isActive == true) {
+            log.d("[MAP_VALIDATION] Cancelling pending map regeneration (regen %d)", regenerationCount)
+        }
+        regenerationJob?.cancel()
+        regenerationJob = null
+    }
+
+    /** Cancel any running solver operation and any pending map regeneration. */
     fun cancelSolver() {
         log.d("[SOLUTION_SOLVER] cancelSolver called")
+        cancelPendingRegeneration()
         solver?.cancel()
         solverJob?.cancel()
         _isSolverRunning.value = false
@@ -2628,10 +2652,7 @@ class GameSession(
      * @param height Height of the board
      */
     private fun createValidGame(width: Int, height: Int) {
-        log.d(
-            "[PATH_DIAG] createValidGame() called: game=%d moves=%d pathHistory=%d regen=%d",
-            _gameCounter.value, _moveCount.value, pathHistory.size, regenerationCount
-        )
+        log.d("createValidGame() called")
 
         if (keepCurrentMapDespiteDifficulty) {
             log.d("[KEEP_MAP_ENFORCER] createValidGame() blocked - user chose to keep current map")
@@ -2662,7 +2683,7 @@ class GameSession(
         // immediately and would overwrite the solver field mid-flight.
 
         // Quick check for trivial puzzles before starting expensive solver
-        if (validateDifficulty && isTrivialPuzzle(newState)) {
+        if (isTrivialPuzzle(newState)) {
             log.d("[TRIVIAL_CHECK] Detected trivial puzzle, regenerating without running solver")
             createValidGame(width, height)
             return
@@ -2670,12 +2691,9 @@ class GameSession(
 
         startTime = TimeProvider.currentTimeMillis()
 
-        if (validateDifficulty) {
-            calculateSolutionAsync(DifficultyValidationCallback(width, height))
-        } else {
-            validateDifficulty = true
-            calculateSolutionAsync(null)
-        }
+        // Difficulty validation and the bounded regeneration chain live in
+        // onSolutionCalculationCompleted (single source of truth).
+        calculateSolutionAsync(null)
     }
 
     /**
@@ -2744,99 +2762,6 @@ class GameSession(
         }
 
         return false
-    }
-
-    /** Callback to validate puzzle difficulty and regenerate if needed. */
-    private inner class DifficultyValidationCallback(
-        private val width: Int,
-        private val height: Int
-    ) : SolutionCallback {
-        private var attemptCount = 0
-
-        override fun onSolutionCalculationStarted() {
-            log.d("DifficultyValidationCallback: Calculation started, attempt %d", attemptCount + 1)
-        }
-
-        override fun onSolutionCalculationCompleted(solution: GameSolution?) {
-            attemptCount++
-            val moveCount = if (solution != null) solution.moves.size else 0
-            val requiredMoves: Int = this@GameSession.minimumRequiredMoves
-            val maxMoves: Int = this@GameSession.maximumRequiredMoves
-
-            if (keepCurrentMapDespiteDifficulty) {
-                log.d(
-                    "[DifficultyValidationCallback][KEEP_MAP_ENFORCER] Skipping difficulty validation - map was manually kept (moves=%d)",
-                    moveCount
-                )
-            } else {
-                if (this@GameSession.isSolution01()) {
-                    log.d("[DifficultyValidationCallback]: Puzzle too easy (1 move), generating new one")
-                    createValidGame(width, height)
-                    return
-                }
-
-                if (moveCount == 0 && attemptCount < MAX_ATTEMPTS) {
-                    log.d(
-                        "[DifficultyValidationCallback]: Solver found no solution, trying new map (attempt %d/%d)",
-                        attemptCount, MAX_ATTEMPTS
-                    )
-                    createValidGame(width, height)
-                    return
-                } else if (moveCount == 0) {
-                    log.w(
-                        "[DifficultyValidationCallback]: No solution after %d attempts, accepting puzzle",
-                        attemptCount
-                    )
-                    onMapFallbackAccepted?.invoke(attemptCount, null)
-                    validateDifficulty = true
-                    solutionWasAccepted = true
-                    _isSolverRunning.value = false
-                    return
-                }
-
-                if (moveCount < requiredMoves && attemptCount < MAX_ATTEMPTS) {
-                    log.d(
-                        "[MAP_VALIDATION][DISCARD] Map discarded: too easy (%d moves < %d required), generating new one (attempt %d/%d)",
-                        moveCount, requiredMoves, attemptCount, MAX_ATTEMPTS
-                    )
-                    createValidGame(width, height)
-                    return
-                } else if (moveCount > maxMoves && attemptCount < MAX_ATTEMPTS) {
-                    log.d(
-                        "[MAP_VALIDATION][DISCARD] Map discarded: too hard (%d moves > %d max), generating new one (attempt %d/%d)",
-                        moveCount, maxMoves, attemptCount, MAX_ATTEMPTS
-                    )
-                    createValidGame(width, height)
-                    return
-                }
-            }
-
-            // Accepted despite violating difficulty limits (attempts exhausted)
-            if (!keepCurrentMapDespiteDifficulty && attemptCount >= MAX_ATTEMPTS &&
-                (moveCount < requiredMoves || moveCount > maxMoves)
-            ) {
-                onMapFallbackAccepted?.invoke(attemptCount, moveCount)
-            }
-
-            log.d(
-                "[DifficultyValidationCallback] Accepted puzzle with %d moves after %d attempts",
-                moveCount, attemptCount
-            )
-            validateDifficulty = true
-            currentSolution = solution
-            currentSolutionStep = 0
-            updatePreCompRobotOrder(solution)
-
-            solutionWasAccepted = true
-
-            _isSolverRunning.value = false
-        }
-
-        override fun onSolutionCalculationFailed(errorMessage: String?) {
-            log.w("DifficultyValidationCallback: Solution calculation failed: %s", errorMessage)
-            validateDifficulty = true
-            _isSolverRunning.value = false
-        }
     }
 
     /**
@@ -3421,8 +3346,41 @@ class GameSession(
         /** Touch action for release (matches MotionEvent.ACTION_UP). */
         const val ACTION_UP: Int = 1
 
-        private const val MAX_ATTEMPTS = 999
         private const val MAX_AUTO_REGENERATIONS = 999
+
+        /**
+         * Minimum optimal solution length a map must reach once
+         * [MAX_AUTO_REGENERATIONS] is exhausted (capped by the configured minimum).
+         */
+        private const val FALLBACK_MIN_SOLUTION_MOVES = 19
+
+        /** Outcome of the difficulty check of one generated map. */
+        internal enum class MapVerdict { ACCEPT, DISCARD, DISCARD_BELOW_FALLBACK, ACCEPT_FALLBACK }
+
+        /**
+         * Difficulty decision for a generated random map (pure, see acceptGeneratedMap).
+         * @param moveCount optimal solution length, 0 if the solver found none
+         * @param isSolution01 solver reports a trivial (one-move) solution
+         * @param minMoves configured minimum solution length
+         * @param maxMoves configured maximum solution length
+         * @param discardedSoFar maps already discarded for the current game
+         */
+        internal fun evaluateGeneratedMap(
+            moveCount: Int,
+            isSolution01: Boolean,
+            minMoves: Int,
+            maxMoves: Int,
+            discardedSoFar: Int
+        ): MapVerdict {
+            val solved = moveCount > 0 && !isSolution01
+            if (solved && moveCount in minMoves..maxMoves) return MapVerdict.ACCEPT
+            if (discardedSoFar < MAX_AUTO_REGENERATIONS) return MapVerdict.DISCARD
+            return if (solved && moveCount >= min(FALLBACK_MIN_SOLUTION_MOVES, minMoves)) {
+                MapVerdict.ACCEPT_FALLBACK
+            } else {
+                MapVerdict.DISCARD_BELOW_FALLBACK
+            }
+        }
 
         /** Move cooldown to prevent multiple moves within a short window. */
         private const val MOVE_COOLDOWN_MS: Long = 400

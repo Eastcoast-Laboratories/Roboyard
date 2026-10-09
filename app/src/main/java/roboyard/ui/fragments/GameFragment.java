@@ -694,6 +694,13 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             checkIfMoveMatchesHint(state);
         });
         
+        // Map accepted after the regeneration limit: tell the player the configured range was not met
+        gameStateManager.getMapFallbackNotice().observe(getViewLifecycleOwner(), notice -> {
+            if (notice == null) return;
+            gameStateManager.clearMapFallbackNotice();
+            showMapFallbackNotice(notice.getFirst(), notice.getSecond());
+        });
+
         // Observe move count
         gameStateManager.getMoveCount().observe(getViewLifecycleOwner(), this::updateMoveCount);
         
@@ -3416,6 +3423,27 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
     }
     
     /**
+     * Dialog for a map accepted after the regeneration limit (same texts as the
+     * composeApp MapGenerationFallbackDialog).
+     * @param attempts generated candidates
+     * @param moves optimal moves of the accepted map, or null if unknown
+     */
+    private void showMapFallbackNotice(int attempts, @Nullable Integer moves) {
+        String actual = moves != null ? String.valueOf(moves) : getString(R.string.map_generation_unknown_moves);
+        int minMoves = Preferences.minSolutionMoves;
+        int maxMoves = Preferences.maxSolutionMoves;
+        String message = maxMoves >= 99
+                ? getString(R.string.map_generation_failed_min_message, minMoves, attempts, actual)
+                : getString(R.string.map_generation_failed_range_message, minMoves, maxMoves, attempts, actual);
+        Timber.d("[MAP_VALIDATION][FALLBACK] Showing fallback notice: %s", message);
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.map_generation_failed_title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
+    }
+
+    /**
      * Shows a message that the A.I. is calculating a solution with restart counter and last solution info
      */
     private void showSolverCalculatingMessage() {
@@ -3777,14 +3805,12 @@ public class GameFragment extends BaseGameFragment implements GameStateManager.S
             return;
         }
         
-        Timber.d("[HINT_AUTO_MOVE][PATH_DIAG] Scheduling auto-move for robot color %d in direction %d, %s",
-                robotColor, direction, gameStateManager.pathDiagInfo());
+        Timber.d("[HINT_AUTO_MOVE] Scheduling auto-move for robot color %d in direction %d", 
+                robotColor, direction);
         
         // Execute auto-move asynchronously to avoid ANR when clicking hints rapidly
         if (getView() != null) {
             getView().postDelayed(() -> {
-                Timber.d("[HINT_AUTO_MOVE][PATH_DIAG] Executing scheduled auto-move color %d, %s",
-                        robotColor, gameStateManager.pathDiagInfo());
                 // Check if game is still active before executing move
                 if (gameStateManager.isGameComplete().getValue()) {
                     Timber.d("[HINT_AUTO_MOVE] Game complete, skipping auto-move");
