@@ -2,6 +2,7 @@ package roboyard.ui.compose
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -228,11 +229,14 @@ fun MainMenuScreen(
             achievements = popupQueue,
             onDismiss = { popupQueue = emptyList() }
         )
-                    FancyButton(
-                        text = stringProvider.getString("level_design_editor") ?: "Level Design Editor",
-                        color = FancyButtonColor.PURPLE,
-                        onClick = onLevelEditor,
-                        modifier = Modifier.fillMaxWidth()
+                    // Android parity: the editor is only reachable from Level
+                    // Selection once 140 stars are earned. Transparent tap area
+                    // kept here for testing without grinding stars.
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .clickable { onLevelEditor() }
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }

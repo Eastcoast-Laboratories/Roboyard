@@ -107,5 +107,8 @@ ist das gelöst?
 - Audit-Fund 3: getRobotColorName-Fallback: Android getString(unknown_color, id) vs. HintManager "robot $color".
 
 
-- in der compose-app geht das auge auch, da soll ja immer von der aktuellen spielsituation aus ein neuer solver gestartet werden unm anzuzeigen, wieviel schritte ncoh von hieraus . diese anzeige erscheint aber verdeckt von dem hint container, die soll aber innerhalb des hint containers angezeigt werden, mit farbkodierung, je nach anzahl des deltas vom optimalen. sieh dir den android code an und baue es genau so nach, mit font-grössen , also das delta selbst in etwas grösserem font, es soll haargenau so aussehen , wie in der android app
+# unterschiede der compse app:
 
+- play games service option, ist egal, da ja in android auch deaktivierrt
+- talkback ist noch nciht komlett
+- longpress auf den titel im settings menu um in den debug screen zu kommen
