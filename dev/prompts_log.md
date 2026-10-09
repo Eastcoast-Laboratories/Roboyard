@@ -117,3 +117,5 @@
 26-10-09 12:08 "do everything else needed via ssh yourself to build the app in xcode there and publish it"
 26-10-09 13:05 "fix minimally and document, then commit yourself when the state is good in sensible packages, then continue autonomously with the plan until the build runs on the Mac — note: everything that happens on the Mac must be in dev/macos-build-setup.sh so it can be re-run on a new Mac"
 26-10-09 13:45 "commit the intermediate state in sensible packages; also keep in mind we still need to build the Capacitor apps Lalumo (/var/www/Musici) and CaveShuttle (/var/www/CaveShuttle) on the mac mini, projects are very similar to Roboyard; then continue until Roboyard for iOS is fully built"
+26-10-09 14:52 "mache einen prompt fertig, um in der caveshuttle ki session für die app alles zusammen zu haben"
+26-10-09 14:55 "/var/tmp/mac-mini-passwort.txt"

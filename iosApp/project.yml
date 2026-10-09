@@ -29,6 +29,7 @@ targets:
         INFOPLIST_FILE: iosApp/Info.plist
         TARGETED_DEVICE_FAMILY: "1,2"
         SWIFT_VERSION: "5.0"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         # The KMP Roboyard.framework is embedded via @rpath — without this
         # entry dyld cannot find it and the app aborts at launch.
         LD_RUNPATH_SEARCH_PATHS:
@@ -37,3 +38,13 @@ targets:
         # KMP ships only iosSimulatorArm64 — no x86_64 simulator slice exists,
         # so the simulator SDK must not try to build an Intel binary.
         EXCLUDED_ARCHS[sdk=iphonesimulator*]: x86_64
+      configs:
+        # Archives are signed manually with the Apple Distribution identity and
+        # the App Store provisioning profile for de.z11.roboyard. Automatic
+        # signing cannot be used: Xcode insists on revoking and recreating the
+        # development certificate for this machine, which requires GUI consent.
+        Release:
+          CODE_SIGN_STYLE: Manual
+          CODE_SIGN_IDENTITY: "Apple Distribution"
+          DEVELOPMENT_TEAM: SVFZHJF78U
+          PROVISIONING_PROFILE_SPECIFIER: "Roboyard AppStore"

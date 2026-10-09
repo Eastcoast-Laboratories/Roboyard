@@ -148,12 +148,84 @@ xcrun simctl io booted screenshot /var/tmp/roboyard-ios.png
 # - App Store Connect web work (app record, metadata, screenshots) — cannot
 #   be done via SSH
 #
-# Release/archive path (paid Apple Developer Program, account logged in):
+# ----------------------------------------------------------------------
+# 10) Signing + release archive (paid Apple Developer Program, team SVFZHJF78U).
+#
+# Certificates were created WITHOUT Xcode (openssl CSR + portal download)
+# because Xcode's "Manage Certificates" dialog froze and its automatic flow
+# tries to revoke the existing dev cert (GUI-only consent):
+#
+#   # on the Mac, once per certificate type:
+#   mkdir -p ~/devtools/certs && cd ~/devtools/certs
+#   openssl req -new -newkey rsa:2048 -nodes \
+#     -keyout apple-dev.key -out apple-dev.csr \
+#     -subj "/emailAddress=apple@eclabs.de/CN=Ruben Barkow-Kuder/C=DE"
+#   openssl req -new -newkey rsa:2048 -nodes \
+#     -keyout apple-dist.key -out apple-dist.csr \
+#     -subj "/emailAddress=apple@eclabs.de/CN=Ruben Barkow-Kuder/C=DE"
+#   # upload the .csr files at developer.apple.com/account/resources/certificates
+#   # ("Apple Development" + "Apple Distribution"), download the .cer files
+#   # back to dev/xcode/ on the laptop, then scp them to ~/devtools/certs/
+#
+# Import into the login keychain. The private keys must be exported as .p12
+# first (security cannot import bare .key files); the keychain must be
+# unlocked — `security unlock-keychain -p <pw>` or Keychain Access in VNC:
+#
+#   openssl x509 -in distribution.cer -inform DER -out distribution.pem
+#   openssl pkcs12 -export -out apple-dist.p12 \
+#     -inkey apple-dist.key -in distribution.pem -password pass:rb-tmp-p12
+#   security unlock-keychain -p "$MAC_PASSWORD" ~/Library/Keychains/login.keychain-db
+#   security import apple-dist.p12 -k ~/Library/Keychains/login.keychain-db \
+#     -P rb-tmp-p12 -T /usr/bin/codesign
+#   security find-identity -v -p codesigning
+#   # must list BOTH "Apple Development: Ruben Barkow-Kuder (7U462K6UCH)"
+#   # and  "Apple Distribution: Ruben Barkow-Kuder (SVFZHJF78U)"
+#
+# Provisioning profile (portal, browser): Identifiers "+" -> App ID
+# de.z11.roboyard (explicit); Profiles "+" -> "App Store Connect" ->
+# distribution cert -> name "Roboyard AppStore" -> download .mobileprovision.
+# Install it:
+#   mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+#   cp /path/to/Roboyard_AppStore.mobileprovision \
+#      ~/Library/MobileDevice/Provisioning\ Profiles/
+#
+# project.yml pins Release to CODE_SIGN_STYLE=Manual + "Apple Distribution" +
+# PROVISIONING_PROFILE_SPECIFIER="Roboyard AppStore" — regenerate after
+# project.yml edits: cd iosApp && xcodegen generate
+#
+# Archive + export (manual signing, no -allowProvisioningUpdates needed):
+#   cd ~/repos/Roboyard/iosApp
 #   xcodebuild -project iosApp.xcodeproj -scheme iosApp -configuration Release \
 #     -sdk iphoneos -destination 'generic/platform=iOS' \
-#     archive -archivePath build/iosApp.xcarchive -allowProvisioningUpdates
-#   then xcodebuild -exportArchive with an exportOptions.plist
-#   (method: app-store-connect) to produce the .ipa
+#     -archivePath build/iosApp.xcarchive archive
+#   xcodebuild -exportArchive -archivePath build/iosApp.xcarchive \
+#     -exportPath build/ipa -exportOptionsPlist ExportOptions.plist
+#   # ExportOptions.plist has destination=upload -> uploads DIRECTLY to
+#   # App Store Connect (verified 2026-10-09: "Upload succeeded").
+#   # For a local .ipa instead, set destination=export in ExportOptions.plist.
+#
+# After upload: App Store Connect web UI (appstoreconnect.apple.com) —
+#   build appears under the app's TestFlight/"Builds" once processed
+#   (~minutes). App record de.z11.roboyard, metadata, screenshots,
+#   review submission all need the web UI.
+#
+# KNOWN ISSUES:
+# - -allowProvisioningUpdates fails headless — Xcode wants to revoke+recreate
+#   the "Apple Development" cert "for this machine" (GUI consent). Manual
+#   signing for Release avoids that path entirely.
+# - codesign errSecInternalComponent during archive: (a) unlock the keychain
+#   before the build and disable auto-lock with `set-keychain-settings
+#   -t 36000`; (b) run `security set-key-partition-list -S
+#   apple-tool:,apple:,codesign: -s -k <pw>` once so codesign may use the
+#   private key non-interactively; (c) IMPORTANT: stop the Gradle daemon
+#   (`./gradlew --stop`) — a daemon spawned before the keychain unlock keeps
+#   the locked security context and will keep failing.
+# - exportArchive fails with "Missing required icon file" / CFBundleIconName
+#   unless the app has an asset-catalog icon: iosApp/iosApp/Assets.xcassets/
+#   AppIcon.appiconset is generated from dev/images/IconKitchen-Output/ios/
+#   (PNG set + Contents.json) plus ASSETCATALOG_COMPILER_APPICON_NAME=AppIcon
+#   in project.yml.
+#
 #
 # ----------------------------------------------------------------------
 # FUTURE: the same Mac will also build the Capacitor apps
