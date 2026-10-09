@@ -1,6 +1,7 @@
 package roboyard.logic.util
 
 import co.touchlab.kermit.Logger
+import roboyard.logic.util.Synchronized
 
 /**
  * Multiplatform-compatible logging facade for Roboyard shared module.

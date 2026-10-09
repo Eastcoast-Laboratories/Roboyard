@@ -1,6 +1,5 @@
 package roboyard.logic.network
 
-import java.net.URLDecoder
 import roboyard.logic.core.Constants
 import roboyard.logic.core.GameElement
 import roboyard.logic.core.GameState
@@ -98,10 +97,7 @@ object DeepLinkHandler {
             for (param in tail.split("&")) {
                 if (param.startsWith("name=") && mapName == null) {
                     var value = param.substring("name=".length)
-                    try {
-                        value = URLDecoder.decode(value, "UTF-8")
-                    } catch (ignored: Exception) {
-                    }
+                    value = urlDecodeUtf8(value)
                     if (value.isNotEmpty()) mapName = value
                 } else if (param.startsWith("difficulty=") && difficultyStr == null) {
                     difficultyStr = param.substring("difficulty=".length)
@@ -226,7 +222,7 @@ object DeepLinkHandler {
             val key = pair.substring(0, idx)
             val raw = pair.substring(idx + 1)
             result[key] = try {
-                URLDecoder.decode(raw, "UTF-8")
+                urlDecodeUtf8(raw)
             } catch (e: Exception) {
                 raw
             }

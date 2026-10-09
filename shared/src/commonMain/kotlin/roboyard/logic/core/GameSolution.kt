@@ -1,5 +1,7 @@
 package roboyard.logic.core
 
+import kotlin.jvm.JvmField
+
 /**
  * Represents a solution to a puzzle.
  * A solution consists of a sequence of moves that lead from the initial state

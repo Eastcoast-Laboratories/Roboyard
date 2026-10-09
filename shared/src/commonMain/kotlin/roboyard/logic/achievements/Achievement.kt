@@ -1,6 +1,7 @@
 package roboyard.logic.achievements
 
 import driftingdroids.model.TimeProvider
+import kotlin.jvm.JvmField
 
 /**
  * Represents a single achievement in the game.

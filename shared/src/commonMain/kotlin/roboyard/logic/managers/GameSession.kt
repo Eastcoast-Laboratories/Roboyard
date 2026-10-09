@@ -41,6 +41,7 @@ import roboyard.logic.ui.StringProvider
 import roboyard.logic.ui.UiNotifier
 import roboyard.logic.ui.getStringProvider
 import roboyard.logic.util.RLog
+import kotlin.jvm.JvmStatic
 
 /**
  * Platform-independent game session manager.

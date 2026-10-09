@@ -1,6 +1,8 @@
 package roboyard.logic.achievements
 
 import kotlin.math.abs
+import kotlin.jvm.JvmField
+import kotlin.jvm.JvmStatic
 
 /**
  * Defines all achievements in the game.

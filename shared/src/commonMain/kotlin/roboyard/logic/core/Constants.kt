@@ -1,5 +1,8 @@
 package roboyard.logic.core
 
+import kotlin.jvm.JvmField
+import kotlin.jvm.JvmStatic
+
 // ARGB color constants (replaced android.graphics.Color for KMP compatibility)
 
 object Constants {

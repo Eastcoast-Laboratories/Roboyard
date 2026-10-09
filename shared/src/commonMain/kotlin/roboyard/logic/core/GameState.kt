@@ -4,6 +4,9 @@ import roboyard.logic.storage.PlatformStorage
 import roboyard.logic.util.RLog
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.jvm.JvmField
+import kotlin.jvm.JvmStatic
+import driftingdroids.model.TimeProvider
 
 /**
  * Represents the state of a game, including the board, robots, targets, and game progress.
@@ -193,7 +196,7 @@ class GameState(
         this.gameElements = ArrayList<GameElement>()
         this.levelId = -1
         this.levelName = "XXXXX"
-        this.startTime = System.currentTimeMillis()
+        this.startTime = TimeProvider.currentTimeMillis()
         this.moveCount = 0
 
 
@@ -702,7 +705,7 @@ class GameState(
 
         // Generate the metadata section
         sb.append("#MAPNAME:").append(levelName)
-            .append(";TIME:").append(System.currentTimeMillis() - startTime)
+            .append(";TIME:").append(TimeProvider.currentTimeMillis() - startTime)
             .append(";MOVES:").append(moveCount)
 
         if (!uniqueMapId.isEmpty()) {
@@ -1619,7 +1622,7 @@ class GameState(
                 state.levelName = mapName
                 state.moveCount = moveCount
                 state.difficulty = difficulty
-                state.startTime = System.currentTimeMillis() - timePlayed
+                state.startTime = TimeProvider.currentTimeMillis() - timePlayed
 
                 val lines =
                     saveData.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
@@ -1665,7 +1668,7 @@ class GameState(
                                     state = GameState(width, height)
                                     state.levelName = mapName
                                     state.moveCount = moveCount
-                                    state.startTime = System.currentTimeMillis() - timePlayed
+                                    state.startTime = TimeProvider.currentTimeMillis() - timePlayed
                                     log.d(
                                         "[BOARD_SIZE_DEBUG] parseFromSaveData compact format board size: %dx%d",
                                         width,
@@ -2711,7 +2714,7 @@ class GameState(
                 }
             }
 
-            state.levelName = "Random Game " + System.currentTimeMillis() % 1000
+            state.levelName = "Random Game " + TimeProvider.currentTimeMillis() % 1000
 
 
             // Store initial robot positions for reset functionality

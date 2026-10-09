@@ -1,11 +1,18 @@
 package roboyard.logic.managers
 
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import roboyard.logic.json.JsonArray
+import roboyard.logic.json.JsonObject
+import roboyard.logic.json.JsonParser
+import roboyard.logic.network.optBoolean
+import roboyard.logic.network.optInt
+import roboyard.logic.network.optJsonArray
+import roboyard.logic.network.optLong
+import roboyard.logic.network.optString
 import roboyard.logic.core.Constants
 import roboyard.logic.core.GameHistoryEntry
 import roboyard.logic.storage.PlatformStorage
 import roboyard.logic.util.RLog
+import kotlin.jvm.JvmStatic
 
 /**
  * Serializable data for a single history entry
@@ -45,6 +52,82 @@ data class HistoryIndex(
     val historyEntries: List<HistoryEntryData>
 )
 
+/** Serializes to the same JSON shape Gson produced (null fields omitted). */
+private fun HistoryEntryData.toJsonObject(): JsonObject {
+    val o = JsonObject()
+    o.addProperty("mapPath", mapPath)
+    o.addProperty("mapName", mapName)
+    o.addProperty("timestamp", timestamp)
+    o.addProperty("playDuration", playDuration)
+    o.addProperty("movesMade", movesMade)
+    o.addProperty("optimalMoves", optimalMoves)
+    o.addProperty("boardSize", boardSize)
+    o.addProperty("previewImagePath", previewImagePath)
+    o.addProperty("completionCount", completionCount)
+    o.addProperty("lastCompletionTimestamp", lastCompletionTimestamp)
+    o.addProperty("bestTime", bestTime)
+    o.addProperty("bestMoves", bestMoves)
+    if (wallSignature != null) o.addProperty("wallSignature", wallSignature)
+    if (positionSignature != null) o.addProperty("positionSignature", positionSignature)
+    if (mapSignature != null) o.addProperty("mapSignature", mapSignature)
+    val ts = JsonArray(); completionTimestamps.forEach { ts.add(it) }
+    o.add("completionTimestamps", ts)
+    val mv = JsonArray(); completionMoves.forEach { mv.add(it) }
+    o.add("completionMoves", mv)
+    val st = JsonArray(); completionStars.forEach { st.add(it) }
+    o.add("completionStars", st)
+    o.addProperty("starsEarned", starsEarned)
+    o.addProperty("maxHintUsed", maxHintUsed)
+    o.addProperty("solvedWithoutHints", solvedWithoutHints)
+    o.addProperty("everUsedHints", everUsedHints)
+    o.addProperty("lastSolvedWithoutHints", lastSolvedWithoutHints)
+    o.addProperty("lastPerfectlySolvedWithoutHints", lastPerfectlySolvedWithoutHints)
+    if (difficulty != null) o.addProperty("difficulty", difficulty)
+    return o
+}
+
+private fun jsonLongArray(o: JsonObject, key: String): List<Long> =
+    o.optJsonArray(key)?.map { it.asLong } ?: emptyList()
+
+private fun jsonIntArray(o: JsonObject, key: String): List<Int> =
+    o.optJsonArray(key)?.map { it.asInt } ?: emptyList()
+
+private fun historyEntryDataFromJson(o: JsonObject): HistoryEntryData = HistoryEntryData(
+    mapPath = o.optString("mapPath") ?: "",
+    mapName = o.optString("mapName") ?: "",
+    timestamp = o.optLong("timestamp"),
+    playDuration = o.optInt("playDuration"),
+    movesMade = o.optInt("movesMade"),
+    optimalMoves = o.optInt("optimalMoves"),
+    boardSize = o.optString("boardSize") ?: "",
+    previewImagePath = o.optString("previewImagePath") ?: "",
+    completionCount = o.optInt("completionCount"),
+    lastCompletionTimestamp = o.optLong("lastCompletionTimestamp"),
+    bestTime = o.optInt("bestTime"),
+    bestMoves = o.optInt("bestMoves"),
+    wallSignature = o.optString("wallSignature"),
+    positionSignature = o.optString("positionSignature"),
+    mapSignature = o.optString("mapSignature"),
+    completionTimestamps = jsonLongArray(o, "completionTimestamps"),
+    completionMoves = jsonIntArray(o, "completionMoves"),
+    completionStars = jsonIntArray(o, "completionStars"),
+    starsEarned = o.optInt("starsEarned"),
+    maxHintUsed = o.optInt("maxHintUsed"),
+    solvedWithoutHints = o.optBoolean("solvedWithoutHints"),
+    everUsedHints = o.optBoolean("everUsedHints"),
+    lastSolvedWithoutHints = o.optLong("lastSolvedWithoutHints"),
+    lastPerfectlySolvedWithoutHints = o.optLong("lastPerfectlySolvedWithoutHints"),
+    difficulty = o.optString("difficulty")
+)
+
+private fun HistoryIndex.toJsonObject(): JsonObject {
+    val o = JsonObject()
+    val arr = JsonArray()
+    historyEntries.forEach { arr.add(it.toJsonObject()) }
+    o.add("historyEntries", arr)
+    return o
+}
+
 /**
  * Manager class for handling game history entries.
  * Provides methods for saving, loading, and managing history entries.
@@ -53,7 +136,6 @@ data class HistoryIndex(
 object GameHistoryManager {
     private const val HISTORY_INDEX_FILE = "history_index.json"
     private val log = RLog.tag("GameHistoryManager")
-    private val gson = Gson()
 
     /**
      * Parse history index JSON, handling both wrapped object format and legacy direct array format.
@@ -62,13 +144,19 @@ object GameHistoryManager {
      */
     private fun parseHistoryIndex(indexJson: String): HistoryIndex {
         val trimmed = indexJson.trim()
-        return if (trimmed.startsWith("{")) {
-            gson.fromJson(indexJson, HistoryIndex::class.java) ?: HistoryIndex(emptyList())
-        } else {
+        val root = JsonParser.parseString(trimmed)
+        return if (root.isJsonObject) {
+            val arr = root.asJsonObject.optJsonArray("historyEntries")
+            HistoryIndex(arr?.mapNotNull {
+                if (it.isJsonObject) historyEntryDataFromJson(it.asJsonObject) else null
+            } ?: emptyList())
+        } else if (root.isJsonArray) {
             // Legacy direct array format
-            val type = object : TypeToken<List<HistoryEntryData>>() {}.type
-            val list: List<HistoryEntryData> = gson.fromJson(indexJson, type) ?: emptyList()
-            HistoryIndex(list)
+            HistoryIndex(root.asJsonArray.mapNotNull {
+                if (it.isJsonObject) historyEntryDataFromJson(it.asJsonObject) else null
+            })
+        } else {
+            HistoryIndex(emptyList())
         }
     }
 
@@ -81,7 +169,7 @@ object GameHistoryManager {
             // Create empty history index file if it doesn't exist
             if (!storage.fileExists(HISTORY_INDEX_FILE)) {
                 val index = HistoryIndex(emptyList())
-                val indexJson = gson.toJson(index)
+                val indexJson = index.toJsonObject().toString()
                 storage.writeFile(HISTORY_INDEX_FILE, indexJson)
                 log.d("Created empty history index file")
             }
@@ -163,7 +251,7 @@ object GameHistoryManager {
             // Fallback: check by mapName (legacy entries)
             if (!updated) {
                 for (i in entries.indices) {
-                    if (entries.get(i).mapName == entry.mapName) {
+                    if (entries.get(i)!!.mapName == entry.mapName) {
                         val existing = entries.get(i)
                         // Only record completion if moves > 0 (game was actually played)
                         if (entry.movesMade > 0) {
@@ -311,7 +399,7 @@ object GameHistoryManager {
             }
             
             val index = HistoryIndex(entryDataList)
-            val indexJson = gson.toJson(index)
+            val indexJson = index.toJsonObject().toString()
             
             val isSaved = storage.writeFile(HISTORY_INDEX_FILE, indexJson)
 
@@ -353,7 +441,7 @@ object GameHistoryManager {
     fun getHistoryIndex(storage: PlatformStorage, mapPath: String?): Int {
         val entries = getHistoryEntries(storage)
         for (i in entries.indices) {
-            if (entries.get(i).getMapPath() == mapPath) {
+            if (entries.get(i)!!.getMapPath() == mapPath) {
                 return i
             }
         }

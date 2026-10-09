@@ -3,6 +3,8 @@ package roboyard.logic.managers
 import roboyard.logic.core.GameState
 import roboyard.logic.network.urlEncodeUtf8
 import roboyard.logic.util.RLog
+import kotlin.jvm.JvmField
+import kotlin.jvm.JvmStatic
 
 /**
  * Shared helpers to convert save-file data into the roboyard.z11.de share format.

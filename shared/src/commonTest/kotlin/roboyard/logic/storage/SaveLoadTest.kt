@@ -1,6 +1,7 @@
 package roboyard.logic.storage
 
 import driftingdroids.model.Board
+import driftingdroids.model.TimeProvider
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -41,8 +42,8 @@ class SaveLoadTest {
         val moveCount = 5
         val isLevelGame = false
         val gameWon = false
-        val timestamp = System.currentTimeMillis()
-        
+        val timestamp = TimeProvider.currentTimeMillis()
+
         val saveData = buildString {
             appendLine("width:${board.width}")
             appendLine("height:${board.height}")
@@ -55,16 +56,16 @@ class SaveLoadTest {
             appendLine("timestamp:$timestamp")
             appendLine("gameWon:$gameWon")
         }
-        
+
         println("[TEST] Save data: $saveData")
         val saveResult = storage.writeFile(saveFileName, saveData)
         assertTrue(saveResult, "Save should succeed")
-        
+
         // Check if file exists
         val fileExists = storage.fileExists(saveFileName)
         assertTrue(fileExists, "File should exist after save")
         println("[TEST] File exists: $fileExists")
-        
+
         // Load game from slot 1
         println("[TEST] Loading game from: $saveFileName")
         val loadedData = storage.readFile(saveFileName)
@@ -195,7 +196,7 @@ class SaveLoadTest {
         val moveCount = 10
         val isLevelGame = true
         val gameWon = false
-        val timestamp = System.currentTimeMillis()
+        val timestamp = TimeProvider.currentTimeMillis()
         
         val saveData = buildString {
             appendLine("width:${board.width}")

@@ -7,11 +7,14 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import driftingdroids.model.TimeProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import roboyard.logic.core.Constants
 import roboyard.logic.core.GameElement
 import roboyard.logic.core.GameState
@@ -291,9 +294,9 @@ class GameSessionTest {
 
             session.startGame()
 
-            val deadline = System.currentTimeMillis() + 60_000
-            while (!sawCleared.value && System.currentTimeMillis() < deadline) {
-                Thread.sleep(10)
+            val deadline = TimeProvider.currentTimeMillis() + 60_000
+            while (!sawCleared.value && TimeProvider.currentTimeMillis() < deadline) {
+                runBlocking { delay(10) }
             }
             collectJob.cancel()
 

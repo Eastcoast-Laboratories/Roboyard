@@ -57,7 +57,7 @@ class Solution(private val board: Board) : Comparable<Solution> {
 
     fun isRebound(queryMove: Move?): Boolean {
         var result = false
-        val directions = this.board.robotPositions.clone()
+        val directions = this.board.robotPositions.copyOf()
         directions.fill(-1)
         for (move in this.movesList) {
             if ((-1 == directions[move.robotNumber]) || (move.direction != (3 and (directions[move.robotNumber] + 2)))) {

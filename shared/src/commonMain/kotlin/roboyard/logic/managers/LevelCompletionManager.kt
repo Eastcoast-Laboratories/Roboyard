@@ -1,12 +1,14 @@
 package roboyard.logic.managers
 
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import roboyard.logic.json.JsonObject
+import roboyard.logic.json.JsonParser
 import roboyard.logic.core.LevelCompletionData
 import roboyard.logic.storage.PlatformStorage
 import roboyard.logic.storage.getPlatformStorage
 import roboyard.logic.ui.UiNotifier
 import roboyard.logic.util.RLog
+import kotlin.jvm.JvmStatic
+import roboyard.logic.util.Synchronized
 
 /**
  * Manager for level completion data.
@@ -19,7 +21,6 @@ class LevelCompletionManager private constructor(
     private var completionDataMap: MutableMap<Int, LevelCompletionData> = HashMap()
     private var uiNotifier: UiNotifier? = null
     private val log = RLog.tag("LevelCompletionManager")
-    private val gson = Gson()
 
     init {
         loadCompletionData()
@@ -171,11 +172,16 @@ class LevelCompletionManager private constructor(
 
         if (json != null) {
             try {
-                // Use runtime type token to avoid ProGuard issues and match app version format
-                val mapType = object : TypeToken<HashMap<Int, LevelCompletionData>>() {}.type
-                val loadedData: MutableMap<Int, LevelCompletionData>? = gson.fromJson(json, mapType)
-
-                if (loadedData != null) {
+                val root = JsonParser.parseString(json)
+                val loadedData = HashMap<Int, LevelCompletionData>()
+                if (root.isJsonObject) {
+                    for ((key, value) in root.asJsonObject.entrySet()) {
+                        val levelId = key.toIntOrNull()
+                        if (levelId != null && value.isJsonObject) {
+                            loadedData[levelId] =
+                                LevelCompletionData.fromJsonObject(value.asJsonObject)
+                        }
+                    }
                     completionDataMap = loadedData
                     log.d("Loaded completion data for ${completionDataMap.size} levels")
 
@@ -261,7 +267,11 @@ class LevelCompletionManager private constructor(
      */
     private fun saveCompletionData() {
         try {
-            val json = gson.toJson(completionDataMap)
+            val obj = JsonObject()
+            for ((levelId, data) in completionDataMap) {
+                obj.add(levelId.toString(), data.toJsonObject())
+            }
+            val json = obj.toString()
             storage.putString(COMPLETION_DATA_KEY, json)
             log.d("Saved completion data for ${completionDataMap.size} levels")
         } catch (e: Exception) {

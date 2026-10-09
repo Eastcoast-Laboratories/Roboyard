@@ -1,15 +1,16 @@
 package roboyard.logic.managers
 
-import com.google.gson.JsonArray
-import com.google.gson.JsonNull
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
-import com.google.gson.JsonPrimitive
+import roboyard.logic.json.JsonArray
+import roboyard.logic.json.JsonNull
+import roboyard.logic.json.JsonObject
+import roboyard.logic.json.JsonParser
+import roboyard.logic.json.JsonPrimitive
 import roboyard.logic.achievements.AchievementManager
 import roboyard.logic.achievements.StreakManager
 import roboyard.logic.platform.PlatformInfo
 import roboyard.logic.storage.PlatformStorage
 import roboyard.logic.util.RLog
+import driftingdroids.model.TimeProvider
 
 /**
  * Manages export and import of all app data as JSON.
@@ -30,7 +31,7 @@ class DataExportImportManager(private val storage: PlatformStorage) {
             // Add metadata
             val metadata = JsonObject()
             metadata.addProperty("version", 1)
-            metadata.addProperty("exportTime", System.currentTimeMillis())
+            metadata.addProperty("exportTime", TimeProvider.currentTimeMillis())
             metadata.addProperty("appVersion", PlatformInfo.getAppVersionName())
             root.add("metadata", metadata)
 
@@ -125,30 +126,30 @@ class DataExportImportManager(private val storage: PlatformStorage) {
             val root = JsonParser.parseString(jsonData).asJsonObject
 
             // Check version compatibility
-            val metadata = if (root.has("metadata") && root.get("metadata").isJsonObject)
+            val metadata = if (root.has("metadata") && root.get("metadata")!!.isJsonObject)
                 root.getAsJsonObject("metadata") else null
             if (metadata != null) {
                 log.d("Importing data version %d",
-                    if (metadata.has("version")) metadata.get("version").asInt else 1)
+                    if (metadata.has("version")) metadata.get("version")!!.asInt else 1)
             }
 
             // Import SharedPreferences
-            if (root.has("preferences") && root.get("preferences").isJsonObject) {
+            if (root.has("preferences") && root.get("preferences")!!.isJsonObject) {
                 val prefsData = root.getAsJsonObject("preferences")
                 for (prefsName in PREFS_NAMES) {
-                    if (prefsData.has(prefsName) && prefsData.get(prefsName).isJsonObject) {
+                    if (prefsData.has(prefsName) && prefsData.get(prefsName)!!.isJsonObject) {
                         importSharedPreferences(prefsName, prefsData.getAsJsonObject(prefsName))
                     }
                 }
             }
 
             // Import save games
-            if (root.has("saveGames") && root.get("saveGames").isJsonArray) {
+            if (root.has("saveGames") && root.get("saveGames")!!.isJsonArray) {
                 importFiles(root.getAsJsonArray("saveGames"), SAVES_DIRECTORY + "/")
             }
 
             // Import game history (entries may carry a "history/" prefix or be root-level files)
-            if (root.has("gameHistory") && root.get("gameHistory").isJsonArray) {
+            if (root.has("gameHistory") && root.get("gameHistory")!!.isJsonArray) {
                 importFiles(root.getAsJsonArray("gameHistory"), null)
             }
 
@@ -211,9 +212,9 @@ class DataExportImportManager(private val storage: PlatformStorage) {
     /** Import files from a JSON array of {filename, content} entries. */
     private fun importFiles(files: JsonArray, dirPrefix: String?) {
         for (i in 0 until files.size()) {
-            val entry = files.get(i).asJsonObject
-            val filename = entry.get("filename").asString
-            val content = entry.get("content").asString
+            val entry = files.get(i)!!.asJsonObject
+            val filename = entry.get("filename")!!.asString
+            val content = entry.get("content")!!.asString
             val path = if (dirPrefix != null) dirPrefix + filename else filename
             try {
                 storage.writeFile(path, content)

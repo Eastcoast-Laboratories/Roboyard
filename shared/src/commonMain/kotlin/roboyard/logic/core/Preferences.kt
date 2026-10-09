@@ -6,6 +6,8 @@ import roboyard.logic.util.RLog
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
+import kotlin.jvm.JvmField
+import kotlin.jvm.JvmStatic
 
 /**
  * Central preferences manager for Roboyard.

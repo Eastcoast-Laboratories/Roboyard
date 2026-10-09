@@ -2,6 +2,7 @@ package roboyard.logic.core
 
 import driftingdroids.model.Board
 import roboyard.logic.util.RLog
+import driftingdroids.model.TimeProvider
 
 /**
  * Shared game controller for robot movement with cooldown, undo, and path history.
@@ -38,7 +39,7 @@ class GameController {
      */
     fun moveRobotWithCooldown(board: Board, robotIndex: Int, direction: Int): Board? {
         // Check if move cooldown is active
-        val currentTime = System.currentTimeMillis()
+        val currentTime = TimeProvider.currentTimeMillis()
         if (currentTime - lastMoveTime < MOVE_COOLDOWN_MS) {
             log.d("[MOVE_COOLDOWN] Move blocked: %dms remaining", MOVE_COOLDOWN_MS - (currentTime - lastMoveTime))
             return null

@@ -4,6 +4,7 @@ import kotlin.math.max
 import kotlin.random.Random
 import kotlin.math.min
 import roboyard.logic.util.RLog
+import kotlin.jvm.JvmStatic
 
 /**
  * A UI-agnostic class that contains the core game logic for map generation.

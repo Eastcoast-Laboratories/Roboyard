@@ -1,5 +1,7 @@
 package roboyard.logic.core
 
+import kotlin.jvm.JvmField
+
 /**
  * Represents a wall in the game board.
  * A wall is defined by its position (x,y) and type (horizontal or vertical).

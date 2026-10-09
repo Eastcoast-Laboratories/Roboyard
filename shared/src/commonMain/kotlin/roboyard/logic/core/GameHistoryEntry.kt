@@ -1,6 +1,8 @@
 package roboyard.logic.core
 
 import roboyard.logic.util.RLog
+import kotlin.jvm.JvmField
+import driftingdroids.model.TimeProvider
 
 /**
  * Represents an entry in the game's move history.
@@ -75,7 +77,7 @@ class GameHistoryEntry(
 
     fun recordCompletion(time: Int, moves: Int, stars: Int): Boolean {
         completionCount++
-        lastCompletionTimestamp = System.currentTimeMillis()
+        lastCompletionTimestamp = TimeProvider.currentTimeMillis()
         playDuration += time
         // movesMade tracks the latest completion's move count
         movesMade = moves
@@ -109,8 +111,8 @@ class GameHistoryEntry(
         // Only set timestamps if hints were never used before
         // This ensures hints used before first solve permanently disqualify
         if (!everUsedHints) {
-            lastSolvedWithoutHints = System.currentTimeMillis()
-            if (optimal) lastPerfectlySolvedWithoutHints = System.currentTimeMillis()
+            lastSolvedWithoutHints = TimeProvider.currentTimeMillis()
+            if (optimal) lastPerfectlySolvedWithoutHints = TimeProvider.currentTimeMillis()
         }
     }
     fun markEverUsedHints() { everUsedHints = true }

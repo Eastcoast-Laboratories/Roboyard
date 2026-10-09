@@ -17,7 +17,11 @@
 package driftingdroids.model
 
 import roboyard.logic.core.Constants
+import kotlin.experimental.ExperimentalObjCRefinement
 import kotlin.math.min
+import kotlin.jvm.JvmField
+import kotlin.jvm.JvmStatic
+import kotlin.native.HiddenFromObjC
 
 /**
  * Quick check if puzzle is trivial (already solved or only 1 move needed)
@@ -927,6 +931,10 @@ class Board private constructor(val width: Int, val height: Int, numRobots: Int)
         val HEIGHT_STANDARD: Int = Constants.DEFAULT_BOARD_SIZE_Y
         const val HEIGHT_MIN: Int = 3
         const val HEIGHT_MAX: Int = 100
+        // HiddenFromObjC: SIZE_MAX clashes with the C macro from <stdint.h>
+        // in the generated framework header (preprocessor expands it).
+        @OptIn(ExperimentalObjCRefinement::class)
+        @HiddenFromObjC
         const val SIZE_MAX: Int = 4096 // 12 bits
         const val NUMROBOTS_STANDARD: Int = 4
 
@@ -1304,7 +1312,7 @@ class Board private constructor(val width: Int, val height: Int, numRobots: Int)
                 }
                 require(idStr.get(index++) == '+') { "missing '+' at index=" + (index - 1) }
                 var str = idStr.get(index++).toString()
-                str += idStr.get(index).toString()
+                str += idStr.get(index)!!.toString()
                 val goalPosition = str.toInt(16)
                 result = createBoardQuadrants(q0, q1, q2, q3, numRobots)
                 val successRobots = result.setRobots(robotPositions)

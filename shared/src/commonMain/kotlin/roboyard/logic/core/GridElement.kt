@@ -1,5 +1,7 @@
 package roboyard.logic.core
 
+import kotlin.jvm.JvmField
+
 
 /**
  * Represents a single element in the game grid (wall, robot, or target).
