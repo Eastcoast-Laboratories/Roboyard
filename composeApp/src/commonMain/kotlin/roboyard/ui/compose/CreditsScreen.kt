@@ -104,11 +104,11 @@ fun CreditsScreen(
             )
             LinkText("github.com/Eastcoast-Laboratories/Roboyard", urlOpensource)
 
-            // Version (matches version_format string; version from PlatformInfo)
+            // Version (matches version_format string; name+code from PlatformInfo)
             Text(
-                text = s("version_format", "Version: {0}")
+                text = s("version_format", "Version: {0} (Build {1})")
                     .replace("{0}", PlatformInfo.getAppVersionName())
-                    .replace("{1}", ""),
+                    .replace("{1}", PlatformInfo.getAppVersionCode().toString()),
                 color = Color.White,
                 fontSize = 14.sp,
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)

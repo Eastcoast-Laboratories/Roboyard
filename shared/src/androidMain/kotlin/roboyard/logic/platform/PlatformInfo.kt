@@ -52,6 +52,19 @@ actual object PlatformInfo {
 
     actual fun getAppVersionName(): String = cachedVersionName ?: "unknown"
 
+    actual fun getAppVersionCode(): Int = try {
+        val ctx = appContext ?: return -1
+        val info = ctx.packageManager.getPackageInfo(ctx.packageName, 0)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            info.longVersionCode.toInt()
+        } else {
+            @Suppress("DEPRECATION")
+            info.versionCode
+        }
+    } catch (e: Exception) {
+        -1
+    }
+
     actual fun isPlayGamesEnabled(): Boolean = cachedPlayGamesEnabled ?: false
 
     actual fun isMobile(): Boolean = true

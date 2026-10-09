@@ -22,6 +22,11 @@ expect object PlatformInfo {
     fun getAppVersionName(): String
 
     /**
+     * Get the app build/version code (e.g., 141), or -1 when unavailable.
+     */
+    fun getAppVersionCode(): Int
+
+    /**
      * Check if Google Play Games integration is enabled.
      */
     fun isPlayGamesEnabled(): Boolean

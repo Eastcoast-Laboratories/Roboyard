@@ -395,7 +395,6 @@ fun GameScreen(
     var lastCompletedLevelId by remember { mutableIntStateOf(-1) }
     var lastCompletedTime by remember { mutableLongStateOf(0L) }
     var lastAutoHintClickTime by remember { mutableLongStateOf(0L) }
-    var gameStartElapsed by remember(gameEpoch) { mutableLongStateOf(TimeProvider.currentTimeMillis()) }
     val liveCounterText by session.liveMoveCounterText.collectAsState()
     val liveSolverCalculating by session.liveSolverCalculating.collectAsState()
     val liveCounterDeviation by session.liveMoveCounterDeviation.collectAsState()
@@ -604,7 +603,7 @@ fun GameScreen(
         if (autosaveRunning) {
             while (autosaveRunning) {
                 delay(1000)
-                if (autosaveRunning &&
+                if (autosaveRunning && !session.timerPaused.value &&
                     System.currentTimeMillis() - lastAutosaveTime >= AUTOSAVE_INTERVAL_MS
                 ) {
                     // Android autosave(): skip level games (levelId > 0)
@@ -913,12 +912,13 @@ fun GameScreen(
         }
     }
 
-    // Timer effect - runs every 500ms when timer is enabled (matches Android)
+    // Timer effect - runs every 500ms when timer is enabled (matches Android);
+    // paused while the app is in the background (Android onPause -> stopTimer)
     LaunchedEffect(timerRunning) {
         if (timerRunning) {
             while (timerRunning) {
                 delay(500)
-                if (timerRunning) {
+                if (timerRunning && !session.timerPaused.value) {
                     elapsedTime += 500
                     // Session handles history threshold + view_1_hour achievement
                     session.updateGameTimer()
@@ -947,10 +947,32 @@ fun GameScreen(
         }
     }
 
-    // Start timer when game starts (on first move)
-    LaunchedEffect(moveCount) {
-        if (moveCount > 0 && !timerRunning && !gameWon) {
+    // Android initializeGame: the UI timer runs while a game is displayed, not
+    // only after the first move — resumed from uiTimerElapsedMs when it was
+    // running before a screen recreation and no new game was loaded, otherwise
+    // reset to 0:00 and started. Keyed on gameEpoch so a game swap that keeps
+    // currentState non-null (e.g. history next-game) still restarts the timer.
+    LaunchedEffect(gameEpoch, gameState != null) {
+        if (gameState != null && !gameWon && !timerRunning) {
+            if (!(session.wasUiTimerRunning() && !session.isNewGameLoaded)) {
+                session.resetUiTimer()
+                elapsedTime = 0
+            }
+            session.clearNewGameLoadedFlag()
             timerRunning = true
+        }
+    }
+
+    // Android isSolverRunning observer: resetAndStartTimer() whenever the solver
+    // finishes after accepting a (re)generated map — the timer restarts at 0:00
+    LaunchedEffect(isSolverRunning) {
+        if (!isSolverRunning && session.solutionWasAccepted()) {
+            session.clearSolutionAcceptedFlag()
+            session.resetUiTimer()
+            elapsedTime = 0
+            if (gameState != null && !gameWon) {
+                timerRunning = true
+            }
         }
     }
 
@@ -964,7 +986,8 @@ fun GameScreen(
             val state = session.currentState.value ?: return@LaunchedEffect
             val optimalMoves = sessionSolution?.moves?.size ?: session.lastSolutionMinMoves
             val hintsUsed = state.hintCount
-            val elapsed = TimeProvider.currentTimeMillis() - gameStartElapsed
+            // UI timer value = Android's SystemClock.elapsedRealtime() - startTime
+            val elapsed = elapsedTime
             hintContainerVisible = true
 
             if (isLevelGame && state.levelId > 0) {
@@ -1598,7 +1621,6 @@ fun GameScreen(
             hintMessage = null
             hintContainerVisible = false
             selectedRobotHasMoved = false
-            elapsedTime = 0
             // Android reset button: move sound + accessibility announcement
             soundManager.playSound("move")
             if (Preferences.accessibilityMode) {

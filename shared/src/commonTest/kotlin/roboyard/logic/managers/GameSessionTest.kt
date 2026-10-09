@@ -114,12 +114,14 @@ class GameSessionTest {
     /**
      * Map difficulty decision: inside the regeneration limit only the
      * configured range is accepted; past the limit generation continues until
-     * the map has at least min(10, configured minimum) optimal moves.
+     * the map has at least min(FALLBACK_MIN_SOLUTION_MOVES, configured
+     * minimum) optimal moves.
      */
     @Test
     fun test_evaluateGeneratedMap_fallbackRequiresMinimumMoves() {
         val within = 0
         val pastLimit = 100_000
+        val fb = GameSession.FALLBACK_MIN_SOLUTION_MOVES
         fun verdict(moves: Int, min: Int, max: Int, discarded: Int, trivial: Boolean = false) =
             GameSession.evaluateGeneratedMap(moves, trivial, min, max, discarded)
 
@@ -127,16 +129,17 @@ class GameSessionTest {
         assertEquals(GameSession.Companion.MapVerdict.DISCARD, verdict(12, 20, 99, within))
         assertEquals(GameSession.Companion.MapVerdict.DISCARD, verdict(0, 20, 99, within))
 
-        // Past the limit: below 10 moves keeps generating, 10+ is accepted as fallback
+        // Past the limit: below the fallback minimum keeps generating, at or
+        // above it the map is accepted as fallback
         assertEquals(GameSession.Companion.MapVerdict.DISCARD_BELOW_FALLBACK, verdict(2, 20, 99, pastLimit))
-        assertEquals(GameSession.Companion.MapVerdict.DISCARD_BELOW_FALLBACK, verdict(9, 20, 99, pastLimit))
+        assertEquals(GameSession.Companion.MapVerdict.DISCARD_BELOW_FALLBACK, verdict(fb - 1, 20, 99, pastLimit))
         assertEquals(GameSession.Companion.MapVerdict.DISCARD_BELOW_FALLBACK, verdict(0, 20, 99, pastLimit))
-        assertEquals(GameSession.Companion.MapVerdict.ACCEPT_FALLBACK, verdict(10, 20, 99, pastLimit))
+        assertEquals(GameSession.Companion.MapVerdict.ACCEPT_FALLBACK, verdict(fb, 20, 99, pastLimit))
         assertEquals(GameSession.Companion.MapVerdict.ACCEPT, verdict(20, 20, 99, pastLimit))
 
         // Too hard past the limit is accepted as fallback (any maximum)
-        assertEquals(GameSession.Companion.MapVerdict.ACCEPT_FALLBACK, verdict(14, 5, 8, pastLimit))
-        // Configured minimum below 10 caps the fallback minimum (6 here)
+        assertEquals(GameSession.Companion.MapVerdict.ACCEPT_FALLBACK, verdict(fb + 1, 5, 8, pastLimit))
+        // Configured minimum below the fallback minimum caps it (6 here)
         assertEquals(GameSession.Companion.MapVerdict.ACCEPT_FALLBACK, verdict(9, 6, 8, pastLimit))
         assertEquals(GameSession.Companion.MapVerdict.DISCARD_BELOW_FALLBACK, verdict(5, 6, 8, pastLimit))
         // A trivial one-move solution is never accepted by generation

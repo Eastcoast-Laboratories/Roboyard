@@ -34,6 +34,14 @@ actual object PlatformInfo {
         }
     }
 
+    actual fun getAppVersionCode(): Int {
+        return try {
+            (NSBundle.mainBundle.infoDictionary?.get("CFBundleVersion") as? String)?.toIntOrNull() ?: -1
+        } catch (e: Exception) {
+            -1
+        }
+    }
+
     actual fun isPlayGamesEnabled(): Boolean = false
 
     actual fun isMobile(): Boolean = true

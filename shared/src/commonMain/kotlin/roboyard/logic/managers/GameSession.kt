@@ -1765,12 +1765,17 @@ class GameSession(
         this.isNewGameLoaded = false
     }
 
+    private val _timerPaused = MutableStateFlow(false)
+
+    /** True while the platform reports the app as paused (Android onPause, desktop window unfocused). */
+    val timerPaused: StateFlow<Boolean> = _timerPaused
+
     fun pauseTimer() {
-        // Timer pause is handled by the platform screen
+        _timerPaused.value = true
     }
 
     fun resumeTimer() {
-        // Timer resume is handled by the platform screen
+        _timerPaused.value = false
     }
 
     fun clearNewGameLoadedFlag() {
@@ -3352,7 +3357,7 @@ class GameSession(
          * Minimum optimal solution length a map must reach once
          * [MAX_AUTO_REGENERATIONS] is exhausted (capped by the configured minimum).
          */
-        private const val FALLBACK_MIN_SOLUTION_MOVES = 19
+        internal const val FALLBACK_MIN_SOLUTION_MOVES = 19
 
         /** Outcome of the difficulty check of one generated map. */
         internal enum class MapVerdict { ACCEPT, DISCARD, DISCARD_BELOW_FALLBACK, ACCEPT_FALLBACK }
