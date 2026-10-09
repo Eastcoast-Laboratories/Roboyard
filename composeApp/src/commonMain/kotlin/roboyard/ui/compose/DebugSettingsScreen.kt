@@ -1,5 +1,6 @@
 package roboyard.ui.compose
 
+import driftingdroids.model.TimeProvider
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -280,11 +281,15 @@ fun DebugSettingsScreen(
                     .background(Color(0xFF2a2a2a))
                     .padding(8.dp)
             ) {
-                val runtime = Runtime.getRuntime()
-                val usedMemory = (runtime.totalMemory() - runtime.freeMemory()) / 1024 / 1024
-                val maxMemory = runtime.maxMemory() / 1024 / 1024
+                val memStats = platformMemoryStatsMb()
                 Text(
-                    "Total Memory: $usedMemory MB / $maxMemory MB (%.1f%%)".format(usedMemory * 100.0 / maxMemory),
+                    if (memStats != null) {
+                        val (usedMemory, maxMemory) = memStats
+                        val pctTenths = if (maxMemory > 0) usedMemory * 1000 / maxMemory else 0
+                        "Total Memory: $usedMemory MB / $maxMemory MB (${pctTenths / 10}.${pctTenths % 10}%)"
+                    } else {
+                        "Total Memory: unavailable on this platform"
+                    },
                     color = Color.White, fontSize = 14.sp,
                     modifier = Modifier.padding(vertical = 2.dp)
                 )
@@ -441,17 +446,11 @@ fun DebugSettingsScreen(
                 color = FancyButtonColor.RED,
                 onClick = {
                     toast("Restarting app...")
-                    // Desktop: relaunch the JVM process
+                    // Relaunch via platform helper (JVM respawn on desktop)
                     scope.launch {
                         delay(500)
                         try {
-                            val javaBin = System.getProperty("java.home") + "/bin/java"
-                            val cmd = arrayListOf(
-                                javaBin, "-cp", System.getProperty("java.class.path"),
-                                "roboyard.MainKt"
-                            )
-                            ProcessBuilder(cmd).start()
-                            kotlin.system.exitProcess(0)
+                            platformRestartApp()
                         } catch (e: Exception) {
                             println("[DEBUG] Restart failed: ${e.message}")
                         }
@@ -644,7 +643,7 @@ private fun addDummyHistoryEntries(
         val entry = GameHistoryEntry()
         entry.setMapPath(storage.getFilePath(fileName))
         entry.mapName = "Test$currentTestNumber"
-        entry.timestamp = System.currentTimeMillis() - (i * 60000L)
+        entry.timestamp = TimeProvider.currentTimeMillis() - (i * 60000L)
         entry.playDuration = (30..330).random()
         entry.movesMade = (10..60).random()
         entry.optimalMoves = (5..35).random()

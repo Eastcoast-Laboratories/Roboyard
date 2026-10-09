@@ -3,6 +3,7 @@ package roboyard.ui.compose
 import driftingdroids.model.Board
 import roboyard.logic.core.GridElement
 import roboyard.logic.storage.PlatformStorage
+import kotlin.math.abs
 
 /**
  * Converts a GridElement list (from GameLogic) to a Board instance.
@@ -220,8 +221,7 @@ fun generateMapSignature(board: Board, startBoard: Board? = null): String {
 fun generateUnique5LetterFromString(input: String): String {
     try {
         // Create SHA-256 hash
-        val digest = java.security.MessageDigest.getInstance("SHA-256")
-        val hashBytes = digest.digest(input.toByteArray())
+        val hashBytes = platformSha256(input.encodeToByteArray())
         
         // Define vowels and consonants
         val vowels = charArrayOf('A', 'E', 'I', 'O', 'U')
@@ -230,7 +230,7 @@ fun generateUnique5LetterFromString(input: String): String {
         // Convert hash bytes to 5-letter string, alternating between consonants and vowels
         val uniqueString = StringBuilder()
         for (i in 0 until 5) {
-            val index = Math.abs(hashBytes[i].toInt()) % (if (i % 2 == 0) consonants.size else vowels.size)
+            val index = abs(hashBytes[i].toInt()) % (if (i % 2 == 0) consonants.size else vowels.size)
             val letter = if (i % 2 == 0) consonants[index] else vowels[index]
             uniqueString.append(letter)
         }

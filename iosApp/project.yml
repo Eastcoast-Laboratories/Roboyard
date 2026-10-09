@@ -1,0 +1,39 @@
+name: iosApp
+options:
+  bundleIdPrefix: de.z11
+targets:
+  iosApp:
+    type: application
+    platform: iOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: iosApp
+    preBuildScripts:
+      - name: Compile Kotlin framework
+        script: |
+          export JAVA_HOME="$HOME/devtools/jdk-17/Contents/Home"
+          export ANDROID_HOME="$HOME/devtools/Android/sdk"
+          cd "$SRCROOT/.."
+          ./gradlew :composeApp:embedAndSignAppleFrameworkForXcode
+        basedOnDependencyAnalysis: false
+    dependencies:
+      - framework: ../composeApp/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)/Roboyard.framework
+        embed: true
+    settings:
+      base:
+        PRODUCT_NAME: iosApp
+        PRODUCT_BUNDLE_IDENTIFIER: de.z11.roboyard
+        MARKETING_VERSION: "53"
+        CURRENT_PROJECT_VERSION: "141"
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: iosApp/Info.plist
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_VERSION: "5.0"
+        # The KMP Roboyard.framework is embedded via @rpath — without this
+        # entry dyld cannot find it and the app aborts at launch.
+        LD_RUNPATH_SEARCH_PATHS:
+          - "$(inherited)"
+          - "@executable_path/Frameworks"
+        # KMP ships only iosSimulatorArm64 — no x86_64 simulator slice exists,
+        # so the simulator SDK must not try to build an Intel binary.
+        EXCLUDED_ARCHS[sdk=iphonesimulator*]: x86_64
