@@ -119,3 +119,6 @@
 26-10-09 13:45 "commit the intermediate state in sensible packages; also keep in mind we still need to build the Capacitor apps Lalumo (/var/www/Musici) and CaveShuttle (/var/www/CaveShuttle) on the mac mini, projects are very similar to Roboyard; then continue until Roboyard for iOS is fully built"
 26-10-09 14:52 "mache einen prompt fertig, um in der caveshuttle ki session für die app alles zusammen zu haben"
 26-10-09 14:55 "/var/tmp/mac-mini-passwort.txt"
+26-10-09 17:30 "erstelle einen skill aus dem bisher gelernten wie man die capacitor app anpassen muss für ios und was die fallstricke sind beim bauen auf dem imac in der cloud — muss alles beinhalten was ein anderer agent wissen muss um caveshuttle und lalumo für ios zu verkaufen; plan in /var/www/CaveShuttle/dev/plans/; parallel zu roboyard? dann fahre sofort fort"
+26-10-09 18:00 "mache weiter — ich brauche eine installierbare version gebaut mit dev/build_composeapp (läuft im hintergrund), warte bis fertig, checke ob alles baut, und ich brauche ein installierbares paket auf meinem iphone zum testen; erweitere bei bedarf den skill"
+26-10-09 18:50 "da ist gar nichts im git unstaged, ist das ignored? bitte mach den commit selbst, aber die builds nicht mit committen"
