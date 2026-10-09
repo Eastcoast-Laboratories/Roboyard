@@ -1883,14 +1883,20 @@ public class GameGridView extends View {
         if (gameStateManager == null) return;
         
         ArrayList<int[]> pathHistory = gameStateManager.pathHistory;
-        if (pathHistory.isEmpty()) return;
         
-        // Clear current paths but keep the history
+        // Clear current paths but keep the history. An empty history
+        // legitimately means "no trails", so clearing must not be skipped —
+        // otherwise trails from a previous game would keep rendering.
         robotPaths.clear();
         robotBaseOffsets.clear();
         segmentCounts.clear();
         visitedSquaresPerRobot.clear();
         visitedSquaresAllRobots.clear();
+        
+        if (pathHistory.isEmpty()) {
+            invalidate();
+            return;
+        }
         
         // Reconstruct paths from history
         for (int[] entry : pathHistory) {
