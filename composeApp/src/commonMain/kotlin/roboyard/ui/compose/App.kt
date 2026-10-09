@@ -19,6 +19,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import roboyard.logic.core.GameState
 import roboyard.logic.managers.GameSession
 import roboyard.logic.managers.SyncManager
 import roboyard.logic.network.RoboyardApiClient
@@ -40,6 +41,8 @@ fun App(
     var showAuthDialog by remember { mutableStateOf(false) }
     var authRefresh by remember { mutableStateOf(0) }
     var saveLoadMode by remember { mutableStateOf(false) } // true = save mode, false = load mode
+    // Screen the level editor returns to on Back (Android fragment back-stack parity)
+    var editorBackTarget by remember { mutableStateOf<Screen>(Screen.LevelSelection) }
 
     val storage = getPlatformStorage()
     val stringProvider = getStringProvider()
@@ -47,6 +50,16 @@ fun App(
     // Single shared game session for the whole app (mirrors Android GameStateManager)
     val appScope = rememberCoroutineScope()
     val session = remember { externalSession ?: GameSession(storage, appScope) }
+
+    // Installs a custom/editor map and opens the game screen (Android editor
+    // parity: playCurrentMap() launches the map via the /open deep link, which
+    // resolves to the same setGameState + Game navigation)
+    val openCustomMap: (GameState) -> Unit = { state ->
+        session.setGameState(state)
+        isLevelGame = false
+        isLoadedGame = false
+        currentScreen = Screen.Game
+    }
 
     // UiNotifier (Android Toast parity): one Compose notifier shared by
     // GameSession and AchievementManager so messages surface as toasts
@@ -78,10 +91,7 @@ fun App(
         val url = pendingDeepLink ?: return@LaunchedEffect
         when (val result = roboyard.logic.network.DeepLinkHandler.parse(url)) {
             is roboyard.logic.network.DeepLinkHandler.DeepLinkResult.Map -> {
-                session.setGameState(result.gameState)
-                isLevelGame = false
-                isLoadedGame = false
-                currentScreen = Screen.Game
+                openCustomMap(result.gameState)
             }
             is roboyard.logic.network.DeepLinkHandler.DeepLinkResult.Random -> {
                 session.startNewGame()
@@ -162,6 +172,7 @@ fun App(
                         currentScreen = Screen.Achievements
                     },
                     onLevelEditor = {
+                        editorBackTarget = Screen.MainMenu
                         currentScreen = Screen.LevelDesignEditor
                     },
                     onProfile = openProfilePage,
@@ -212,6 +223,7 @@ fun App(
                         onProfile = openProfilePage,
                         profileInitial = profileInitial,
                         onLevelEditor = {
+                            editorBackTarget = Screen.LevelSelection
                             currentScreen = Screen.LevelDesignEditor
                         }
                     )
@@ -233,14 +245,10 @@ fun App(
                             currentScreen = Screen.Settings
                         },
                         onOpenLevelEditor = {
+                            editorBackTarget = Screen.DebugSettings
                             currentScreen = Screen.LevelDesignEditor
                         },
-                        onApplyDeepLinkState = { state ->
-                            session.setGameState(state)
-                            isLevelGame = false
-                            isLoadedGame = false
-                            currentScreen = Screen.Game
-                        },
+                        onApplyDeepLinkState = openCustomMap,
                         onStartRandomGame = {
                             session.startNewGame()
                             isLevelGame = false
@@ -252,8 +260,9 @@ fun App(
                 Screen.LevelDesignEditor -> {
                     LevelDesignEditorScreen(
                         onBack = {
-                            currentScreen = Screen.MainMenu
-                        }
+                            currentScreen = editorBackTarget
+                        },
+                        onPlayMap = openCustomMap
                     )
                 }
                 Screen.Help -> {
