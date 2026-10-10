@@ -384,7 +384,7 @@ Use these tags to find tests relevant to a specific feature:
 |-----------|------|--------|-------------|------|
 | `ExtendedLoginTest` | Unit | ✅ Passing | Extended login functionality: email, username, user ID, and unique email prefix login. Tests all login methods and validation for ambiguous prefixes. | laravel, backend, login, authentication, api |
 | `WebLoginTest` | Unit | ✅ Passing | Web interface login with extended identifier types: email, username, user ID, and unique email prefix. Tests web form authentication with all supported login methods. | laravel, backend, login, authentication, web |
-| `RealUser3LoginTest` | Integration | ✅ Passing | Real database login test with User 3 using password 'secureRoboyardAdminPass123'. Tests actual database user authentication with all identifier types. | laravel, backend, login, authentication, integration |
+| `RealUser3LoginTest` | Integration | ✅ Passing | Real database login test with User 3 using the test password stored as TEST_USER3_PASSWORD in dev/.env. Tests actual database user authentication with all identifier types. | laravel, backend, login, authentication, integration |
 | `AchievementStatsTest` | Unit | ✅ Passing | Achievement stats query with deleted_at column support. Tests database queries that were failing due to missing deleted_at column in user_achievement_stats table. | laravel, backend, database, achievements |
 | `AchievementRankingTest` | Unit | ✅ Passing | Achievement ranking page with ambiguous deleted_at column fix. Tests /rankings/achievements/{achievementId} endpoint with proper table prefixes for deleted_at columns. | laravel, backend, database, rankings |
 
