@@ -819,4 +819,16 @@
     <string name="help_level_editor_description">Una vez que hayas desbloqueado todos los 140 niveles, aparecerá un botón de Editor de Niveles en el menú principal. ¡Crea tus propios mapas y compártelos con tus amigos!</string>
     <string name="button_back_game">Atrás</string>
 
+    <string name="level_design_editor">Editor de niveles</string>
+    <string name="yes">Sí</string>
+    <string name="no">No</string>
+    <string name="cancel">Cancelar</string>
+    <string name="delete_button_a11y">Eliminar entrada del historial</string>
+    <string name="no_history_entries">Sin entradas de historial</string>
+    <string name="history_delete_failed">Error al eliminar la entrada</string>
+    <string name="standard_levels">Niveles estándar</string>
+    <string name="custom_levels">Niveles personalizados</string>
+    <string name="level_card_a11y">Nivel %1$d</string>
+    <string name="settings_export_to_file">Guardar en archivo</string>
+    <string name="settings_import_from_file">Cargar desde archivo</string>
 </resources>

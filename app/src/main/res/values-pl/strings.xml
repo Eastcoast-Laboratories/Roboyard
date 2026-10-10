@@ -830,4 +830,16 @@
     
     <!-- Empty text placeholder used in layouts -->
     <string name="empty_text" comment="Empty text placeholder"></string>
+    <string name="level_design_editor">Edytor poziomów</string>
+    <string name="yes">Tak</string>
+    <string name="no">Nie</string>
+    <string name="cancel">Anuluj</string>
+    <string name="delete_button_a11y">Usuń wpis historii</string>
+    <string name="no_history_entries">Brak wpisów historii</string>
+    <string name="history_delete_failed">Nie udało się usunąć wpisu</string>
+    <string name="standard_levels">Poziomy standardowe</string>
+    <string name="custom_levels">Poziomy niestandardowe</string>
+    <string name="level_card_a11y">Poziom %1$d</string>
+    <string name="settings_export_to_file">Zapisz do pliku</string>
+    <string name="settings_import_from_file">Wczytaj z pliku</string>
 </resources>

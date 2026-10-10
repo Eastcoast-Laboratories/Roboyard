@@ -84,6 +84,20 @@ kotlin {
     }
 }
 
+// strings.json (Desktop/iOS texts) is generated from the Android string
+// resources (single source of truth: app/src/main/res/values*/strings.xml).
+def generateStringsJson = tasks.register('generateStringsJson', Exec) {
+    description = 'Generates strings/strings.json from the Android strings.xml files'
+    def script = rootProject.file('dev/scripts/sync_strings_json.py')
+    inputs.files(fileTree(rootProject.file('app/src/main/res')) { include 'values*/strings.xml' })
+    inputs.file(script)
+    outputs.file(file('src/commonMain/resources/strings/strings.json'))
+    commandLine 'python3', script.absolutePath
+}
+tasks.matching { it.name.endsWith('ProcessResources') || it.name.endsWith('JavaRes') }.configureEach {
+    dependsOn generateStringsJson
+}
+
 compose.desktop {
     application {
         mainClass = 'roboyard.MainKt'

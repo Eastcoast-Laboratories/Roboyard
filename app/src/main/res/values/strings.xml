@@ -839,4 +839,16 @@
     
     <!-- Empty text placeholder used in layouts -->
     <string name="empty_text" comment="Empty text placeholder" translatable="false"></string>
+    <string name="level_design_editor">Level Design Editor</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete_button_a11y">Delete history entry</string>
+    <string name="no_history_entries">No history entries yet</string>
+    <string name="history_delete_failed">Failed to delete history entry</string>
+    <string name="standard_levels">Standard Levels</string>
+    <string name="custom_levels">Custom Levels</string>
+    <string name="level_card_a11y">Level %1$d</string>
+    <string name="settings_export_to_file">Save to File</string>
+    <string name="settings_import_from_file">Load from File</string>
 </resources>

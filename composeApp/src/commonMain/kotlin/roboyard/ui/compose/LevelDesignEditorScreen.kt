@@ -486,7 +486,7 @@ fun LevelDesignEditorScreen(
 
             // Level selector
             EditorDropdownRow(
-                label = s("editor_select_level", "Select Level: "),
+                label = s("editor_select_level", "Select Level:"),
                 options = levelOptions.map { it.first },
                 selected = selectedLevelLabel.ifEmpty { levelOptions.firstOrNull()?.first ?: "" },
                 onSelect = { label ->
@@ -512,7 +512,7 @@ fun LevelDesignEditorScreen(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(s("editor_board_size", "Board Size: "), color = Color.White, fontSize = 14.sp)
+                Text(s("editor_board_size", "Board Size:"), color = Color.White, fontSize = 14.sp, modifier = Modifier.padding(end = 4.dp))
                 TextField(
                     value = boardWidthText,
                     onValueChange = { boardWidthText = it.filter(Char::isDigit).take(2) },
@@ -942,7 +942,7 @@ private fun EditorDropdownRow(
         modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (label.isNotEmpty()) Text(label, color = Color.White, fontSize = 14.sp)
+        if (label.isNotEmpty()) Text(label, color = Color.White, fontSize = 14.sp, modifier = Modifier.padding(end = 4.dp))
         Box {
             Text(
                 text = selected,

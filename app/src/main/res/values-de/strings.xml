@@ -821,4 +821,16 @@
     <string name="settings_logging_out">Abmelden…</string>
     <string name="needs_update_toast">Ihre App benötigt ein Update, um diese Funktion zu verwenden.</string>
     <string name="deeplink_map_too_large">Diese Karte ist zu groß zum Öffnen (Größenlimits überschritten).</string>
+    <string name="level_design_editor">Level-Editor</string>
+    <string name="yes">Ja</string>
+    <string name="no">Nein</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="delete_button_a11y">Verlaufseintrag löschen</string>
+    <string name="no_history_entries">Noch keine Verlaufseinträge</string>
+    <string name="history_delete_failed">Verlaufseintrag konnte nicht gelöscht werden</string>
+    <string name="standard_levels">Standard-Level</string>
+    <string name="custom_levels">Eigene Level</string>
+    <string name="level_card_a11y">Level %1$d</string>
+    <string name="settings_export_to_file">In Datei speichern</string>
+    <string name="settings_import_from_file">Aus Datei laden</string>
 </resources>

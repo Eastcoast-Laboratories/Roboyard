@@ -33,10 +33,11 @@
 
 - `dev/achievements.md` is the source of truth for achievement definitions — keep it synchronized with `shared/src/commonMain/kotlin/roboyard/logic/achievements/AchievementDefinitions.kt` when changing the achievement system.
 - `dev/TESTSUITE.md` is the source of truth for the test suite status.
+- All UI texts live only in the Android `app/src/main/res/values*/strings.xml` files. `composeApp/src/commonMain/resources/strings/strings.json` is generated from them by `dev/scripts/sync_strings_json.py` (Gradle task `:composeApp:generateStringsJson`, runs before every composeApp resource step) — never edit the JSON by hand.
 
 ## Deployment
 
-- The production community site is deployed via rsync using `/var/www/roboyard.z11/deploy-watch.sh` to `eclabs-vm06:/var/kunden/webs/z11/roboyard.z11.de` — it is **not** managed by git on the server.
+- The production community site is deployed via rsync to the production server — it is **not** managed by git on the server. Deploy script, host and remote path live in `dev/.env` (gitignored, template `dev/.env.example`) as `DEPLOY_SCRIPT`, `DEPLOY_HOST`, `DEPLOY_REMOTE_PATH`.
 - The same community site also serves `caveshuttle.z11.de` via different deploy paths — make sure you touch the right files for the right app.
 - Workflow: test locally → deploy → test online → only then commit.
 - Never change anything on production without an explicit user command: no git operations on the server, no DELETEs, no table drops, no data manipulation. Always ask first.

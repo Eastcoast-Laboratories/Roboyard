@@ -725,4 +725,16 @@
     <string name="settings_hint_auto_move_semi_auto">Semi-automatique (déplacement sur bouton indice suivant)</string>
     <string name="settings_hint_auto_move_semi_auto_a11y">Mode semi-automatique: le robot se déplace quand vous cliquez sur le bouton indice suivant</string>
     <string name="map_dimensions_mismatch">Les dimensions de la carte %1$dx%2$d ne correspondent pas aux paramètres %3$dx%4$d - génération de nouveaux murs</string>
+    <string name="level_design_editor">Éditeur de niveaux</string>
+    <string name="yes">Oui</string>
+    <string name="no">Non</string>
+    <string name="cancel">Annuler</string>
+    <string name="delete_button_a11y">Supprimer l\'entrée d\'historique</string>
+    <string name="no_history_entries">Aucune entrée d\'historique</string>
+    <string name="history_delete_failed">Échec de la suppression</string>
+    <string name="standard_levels">Niveaux standard</string>
+    <string name="custom_levels">Niveaux personnalisés</string>
+    <string name="level_card_a11y">Niveau %1$d</string>
+    <string name="settings_export_to_file">Enregistrer dans un fichier</string>
+    <string name="settings_import_from_file">Charger depuis un fichier</string>
 </resources>

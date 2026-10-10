@@ -810,4 +810,16 @@
     <string name="pre_hint_less_than_1">您找到了比A.I.更好的解决方案！</string>
     <string name="pre_hint_exact_solution">A.I.在%1$d步中找到了解决方案</string>
 
+    <string name="level_design_editor">关卡编辑器</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
+    <string name="cancel">取消</string>
+    <string name="delete_button_a11y">删除历史记录</string>
+    <string name="no_history_entries">暂无历史记录</string>
+    <string name="history_delete_failed">删除历史记录失败</string>
+    <string name="standard_levels">标准关卡</string>
+    <string name="custom_levels">自定义关卡</string>
+    <string name="level_card_a11y">关卡 %1$d</string>
+    <string name="settings_export_to_file">保存到文件</string>
+    <string name="settings_import_from_file">从文件加载</string>
 </resources>

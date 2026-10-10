@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
-"""Sync missing <string> entries from the Android strings.xml files into
-composeApp/src/commonMain/resources/strings/strings.json.
+"""Generate composeApp/src/commonMain/resources/strings/strings.json from the
+Android strings.xml files (app/src/main/res/values*/strings.xml).
 
-Android format args (%1$s, %2$d, ...) are converted to the JSON convention
-({0}, {1}, ...). Existing JSON entries are never overwritten — the JSON is
-the hand-maintained source for Compose, this only fills gaps.
+The Android strings.xml files are the single source of truth for all texts;
+the JSON is fully regenerated on every run and must never be edited by hand.
+It runs automatically before every composeApp resource processing step
+(Gradle task :composeApp:generateStringsJson).
 
-Run: python3 dev/scripts/sync_strings_json.py
+Android format args are converted to the JSON convention: positional
+%1$s/%2$d/... become {0}/{1}/..., non-positional %s/%d are numbered in order.
+JSON has no comments, so the generated file starts with a "_comment" object
+(an object, because the desktop parser expects locale -> object entries).
+
+Run manually: python3 dev/scripts/sync_strings_json.py
 """
 import json
 import re
@@ -21,22 +27,34 @@ JSON_PATH = REPO / "composeApp/src/commonMain/resources/strings/strings.json"
 LOCALE_DIRS = {
     "values": "en",
     "values-de": "de",
-    "values-es": "es",
     "values-fr": "fr",
-    "values-ja": "ja",
-    "values-ko": "ko",
-    "values-pl": "pl",
-    "values-pt-rBR": "pt",
+    "values-es": "es",
     "values-zh": "zh",
+    "values-ko": "ko",
+    "values-ja": "ja",
+    "values-pt-rBR": "pt",
+    "values-pl": "pl",
 }
 
-FORMAT_ARG = re.compile(r"%(\d+)\$[sdfoxeg]")
+COMMENT = {
+    "warning": "AUTO-GENERATED from app/src/main/res/values*/strings.xml by "
+               "dev/scripts/sync_strings_json.py - DO NOT EDIT. Change the Android "
+               "strings.xml files instead; this file is regenerated on every build."
+}
+
+FORMAT_ARG = re.compile(r"%(?:(\d+)\$)?[sdfoxeg]")
 
 
 def android_to_json(value: str) -> str:
-    """Unescape Android string escapes and convert %N$x args to {N-1}."""
+    """Unescape Android string escapes and convert format args to {N}."""
     value = value.replace("\\'", "'").replace('\\"', '"').replace("\\\\", "\\")
-    return FORMAT_ARG.sub(lambda m: "{%d}" % (int(m.group(1)) - 1), value)
+    counter = iter(range(1000))
+
+    def convert(m: re.Match) -> str:
+        index = int(m.group(1)) - 1 if m.group(1) else next(counter)
+        return "{%d}" % index
+
+    return FORMAT_ARG.sub(convert, value)
 
 
 def load_xml_strings(xml_path: Path) -> dict:
@@ -50,26 +68,19 @@ def load_xml_strings(xml_path: Path) -> dict:
 
 
 def main() -> None:
-    data = json.loads(JSON_PATH.read_text(encoding="utf-8"))
-    total_added = 0
+    data = {"_comment": COMMENT}
     for res_dir, locale in LOCALE_DIRS.items():
         xml_path = RES / res_dir / "strings.xml"
         if not xml_path.exists():
-            print(f"SKIP {res_dir}: no strings.xml")
-            continue
-        xml_strings = load_xml_strings(xml_path)
-        existing = data.setdefault(locale, {})
-        added = 0
-        for name, value in xml_strings.items():
-            if name not in existing:
-                existing[name] = value
-                added += 1
-        total_added += added
-        print(f"{locale}: {added} added, {len(existing)} total")
-    JSON_PATH.write_text(
-        json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
-    print(f"Done: {total_added} keys added -> {JSON_PATH}")
+            raise SystemExit(f"[STRINGS_JSON] missing {xml_path}")
+        data[locale] = load_xml_strings(xml_path)
+        print(f"[STRINGS_JSON] {locale}: {len(data[locale])} strings")
+    content = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+    if JSON_PATH.exists() and JSON_PATH.read_text(encoding="utf-8") == content:
+        print(f"[STRINGS_JSON] up to date: {JSON_PATH}")
+        return
+    JSON_PATH.write_text(content, encoding="utf-8")
+    print(f"[STRINGS_JSON] written: {JSON_PATH}")
 
 
 if __name__ == "__main__":
