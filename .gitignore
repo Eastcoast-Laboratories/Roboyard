@@ -47,3 +47,4 @@ screenshot_*.png
 test_suite.cpython-*.pyc
 *_testsuite.cpython-*.pyc
 .idea/artifacts/shared.xml
+dev/xcode/
