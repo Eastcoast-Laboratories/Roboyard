@@ -141,3 +141,9 @@ dev/prompts/ios-app-icon.md)
 
 
 26-10-11 09:20 "ok, now the only remaining bug is that on iOS the new game button in the second row doesn't disappear when the big one appears below at level complete — we had that problem before when coming from a history entry, but it was actually fixed; look at the last commits where it was fixed — probably it was not fixed in shared but in an Android-only path? if so, make it DRY"
+
+26-10-11 09:55 "build a new testflight when the mac is free"
+
+26-10-11 09:58 "that was the lalumo build running — I meant check first whether any other devin process is running before you do anything on the mac / continue — does something need to go into the test file because of your side finding?"
+
+26-10-11 10:20 "remember in the global mac skill: always check first whether any other devin process is running before you do anything on the mac"

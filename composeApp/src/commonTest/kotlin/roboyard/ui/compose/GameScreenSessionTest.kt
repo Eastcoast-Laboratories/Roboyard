@@ -14,6 +14,12 @@ import org.junit.Test
  * renders (i.e. it does not stay stuck on the "Calculating..." state).
  * `waitUntil` throws on timeout, so a passing test means the game UI appeared.
  *
+ * The test runs against the real ~/.roboyard profile (autosave, history
+ * entries, auth token). With a large real profile, startup work competes
+ * with the test's virtual clock and the 60s wait can time out before the
+ * real-time solver finishes — a timeout here does not prove a regression
+ * unless it reproduces with a clean profile.
+ *
  * Run: ./gradlew :composeApp:desktopTest --tests "roboyard.ui.compose.GameScreenSessionTest"
  */
 class GameScreenSessionTest {
