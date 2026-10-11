@@ -1,4 +1,5 @@
 - Next Level button in game
 - History tab: gold-framed map previews with 0-3 stars
 - New/Next/Back buttons: no Long-Press needed during the first 20s after a map starts
+- Fixed a crash that could occur when device memory was full
 - Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md

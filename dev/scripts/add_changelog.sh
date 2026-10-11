@@ -69,6 +69,7 @@ DE_CHANGES=$(cat << EOF
 - Next-Level-Button im Spiel
 - Verlauf-Tab: Karten-Vorschau im Goldrahmen mit 0-3 Sternen
 - New/Next/Back-Buttons: in den ersten 20s nach Kartenstart ist kein Long-Press nötig
+- Absturz behoben, der bei vollem Gerätespeicher auftreten konnte
 EOF
 )
 
@@ -77,6 +78,7 @@ EN_CHANGES=$(cat << EOF
 - Next Level button in game
 - History tab: gold-framed map previews with 0-3 stars
 - New/Next/Back buttons: no Long-Press needed during the first 20s after a map starts
+- Fixed a crash that could occur when device memory was full
 EOF
 )
 
@@ -97,12 +99,28 @@ EOF
 # Play Store has a limit of 500 characters
 PLAYSTORE_DE_DE=$(cat << EOF
 <de-DE>
+- Next-Level-Button im Spiel
+- Verlauf-Tab: Karten-Vorschau mit 0-3 Sternen
+- Absturz bei vollem Gerätespeicher behoben
+- Speichern & Autosave funktionierten nicht mehr
+- Roboter-Spuren blieben sichtbar
+- Karte-speichern-Button blieb deaktiviert
+- Karten passen zuverlässiger zur eingestellten Schwierigkeit
+- komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
 </de-DE>
 EOF
 )
 
 PLAYSTORE_EN_GB=$(cat << EOF
 <en-GB>
+- Next Level button in game
+- History tab: gold-framed map previews with 0-3 stars
+- Fixed crash when device memory was full
+- Fixed save/autosave failing silently
+- Fixed robot trails staying on new maps
+- Fixed save-map button staying disabled
+- Out-of-difficulty maps are now regenerated reliably
+- Full changelog on https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG.md
 </en-GB>
 EOF
 )

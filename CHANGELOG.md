@@ -2,10 +2,11 @@
 =========
 
 
-## Version 53 (141) - 2026-10-08
+## Version 53 (141) - 2026-10-11
 - Next Level button in game
 - History tab: gold-framed map previews with 0-3 stars
 - New/Next/Back buttons: no Long-Press needed during the first 20s after a map starts
+- Fixed a crash that could occur when device memory was full
 
 ## Version 52 (140) - 2026-05-28
 - Added long-press protection in game screen for New Game
