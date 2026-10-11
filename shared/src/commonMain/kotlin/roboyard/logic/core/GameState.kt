@@ -483,6 +483,15 @@ class GameState(
         // Calculate how many robots need to be at targets to win
         // If there are fewer targets than robotCount, we only need as many robots at targets as there are targets
         val requiredRobots = min(robotCount, targets.size)
+        if (requiredRobots < 1) {
+            // A game always has at least one target and robotCount >= 1 when
+            // Preferences is initialized; 0 would declare every move a win.
+            log.e(
+                "[GOAL DEBUG] Invalid win condition: requiredRobots=%d (robotCount=%d, targets=%d) — Preferences not initialized?",
+                requiredRobots, robotCount, targets.size
+            )
+            return false
+        }
 
 
         // Game is complete when the number of robots at targets matches the required count

@@ -30,7 +30,7 @@ targets:
         PRODUCT_NAME: iosApp
         PRODUCT_BUNDLE_IDENTIFIER: de.z11.roboyard
         MARKETING_VERSION: "53"
-        CURRENT_PROJECT_VERSION: "147"
+        CURRENT_PROJECT_VERSION: "148"
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_FILE: iosApp/Info.plist
         TARGETED_DEVICE_FAMILY: "1,2"
@@ -54,3 +54,37 @@ targets:
           CODE_SIGN_IDENTITY: "Apple Distribution"
           DEVELOPMENT_TEAM: SVFZHJF78U
           PROVISIONING_PROFILE_SPECIFIER: "Roboyard AppStore"
+  # Simulator-only UI tests driving the real app (see iosAppUITests/*.swift for
+  # the run command). Never archived — the iosApp scheme does not include it.
+  iosAppUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: iosAppUITests
+    dependencies:
+      - target: iosApp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: de.z11.roboyard.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_VERSION: "5.0"
+        EXCLUDED_ARCHS[sdk=iphonesimulator*]: x86_64
+schemes:
+  iosApp:
+    build:
+      targets:
+        iosApp: all
+    run:
+      config: Debug
+    archive:
+      config: Release
+  iosAppUITests:
+    build:
+      targets:
+        iosApp: all
+        iosAppUITests: [test]
+    test:
+      config: Debug
+      targets:
+        - iosAppUITests

@@ -209,7 +209,7 @@ fun MainMenuScreen(
                             text = stringProvider.getString("level_game") ?: "Level Game",
                             color = FancyButtonColor.BLUE,
                             onClick = onLevelSelection,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth().semantics { testTag = "levelGameButton" }
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                     }

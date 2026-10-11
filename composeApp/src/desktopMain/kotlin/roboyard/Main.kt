@@ -14,19 +14,12 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import java.time.OffsetDateTime
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import roboyard.ui.compose.App
-import roboyard.logic.achievements.AchievementManager
-import roboyard.logic.achievements.ApiAchievementSyncClient
-import roboyard.logic.core.Constants
+import roboyard.ui.compose.initAppServices
 import roboyard.logic.core.Preferences
 import roboyard.logic.core.ResourceLoader
 import roboyard.logic.audio.getSoundManager
-import roboyard.logic.managers.SyncHooks
-import roboyard.logic.managers.SyncManager
 import roboyard.logic.network.DesktopNetworkMonitor
-import roboyard.logic.network.RoboyardApiClient
 import roboyard.logic.storage.getPlatformStorage
 
 fun main(args: Array<String>) = application {
@@ -35,43 +28,13 @@ fun main(args: Array<String>) = application {
     val pendingDeepLink = args.firstOrNull()?.takeIf {
         roboyard.logic.network.DeepLinkHandler.isValidDeepLink(it)
     }
-    // Initialize Preferences with desktop storage
     val storage = getPlatformStorage()
-    Preferences.storageProvider = { storage }
-    Preferences.initialize(storage)
-
-    // Shared API client + sync manager (parity with Android ApiClientProvider)
-    val apiClient = RoboyardApiClient.getInstance(
-        storage,
-        CoroutineScope(Dispatchers.Default),
-        { "desktop" }
+    initAppServices(
+        storage = storage,
+        installSource = "desktop",
+        networkMonitorFactory = { baseUrl -> DesktopNetworkMonitor(baseUrl) },
+        parseIsoTimestamp = { iso -> OffsetDateTime.parse(iso).toInstant().toEpochMilli() }
     )
-    AchievementManager.getInstance(storage).syncClient = ApiAchievementSyncClient(apiClient)
-    val syncManager = SyncManager.getInstance(
-        storage,
-        DesktopNetworkMonitor { apiClient.baseUrl },
-        apiClient,
-        SyncHooks(
-            listSaveFileNames = { storage.listFilesInDir(Constants.SAVE_DIRECTORY) },
-            readMapAsset = { path ->
-                // "level_N.txt" -> bundled level content
-                path.removePrefix("level_").removeSuffix(".txt").toIntOrNull()
-                    ?.let { ResourceLoader.loadLevelContent(it) }
-            },
-            parseIsoTimestamp = { iso -> OffsetDateTime.parse(iso).toInstant().toEpochMilli() },
-            syncAchievementsToServer = { AchievementManager.getInstance(storage).syncToServer() }
-        )
-    )
-    // Android parity: MainActivity verifies the token and auto-syncs on resume;
-    // on desktop this happens once at startup.
-    apiClient.verifyToken(object : RoboyardApiClient.ApiCallback<Boolean?> {
-        override fun onSuccess(result: Boolean?) {}
-        override fun onError(error: String?) {}
-    })
-    syncManager.syncOnResume()
-
-    // Android parity: MainActivity starts the background music service at startup
-    getSoundManager().setBackgroundVolume(Preferences.backgroundSoundVolume)
 
     // Shared game session created here so the window-focus listener can drive
     // pauseTimer/resumeTimer like Android's MainActivity does on onPause/onResume

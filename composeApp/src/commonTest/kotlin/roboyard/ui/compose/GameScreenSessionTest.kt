@@ -3,7 +3,6 @@ package roboyard.ui.compose
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.junit4.createComposeRule
 import org.junit.Rule
@@ -39,7 +38,7 @@ class GameScreenSessionTest {
     fun testLevelGameRendersBoard() {
         composeRule.setContent { App() }
 
-        composeRule.onNodeWithText("Level Game").performClick()
+        composeRule.onNodeWithTag("levelGameButton").performClick()
         composeRule.waitUntil(timeoutMillis = 30_000) {
             composeRule.onAllNodesWithTag("levelItem_1").fetchSemanticsNodes().isNotEmpty()
         }
