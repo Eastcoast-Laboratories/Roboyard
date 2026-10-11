@@ -97,13 +97,22 @@ $RSYNC "$MAC_HOST":~/repos/Roboyard/iosApp/build/iosApp.xcarchive/ "$BACKUP/xcod
 $RSYNC "$MAC_HOST":~/repos/CaveShuttle/build/App.xcarchive/       "$BACKUP/xcode/CaveShuttle.xcarchive/"
 $RSYNC "$MAC_HOST":~/repos/Lalumo/build/App.xcarchive/            "$BACKUP/xcode/Lalumo.xcarchive/"
 mkdir -p "$BACKUP/xcode/ipa"
-$RSYNC "$MAC_HOST":~/repos/Roboyard/iosApp/build/ipa/iosApp.ipa   "$BACKUP/xcode/ipa/iosApp.ipa"
-$RSYNC "$MAC_HOST":~/repos/CaveShuttle/build/ios/CaveShuttle.ipa  "$BACKUP/xcode/ipa/CaveShuttle.ipa"
+# ExportOptions uses destination=upload, so a local .ipa only exists when an
+# export ran with destination=export; build/ is deleted before each re-archive.
+# The xcarchive above still covers the exact uploaded bits either way.
+if ssh -o ConnectTimeout=15 "$MAC_HOST" "test -f ~/repos/Roboyard/iosApp/build/ipa/iosApp.ipa"; then
+  $RSYNC "$MAC_HOST":~/repos/Roboyard/iosApp/build/ipa/iosApp.ipa   "$BACKUP/xcode/ipa/iosApp.ipa"
+else
+  echo "   (no Roboyard IPA on the Mac right now — skipped, xcarchive covers it)"
+fi
+if ssh -o ConnectTimeout=15 "$MAC_HOST" "test -f ~/repos/CaveShuttle/build/ios/CaveShuttle.ipa"; then
+  $RSYNC "$MAC_HOST":~/repos/CaveShuttle/build/ios/CaveShuttle.ipa  "$BACKUP/xcode/ipa/CaveShuttle.ipa"
+else
+  echo "   (no CaveShuttle IPA on the Mac right now — skipped, xcarchive covers it)"
+fi
 if ssh -o ConnectTimeout=15 "$MAC_HOST" "test -f ~/repos/Lalumo/build/ipa/App.ipa"; then
   $RSYNC "$MAC_HOST":~/repos/Lalumo/build/ipa/App.ipa             "$BACKUP/xcode/ipa/Lalumo.ipa"
 else
-  # build/ipa/ is deleted before each re-archive — if absent, the
-  # xcarchive above still covers the exact uploaded bits
   echo "   (no Lalumo IPA on the Mac right now — skipped, xcarchive covers it)"
 fi
 
