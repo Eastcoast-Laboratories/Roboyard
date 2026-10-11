@@ -8,6 +8,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import roboyard.logic.platform.DesktopStorage
 
 /**
  * UI smoke test for the ComposeApp.
@@ -30,16 +31,24 @@ class ComposeAppUiSmokeTest {
     @Test
     fun testMainMenuVisible() {
         composeRule.setContent { App() }
+        composeRule.dismissStreakPopupIfVisible()
 
-        // Main menu should show its three primary buttons (Android strings: Play / Levels / Load Game)
+        // Main menu should show its primary buttons (Android strings: Play /
+        // Levels / Load Game). Load Game is hidden without saved games —
+        // Android MainMenuFragment parity.
         composeRule.onNodeWithText("Play").assertExists()
         composeRule.onNodeWithText("Levels").assertExists()
-        composeRule.onNodeWithText("Load Game").assertExists()
+        if (DesktopStorage().hasSavedGames()) {
+            composeRule.onNodeWithText("Load Game").assertExists()
+        } else {
+            composeRule.onNodeWithText("Load Game").assertDoesNotExist()
+        }
     }
 
     @Test
     fun testNavigateToLevelSelection() {
         composeRule.setContent { App() }
+        composeRule.dismissStreakPopupIfVisible()
 
         composeRule.onNodeWithText("Levels").performClick()
         composeRule.waitForIdle()
@@ -51,6 +60,7 @@ class ComposeAppUiSmokeTest {
     @Test
     fun testNavigateToCredits() {
         composeRule.setContent { App() }
+        composeRule.dismissStreakPopupIfVisible()
 
         // Credits button has text "©"
         composeRule.onNodeWithText("©").performClick()
@@ -63,6 +73,7 @@ class ComposeAppUiSmokeTest {
     @Test
     fun testNavigateToCreditsAndBack() {
         composeRule.setContent { App() }
+        composeRule.dismissStreakPopupIfVisible()
 
         composeRule.onNodeWithText("©").performClick()
         composeRule.waitForIdle()
@@ -76,6 +87,7 @@ class ComposeAppUiSmokeTest {
     @Test
     fun testNavigateToSettingsShowsFullSettings() {
         composeRule.setContent { App() }
+        composeRule.dismissStreakPopupIfVisible()
 
         composeRule.onNodeWithTag("settingsButton").performClick()
         composeRule.waitForIdle()
