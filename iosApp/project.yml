@@ -30,7 +30,7 @@ targets:
         PRODUCT_NAME: iosApp
         PRODUCT_BUNDLE_IDENTIFIER: de.z11.roboyard
         MARKETING_VERSION: "53"
-        CURRENT_PROJECT_VERSION: "146"
+        CURRENT_PROJECT_VERSION: "147"
         GENERATE_INFOPLIST_FILE: NO
         INFOPLIST_FILE: iosApp/Info.plist
         TARGETED_DEVICE_FAMILY: "1,2"

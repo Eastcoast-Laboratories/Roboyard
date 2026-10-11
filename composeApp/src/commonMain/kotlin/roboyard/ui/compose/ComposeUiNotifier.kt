@@ -2,8 +2,7 @@ package roboyard.ui.compose
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -15,6 +14,8 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.MutableStateFlow
 
 import kotlinx.coroutines.flow.StateFlow
+import roboyard.logic.platform.PlatformInfo
+import roboyard.logic.platform.shareText
 import roboyard.logic.ui.UiNotifier
 
 /**
@@ -36,30 +37,31 @@ class ComposeUiNotifier : UiNotifier {
 
 
 /**
- * Log viewer dialog — desktop equivalent of Android's logcat viewer
- * (Settings "View Logs" button, last 500 lines via LogBuffer).
+ * Log viewer dialog — equivalent of Android's Settings "View Error Logs"
+ * logcat dialog (last 500 lines via LogBuffer), including its "Share" action
+ * for bug reports.
  */
 @Composable
 fun LogViewerDialog(onDismiss: () -> Unit) {
+    val lines = roboyard.logic.util.LogBuffer.getLines()
+    val report = buildLogReport(lines)
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Logs (last ${roboyard.logic.util.LogBuffer.getLines().size} lines)") },
+        title = { Text("Error Logs (last ${lines.size} lines)") },
         text = {
             Column(modifier = Modifier.desktopVerticalScroll()) {
-                val lines = roboyard.logic.util.LogBuffer.getLines()
                 if (lines.isEmpty()) {
                     Text("No log entries yet", color = Color.Gray, fontSize = 12.sp)
                 } else {
-                    Text(
-                        text = lines.joinToString("\n"),
-                        fontSize = 10.sp,
-                        fontFamily = FontFamily.Monospace
-                    )
+                    SelectionContainer {
+                        Text(text = report, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                    }
                 }
             }
         },
         confirmButton = {
             Row {
+                TextButton(onClick = { shareText("Roboyard Error Logs", report) }) { Text("Share") }
                 TextButton(onClick = {
                     roboyard.logic.util.LogBuffer.clear()
                     onDismiss()
@@ -68,4 +70,11 @@ fun LogViewerDialog(onDismiss: () -> Unit) {
             }
         }
     )
+}
+
+/** Log lines prefixed with app/OS version so shared reports identify the build. */
+private fun buildLogReport(lines: List<String>): String {
+    val header = "Roboyard ${PlatformInfo.getAppVersionName()} (${PlatformInfo.getAppVersionCode()}) " +
+        "on ${PlatformInfo.getOsVersionString()}"
+    return header + "\n\n" + lines.joinToString("\n")
 }

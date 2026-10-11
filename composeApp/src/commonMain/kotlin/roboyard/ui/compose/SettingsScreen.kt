@@ -527,9 +527,18 @@ private fun DataManagementSection(s: (String, String) -> String) {
     val scope = rememberCoroutineScope()
 
     SettingsLabel(s("settings_data_section", "Data Management"))
+    Text(
+        s("settings_data_description", "Export or import all your game data including preferences, achievements, level progress, and save games."),
+        color = DescriptionGray,
+        fontSize = 16.sp,
+        modifier = Modifier.padding(bottom = 8.dp)
+    )
 
-    Row(modifier = Modifier.padding(bottom = 8.dp)) {
-        Button(onClick = {
+    // Full-width stacked buttons like Android's fragment_settings data section;
+    // a single Row would push the trailing buttons off-screen on phones
+    val buttonModifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Button(modifier = buttonModifier, onClick = {
             exportedData = DataExportImportManager(storage).exportAllData()
             statusMessage = if (exportedData != null)
                 s("settings_export_success", "Data exported successfully")
@@ -538,35 +547,33 @@ private fun DataManagementSection(s: (String, String) -> String) {
         }) {
             Text(s("settings_export_data", "Export Data"))
         }
-        Spacer(modifier = Modifier.width(8.dp))
-        // Save export directly to a file via native dialog (desktop)
-        Button(onClick = {
-            val data = exportedData ?: DataExportImportManager(storage).exportAllData()
-            if (data == null) {
-                statusMessage = s("settings_export_failed", "Export failed: {0}").replace("{0}", "Unknown error")
-                return@Button
-            }
-            exportedData = data
-            scope.launch(kotlinx.coroutines.Dispatchers.Default) {
-                val ok = roboyard.logic.platform.saveTextToFileWithDialog(data, "roboyard-export.json")
-                if (ok) {
-                    statusMessage = s("settings_export_success", "Data exported successfully")
+        // Native save-file dialog only exists on desktop
+        if (!roboyard.logic.platform.PlatformInfo.isMobile()) {
+            Button(modifier = buttonModifier, onClick = {
+                val data = exportedData ?: DataExportImportManager(storage).exportAllData()
+                if (data == null) {
+                    statusMessage = s("settings_export_failed", "Export failed: {0}").replace("{0}", "Unknown error")
+                    return@Button
                 }
+                exportedData = data
+                scope.launch(kotlinx.coroutines.Dispatchers.Default) {
+                    val ok = roboyard.logic.platform.saveTextToFileWithDialog(data, "roboyard-export.json")
+                    if (ok) {
+                        statusMessage = s("settings_export_success", "Data exported successfully")
+                    }
+                }
+            }) {
+                Text(s("settings_export_to_file", "Save to File"))
             }
-        }) {
-            Text(s("settings_export_to_file", "Save to File"))
         }
-        Spacer(modifier = Modifier.width(8.dp))
-        Button(onClick = { showImportDialog = true }) {
+        Button(modifier = buttonModifier, onClick = { showImportDialog = true }) {
             Text(s("settings_import_data", "Import Data"))
         }
-        Spacer(modifier = Modifier.width(8.dp))
-        Button(onClick = { showResetConfirm = true }) {
+        Button(modifier = buttonModifier, onClick = { showResetConfirm = true }) {
             Text(s("settings_reset_data", "Reset All Data"))
         }
-        Spacer(modifier = Modifier.width(8.dp))
-        // View Logs — desktop equivalent of Android's logcat viewer (LogBuffer)
-        Button(onClick = { showLogViewer = true }) {
+        // Android SettingsFragment "View Error Logs" (logcat dialog with Share)
+        Button(modifier = buttonModifier, onClick = { showLogViewer = true }) {
             Text(s("settings_view_logs", "View Error Logs"))
         }
     }

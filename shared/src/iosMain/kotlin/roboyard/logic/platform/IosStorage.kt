@@ -34,7 +34,12 @@ class IosStorage : PlatformStorage {
         userDefaults.synchronize()
     }
 
+    // NSUserDefaults returns 0/false for missing keys; callers rely on their
+    // defaultValue for never-written keys (same contract as SharedPreferences)
+    private fun hasKey(key: String): Boolean = userDefaults.objectForKey(key) != null
+
     override fun getInt(key: String, defaultValue: Int): Int {
+        if (!hasKey(key)) return defaultValue
         return userDefaults.integerForKey(key).toInt()
     }
 
@@ -44,6 +49,7 @@ class IosStorage : PlatformStorage {
     }
 
     override fun getLong(key: String, defaultValue: Long): Long {
+        if (!hasKey(key)) return defaultValue
         return userDefaults.integerForKey(key)
     }
 
@@ -53,6 +59,7 @@ class IosStorage : PlatformStorage {
     }
 
     override fun getBoolean(key: String, defaultValue: Boolean): Boolean {
+        if (!hasKey(key)) return defaultValue
         return userDefaults.boolForKey(key)
     }
 
