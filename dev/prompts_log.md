@@ -137,3 +137,5 @@ dev/prompts/ios-app-icon.md)
 26-10-11 07:40 "jetzt geht der level screen zwar in ios, aber man gewinnt das spiel immer gleich beim ersten zug auf iOS! es soll in ios genau so laufen, wie in android!"
 26-10-11 07:50 "löse das problem zuende, 2. dann im android game sieht man in den settings unten ja noch einen knopf für die error logs zum reporten, baue das auch im ios ein, damit man an die reports kommt, dann committe alles und baue eine neue ios app auf dem mac"
 
+26-10-11 08:00 "er löst den level immer noch mit dem ersten zug, log hier: [...] (D/GameState: [GOAL DEBUG] 0/4 robots at targets (required: 0, total targets: 1, robotCount: 0) -> Game complete) löse das und teste es in einer simulation auf dem mac nach dem bauen irgendwie, wenn es gelöst ist, veröffentliche erneut"
+

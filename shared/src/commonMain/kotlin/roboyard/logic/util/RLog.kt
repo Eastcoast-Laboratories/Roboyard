@@ -58,7 +58,7 @@ class RLog private constructor(private val logger: Logger, private val tag: Stri
         if (args.isEmpty()) return message
         var result = message
         var argIndex = 0
-        val regex = Regex("%[sd]")
+        val regex = Regex("%[sdb]")
         regex.findAll(message).forEach { match ->
             if (argIndex < args.size) {
                 result = result.replaceFirst(match.value, args[argIndex].toString())
