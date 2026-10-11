@@ -263,9 +263,11 @@ These tests require a connected Android device or emulator.
 
 | Class | Status | Tests | Description | Tags |
 |-------|--------|-------|-------------|------|
-| `ComposeAppUiSmokeTest` | ✅ Passing | 5 | Compose UI smoke test: main menu visible, navigate to Level Selection, navigate to Credits, navigate to Credits and back, Settings full rendering and back navigation. | compose, desktop, ui-test, smoke-test, navigation, settings |
+| `ComposeAppUiSmokeTest` | ✅ Passing | 5 | Compose UI smoke test: main menu visible, navigate to Level Selection, navigate to Credits, navigate to Credits and back, Settings full rendering and back navigation. Dismisses the day-1 streak popup on fresh profiles; "Load Game" is asserted conditionally (`DesktopStorage().hasSavedGames()`) since Android hides it without saves. | compose, desktop, ui-test, smoke-test, navigation, settings |
 | `MapGenerationFallbackDialogTest` | ✅ Passing | 1 | Fallback dialog shown after exhausting map generation attempts: title, localized message with min moves/attempts/actual moves, OK dismisses. Run via `:composeApp:desktopTest --tests "roboyard.ui.compose.MapGenerationFallbackDialogTest"`. | compose, desktop, ui-test, map-generation, dialog |
-| `GameScreenSessionTest` | ⚠️ Env-dependent | 2 | GameSession-based game screen: random game and level game (via `levelItem_1` testTag) must render the board UI ("Moves:" counter) instead of staying on "Calculating...". Run via `:composeApp:desktopTest --tests "roboyard.ui.compose.GameScreenSessionTest"`. 2026-10-11: both tests time out (60s) waiting for "Moves:" even on clean HEAD — the tests run against real `~/.roboyard` storage (auth token, autosave `saves/save_0.dat`, 200+ history entries); `waitUntil`'s virtual clock can outpace the real-time solver. | compose, desktop, ui-test, game-session, regression |
+| `GameScreenSessionTest` | ✅ Passing | 2 | GameSession-based game screen: random game and level game (via `levelItem_1` testTag) must render the board instead of staying on "Calculating...". The board is located via its fixed English `contentDescription` ("Game board with …") — counter labels are localized ("Züge:" vs "Moves:"), which was the root cause of earlier timeouts. Dismisses the streak popup on the fresh sandbox profile. | compose, desktop, ui-test, game-session, regression |
+
+`desktopTest` sandbox: `composeApp/build.gradle` redirects `user.home` to `composeApp/build/test-profile` (wiped per run) so tests never touch the real `~/.roboyard` profile — no autosave, no history, default preferences. Shared helpers (e.g. streak-popup dismissal) live in `UiTestHelpers.kt`.
 
 #### Compose Non-UI Unit Tests (logic only, no app launch)
 

@@ -377,6 +377,10 @@ fun GameScreen(
     // achievements too early.
     var timerAnchorMs by remember(gameEpoch) { mutableLongStateOf(0L) }
 
+    // Android GameFragment.onViewCreated: re-enable map regeneration while the
+    // game screen is visible — the menu screens call stopRegeneration() on entry
+    LaunchedEffect(Unit) { session.resumeRegeneration() }
+
     // Android onPause: persist the UI timer into the session so it survives
     // leaving and re-entering the game screen
     DisposableEffect(gameEpoch) {

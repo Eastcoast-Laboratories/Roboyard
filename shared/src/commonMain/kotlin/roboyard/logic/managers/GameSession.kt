@@ -662,29 +662,35 @@ class GameSession(
 
                 this.loadedSolutions = loaded
 
-                // Convert solution to predefined format for the solver path
-                val solutionStr = StringBuilder()
+                // Convert the solution to the predefined format the parser
+                // understands: "[color letter][direction letter]" with
+                // r/g/b/y and N/S/E/W, e.g. "gE gN bW".
+                val solutionMoves = mutableListOf<String>()
                 for (move in currentSolution!!.moves) {
-                    if (solutionStr.isNotEmpty()) {
-                        solutionStr.append(" ")
-                    }
                     val rrMove = move as RRGameMove?
-                    val color = rrMove!!.color
-                    val direction = rrMove.direction
-
-                    solutionStr.append(color)
-                    when (direction) {
-                        1 -> solutionStr.append("U")
-                        2 -> solutionStr.append("R")
-                        4 -> solutionStr.append("D")
-                        8 -> solutionStr.append("L")
+                    val colorChar = when (rrMove!!.color) {
+                        0 -> "r"
+                        1 -> "g"
+                        2 -> "b"
+                        3 -> "y"
                         else -> {
-                            log.e("[SOLUTIONS_SAVE_LOAD] unknown direction %d in solution", direction)
-                            solutionStr.append(direction)
+                            log.e("[SOLUTIONS_SAVE_LOAD] unknown robot color %d in solution", rrMove.color)
+                            continue
                         }
                     }
+                    val dirChar = when (rrMove.direction) {
+                        1 -> "N"
+                        2 -> "E"
+                        4 -> "S"
+                        8 -> "W"
+                        else -> {
+                            log.e("[SOLUTIONS_SAVE_LOAD] unknown direction %d in solution", rrMove.direction)
+                            continue
+                        }
+                    }
+                    solutionMoves.add(colorChar + dirChar)
                 }
-                setPredefinedSolution(solutionStr.toString(), currentSolution!!.moves.size)
+                setPredefinedSolution(solutionMoves.joinToString(" "), solutionMoves.size)
             }
         }
 
@@ -2198,6 +2204,8 @@ class GameSession(
         solverInitialized = false
         solver = null
         solverSolutionList = null
+        predefinedSolution = null
+        predefinedNumMoves = 0
     }
 
     /** Set a predefined solution so the solver does not need to run. */

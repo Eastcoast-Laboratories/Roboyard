@@ -106,3 +106,15 @@ compose.desktop {
         }
     }
 }
+
+// Compose desktop tests must not read or write the developer's real
+// ~/.roboyard profile (autosave, history index, stored prefs). Redirecting
+// user.home gives every test run a fresh sandbox: DesktopStorage resolves
+// its data dir from it and java.util.prefs stores under <user.home>/.java.
+tasks.withType(Test).configureEach {
+    if (name == 'desktopTest') {
+        def sandbox = file("$buildDir/test-profile")
+        systemProperty 'user.home', sandbox.absolutePath
+        doFirst { sandbox.deleteDir() }
+    }
+}
