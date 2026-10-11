@@ -23,7 +23,7 @@
 #   repos/CaveShuttle, Lalumo  rsync trees (no .git on the Mac!) minus
 #                              regenerable dirs (node_modules/dist/build)
 #   xcode/*.xcarchive/         exact archives uploaded to App Store —
-#                              Roboyard 141, CaveShuttle 2, Lalumo 15
+#                              Roboyard 141, CaveShuttle 2, Lalumo 44
 #                              (app, dSYMs for crash symbolication, Info)
 #   xcode/ipa/                 exported .ipa files where they exist
 #
@@ -99,6 +99,13 @@ $RSYNC "$MAC_HOST":~/repos/Lalumo/build/App.xcarchive/            "$BACKUP/xcode
 mkdir -p "$BACKUP/xcode/ipa"
 $RSYNC "$MAC_HOST":~/repos/Roboyard/iosApp/build/ipa/iosApp.ipa   "$BACKUP/xcode/ipa/iosApp.ipa"
 $RSYNC "$MAC_HOST":~/repos/CaveShuttle/build/ios/CaveShuttle.ipa  "$BACKUP/xcode/ipa/CaveShuttle.ipa"
+if ssh -o ConnectTimeout=15 "$MAC_HOST" "test -f ~/repos/Lalumo/build/ipa/App.ipa"; then
+  $RSYNC "$MAC_HOST":~/repos/Lalumo/build/ipa/App.ipa             "$BACKUP/xcode/ipa/Lalumo.ipa"
+else
+  # build/ipa/ is deleted before each re-archive — if absent, the
+  # xcarchive above still covers the exact uploaded bits
+  echo "   (no Lalumo IPA on the Mac right now — skipped, xcarchive covers it)"
+fi
 
 echo "== done"
 du -sh "$BACKUP" "$BACKUP"/*/ 2>/dev/null
