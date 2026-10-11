@@ -110,7 +110,10 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
         this.maxNodeArrays = max(16, ((maxHeap / 4) / (NODE_ARRAY_SIZE * 4L)).toInt())
         this.maxLeafArrays = max(16, ((maxHeap / 10) / LEAF_ARRAY_SIZE).toInt())
 
-        this.nodeArrays = Array(64) { IntArray(NODE_ARRAY_SIZE) }
+        // Only slot 0 (the root node array) is allocated eagerly; all other
+        // slots are filled lazily by tryAllocateNodeArray(). Eagerly
+        // allocating all 64 slots would waste ~16MB per solver instance.
+        this.nodeArrays = Array(64) { i -> if (i == 0) IntArray(NODE_ARRAY_SIZE) else IntArray(0) }
         this.rootNode = this.nodeArrays[0]!!
         this.numNodeArrays = 1
         this.nextNode = board.size //root node already exists
@@ -121,7 +124,8 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
         this.leafNodeSize = this.leafNodeMask + 1
         this.leafSize = 1 shl (board.sizeNumBits - this.leafNodeShift)
         this.leafMask = this.leafSize - 1
-        this.leafArrays = Array(64) { ByteArray(LEAF_ARRAY_SIZE) }
+        // Leaf arrays are allocated lazily by tryAllocateLeafArray().
+        this.leafArrays = Array(64) { ByteArray(0) }
         this.numLeafArrays = 0
         this.nextLeaf =
             this.leafSize //no leaves yet, but skip leaf "0" because this is the special value
@@ -135,9 +139,19 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
             this.allocationLimitReached = true
             return null
         }
+        // Global heap reserve: refuse when the whole process is running low.
+        // Concurrent solver instances would otherwise push the heap over the
+        // growth limit even while each stays under its own cap.
+        if (!SolverHeapGuard.hasHeadroom()) {
+            this.allocationLimitReached = true
+            Logger.println("[MEMORY] Refused node array #" + this.numNodeArrays + ": heap reserve exhausted")
+            return null
+        }
         try {
             return IntArray(NODE_ARRAY_SIZE)
-        } catch (oom: Exception) {
+        } catch (t: Throwable) {
+            // OutOfMemoryError is an Error, not an Exception — catch Throwable
+            // so the limit flag is set and the search degrades gracefully.
             this.allocationLimitReached = true
             return null
         }
@@ -148,9 +162,14 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
             this.allocationLimitReached = true
             return null
         }
+        if (!SolverHeapGuard.hasHeadroom()) {
+            this.allocationLimitReached = true
+            Logger.println("[MEMORY] Refused leaf array #" + this.numLeafArrays + ": heap reserve exhausted")
+            return null
+        }
         try {
             return ByteArray(LEAF_ARRAY_SIZE)
-        } catch (oom: Exception) {
+        } catch (t: Throwable) {
             this.allocationLimitReached = true
             return null
         }
@@ -354,6 +373,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
      * @see driftingdroids.model.KeyDepthMap#putIfGreater(long, int)
      */
     override fun putIfGreater(key: Long, byteValue: Int): Boolean {
+        if (this.allocationLimitReached) return false
         //this method is copy&paste from putIfGreater(int,int) with only a few (int) casts added where required.
         //root node
         var key = key
@@ -576,6 +596,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
      */
     private class KeyDepthMapTrieSpecialEqual(board: Board) : KeyDepthMapTrieSpecial(board) {
         override fun putIfGreater(key: Int, byteValue: Int): Boolean {
+            if (this.allocationLimitReached) return false
             //root node
             var key = key
             var nidx = key and this.nodeMask
@@ -768,6 +789,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
         }
 
         override fun putIfGreater(key: Long, byteValue: Int): Boolean {
+            if (this.allocationLimitReached) return false
             //this method is copy&paste from putIfGreater(int,int) with only a few (int) casts added where required.
             //root node
             var key = key
@@ -974,6 +996,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
         }
 
         override fun putIfGreater(key: Int, byteValue: Int): Boolean { // for 4 robots
+            if (this.allocationLimitReached) return false
             var key = key
             var nidx = key and LOOKUP_MASK
             var nodeIndex = this.lookupArray[nidx]
@@ -1074,6 +1097,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
         }
 
         override fun putIfGreater(key: Long, byteValue: Int): Boolean { // for 5 robots
+            if (this.allocationLimitReached) return false
             var key = key
             var nidx = key.toInt() and LOOKUP_MASK
             var nodeIndex = this.lookupArray[nidx]
@@ -1251,6 +1275,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
     private class KeyDepthMapTrieSpecial8BitEqual(board: Board) :
         KeyDepthMapTrieSpecial8Bit(board) {
         override fun putIfGreater(key: Int, byteValue: Int): Boolean { // for 4 robots
+            if (this.allocationLimitReached) return false
             var key = key
             var nidx = key and LOOKUP_MASK
             var nodeIndex = this.lookupArray[nidx]
@@ -1351,6 +1376,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
         }
 
         override fun putIfGreater(key: Long, byteValue: Int): Boolean { // for 5 robots
+            if (this.allocationLimitReached) return false
             var key = key
             var nidx = key.toInt() and LOOKUP_MASK
             var nodeIndex = this.lookupArray[nidx]
@@ -1520,7 +1546,7 @@ open class KeyDepthMapTrieSpecial private constructor(board: Board) : KeyDepthMa
             // The 8Bit variant allocates a 64MB lookup array - only use it if heap is large enough
             val memInfo = TimeProvider.getRuntimeMemoryInfo()
             val maxHeapMB = memInfo.maxMemory shr 20
-            val heapLargeEnough = maxHeapMB > 768
+            val heapLargeEnough = maxHeapMB > 768 && SolverHeapGuard.hasHeadroom()
             if (useMoreMemoryForSpeedup && heapLargeEnough && (8 == board.sizeNumBits) && ((4 == board.numRobots) || (5 == board.numRobots))) {
                 if (Solver.USE_SLOW_SEARCH_MORE_SOLUTIONS) {
                     Logger.println("UseSlowSearchMoreSolutions")

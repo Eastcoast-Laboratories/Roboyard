@@ -151,3 +151,5 @@ dev/prompts/ios-app-icon.md)
 26-10-11 10:55 "fix the test — also apparently on iOS the min/max move counts are not respected, it just accepted a map with 2 moves even though minimum was set to 4 on the iPhone. Another problem appeared on desktop, can you read the log in the console?"
 
 26-10-11 11:05 "there isn't much to look at, it should all work exactly like Android! No custom tinkering — extract the logic from Android into shared and use it in all builds. And all stored preferences must be respected, including on iOS — there was already a problem like that in an earlier commit; analyze the last 10 commits, there was something about the preferences not being applied on iOS — they must ALL be applied"
+
+26-10-11 11:30 "this is the crash report when the phone's memory is full. It would be good if the app reserved the memory it might need at startup, so it doesn't crash mid-game from lack of memory — happens: [logcat: OutOfMemoryError in iddfs depthLimit=2, solver KnownStates filled 512MB heap, FATAL EXCEPTION in MIUI dumpScoutTrace thread]"
