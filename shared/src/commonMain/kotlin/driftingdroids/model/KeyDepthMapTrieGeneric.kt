@@ -16,6 +16,8 @@
 */
 package driftingdroids.model
 
+import kotlin.concurrent.Volatile
+
 /**
  * This class is a minimal `Map&ltK,V&gt` implementation for primitive
  * `int` or `long` keys K and <tt>byte</tt> values V,
@@ -65,13 +67,16 @@ class KeyDepthMapTrieGeneric(keyBits: Int) : KeyDepthMap {
         this.leafSize = 1 shl this.leafBits
         this.leafMask = this.leafSize - 1
 
-        this.nodeArrays = Array(32) { IntArray(NODE_ARRAY_SIZE) }
+        // Only slot 0 (the root node array) is allocated eagerly; all other
+        // slots are filled lazily by tryAllocateNodeArray().
+        this.nodeArrays = Array(32) { i -> if (i == 0) IntArray(NODE_ARRAY_SIZE) else IntArray(0) }
         this.rootNode = this.nodeArrays[0]!!
         this.numNodeArrays = 1
         this.nextNode = this.nodeSize //root node already exists
         this.nextNodeArray = NODE_ARRAY_SIZE //first array already exists
 
-        this.leafArrays = Array(32) { ByteArray(LEAF_ARRAY_SIZE) }
+        // Leaf arrays are allocated lazily by tryAllocateLeafArray().
+        this.leafArrays = Array(32) { ByteArray(0) }
         this.numLeafArrays = 0
         this.nextLeaf =
             this.leafSize //no leaves yet, but skip leaf "0" because this is the special value
@@ -79,10 +84,51 @@ class KeyDepthMapTrieGeneric(keyBits: Int) : KeyDepthMap {
     }
 
 
+    // Set when a chunk allocation was refused (heap reserve) or threw —
+    // further putIfGreater calls then short-circuit instead of retrying.
+    @Volatile
+    private var allocationLimitReached: Boolean = false
+
+    // Central allocation methods: the global heap guard refuses new chunks
+    // once the process runs low, regardless of how many solver instances
+    // (map validation, live solver, pre-computation) share the heap.
+    private fun tryAllocateNodeArray(): IntArray? {
+        if (!SolverHeapGuard.hasHeadroom()) {
+            this.allocationLimitReached = true
+            Logger.println("[MEMORY] Refused node array #" + this.numNodeArrays + ": heap reserve exhausted")
+            return null
+        }
+        try {
+            return IntArray(NODE_ARRAY_SIZE)
+        } catch (t: Throwable) {
+            // OutOfMemoryError is an Error, not an Exception
+            this.allocationLimitReached = true
+            return null
+        }
+    }
+
+    private fun tryAllocateLeafArray(): ByteArray? {
+        if (!SolverHeapGuard.hasHeadroom()) {
+            this.allocationLimitReached = true
+            Logger.println("[MEMORY] Refused leaf array #" + this.numLeafArrays + ": heap reserve exhausted")
+            return null
+        }
+        try {
+            val newLeafArray = ByteArray(LEAF_ARRAY_SIZE)
+            newLeafArray.fill(DEFAULT_VALUE)
+            return newLeafArray
+        } catch (t: Throwable) {
+            this.allocationLimitReached = true
+            return null
+        }
+    }
+
+
     /* (non-Javadoc)
      * @see driftingdroids.model.KeyDepthMap#putIfGreater(int, int)
      */
     override fun putIfGreater(key: Int, byteValue: Int): Boolean {
+        if (this.allocationLimitReached) return false
         //root node
         var key = key
         var nodeArray = this.rootNode
@@ -101,7 +147,9 @@ class KeyDepthMapTrieGeneric(keyBits: Int) : KeyDepthMap {
                         this.nodeArrays =
                             this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                     }
-                    this.nodeArrays[this.numNodeArrays++] = IntArray(NODE_ARRAY_SIZE)
+                    val newNodeArray = tryAllocateNodeArray()
+                    if (newNodeArray == null) return false
+                    this.nodeArrays[this.numNodeArrays++] = newNodeArray
                     this.nextNodeArray += NODE_ARRAY_SIZE
                 }
                 nodeIndex = this.nextNode
@@ -141,7 +189,9 @@ class KeyDepthMapTrieGeneric(keyBits: Int) : KeyDepthMap {
                         this.nodeArrays =
                             this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                     }
-                    this.nodeArrays[this.numNodeArrays++] = IntArray(NODE_ARRAY_SIZE)
+                    val newNodeArray = tryAllocateNodeArray()
+                    if (newNodeArray == null) return false
+                    this.nodeArrays[this.numNodeArrays++] = newNodeArray
                     this.nextNodeArray += NODE_ARRAY_SIZE
                 }
                 nodeIndex = this.nextNode
@@ -185,8 +235,8 @@ class KeyDepthMapTrieGeneric(keyBits: Int) : KeyDepthMap {
                 if (this.leafArrays.size <= this.numLeafArrays) {
                     this.leafArrays = this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1) as Array<ByteArray>
                 }
-                val newLeafArray = ByteArray(LEAF_ARRAY_SIZE)
-                newLeafArray.fill(DEFAULT_VALUE)
+                val newLeafArray = tryAllocateLeafArray()
+                if (newLeafArray == null) return false
                 this.leafArrays[this.numLeafArrays++] = newLeafArray
                 this.nextLeafArray += LEAF_ARRAY_SIZE
             }
@@ -212,6 +262,7 @@ class KeyDepthMapTrieGeneric(keyBits: Int) : KeyDepthMap {
      * @see driftingdroids.model.KeyDepthMap#putIfGreater(long, int)
      */
     override fun putIfGreater(key: Long, byteValue: Int): Boolean {
+        if (this.allocationLimitReached) return false
         //this method is copy&paste from put(int,byte) with only a few (int) casts added where required.
         //those lines are marked with //(int)
         //root node
@@ -232,7 +283,9 @@ class KeyDepthMapTrieGeneric(keyBits: Int) : KeyDepthMap {
                         this.nodeArrays =
                             this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                     }
-                    this.nodeArrays[this.numNodeArrays++] = IntArray(NODE_ARRAY_SIZE)
+                    val newNodeArray = tryAllocateNodeArray()
+                    if (newNodeArray == null) return false
+                    this.nodeArrays[this.numNodeArrays++] = newNodeArray
                     this.nextNodeArray += NODE_ARRAY_SIZE
                 }
                 nodeIndex = this.nextNode
@@ -272,7 +325,9 @@ class KeyDepthMapTrieGeneric(keyBits: Int) : KeyDepthMap {
                         this.nodeArrays =
                             this.nodeArrays.copyOf<IntArray>(this.nodeArrays.size shl 1) as Array<IntArray>
                     }
-                    this.nodeArrays[this.numNodeArrays++] = IntArray(NODE_ARRAY_SIZE)
+                    val newNodeArray = tryAllocateNodeArray()
+                    if (newNodeArray == null) return false
+                    this.nodeArrays[this.numNodeArrays++] = newNodeArray
                     this.nextNodeArray += NODE_ARRAY_SIZE
                 }
                 nodeIndex = this.nextNode
@@ -316,8 +371,8 @@ class KeyDepthMapTrieGeneric(keyBits: Int) : KeyDepthMap {
                 if (this.leafArrays.size <= this.numLeafArrays) {
                     this.leafArrays = this.leafArrays.copyOf<ByteArray>(this.leafArrays.size shl 1) as Array<ByteArray>
                 }
-                val newLeafArray = ByteArray(LEAF_ARRAY_SIZE)
-                newLeafArray.fill(DEFAULT_VALUE)
+                val newLeafArray = tryAllocateLeafArray()
+                if (newLeafArray == null) return false
                 this.leafArrays[this.numLeafArrays++] = newLeafArray
                 this.nextLeafArray += LEAF_ARRAY_SIZE
             }

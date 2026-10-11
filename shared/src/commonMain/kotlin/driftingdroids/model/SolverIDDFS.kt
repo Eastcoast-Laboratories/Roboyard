@@ -284,9 +284,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
                 Logger.println("iddfs: cancel requested, stopping solver")
                 throw Exception("Solver was cancelled")
             }
-            val memInfo = TimeProvider.getRuntimeMemoryInfo()
-            val freeBytes = memInfo.maxMemory - memInfo.totalMemory + memInfo.freeMemory
-            if (freeBytes < memInfo.maxMemory / 4) { // abort if less than 25% free
+            if (!SolverHeapGuard.hasHeadroom()) { // abort if less than 25% free
                 this.memoryLow = true
                 return
             }
@@ -391,9 +389,7 @@ class SolverIDDFS(board: Board) : Solver(board) {
                 Logger.println("iddfs: cancel requested, stopping solver")
                 throw Exception("Solver was cancelled")
             }
-            val memInfo = TimeProvider.getRuntimeMemoryInfo()
-            val freeBytes = memInfo.maxMemory - memInfo.totalMemory + memInfo.freeMemory
-            if (freeBytes < memInfo.maxMemory / 4) { // abort if less than 25% free
+            if (!SolverHeapGuard.hasHeadroom()) { // abort if less than 25% free
                 this.memoryLow = true
                 return
             }
