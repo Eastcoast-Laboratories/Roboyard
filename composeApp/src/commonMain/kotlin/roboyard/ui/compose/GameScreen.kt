@@ -1688,16 +1688,18 @@ fun GameScreen(
                         )
                     }
                     if (!isLevelGame) {
-                        val isHistoryGame = session.isLoadedFromHistory
-                        val hasNext = isHistoryGame && session.hasNextHistoryEntry()
-                        CooldownFancyButton(
-                            text = "▸",
-                            color = FancyButtonColor.GREEN,
-                            enabled = !isHistoryGame || hasNext,
-                            cooldown = pastCooldownGrace,
-                            onClick = { handleNewMapButtonClick() },
-                            modifier = Modifier.weight(1f).height(64.dp)
-                        )
+                        if (session.isNewGameButtonVisible()) {
+                            val isHistoryGame = session.isLoadedFromHistory
+                            val hasNext = isHistoryGame && session.hasNextHistoryEntry()
+                            CooldownFancyButton(
+                                text = "▸",
+                                color = FancyButtonColor.GREEN,
+                                enabled = !isHistoryGame || hasNext,
+                                cooldown = pastCooldownGrace,
+                                onClick = { handleNewMapButtonClick() },
+                                modifier = Modifier.weight(1f).height(64.dp)
+                            )
+                        }
                         altIconButton(
                             icon = Res.drawable.ic_alt_save_add,
                             contentDescription = stringProvider.getString("save_map_button_a11y") ?: "Save map",
@@ -1802,9 +1804,10 @@ fun GameScreen(
                     onClick = { resetAction() },
                     modifier = Modifier.weight(1f).padding(end = 3.dp)
                 )
-                // New Map button: hidden in level games (Android sets GONE);
+                // New Map button: hidden in level games and while the game is
+                // complete (Android sets newMapButton GONE);
                 // history games show "Next Game" (disabled at last entry)
-                if (!isLevelGame) {
+                if (session.isNewGameButtonVisible()) {
                     val isHistoryGame = session.isLoadedFromHistory
                     val hasNext = isHistoryGame && session.hasNextHistoryEntry()
                     CooldownFancyButton(
