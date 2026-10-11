@@ -2,10 +2,11 @@ Changelog Deutsch
 =================
 
 
-## Version 53 (2026-10-08)
+## Version 53 (2026-10-11)
 - Next-Level-Button im Spiel
 - Verlauf-Tab: Karten-Vorschau im Goldrahmen mit 0-3 Sternen
 - New/Next/Back-Buttons: in den ersten 20s nach Kartenstart ist kein Long-Press nötig
+- Absturz behoben, der bei vollem Gerätespeicher auftreten konnte
 
 ## Version 52 (140)
 - Long-Press-Schutz fuer Neues Spiel im Spielbildschirm hinzugefuegt

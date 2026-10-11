@@ -1,4 +1,5 @@
 - Next-Level-Button im Spiel
 - Verlauf-Tab: Karten-Vorschau im Goldrahmen mit 0-3 Sternen
 - New/Next/Back-Buttons: in den ersten 20s nach Kartenstart ist kein Long-Press nötig
+- Absturz behoben, der bei vollem Gerätespeicher auftreten konnte
 - komplettes Changelog auf https://github.com/Eastcoast-Laboratories/Roboyard/blob/master/CHANGELOG_de.md
