@@ -139,3 +139,5 @@ dev/prompts/ios-app-icon.md)
 
 26-10-11 08:00 "er löst den level immer noch mit dem ersten zug, log hier: [...] (D/GameState: [GOAL DEBUG] 0/4 robots at targets (required: 0, total targets: 1, robotCount: 0) -> Game complete) löse das und teste es in einer simulation auf dem mac nach dem bauen irgendwie, wenn es gelöst ist, veröffentliche erneut"
 
+
+26-10-11 09:20 "ok, now the only remaining bug is that on iOS the new game button in the second row doesn't disappear when the big one appears below at level complete — we had that problem before when coming from a history entry, but it was actually fixed; look at the last commits where it was fixed — probably it was not fixed in shared but in an Android-only path? if so, make it DRY"

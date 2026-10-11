@@ -1593,6 +1593,16 @@ class GameSession(
     // ── Completion ────────────────────────────────────────────────────────
 
     /**
+     * Whether the small in-row New Game button should be visible.
+     * Level games never show it, and while the game is complete the big
+     * full-width completion button takes its place.
+     */
+    fun isNewGameButtonVisible(): Boolean {
+        val isLevelGame = (_currentState.value?.levelId ?: 0) > 0
+        return !isLevelGame && !_isGameComplete.value
+    }
+
+    /**
      * Set whether the game is complete.
      * Handles level completion data, history updates and upload triggers.
      */

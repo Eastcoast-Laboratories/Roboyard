@@ -97,6 +97,26 @@ class GameSessionTest {
     }
 
     /**
+     * The small in-row New Game button is only shown for an in-progress
+     * non-level game; a completed game shows the big completion button
+     * instead (Android GameFragment hides newMapButton in the isComplete
+     * observer).
+     */
+    @Test
+    fun test_isNewGameButtonVisible() {
+        val state = testState()
+        session.setGameState(state)
+        assertTrue(session.isNewGameButtonVisible(), "in-progress random game shows the button")
+
+        session.setGameComplete(true)
+        assertFalse(session.isNewGameButtonVisible(), "completed game hides the button")
+
+        session.setGameComplete(false)
+        state.levelId = 1
+        assertFalse(session.isNewGameButtonVisible(), "level games hide the button")
+    }
+
+    /**
      * Loading a different game (history entry / savegame path) must drop the
      * previous game's robot trails and advance the game counter, so UIs bound
      * to the counter rebuild their trails from the emptied history.
