@@ -122,3 +122,13 @@
 26-10-09 17:30 "erstelle einen skill aus dem bisher gelernten wie man die capacitor app anpassen muss für ios und was die fallstricke sind beim bauen auf dem imac in der cloud — muss alles beinhalten was ein anderer agent wissen muss um caveshuttle und lalumo für ios zu verkaufen; plan in /var/www/CaveShuttle/dev/plans/; parallel zu roboyard? dann fahre sofort fort"
 26-10-09 18:00 "mache weiter — ich brauche eine installierbare version gebaut mit dev/build_composeapp (läuft im hintergrund), warte bis fertig, checke ob alles baut, und ich brauche ein installierbares paket auf meinem iphone zum testen; erweitere bei bedarf den skill"
 26-10-09 18:50 "da ist gar nichts im git unstaged, ist das ignored? bitte mach den commit selbst, aber die builds nicht mit committen"
+
+26-10-11 - "Create a prompt how you managed the icon for roboyard, same
+problem there" (iOS stub icon -> Android artwork; wrote
+dev/prompts/ios-app-icon.md)
+26-10-11 05:00 "teste selbst, ob alle anderen devin agenten fertig sind, dann mache automatisch weiter" (continued: remote signing fix, build 143 uploaded to TestFlight)
+
+26-10-11 05:15 "[prompt file dev/prompts/ios-app-icon.md executed]" (composed 1024 icon from Android adaptive layers, universal appiconset, build 144 uploaded)
+
+26-10-11 05:20 "das roboyard icon in version 143 sah schon gut aus, jetzt ist das icon nur kleiner als vorher, soll das so? also mehr margin um den roboter" (fixed: recompose with center-288 crop matching old icon, build 145)
+

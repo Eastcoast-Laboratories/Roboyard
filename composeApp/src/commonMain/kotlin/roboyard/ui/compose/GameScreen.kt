@@ -371,6 +371,11 @@ fun GameScreen(
     var maxHintUsed by remember(gameEpoch) { mutableIntStateOf(-1) }
     var elapsedTime by remember(gameEpoch) { mutableLongStateOf(session.uiTimerElapsedMs) }
     var timerRunning by remember(gameEpoch) { mutableStateOf(false) }
+    // Android measures game time via SystemClock.elapsedRealtime() - startTime.
+    // Wall-clock anchor serving the same role; counting ticks instead would
+    // lag under solver load and shrink the measured time, unlocking speedrun
+    // achievements too early.
+    var timerAnchorMs by remember(gameEpoch) { mutableLongStateOf(0L) }
 
     // Android onPause: persist the UI timer into the session so it survives
     // leaving and re-entering the game screen
@@ -860,6 +865,7 @@ fun GameScreen(
                 session.startLevelGame(nextLevelId)
                 pathTracker.clearPaths()
                 elapsedTime = 0
+                timerAnchorMs = TimeProvider.currentTimeMillis()
                 hintManager.reset()
                 hintMessage = null
                 hintContainerVisible = false
@@ -920,15 +926,24 @@ fun GameScreen(
     }
 
     // Timer effect - runs every 500ms when timer is enabled (matches Android);
-    // paused while the app is in the background (Android onPause -> stopTimer)
+    // paused while the app is in the background (Android onPause -> stopTimer).
+    // elapsedTime is derived from a wall-clock anchor (Android startTime),
+    // not from counted ticks.
     LaunchedEffect(timerRunning) {
         if (timerRunning) {
+            timerAnchorMs = TimeProvider.currentTimeMillis() - elapsedTime
             while (timerRunning) {
                 delay(500)
-                if (timerRunning && !session.timerPaused.value) {
-                    elapsedTime += 500
-                    // Session handles history threshold + view_1_hour achievement
-                    session.updateGameTimer()
+                if (timerRunning) {
+                    if (session.timerPaused.value) {
+                        // Android stopTimer parity: freeze elapsed, realign the
+                        // anchor so the timer resumes from the same value
+                        timerAnchorMs = TimeProvider.currentTimeMillis() - elapsedTime
+                    } else {
+                        elapsedTime = TimeProvider.currentTimeMillis() - timerAnchorMs
+                        // Session handles history threshold + view_1_hour achievement
+                        session.updateGameTimer()
+                    }
                 }
             }
         }
@@ -977,6 +992,7 @@ fun GameScreen(
             session.clearSolutionAcceptedFlag()
             session.resetUiTimer()
             elapsedTime = 0
+            timerAnchorMs = TimeProvider.currentTimeMillis()
             if (gameState != null && !gameWon) {
                 timerRunning = true
             }
