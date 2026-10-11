@@ -132,3 +132,8 @@ dev/prompts/ios-app-icon.md)
 
 26-10-11 05:20 "das roboyard icon in version 143 sah schon gut aus, jetzt ist das icon nur kleiner als vorher, soll das so? also mehr margin um den roboter" (fixed: recompose with center-288 crop matching old icon, build 145)
 
+26-10-11 07:25 "warum hast du die ganzen kleineren icons gelöscht? ... das 512er icon ist etwas unscharf, hier ist das original /var/www/Roboyard/dev/images/robots/blue_robot ... schatten neu ergänzen, höhere auflösung" (recomposed icon from 2048px blue_robot.png + procedural long shadow, build 146)
+
+26-10-11 07:40 "jetzt geht der level screen zwar in ios, aber man gewinnt das spiel immer gleich beim ersten zug auf iOS! es soll in ios genau so laufen, wie in android!"
+26-10-11 07:50 "löse das problem zuende, 2. dann im android game sieht man in den settings unten ja noch einen knopf für die error logs zum reporten, baue das auch im ios ein, damit man an die reports kommt, dann committe alles und baue eine neue ios app auf dem mac"
+
