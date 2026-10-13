@@ -153,3 +153,5 @@ dev/prompts/ios-app-icon.md)
 26-10-11 11:05 "there isn't much to look at, it should all work exactly like Android! No custom tinkering — extract the logic from Android into shared and use it in all builds. And all stored preferences must be respected, including on iOS — there was already a problem like that in an earlier commit; analyze the last 10 commits, there was something about the preferences not being applied on iOS — they must ALL be applied"
 
 26-10-11 11:30 "this is the crash report when the phone's memory is full. It would be good if the app reserved the memory it might need at startup, so it doesn't crash mid-game from lack of memory — happens: [logcat: OutOfMemoryError in iddfs depthLimit=2, solver KnownStates filled 512MB heap, FATAL EXCEPTION in MIUI dumpScoutTrace thread]"
+
+26-10-11 13:05 "check once more whether we have everything [in the backup], I would delete the mac mini now" (dev/backup-mac-mini.sh verified + extended: repos/Roboyard-download artifacts)

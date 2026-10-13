@@ -92,6 +92,10 @@ for r in CaveShuttle Lalumo; do
     "$MAC_HOST":~/repos/"$r"/ "$BACKUP/repos/$r/"
 done
 
+# release artifacts on the Mac that are not in git and partly not on the
+# laptop (v60 ipa/jar/apk, v53.apk) — rest of repos/Roboyard stays excluded
+$RSYNC "$MAC_HOST":~/repos/Roboyard/download/ "$BACKUP/repos/Roboyard-download/"
+
 echo "== 6/6 xcarchives + exported .ipa files (all 3 apps)"
 # Build outputs come and go: build/ is deleted before each re-archive (another
 # session may be rebuilding right now), and ExportOptions destination=upload
