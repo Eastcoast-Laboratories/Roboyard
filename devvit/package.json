@@ -6,8 +6,9 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite",
-    "login": "devvit login",
-    "playtest": "npm run build && devvit playtest",
+    "login": "devvit-cli login",
+    "playtest": "npm run build && devvit-cli playtest",
+    "upload": "npm run build && devvit-cli upload",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "validate": "npm run typecheck && npm test && npm run build"
