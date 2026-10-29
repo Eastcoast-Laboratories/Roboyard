@@ -1,0 +1,29 @@
+{
+  "name": "roboyard-devvit",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "login": "devvit login",
+    "playtest": "npm run build && devvit playtest",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "validate": "npm run typecheck && npm test && npm run build"
+  },
+  "dependencies": {
+    "@devvit/web": "0.15.1",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@devvit/cli": "0.15.1",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "@vitejs/plugin-react": "5.1.1",
+    "typescript": "5.9.3",
+    "vite": "7.3.1",
+    "vitest": "4.0.17"
+  }
+}

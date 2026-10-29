@@ -1,0 +1,83 @@
+:root {
+  color: #f7f0dc;
+  background: #171429;
+  font-family: Inter, ui-rounded, "Trebuchet MS", system-ui, sans-serif;
+  font-synthesis: none;
+  --purple: #8d50d6;
+  --purple-bright: #cc65ff;
+  --mint: #4fffc1;
+  --panel: rgba(31, 28, 55, 0.94);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: radial-gradient(circle at 50% 0%, #352655 0, #171429 45%, #0d0b18 100%); }
+button { font: inherit; }
+.shell { width: min(1180px, 100%); min-height: 100vh; margin: auto; padding: clamp(14px, 3vw, 32px); }
+.hero { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 18px; }
+.eyebrow { color: var(--mint); font-size: 12px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+.hero h1 { margin: 6px 0 2px; font-size: clamp(28px, 5vw, 52px); line-height: .95; text-shadow: 0 4px #191126; }
+.hero p { margin: 8px 0 0; color: #bbb2d1; }
+.community { border: 1px solid #594a75; border-radius: 999px; padding: 8px 12px; color: #cfc5e6; white-space: nowrap; }
+.game-card { overflow: hidden; border: 1px solid #624b85; border-radius: 24px; background: var(--panel); box-shadow: 0 25px 80px #05030bcc, inset 0 1px #ffffff17; }
+.toolbar { display: flex; justify-content: center; align-items: center; gap: 18px; padding: 12px; border-bottom: 1px solid #4f416b; background: #241d3a; }
+.toolbar div { min-width: 112px; text-align: center; }
+.toolbar strong, .toolbar span { display: block; }
+.toolbar span { margin-top: 2px; color: #a99fbd; font-size: 12px; }
+.toolbar button, .actions button, .victory button { border: 1px solid #7256a0; border-radius: 12px; color: white; background: linear-gradient(#6c45a5, #492c75); cursor: pointer; }
+.toolbar button { width: 40px; height: 40px; font-size: 28px; }
+button:disabled { cursor: default; opacity: .35; }
+.play-area { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 20px; padding: 20px; }
+.board-frame { min-width: 0; display: grid; place-items: center; padding: 12px; border: 2px solid #643892; border-radius: 18px; background: #0f0d1a; box-shadow: inset 0 0 35px #000; }
+.board { position: relative; display: grid; width: min(100%, 72vh); aspect-ratio: 1; border: 5px solid #8e49c4; background: #292a58; isolation: isolate; }
+.cell { position: relative; min-width: 0; min-height: 0; padding: 0; border: 0; background: url('/assets/floor.png') center/cover; cursor: pointer; }
+.cell::after { position: absolute; inset: 0; border: 1px solid #7774b033; content: ''; pointer-events: none; }
+.wall { position: absolute; z-index: 5; object-fit: fill; pointer-events: none; filter: drop-shadow(0 1px 1px #000c); }
+.wall-horizontal { left: -8%; width: 116%; height: 28%; }
+.wall-vertical { top: -8%; width: 28%; height: 116%; }
+.wall-top { top: -14%; }
+.wall-bottom { bottom: -14%; }
+.wall-left { left: -14%; }
+.wall-right { right: -14%; }
+.goal, .robot { position: absolute; inset: 4%; width: 92%; height: 92%; object-fit: contain; pointer-events: none; }
+.goal { z-index: 1; opacity: .82; }
+.robot { z-index: 3; filter: drop-shadow(0 3px 2px #000b); transition: transform 140ms ease; }
+.selected-robot { transform: translateY(-5%) scale(1.08); filter: drop-shadow(0 0 5px #fff) drop-shadow(0 4px 3px #000c); }
+.center-emblem { position: absolute; z-index: 2; left: 40%; top: 40%; width: 20%; height: 20%; object-fit: contain; opacity: .34; pointer-events: none; }
+.controls { display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+.roster { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; }
+.roster-button { display: flex; align-items: center; gap: 3px; min-width: 0; padding: 5px; border: 1px solid #4d4266; border-radius: 10px; color: #ddd5ed; background: #1b172b; cursor: pointer; text-transform: capitalize; }
+.roster-button img { width: 40px; height: 40px; object-fit: contain; }
+.roster-button span { overflow: hidden; font-size: 11px; }
+.roster-button.selected { border-color: var(--mint); background: #2c2642; box-shadow: 0 0 14px #4fffc144; }
+.dpad { display: grid; grid-template: repeat(3, 48px) / repeat(3, 48px); justify-content: center; }
+.dpad button { border: 1px solid #75569b; color: #fff; background: linear-gradient(145deg, #554071, #2a213d); cursor: pointer; }
+.dpad .up { grid-column: 2; border-radius: 12px 12px 3px 3px; }
+.dpad .left { grid-area: 2 / 1; border-radius: 12px 3px 3px 12px; }
+.dpad .down { grid-area: 2 / 2; border-radius: 3px 3px 12px 12px; }
+.dpad .right { grid-area: 2 / 3; border-radius: 3px 12px 12px 3px; }
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.actions button, .victory button { padding: 10px 14px; }
+.hint { margin: 0; color: #a9a0bd; font-size: 12px; line-height: 1.45; text-align: center; }
+.message { margin: 20vh auto; max-width: 440px; text-align: center; }
+.victory { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; padding: 20px; background: #08060dcf; backdrop-filter: blur(7px); }
+.victory-card { width: min(390px, 100%); padding: 26px; border: 1px solid #8562ad; border-radius: 24px; background: #251d3b; box-shadow: 0 20px 80px #000; text-align: center; }
+.victory-card img { width: 150px; height: 150px; object-fit: contain; }
+.victory h2 { margin: 7px 0; font-size: 28px; }
+.victory p { color: #bcb2cf; }
+.victory button { color: #121122; background: linear-gradient(#65ffd0, #36c89c); border-color: #88ffe0; font-weight: 900; }
+
+@media (max-width: 760px) {
+  .shell { padding: 10px; }
+  .hero { align-items: start; }
+  .hero p, .community { display: none; }
+  .game-card { border-radius: 18px; }
+  .play-area { grid-template-columns: 1fr; gap: 12px; padding: 10px; }
+  .board-frame { padding: 5px; }
+  .board { width: min(100%, 68vh); }
+  .controls { display: grid; grid-template-columns: 1fr auto; align-items: center; }
+  .roster { grid-template-columns: repeat(5, 1fr); }
+  .roster-button { display: block; padding: 2px; text-align: center; }
+  .roster-button img { width: 100%; max-width: 48px; }
+  .roster-button span, .hint { display: none; }
+  .dpad { grid-row: span 2; }
+}

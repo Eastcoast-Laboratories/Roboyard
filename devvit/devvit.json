@@ -1,0 +1,26 @@
+{
+  "$schema": "https://developers.reddit.com/schema/config-file.v1.json",
+  "name": "roboyard",
+  "post": {
+    "dir": "dist/client",
+    "entrypoints": {
+      "default": {
+        "entry": "index.html",
+        "height": "tall",
+        "styles": {
+          "backgroundColor": "#171429FF",
+          "backgroundColorDark": "#171429FF",
+          "height": "tall"
+        }
+      },
+      "_gameplay": {
+        "entry": "index.html",
+        "height": "tall"
+      },
+      "_direct_launch": {
+        "entry": "index.html",
+        "height": "tall"
+      }
+    }
+  }
+}
