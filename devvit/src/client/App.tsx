@@ -11,7 +11,7 @@ function asset(name: string): string {
 }
 
 export function App() {
-  const [level, setLevel] = useState(() => Math.min(140, Math.max(1, Number(localStorage.getItem('roboyard-level')) || 1)));
+  const [level, setLevel] = useState(() => Math.min(140, Math.max(1, Number(localStorage.getItem('crypt-crawler-level') ?? localStorage.getItem('roboyard-level')) || 1)));
   const [board, setBoard] = useState<Board | null>(null);
   const [initial, setInitial] = useState<Board | null>(null);
   const [selected, setSelected] = useState<RobotColor>('pink');
@@ -33,7 +33,7 @@ export function App() {
         setInitial(next);
         setSelected(next.robots[0]?.color ?? 'pink');
         setHistory([]);
-        localStorage.setItem('roboyard-level', String(level));
+        localStorage.setItem('crypt-crawler-level', String(level));
       })
       .catch((reason: unknown) => active && setError(reason instanceof Error ? reason.message : 'Could not load level.'));
     return () => {
@@ -89,7 +89,7 @@ export function App() {
     <main className="shell">
       <header className="hero">
         <div>
-          <span className="eyebrow">Roboyard · Skeleton Crypt</span>
+          <span className="eyebrow">Crypt Crawler</span>
           <h1>Slide. Ricochet. Awaken.</h1>
           <p>Guide each skeleton to its matching summoning circle.</p>
         </div>

@@ -5,7 +5,7 @@ import { parseLevel } from './engine';
 
 const levelsDirectory = join(process.cwd(), 'public', 'levels');
 
-describe('bundled Roboyard levels', () => {
+describe('bundled Crypt Crawler levels', () => {
   it('parses all 140 levels with valid board positions', () => {
     const files = readdirSync(levelsDirectory).filter((name) => /^level_\d+\.txt$/.test(name));
     expect(files).toHaveLength(140);

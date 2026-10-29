@@ -1,6 +1,6 @@
-# Roboyard for Devvit
+# Crypt Crawler for Devvit
 
-A React and TypeScript port of Roboyard's sliding puzzle loop for Reddit's Devvit Web runtime.
+A React and TypeScript sliding puzzle game for Reddit's Devvit Web runtime.
 
 ## Development
 
