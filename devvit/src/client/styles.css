@@ -26,6 +26,12 @@ button { font: inherit; }
 .toolbar button, .actions button, .victory button { border: 1px solid #7256a0; border-radius: 12px; color: white; background: linear-gradient(#6c45a5, #492c75); cursor: pointer; }
 .toolbar button { width: 40px; height: 40px; font-size: 28px; }
 button:disabled { cursor: default; opacity: .35; }
+.splash { display: grid; min-height: 100vh; place-items: center; padding: 24px; }
+.splash__content { display: flex; align-items: center; gap: clamp(18px, 5vw, 52px); width: min(760px, 100%); padding: clamp(22px, 5vw, 48px); border: 1px solid #624b85; border-radius: 28px; background: var(--panel); box-shadow: 0 25px 80px #05030bcc, inset 0 1px #ffffff17; }
+.splash__content img { width: min(34vw, 220px); filter: drop-shadow(0 12px 12px #000a); }
+.splash__content h1 { margin: 8px 0; font-size: clamp(30px, 6vw, 58px); line-height: .95; text-shadow: 0 4px #191126; }
+.splash__content p { color: #bbb2d1; }
+.splash__content button { padding: 12px 20px; border: 1px solid #88ffe0; border-radius: 999px; color: #121122; background: linear-gradient(#65ffd0, #36c89c); cursor: pointer; font-weight: 900; }
 .play-area { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 20px; padding: 20px; }
 .board-frame { min-width: 0; display: grid; place-items: center; padding: 12px; border: 2px solid #643892; border-radius: 18px; background: #0f0d1a; box-shadow: inset 0 0 35px #000; }
 .board { position: relative; display: grid; width: min(100%, 72vh); aspect-ratio: 1; border: 5px solid #8e49c4; background: #292a58; isolation: isolate; }
@@ -67,6 +73,7 @@ button:disabled { cursor: default; opacity: .35; }
 .victory button { color: #121122; background: linear-gradient(#65ffd0, #36c89c); border-color: #88ffe0; font-weight: 900; }
 
 @media (max-width: 760px) {
+  .splash__content { flex-direction: column; text-align: center; }
   .shell { padding: 10px; }
   .hero { align-items: start; }
   .hero p, .community { display: none; }

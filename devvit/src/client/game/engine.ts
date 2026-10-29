@@ -34,7 +34,10 @@ export function parseLevel(source: string): Board {
 
     const match = entry.match(/^([a-z]+):?(\d+)\s*,\s*(\d+)$/i);
     if (!match) continue;
-    const [, token, xText, yText] = match;
+    const token = match[1];
+    const xText = match[2];
+    const yText = match[3];
+    if (!token || !xText || !yText) continue;
     const x = Number(xText);
     const y = Number(yText);
 
@@ -64,9 +67,10 @@ function wallBlocks(board: Board, x: number, y: number, direction: Direction): b
 export function moveRobot(board: Board, color: RobotColor, direction: Direction): Board | null {
   const index = board.robots.findIndex((robot) => robot.color === color);
   if (index < 0) return null;
-  const delta = direction === 'up' ? [0, -1] : direction === 'right' ? [1, 0] : direction === 'down' ? [0, 1] : [-1, 0];
+  const delta: readonly [number, number] = direction === 'up' ? [0, -1] : direction === 'right' ? [1, 0] : direction === 'down' ? [0, 1] : [-1, 0];
   const robots = board.robots.map((robot) => ({ ...robot }));
   const robot = robots[index];
+  if (!robot) return null;
   const start = key(robot.x, robot.y);
 
   while (!wallBlocks(board, robot.x, robot.y, direction)) {

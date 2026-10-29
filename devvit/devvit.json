@@ -5,22 +5,31 @@
     "dir": "dist/client",
     "entrypoints": {
       "default": {
-        "entry": "index.html",
-        "height": "tall",
-        "styles": {
-          "backgroundColor": "#171429FF",
-          "backgroundColorDark": "#171429FF",
-          "height": "tall"
-        }
+        "inline": true,
+        "entry": "splash.html"
       },
-      "_gameplay": {
-        "entry": "index.html",
-        "height": "tall"
-      },
-      "_direct_launch": {
-        "entry": "index.html",
-        "height": "tall"
+      "game": {
+        "entry": "game.html"
       }
     }
+  },
+  "server": {
+    "dir": "dist/server",
+    "entry": "index.cjs"
+  },
+  "menu": {
+    "items": [
+      {
+        "label": "Create a Crypt Crawler post",
+        "description": "Create a playable Crypt Crawler post",
+        "location": "subreddit",
+        "forUserType": "moderator",
+        "endpoint": "/internal/menu/post-create"
+      }
+    ]
+  },
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build"
   }
 }

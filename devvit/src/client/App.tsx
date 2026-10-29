@@ -20,7 +20,6 @@ export function App() {
 
   useEffect(() => {
     let active = true;
-    setError('');
     fetch(`./levels/level_${level}.txt`)
       .then((response) => {
         if (!response.ok) throw new Error(`Level ${level} is unavailable.`);
@@ -29,6 +28,7 @@ export function App() {
       .then((source) => {
         if (!active) return;
         const next = parseLevel(source);
+        setError('');
         setBoard(next);
         setInitial(next);
         setSelected(next.robots[0]?.color ?? 'pink');

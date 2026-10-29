@@ -1,15 +1,8 @@
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vitest/config';
+import tailwind from '@tailwindcss/vite';
+import { devvit } from '@devvit/start/vite';
 
 export default defineConfig({
-  plugins: [react()],
-  base: './',
-  build: {
-    outDir: 'dist/client',
-    emptyOutDir: true,
-    sourcemap: true,
-  },
-  test: {
-    environment: 'node',
-  },
+  plugins: [react(), tailwind(), devvit()],
 });
