@@ -33,7 +33,7 @@ button:disabled { cursor: default; opacity: .35; }
 .splash__content button { padding: 12px 20px; border: 1px solid #88ffe0; border-radius: 999px; color: #121122; background: linear-gradient(#65ffd0, #36c89c); cursor: pointer; font-weight: 900; }
 .play-area { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 20px; padding: 20px; }
 .board-frame { min-width: 0; display: grid; place-items: center; padding: 12px; border: 2px solid #643892; border-radius: 18px; background: #0f0d1a; box-shadow: inset 0 0 35px #000; }
-.board { position: relative; display: grid; width: min(100%, 72vh); aspect-ratio: 1; border: 5px solid #8e49c4; background: #292a58; isolation: isolate; }
+.board { position: relative; display: grid; width: min(100%, 72vh); aspect-ratio: 1; border: 5px solid #8e49c4; background: #292a58; isolation: isolate; touch-action: none; user-select: none; }
 .cell { position: relative; min-width: 0; min-height: 0; padding: 0; border: 0; background: url('/assets/floor.png') center/cover; cursor: pointer; }
 .cell::after { position: absolute; inset: 0; border: 1px solid #7774b033; content: ''; pointer-events: none; }
 .wall { position: absolute; z-index: 5; object-fit: fill; pointer-events: none; filter: drop-shadow(0 1px 1px #000c); }
@@ -43,26 +43,40 @@ button:disabled { cursor: default; opacity: .35; }
 .wall-bottom { bottom: -14%; }
 .wall-left { left: -14%; }
 .wall-right { right: -14%; }
-.goal, .robot { position: absolute; inset: 4%; width: 92%; height: 92%; object-fit: contain; pointer-events: none; }
+.goal { position: absolute; inset: 4%; width: 92%; height: 92%; object-fit: contain; pointer-events: none; }
 .goal { z-index: 1; opacity: .82; }
-.robot { z-index: 3; filter: drop-shadow(0 3px 2px #000b); transition: transform 140ms ease; }
-.selected-robot { transform: translateY(-5%) scale(1.08); filter: drop-shadow(0 0 5px #fff) drop-shadow(0 4px 3px #000c); }
+.wisp { --flip: 1; --rotation: 0deg; --scale: 1; display: block; background-position: 0 0; background-repeat: no-repeat; background-size: 400% 100%; filter: drop-shadow(0 3px 3px #000c); transform: rotate(var(--rotation)) scaleX(var(--flip)) scale(var(--scale)); }
+.cell > .wisp { position: absolute; z-index: 3; inset: -18%; width: 136%; height: 136%; pointer-events: none; }
+.wisp-pink { background-image: url('/assets/wisp_pink_idle.png'); }
+.wisp-green { background-image: url('/assets/wisp_green_idle.png'); }
+.wisp-blue { background-image: url('/assets/wisp_blue_idle.png'); }
+.wisp-yellow { background-image: url('/assets/wisp_yellow_idle.png'); }
+.wisp-silver { background-image: url('/assets/wisp_silver_idle.png'); }
+.wisp-pink.wisp-moving { background-image: url('/assets/wisp_pink_move.png'); }
+.wisp-green.wisp-moving { background-image: url('/assets/wisp_green_move.png'); }
+.wisp-blue.wisp-moving { background-image: url('/assets/wisp_blue_move.png'); }
+.wisp-yellow.wisp-moving { background-image: url('/assets/wisp_yellow_move.png'); }
+.wisp-silver.wisp-moving { background-image: url('/assets/wisp_silver_move.png'); }
+.wisp-idle { animation: wisp-frames 1.15s steps(4) infinite; }
+.wisp-moving { animation: wisp-frames .32s steps(4) infinite; }
+.wisp-left { --flip: -1; }
+.wisp-up { --rotation: -90deg; }
+.wisp-down { --rotation: 90deg; }
+.selected-wisp-sprite { --scale: 1.08; filter: drop-shadow(0 0 5px #fff) drop-shadow(0 4px 3px #000c); }
+@keyframes wisp-frames { to { background-position-x: 100%; } }
 .center-emblem { position: absolute; z-index: 2; left: 40%; top: 40%; width: 20%; height: 20%; object-fit: contain; opacity: .34; pointer-events: none; }
-.controls { display: flex; flex-direction: column; justify-content: center; gap: 14px; }
-.roster { display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px; }
-.roster-button { display: flex; align-items: center; gap: 3px; min-width: 0; padding: 5px; border: 1px solid #4d4266; border-radius: 10px; color: #ddd5ed; background: #1b172b; cursor: pointer; text-transform: capitalize; }
-.roster-button img { width: 40px; height: 40px; object-fit: contain; }
-.roster-button span { overflow: hidden; font-size: 11px; }
-.roster-button.selected { border-color: var(--mint); background: #2c2642; box-shadow: 0 0 14px #4fffc144; }
-.dpad { display: grid; grid-template: repeat(3, 48px) / repeat(3, 48px); justify-content: center; }
-.dpad button { border: 1px solid #75569b; color: #fff; background: linear-gradient(145deg, #554071, #2a213d); cursor: pointer; }
-.dpad .up { grid-column: 2; border-radius: 12px 12px 3px 3px; }
-.dpad .left { grid-area: 2 / 1; border-radius: 12px 3px 3px 12px; }
-.dpad .down { grid-area: 2 / 2; border-radius: 3px 3px 12px 12px; }
-.dpad .right { grid-area: 2 / 3; border-radius: 3px 12px 12px 3px; }
+.controls { display: flex; flex-direction: column; justify-content: center; gap: 12px; }
+.selected-wisp { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #56466f; border-radius: 14px; background: #191529; }
+.selected-wisp > .wisp { flex: 0 0 64px; width: 64px; height: 64px; }
+.selected-wisp span, .selected-wisp strong { display: block; }
+.selected-wisp span { color: #9f95b5; font-size: 11px; }
+.selected-wisp strong { margin-top: 3px; text-transform: capitalize; }
+.switch-wisp, .how-to { padding: 10px 14px; border: 1px solid #65507f; border-radius: 12px; color: #ddd5ed; background: #211a34; cursor: pointer; }
+.how-to { border-color: transparent; color: #8ee9cb; background: transparent; }
 .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .actions button, .victory button { padding: 10px 14px; }
 .hint { margin: 0; color: #a9a0bd; font-size: 12px; line-height: 1.45; text-align: center; }
+.moves-low { color: #ff8d8d !important; font-weight: 800; }
 .message { margin: 20vh auto; max-width: 440px; text-align: center; }
 .victory { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; padding: 20px; background: #08060dcf; backdrop-filter: blur(7px); }
 .victory-card { width: min(390px, 100%); padding: 26px; border: 1px solid #8562ad; border-radius: 24px; background: #251d3b; box-shadow: 0 20px 80px #000; text-align: center; }
@@ -70,6 +84,17 @@ button:disabled { cursor: default; opacity: .35; }
 .victory h2 { margin: 7px 0; font-size: 28px; }
 .victory p { color: #bcb2cf; }
 .victory button { color: #121122; background: linear-gradient(#65ffd0, #36c89c); border-color: #88ffe0; font-weight: 900; }
+.victory-card > .wisp { width: 130px; height: 130px; margin: 0 auto; }
+.dialog-actions { display: flex; justify-content: center; gap: 10px; }
+.guide { position: fixed; z-index: 30; inset: 0; display: grid; place-items: center; padding: 20px; background: #08060de8; backdrop-filter: blur(8px); }
+.guide-card { width: min(520px, 100%); padding: clamp(22px, 5vw, 38px); border: 1px solid #8562ad; border-radius: 24px; background: #251d3b; box-shadow: 0 20px 80px #000; }
+.guide-card h2 { margin: 6px 0 8px; font-size: 30px; }
+.guide-card > p { color: #c2b8d5; line-height: 1.5; }
+.guide-card ol { display: grid; gap: 10px; margin: 20px 0; padding: 0; list-style: none; }
+.guide-card li { display: grid; grid-template-columns: 72px 1fr; gap: 12px; padding: 11px; border-radius: 12px; background: #171225; }
+.guide-card li strong { color: var(--mint); }
+.guide-card li span { color: #bbb2cb; line-height: 1.35; }
+.guide-card > button { width: 100%; padding: 12px; border: 1px solid #88ffe0; border-radius: 12px; color: #121122; background: linear-gradient(#65ffd0, #36c89c); cursor: pointer; font-weight: 900; }
 
 @media (max-width: 760px) {
   .splash { padding: 10px; }
@@ -80,10 +105,7 @@ button:disabled { cursor: default; opacity: .35; }
   .play-area { grid-template-columns: 1fr; gap: 12px; padding: 10px; }
   .board-frame { padding: 5px; }
   .board { width: min(100%, 68vh); }
-  .controls { display: grid; grid-template-columns: 1fr auto; align-items: center; }
-  .roster { grid-template-columns: repeat(5, 1fr); }
-  .roster-button { display: block; padding: 2px; text-align: center; }
-  .roster-button img { width: 100%; max-width: 48px; }
-  .roster-button span, .hint { display: none; }
-  .dpad { grid-row: span 2; }
+  .controls { display: grid; grid-template-columns: 1fr 1fr; align-items: center; }
+  .selected-wisp { grid-row: span 2; }
+  .hint { display: none; }
 }

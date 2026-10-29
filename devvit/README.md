@@ -1,4 +1,4 @@
-# Crypt Crawler for Devvit
+# Arcane Wisps for Devvit
 
 A React and TypeScript sliding puzzle game for Reddit's Devvit Web runtime.
 

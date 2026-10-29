@@ -12,7 +12,7 @@ const level = `
   rg1,4; rr4,4;
 `;
 
-describe('Crypt Crawler simulation', () => {
+describe('Arcane Wisps simulation', () => {
   it('parses the Kotlin level format', () => {
     const board = parseLevel(level);
     expect(board.width).toBe(5);

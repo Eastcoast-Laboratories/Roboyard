@@ -2,6 +2,6 @@ import { reddit } from '@devvit/web/server';
 
 export const createPost = async () => {
   return await reddit.submitCustomPost({
-    title: 'Crypt Crawler: Slide. Ricochet. Awaken.',
+    title: 'Arcane Wisps: Slide. Ricochet. Return.',
   });
 };

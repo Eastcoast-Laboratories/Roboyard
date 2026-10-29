@@ -5,8 +5,8 @@ from PIL import Image, ImageEnhance
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "public" / "crypt-crawler-splash.png"
-OUTPUT = ROOT / "public" / "crypt-crawler-splash.gif"
+SOURCE = ROOT / "public" / "arcane-wisps-splash.png"
+OUTPUT = ROOT / "public" / "arcane-wisps-splash.gif"
 SIZE = (640, 360)
 FRAME_COUNT = 16
 

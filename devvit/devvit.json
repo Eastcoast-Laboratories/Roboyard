@@ -20,8 +20,8 @@
   "menu": {
     "items": [
       {
-        "label": "Create a Crypt Crawler post",
-        "description": "Create a playable Crypt Crawler post",
+        "label": "Create an Arcane Wisps post",
+        "description": "Create a playable Arcane Wisps post",
         "location": "subreddit",
         "forUserType": "moderator",
         "endpoint": "/internal/menu/post-create"

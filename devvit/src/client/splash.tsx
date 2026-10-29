@@ -7,8 +7,8 @@ import { createRoot } from 'react-dom/client';
 export const Splash = () => (
   <main className="splash">
     <div className="splash__content">
-      <img className="splash__art" src="/crypt-crawler-splash.gif" alt="Crypt Crawler skeleton heroes racing through a haunted dungeon" />
-      <p>Guide each skeleton to its matching summoning circle.</p>
+      <img className="splash__art" src="/arcane-wisps-splash.gif" alt="Arcane Wisps racing through enchanted ruins" />
+      <p>Return every wisp to its matching rune portal before your moves run out.</p>
       <button type="button" onClick={(event) => requestExpandedMode(event.nativeEvent, 'game')}>
         Enter the crypt
       </button>
