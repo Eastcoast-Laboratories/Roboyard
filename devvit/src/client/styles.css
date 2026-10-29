@@ -27,10 +27,9 @@ button { font: inherit; }
 .toolbar button { width: 40px; height: 40px; font-size: 28px; }
 button:disabled { cursor: default; opacity: .35; }
 .splash { display: grid; min-height: 100vh; place-items: center; padding: 24px; }
-.splash__content { display: flex; align-items: center; gap: clamp(18px, 5vw, 52px); width: min(760px, 100%); padding: clamp(22px, 5vw, 48px); border: 1px solid #624b85; border-radius: 28px; background: var(--panel); box-shadow: 0 25px 80px #05030bcc, inset 0 1px #ffffff17; }
-.splash__content img { width: min(34vw, 220px); filter: drop-shadow(0 12px 12px #000a); }
-.splash__content h1 { margin: 8px 0; font-size: clamp(30px, 6vw, 58px); line-height: .95; text-shadow: 0 4px #191126; }
-.splash__content p { color: #bbb2d1; }
+.splash__content { display: flex; flex-direction: column; align-items: center; gap: 12px; width: min(860px, 100%); padding: clamp(10px, 2vw, 18px); border: 1px solid #624b85; border-radius: 28px; background: var(--panel); box-shadow: 0 25px 80px #05030bcc, inset 0 1px #ffffff17; text-align: center; }
+.splash__art { display: block; width: 100%; border-radius: 18px; box-shadow: 0 12px 32px #0009; }
+.splash__content p { margin: 2px 12px; color: #d6cde9; }
 .splash__content button { padding: 12px 20px; border: 1px solid #88ffe0; border-radius: 999px; color: #121122; background: linear-gradient(#65ffd0, #36c89c); cursor: pointer; font-weight: 900; }
 .play-area { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 20px; padding: 20px; }
 .board-frame { min-width: 0; display: grid; place-items: center; padding: 12px; border: 2px solid #643892; border-radius: 18px; background: #0f0d1a; box-shadow: inset 0 0 35px #000; }
@@ -73,7 +72,7 @@ button:disabled { cursor: default; opacity: .35; }
 .victory button { color: #121122; background: linear-gradient(#65ffd0, #36c89c); border-color: #88ffe0; font-weight: 900; }
 
 @media (max-width: 760px) {
-  .splash__content { flex-direction: column; text-align: center; }
+  .splash { padding: 10px; }
   .shell { padding: 10px; }
   .hero { align-items: start; }
   .hero p, .community { display: none; }

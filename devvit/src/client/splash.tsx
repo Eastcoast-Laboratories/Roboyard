@@ -7,15 +7,11 @@ import { createRoot } from 'react-dom/client';
 export const Splash = () => (
   <main className="splash">
     <div className="splash__content">
-      <img src="/assets/robot_silver_left.png" alt="A chibi skeleton adventurer" />
-      <div>
-        <span className="eyebrow">Crypt Crawler</span>
-        <h1>Slide. Ricochet. Awaken.</h1>
-        <p>Guide each skeleton to its matching summoning circle.</p>
-        <button type="button" onClick={(event) => requestExpandedMode(event.nativeEvent, 'game')}>
-          Enter the crypt
-        </button>
-      </div>
+      <img className="splash__art" src="/crypt-crawler-splash.gif" alt="Crypt Crawler skeleton heroes racing through a haunted dungeon" />
+      <p>Guide each skeleton to its matching summoning circle.</p>
+      <button type="button" onClick={(event) => requestExpandedMode(event.nativeEvent, 'game')}>
+        Enter the crypt
+      </button>
     </div>
   </main>
 );
