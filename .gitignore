@@ -49,3 +49,4 @@ test_suite.cpython-*.pyc
 .idea/artifacts/shared.xml
 dev/xcode/
 dev/.env
+dev/prompts_log.md
