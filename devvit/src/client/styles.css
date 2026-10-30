@@ -63,7 +63,8 @@ button:disabled { cursor: default; opacity: .35; }
 .wisp-up { --rotation: -90deg; }
 .wisp-down { --rotation: 90deg; }
 .selected-wisp-sprite { --scale: 1.08; filter: drop-shadow(0 0 5px #fff) drop-shadow(0 4px 3px #000c); }
-@keyframes wisp-frames { to { background-position-x: 100%; } }
+/* steps(4) lands on 0/33.33/66.67/100% — the four whole frames; 133.33% is one frame past the end and never painted */
+@keyframes wisp-frames { to { background-position-x: 133.3333%; } }
 .center-emblem { position: absolute; z-index: 2; left: 40%; top: 40%; width: 20%; height: 20%; object-fit: contain; opacity: .34; pointer-events: none; }
 .controls { display: flex; flex-direction: column; justify-content: center; gap: 12px; }
 .selected-wisp { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #56466f; border-radius: 14px; background: #191529; }
